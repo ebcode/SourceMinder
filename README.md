@@ -10,6 +10,53 @@ Multi-language code indexer (written in C11) for semantic search, built on SQLit
 not prose or documentation files (`.md`, `.txt`, `.log`, ...).
 While you can index any text file, the tool extracts code symbols and won't be useful for natural language text.
 
+## Build & Install
+
+### Prerequisites
+
+On Linux, install the following dependencies. (MacOS users, see MACOS_SETUP.md)
+
+```bash
+apt install linux-tools-common libtree-sitter-dev libtree-sitter0 libsqlite3-dev
+```
+Clone the repo
+
+```bash
+git clone https://github.com/ebcode/SourceMinder.git && cd SourceMinder
+```
+
+Clone the tree-sitter grammars (at least one):
+
+```bash
+git clone https://github.com/tree-sitter/tree-sitter-c.git
+git clone https://github.com/tree-sitter/tree-sitter-go.git
+git clone https://github.com/tree-sitter/tree-sitter-php.git
+git clone https://github.com/tree-sitter/tree-sitter-python.git
+git clone https://github.com/tree-sitter/tree-sitter-typesript.git
+```
+
+### Configure
+
+Select which languages you want to build (all disabled by default):
+
+```bash
+./configure --enable-all                                 # All languages (recommended for testing)
+./configure --enable-c --enable-typescript --enable-php  # Specific languages
+./configure --enable-all --disable-php                   # All but PHP
+CC=clang ./configure --enable-c                          # Custom compiler, only C
+```
+
+### Compile & Install
+
+```bash
+make                    # Build indexers and query tool
+sudo make install       # Install to /usr/local/bin
+```
+
+**Installed binaries:** `index-c`, `index-ts`, `index-php`, `index-go`, `index-python`, `qi`
+**Config files:** `/usr/local/share/sourceminder/<language>/config/`
+
+
 ## Quick Reference
 
 | Flag | Purpose | Example |
@@ -186,55 +233,9 @@ qi malloc -i call --within '*helper*' -m static
 
 **Pro tip:** Use `-v` (verbose) to see all available columns, then craft precise queries
 
-## Build & Install
-
-### Prerequisites
-
-On Linux, install the following dependencies. (MacOS users, see MACOS_SETUP.md)
-
-```bash
-apt install linux-tools-common libtree-sitter-dev libtree-sitter0 libsqlite3-dev
-```
-Clone the repo
-
-```bash
-git clone https://github.com/ebcode/SourceMinder.git && cd SourceMinder
-```
-
-Clone the tree-sitter grammars (at least one):
-
-```bash
-git clone https://github.com/tree-sitter/tree-sitter-c.git
-git clone https://github.com/tree-sitter/tree-sitter-go.git
-git clone https://github.com/tree-sitter/tree-sitter-php.git
-git clone https://github.com/tree-sitter/tree-sitter-python.git
-git clone https://github.com/tree-sitter/tree-sitter-typesript.git
-```
-
-### Configure
-
-Select which languages you want to build (all disabled by default):
-
-```bash
-./configure --enable-all                                 # All languages (recommended for testing)
-./configure --enable-c --enable-typescript --enable-php  # Specific languages
-./configure --enable-all --disable-php                   # All but PHP
-CC=clang ./configure --enable-c                          # Custom compiler, only C
-```
-
-### Compile & Install
-
-```bash
-make                    # Build indexers and query tool
-sudo make install       # Install to /usr/local/bin
-```
-
-**Installed binaries:** `index-c`, `index-ts`, `index-php`, `index-go`, `index-python`, `qi`
-**Config files:** `/usr/local/share/sourceminder/<language>/config/`
-
 ## Getting Started
 
-**Step 1: Build and index the SourceMinder codebase**
+**Step 1: Index the SourceMinder codebase**
 ```bash
 index-c . --once --verbose
 ```
