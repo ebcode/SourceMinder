@@ -14,10 +14,11 @@ While you can index any text file, the tool extracts code symbols and won't be u
 
 ### Prerequisites
 
-On Linux, install the following dependencies. (MacOS users, see MACOS_SETUP.md)
+On an apt-based Linux (like Debian), install the following dependencies. (MacOS users, see MACOS_SETUP.md)
+I have not yet tested on non-apt Linux, so any help here would be appreciated.
 
 ```bash
-apt install linux-tools-common libtree-sitter-dev libtree-sitter0 libsqlite3-dev
+apt install libtree-sitter-dev libtree-sitter0 libsqlite3-dev
 ```
 Clone the repo
 
