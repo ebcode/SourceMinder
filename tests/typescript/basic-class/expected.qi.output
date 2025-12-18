@@ -1,0 +1,47 @@
+
+Searching for: %
+Filtering by file: basic-class_ts (1 files)
+
+LINE | SYM         | PAR  | SCOPE | NS | MOD    | CLUE | TYPE    | D | CTX  
+-----+-------------+------+-------+----+--------+------+---------+---+------
+tests/typescript/basic-class/basic-class.ts:
+1    | basic-class |      |       |    |        |      |         | 0 | FILE 
+1    | Test        |      |       |    |        |      |         | 0 | COM  
+1    | basic       |      |       |    |        |      |         | 0 | COM  
+1    | TypeScript  |      |       |    |        |      |         | 0 | COM  
+2    | User        |      |       |    |        |      |         | 1 | CLASS
+3    | name        |      |       |    |        |      | string  | 0 | PROP 
+4    | age         |      |       |    |        |      | number  | 0 | PROP 
+5    | email       |      |       |    |        |      | string  | 0 | PROP 
+7    | string      |      |       |    |        |      |         | 1 | TYPE 
+7    | name        |      |       |    |        |      | string  | 1 | ARG  
+7    | number      |      |       |    |        |      |         | 1 | TYPE 
+7    | age         |      |       |    |        |      | number  | 1 | ARG  
+7    | string      |      |       |    |        |      |         | 1 | TYPE 
+7    | email       |      |       |    |        |      | string  | 1 | ARG  
+8    | name        | this |       |    |        |      |         | 1 | PROP 
+8    | name        |      |       |    |        |      |         | 0 | VAR  
+9    | age         | this |       |    |        |      |         | 1 | PROP 
+9    | age         |      |       |    |        |      |         | 0 | VAR  
+10   | email       | this |       |    |        |      |         | 1 | PROP 
+10   | email       |      |       |    |        |      |         | 0 | VAR  
+13   | getInfo     |      |       |    |        |      | string  | 1 | FUNC 
+14   | name        | this |       |    |        |      |         | 1 | PROP 
+14   | age         | this |       |    |        |      |         | 1 | PROP 
+17   | isAdult     |      |       |    |        |      | boolean | 1 | FUNC 
+21   | updateEmail |      |       |    |        |      | void    | 1 | FUNC 
+21   | string      |      |       |    |        |      |         | 1 | TYPE 
+21   | newEmail    |      |       |    |        |      | string  | 1 | ARG  
+22   | email       | this |       |    |        |      |         | 1 | PROP 
+22   | newEmail    |      |       |    |        |      |         | 0 | VAR  
+25   | fromJSON    |      |       |    | static |      | User    | 1 | FUNC 
+25   | json        |      |       |    |        |      | any     | 1 | ARG  
+26   | User        |      |       |    |        |      |         | 0 | CALL 
+26   | json        |      |       |    |        |      |         | 0 | VAR  
+26   | name        | json |       |    |        |      |         | 0 | ARG  
+26   | json        |      |       |    |        |      |         | 0 | VAR  
+26   | age         | json |       |    |        |      |         | 0 | ARG  
+26   | json        |      |       |    |        |      |         | 0 | VAR  
+26   | email       | json |       |    |        |      |         | 0 | ARG  
+
+Found 38 matches

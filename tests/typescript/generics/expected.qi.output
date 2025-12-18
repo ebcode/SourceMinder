@@ -1,0 +1,44 @@
+
+Searching for: %
+Filtering by file: generics_ts (1 files)
+
+LINE | SYM        | PAR  | SCOPE | NS | MOD | CLUE | TYPE    | D | CTX  
+-----+------------+------+-------+----+-----+------+---------+---+------
+tests/typescript/generics/generics.ts:
+1    | generics   |      |       |    |     |      |         | 0 | FILE 
+1    | Test       |      |       |    |     |      |         | 0 | COM  
+1    | TypeScript |      |       |    |     |      |         | 0 | COM  
+1    | generics   |      |       |    |     |      |         | 0 | COM  
+2    | Box        |      |       |    |     |      |         | 1 | CLASS
+2    | TValue     |      |       |    |     |      |         | 1 | TYPE 
+3    | value      |      |       |    |     |      | TValue  | 0 | PROP 
+5    | TValue     |      |       |    |     |      |         | 1 | TYPE 
+5    | value      |      |       |    |     |      | TValue  | 1 | ARG  
+6    | value      | this |       |    |     |      |         | 1 | PROP 
+6    | value      |      |       |    |     |      |         | 0 | VAR  
+9    | getValue   |      |       |    |     |      | TValue  | 1 | FUNC 
+13   | setValue   |      |       |    |     |      | void    | 1 | FUNC 
+13   | TValue     |      |       |    |     |      |         | 1 | TYPE 
+13   | newValue   |      |       |    |     |      | TValue  | 1 | ARG  
+14   | value      | this |       |    |     |      |         | 1 | PROP 
+14   | newValue   |      |       |    |     |      |         | 0 | VAR  
+18   | identity   |      |       |    |     |      | TItem   | 1 | FUNC 
+18   | TItem      |      |       |    |     |      |         | 1 | TYPE 
+18   | TItem      |      |       |    |     |      |         | 1 | TYPE 
+18   | arg        |      |       |    |     |      | TItem   | 1 | ARG  
+19   | arg        |      |       |    |     |      |         | 0 | VAR  
+22   | pair       |      |       |    |     |      | tuple   | 1 | FUNC 
+22   | TKey       |      |       |    |     |      |         | 1 | TYPE 
+22   | TVal       |      |       |    |     |      |         | 1 | TYPE 
+22   | TKey       |      |       |    |     |      |         | 1 | TYPE 
+22   | key        |      |       |    |     |      | TKey    | 1 | ARG  
+22   | TVal       |      |       |    |     |      |         | 1 | TYPE 
+22   | val        |      |       |    |     |      | TVal    | 1 | ARG  
+23   | key        |      |       |    |     |      |         | 0 | VAR  
+23   | val        |      |       |    |     |      |         | 0 | VAR  
+26   | Result     |      |       |    |     |      |         | 1 | TYPE 
+26   | TData      |      |       |    |     |      |         | 1 | TYPE 
+26   | data       |      |       |    |     |      | TData   | 0 | PROP 
+26   | success    |      |       |    |     |      | boolean | 0 | PROP 
+
+Found 35 matches

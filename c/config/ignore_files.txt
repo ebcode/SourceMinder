@@ -1,0 +1,15 @@
+build
+obj
+bin
+.git
+node_modules
+tree-sitter-c
+tree-sitter-typescript
+tree-sitter-php
+tree-sitter-go
+tree-sitter-python
+c/src
+php/src
+typescript/src/
+tmp/*daemon.c
+tmp

@@ -1,0 +1,17 @@
+SourceMinder Roadmap for 2026
+
+1. Additional Languages: Java (just this one next, others to follow, based on interest)
+
+2. Add guides for php and typescript
+
+3. Performance: Add multithreading to index files in parallel
+
+4. Alternative Storage: Currently Sqlite only. Consider MySql/Postgres or other backends
+
+5. Add --rows flag (or similar) to show only results, no help text, tips, or filtering info
+
+6. Json-formatted output
+
+NOT ON THE ROADMAP (... yet ...)
+
+1. Call graph functionality (which functions call this function) -- better tools currently available
