@@ -1,0 +1,103 @@
+/* SourceMinder
+ * Copyright 2025 Eli Bird 
+ * 
+ * This file is part of SourceMinder.
+ * 
+ * SourceMinder is free software: you can redistribute it and/or modify 
+ * it under the terms of the GNU General Public License as published by 
+ * the Free Software Foundation, either version 3 of the License, or (at
+ *  your option) any later version.
+ *
+ * SourceMinder is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details.
+ * You should have received a copy of the GNU General Public License 
+ * along with Foobar. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * ====================================================================
+ *
+ * column_schema.def - X-Macro Definition for Extensible Filterable Columns
+ *
+ * Source of truth for user-facing filterable columns
+ *
+ * This file defines ONLY columns that follow the consistent CLI filter pattern:
+ *   --flag|-f value1 [value2 value3 ...]
+ *
+ * NOT included here (maintained as traditional C code):
+ *   - Infrastructure: lowercase_symbol, directory, filename (indexing internals)
+ *   - Core display: line_number, full_symbol (no filter flags)
+ *   - Special case: context_type (uses -i/-x mutually exclusive flags)
+ *
+ * ==============================================================================
+ * HOW TO ADD A NEW FILTERABLE COLUMN (e.g., 'return_type'):
+ * ==============================================================================
+ * 1. Add ONE line to this file:
+ *    COLUMN(return_type, TEXT, COL_TYPE_STRING, 12, "RETURN", "RET", return, r)
+ *
+ * 2. Add field to IndexEntry struct in database.h:
+ *    char return_type[SYMBOL_MAX_LENGTH];  (or int return_type; for INTEGER types)
+ *
+ * 3. Add field to ExtColumns struct in database.h:
+ *    const char *return_type;
+ *
+ * 4. Implement language-specific extraction in indexers
+ *
+ * That's it! Everything else auto-generates:
+ *   - CLI flags: --return and -r
+ *   - Multi-value parsing: --return int void string
+ *   - SQL WHERE clause generation
+ *   - Display column in query output (full/compact modes)
+ *   - Help text
+ * ==============================================================================
+ *
+ * X-Macro Format:
+ *   COLUMN(db_name, sql_type, c_type, width, display_full, display_compact, cli_long, cli_short)
+ *
+ * Parameters:
+ *   db_name         - Database column name (e.g., parent_symbol)
+ *   sql_type        - SQLite type: TEXT or INTEGER
+ *   c_type          - C column type: COL_TYPE_STRING or COL_TYPE_INT
+ *   width           - Display column width (8, 10, 20, etc.)
+ *   display_full    - Full display name (default mode): "PARENT"
+ *   display_compact - Compact display name (--compact flag): "PAR"
+ *   cli_long        - Long CLI flag name (--parent) - UNQUOTED identifier
+ *   cli_short       - Short CLI flag name (-p) - UNQUOTED identifier
+ *
+ * IMPORTANT: cli_long and cli_short must be UNQUOTED identifiers (not strings)
+ *            because they get stringified with # in X-Macro expansions.
+ */
+
+/* TEXT columns - use COLUMN macro
+ * Format: COLUMN(name, sql_type, c_type, width, display_full, compact, cli_long, cli_short, max_length, help_desc, help_example)
+ * Added max_length parameter for memory optimization
+ * Added help_desc and help_example for --help text generation
+ */
+COLUMN(parent_symbol, TEXT, COL_TYPE_STRING, 8, "PARENT",    "PAR",   parent,    p, SYMBOL_MAX_LENGTH, \
+       "filter by parent symbol (finds member access)", \
+       "qi count -p patterns  (finds patterns->count)")
+
+/* OOP-specific columns - only when OOP languages are enabled */
+#if ENABLED(TYPESCRIPT) || ENABLED(PHP) || ENABLED(GO) || ENABLED(PYTHON)
+COLUMN(scope,         TEXT, COL_TYPE_STRING, 8,  "SCOPE",     "SCOPE", scope,     s, SCOPE_MAX_LENGTH, \
+       "filter by scope (public, private, protected)", \
+       "qi '*' -s public  (public members)")
+COLUMN(namespace,     TEXT, COL_TYPE_STRING, 10, "NAMESPACE", "NS",    namespace, ns, SYMBOL_MAX_LENGTH, \
+       "filter by namespace", \
+       "qi User -ns MyApp")
+#endif
+
+COLUMN(modifier,      TEXT, COL_TYPE_STRING, 8,  "MODIFIER",  "MOD",   modifier,  m, MODIFIER_MAX_LENGTH, \
+       "filter by modifier (static, const, inline, etc.)", \
+       "qi '*' -i func -m static  (static functions)")
+COLUMN(clue,  TEXT, COL_TYPE_STRING, 8,  "CLUE",      "CLUE",  clue,      c, CLUE_MAX_LENGTH, \
+       "show clue column (context hints)", \
+       "qi user -c")
+COLUMN(type,          TEXT, COL_TYPE_STRING, 20, "TYPE",      "TYPE",  type,      t, SYMBOL_MAX_LENGTH, \
+       "filter by type annotation (great for refactoring)", \
+       "qi '*' -i arg -t 'int *'  (all int* args)")
+
+/* INTEGER columns - use INT_COLUMN macro */
+INT_COLUMN(is_definition, INTEGER, COL_TYPE_INT, 1, "DEF", "D", definition, d, \
+           "filter by definition status (0=usage, 1=definition)", \
+           "qi getUserById --def  (definitions only)")

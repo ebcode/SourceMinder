@@ -1,0 +1,345 @@
+# Architecture
+
+This document describes the technical architecture and design decisions 
+of the multi-language code indexer.
+
+## Overview
+
+The indexer is designed with a modular architecture that separates 
+language-agnostic functionality from language-specific implementations. 
+This allows for easy addition of new programming languages while reusing
+core infrastructure.
+
+## Core Components (Shared)
+
+1. **shared/database.c** - SQLite wrapper with transaction support
+2. **shared/filter.c** - Stopword and keyword filtering
+3. **shared/file_walker.c** - Recursive directory traversal (POSIX)
+
+All language implementations share these components, ensuring consistent behavior and reducing code duplication.
+
+## Language Implementation (TypeScript)
+
+1. **typescript/src/parser.c** - Tree-sitter generated grammar
+2. **typescript/src/scanner.c** - Tree-sitter external scanner
+3. **typescript/ts_language.c** - TypeScript AST visitor and symbol extraction
+4. **typescript/index-ts.c** - Main program
+
+## Design Decisions
+
+### Separate Binaries Per Language
+
+Each language gets its own indexer binary (e.g., `index-ts` for TypeScript, `index-php` for PHP). This design:
+- Keeps binaries small and focused
+- Allows language-specific optimizations
+- Simplifies testing and debugging
+- Avoids runtime language detection overhead
+
+### Shared Core
+
+Database operations, filtering, and file walking are language-agnostic and shared across all implementations. Benefits:
+- Consistent database schema
+- Single source of truth for filtering logic
+- Reduced maintenance burden
+- Bug fixes benefit all languages
+
+### Tree-sitter AST Parsing
+
+We use tree-sitter for accurate, fast AST parsing:
+- Language grammars are maintained by the tree-sitter community
+- Provides precise node types and location information
+- Handles syntax errors gracefully
+- Generates optimized C parsers
+
+### Transactions
+
+All database inserts happen within a single SQLite transaction:
+- Without transactions: each insert writes to disk (~260x slower)
+- With transactions: all inserts buffered, single write on commit
+- Critical for performance when indexing large codebases
+
+### WAL Mode (Write-Ahead Logging)
+
+The indexer automatically enables SQLite WAL mode for concurrent database access:
+- Allows multiple language indexers to run in parallel
+- Writers don't block readers
+- 5-second busy timeout handles lock contention
+- `PRAGMA synchronous=NORMAL` for better performance
+
+This enables efficient parallel indexing of mixed-language projects without database locking issues.
+
+### POSIX-only
+
+The codebase uses POSIX APIs (`dirent.h`, `stat()`) and is not intended to be Windows-compatible.
+
+## Database Schema
+
+```sql
+CREATE TABLE code_index (
+  symbol TEXT NOT NULL,
+  directory TEXT NOT NULL,
+  filename TEXT NOT NULL,
+  line_number INTEGER NOT NULL,
+  context_type TEXT NOT NULL,
+  full_symbol TEXT NOT NULL,
+  parent_symbol TEXT NOT NULL,
+  scope TEXT NOT NULL
+);
+
+CREATE INDEX idx_symbol ON code_index(symbol);
+CREATE INDEX idx_directory ON code_index(directory);
+CREATE INDEX idx_filename ON code_index(filename);
+```
+
+### Schema Fields
+
+- **symbol** - Symbol name in lowercase for case-insensitive searches
+- **directory** - Relative directory path
+- **filename** - File name (not full path)
+- **line_number** - Line number where symbol appears
+- **context_type** - Symbol type (FUNCTION_NAME, CLASS_NAME, etc.)
+- **full_symbol** - Symbol name with original case preserved
+- **parent_symbol** - For member expressions, the immediate parent object (e.g., `target` in `this.target.getBounds()`)
+- **scope** - Access modifier for class members (`public`, `private`, `protected`, or empty string)
+
+### Indexes
+
+Three indexes optimize common query patterns:
+1. `symbol` - Fast pattern matching with LIKE queries
+2. `directory` - Quick filtering by directory
+3. `filename` - Fast file-specific lookups
+
+## Adding New Languages
+
+To add support for a new language (e.g., PHP):
+
+1. **Create language directory:**
+   ```bash
+   mkdir -p php php/config
+   ```
+2. **Add tree-sitter grammar:**
+   - git clone the tree-sitter-php repo into the root directory
+
+3. **Implement AST visitor:**
+   - Create `php/php_language.c` and `php/php_language.h`
+   - Implement `parse_php_file()` function
+   - Map PHP AST nodes to ContextType enum values
+
+4. **Create main program:**
+   - Create `php/index-php.c` (similar to `typescript/index-ts.c`)
+   - Handle CLI arguments and coordinate indexing
+
+5. **Add language-specific filters:**
+   ```bash
+   # php/config/file-extensions.txt
+   .php
+   .phtml
+
+   # php/config/ignore_files.txt
+   vendor
+
+   # php/data/php-keywords.txt
+   function
+   class
+   namespace
+   use
+   ```
+
+6. **Update Makefile:**
+   ```makefile
+   php/index-php: php/index-php.o php/php_language.o php/src/parser.o shared/*.o
+       $(CC) -o $@ $^ $(LDFLAGS)
+   ```
+
+### Known Limitations
+
+**PHP - Laravel Blade Templates:**
+Laravel Blade templates (`.blade.php`) will not be indexed properly by a standard PHP indexer since they use a different syntax. Consider using [tree-sitter-blade](https://github.com/EmranMR/tree-sitter-blade) for proper Blade support in the future.
+
+The shared core (database, filtering, file walking) handles everything else automatically. The new language will use shared filters from `shared/data/` (stopwords and regex patterns).
+
+## Technical Details
+
+### Dependencies
+
+- **libsqlite3-dev** - Database storage and querying
+- **libtree-sitter-dev** - AST parsing library
+- Tree-sitter language grammars (bundled in language-specific `src/` directories)
+
+### Performance Metrics
+
+- **Indexing**: ~0.33s for 49 TypeScript files
+- **Querying**: <10ms for typical queries
+- **Database size**: ~200 KB per 1,000 entries
+- **Binary size**: ~1.4MB (TypeScript indexer), ~35KB (query tool)
+
+### Case Sensitivity
+
+- **Patterns**: Case-insensitive by default (searches `symbol`)
+- **Context types**: Case-insensitive (`class_name` = `CLASS_NAME`)
+- **Symbols**: Stored as-written in `full_symbol`, searched case-insensitively via `symbol`
+
+### Compilation
+
+Built with C11 standard for modern C features while maintaining broad compatibility:
+
+```bash
+gcc -Wall -O3 -std=c11 -I/usr/include -I.
+```
+
+Optimization flags:
+- `-O3` - Maximum optimization for performance
+- `-Wall` - All warnings enabled for code quality
+- `-std=c11` - C11 standard compliance
+
+For more implementation details, see [DEVELOPERS.md](DEVELOPERS.md).
+
+## Error Handling Strategy
+
+We use a layered error handling philosophy optimized for both robustness and simplicity:
+
+### 1. Top-Level Code (main functions)
+
+**Use `try_strdup_ctx()` with goto cleanup pattern:**
+
+```c
+int main(int argc, char **argv) {
+    int retval = 0;
+    char *data = NULL;
+
+    data = try_strdup_ctx(source, "Failed to allocate data");
+    if (!data) {
+        retval = 1;
+        goto cleanup;
+    }
+
+    // ... do work ...
+
+cleanup:
+    free(data);  // free(NULL) is safe
+    return retval;
+}
+```
+
+**Why:**
+- Allows proper resource cleanup on all error paths
+- Prevents memory leaks from early returns
+- Single cleanup section is easier to maintain
+- User gets informative error messages before exit
+
+**Rules:**
+- NEVER use bare `return 1` - always `goto cleanup`
+- Initialize all pointers to NULL
+- Check allocation results before using
+- Only increment counters AFTER successful allocation
+
+### 2. Deep Utility/Library Functions
+
+**Use `safe_strdup_ctx()` which calls exit(1):**
+
+```c
+void build_toc(const char *filepath) {
+    FileToc *entry = malloc(sizeof(FileToc));
+    entry->path = safe_strdup_ctx(filepath, "Failed to allocate filepath");
+    // ... continues, knowing allocation succeeded
+}
+```
+
+**Where used:**
+- Config file parsing (`load_config_file()`)
+- TOC building (`toc.c`)
+- Shared utility functions
+- Any code deep in call stack
+
+**Why:**
+- Unrecoverable errors (can't allocate 10 bytes = system is dead)
+- Simpler than propagating errors through many layers
+- Fail-fast prevents cascading failures
+- Called functions are atomic operations
+
+### 3. Language Parsers
+
+**Use `safe_strdup_ctx()` for initialization:**
+
+```c
+static void init_c_symbols(const TSLanguage *language) {
+    static int initialized = 0;
+    if (initialized) return;  // Idempotency guard
+    initialized = 1;
+
+    c_symbols.identifier = ts_language_symbol_for_name(...);
+    // ...
+}
+```
+
+**Why:**
+- Parser init failure is unrecoverable
+- If we can't parse source code, indexer is useless
+- Idempotency guards prevent double-initialization
+- All language parsers follow same pattern
+
+### 4. Common Pitfalls
+
+** WRONG - Side effects with fallible operations:**
+```c
+// BUG: count incremented even on failure!
+array[count++] = try_strdup_ctx(data, "error");
+if (!array[count]) goto cleanup;  // Checking WRONG index!
+```
+
+** CORRECT - Separate check from state update:**
+```c
+array[count] = try_strdup_ctx(data, "error");
+if (!array[count]) goto cleanup;
+count++;  // Only increment on success
+```
+
+** WRONG - Missing cleanup on early return:**
+```c
+ptr = malloc(100);
+if (error_condition) {
+    return 1;  // LEAK!
+}
+```
+
+** CORRECT - Always use cleanup label:**
+```c
+ptr = malloc(100);
+if (error_condition) {
+    retval = 1;
+    goto cleanup;
+}
+// ...
+cleanup:
+    free(ptr);
+    return retval;
+```
+
+### 5. Initialization Guards
+
+All language parsers use static initialization guards to prevent multiple calls:
+
+```c
+static void init_language_symbols(const TSLanguage *lang) {
+    static int initialized = 0;
+    if (initialized) return;
+    initialized = 1;
+    // ... expensive initialization
+}
+```
+
+**Rationale:**
+- Prevents wasted work on repeated calls
+- Guards against future malloc additions (would leak)
+- Consistent pattern across all 5 language parsers
+- Thread-safe for single-threaded context
+
+### Summary
+
+| Location | Function | On Failure | Use Case |
+|----------|----------|------------|----------|
+| main() | `try_strdup_ctx()` | Returns NULL | User input, argument parsing |
+| Utilities | `safe_strdup_ctx()` | Calls exit(1) | Config, TOC, deep functions |
+| Parsers | `safe_strdup_ctx()` | Calls exit(1) | Parser initialization |
+
+This strategy balances **robustness** (cleanup in main) with **simplicity** (fail-fast in utilities) while maintaining **consistency** across the codebase.

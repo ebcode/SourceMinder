@@ -1,0 +1,9 @@
+vendor
+node_modules
+.git
+dist
+build
+plugins
+tmp
+cache
+phpyouradmin

@@ -1,0 +1,139 @@
+#!/bin/bash
+# index-code - Unified indexer front-end
+# Auto-detects languages and runs appropriate indexers concurrently
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Track PIDs for cleanup
+declare -a INDEXER_PIDS=()
+
+# Cleanup function - kill all child indexers
+cleanup() {
+    echo ""
+    echo "Shutting down indexers..."
+    for pid in "${INDEXER_PIDS[@]}"; do
+        if kill -0 "$pid" 2>/dev/null; then
+            kill "$pid" 2>/dev/null || true
+        fi
+    done
+    exit 0
+}
+
+# Set up signal handlers
+trap cleanup SIGINT SIGTERM
+
+# Print usage
+if [[ $# -eq 0 ]] || [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
+    cat << 'EOF'
+Usage: index-code <folders...> [--quiet] [--verbose] [--exclude-dir DIR...]
+
+Unified indexer front-end that auto-detects languages and runs appropriate indexers.
+
+Examples:
+  index-code ./src                      # Auto-detect and index all languages
+  index-code ./src --quiet              # Silent mode
+  index-code ./src --verbose            # Show preflight checks
+  index-code ./src --exclude-dir node_modules
+
+Supported languages: TypeScript, C, PHP, Go, Python
+
+Note: All indexers run concurrently in daemon mode, watching for file changes.
+      Press Ctrl+C to stop all indexers.
+      Database is shared (code-index.db).
+EOF
+    exit 0
+fi
+
+# Parse arguments to find target directories
+target_dirs=()
+for arg in "$@"; do
+    if [[ "$arg" != --* ]] && [[ "$arg" != -* ]]; then
+        target_dirs+=("$arg")
+    fi
+done
+
+# If no target directories found, error out
+if [[ ${#target_dirs[@]} -eq 0 ]]; then
+    echo "Error: No target directories specified"
+    exit 1
+fi
+
+# Detect which languages are present by checking file extensions
+declare -A languages
+languages=(
+    [c]="./index-c"
+    [php]="./index-php"
+    [go]="./index-go"
+    [typescript]="./index-ts"
+    [python]="./index-python"
+)
+
+declare -A has_language
+
+for lang in "${!languages[@]}"; do
+    ext_file="${lang}/config/file-extensions.txt"
+
+    if [[ ! -f "$ext_file" ]]; then
+        continue
+    fi
+
+    # Read extensions from file and build find pattern
+    extensions=()
+    while IFS= read -r ext; do
+        # Skip empty lines and comments
+        [[ -z "$ext" ]] || [[ "$ext" =~ ^# ]] && continue
+        extensions+=("$ext")
+    done < "$ext_file"
+
+    # Check if any files with these extensions exist in target dirs
+    found=0
+    for ext in "${extensions[@]}"; do
+        for dir in "${target_dirs[@]}"; do
+            if find "$dir" -type f -name "*${ext}" 2>/dev/null | head -1 | grep -q .; then
+                found=1
+                break 2
+            fi
+        done
+    done
+
+    if [[ $found -eq 1 ]]; then
+        has_language[$lang]=1
+    fi
+done
+
+# Check if any languages were detected
+if [[ ${#has_language[@]} -eq 0 ]]; then
+    echo "No supported language files found in target directories"
+    echo "Searched for: TypeScript (.ts, .tsx, .js, .jsx), C (.c, .h), PHP (.php), Go (.go), Python (.py)"
+    exit 1
+fi
+
+# Print detected languages
+echo "Detected languages: ${!has_language[*]}"
+echo ""
+
+# Launch indexers concurrently
+for lang in "${!has_language[@]}"; do
+    indexer="${languages[$lang]}"
+
+    if [[ ! -x "$indexer" ]]; then
+        echo "Warning: $indexer not found or not executable, skipping"
+        continue
+    fi
+
+    echo "Starting ${indexer}..."
+    "$indexer" "$@" &
+    INDEXER_PIDS+=($!)
+done
+
+echo ""
+echo "All indexers running (PIDs: ${INDEXER_PIDS[*]})"
+echo "Press Ctrl+C to stop all indexers"
+echo ""
+
+# Wait for all indexers (they run as daemons, so this waits indefinitely)
+# If any indexer exits unexpectedly, we'll catch it
+wait

@@ -1,0 +1,12 @@
+node_modules
+dist
+tmp
+benchmark
+tree-sitter-c
+tree-sitter-typescript
+tree-sitter-go
+tree-sitter-php
+
+#excalidraw
+harfbuzz-wasm.ts
+woff2-wasm.ts

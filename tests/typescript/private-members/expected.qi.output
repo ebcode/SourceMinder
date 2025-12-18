@@ -1,0 +1,42 @@
+
+Searching for: %
+Filtering by file: private-members_ts (1 files)
+
+LINE | SYM                    | PAR  | SCOPE   | NS | MOD | CLUE | TYPE    | D | CTX  
+-----+------------------------+------+---------+----+-----+------+---------+---+------
+tests/typescript/private-members/private-members.ts:
+1    | private-members        |      |         |    |     |      |         | 0 | FILE 
+1    | Test                   |      |         |    |     |      |         | 0 | COM  
+1    | ES2019                 |      |         |    |     |      |         | 0 | COM  
+1    | members                |      |         |    |     |      |         | 0 | COM  
+2    | BankAccount            |      |         |    |     |      |         | 1 | CLASS
+3    | #balance               |      | private |    |     |      | number  | 0 | PROP 
+4    | #accountNumber         |      | private |    |     |      | string  | 0 | PROP 
+5    | owner                  |      |         |    |     |      | string  | 0 | PROP 
+7    | string                 |      |         |    |     |      |         | 1 | TYPE 
+7    | owner                  |      |         |    |     |      | string  | 1 | ARG  
+7    | number                 |      |         |    |     |      |         | 1 | TYPE 
+7    | initialBalance         |      |         |    |     |      | number  | 1 | ARG  
+8    | owner                  | this |         |    |     |      |         | 1 | PROP 
+8    | owner                  |      |         |    |     |      |         | 0 | VAR  
+9    | #balance               | this |         |    |     |      |         | 1 | PROP 
+9    | initialBalance         |      |         |    |     |      |         | 0 | VAR  
+10   | #accountNumber         | this |         |    |     |      |         | 1 | PROP 
+10   | #generateAccountNumber | this |         |    |     |      |         | 0 | CALL 
+13   | #generateAccountNumber |      | private |    |     |      | string  | 1 | FUNC 
+14   | ACC-                   |      |         |    |     |      |         | 0 | STR  
+14   | toString               |      |         |    |     |      |         | 0 | CALL 
+14   | random                 | Math |         |    |     |      |         | 0 | CALL 
+17   | deposit                |      |         |    |     |      | void    | 1 | FUNC 
+17   | number                 |      |         |    |     |      |         | 1 | TYPE 
+17   | amount                 |      |         |    |     |      | number  | 1 | ARG  
+18   | #balance               | this |         |    |     |      |         | 1 | PROP 
+18   | amount                 |      |         |    |     |      |         | 0 | VAR  
+21   | getBalance             |      |         |    |     |      | number  | 1 | FUNC 
+25   | #validateTransaction   |      | private |    |     |      | boolean | 1 | FUNC 
+25   | number                 |      |         |    |     |      |         | 1 | TYPE 
+25   | amount                 |      |         |    |     |      | number  | 1 | ARG  
+26   | amount                 |      |         |    |     |      |         | 0 | VAR  
+26   | amount                 |      |         |    |     |      |         | 0 | VAR  
+
+Found 33 matches

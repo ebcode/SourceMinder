@@ -1,0 +1,25 @@
+
+Searching for: %
+Filtering by file: hello-world_c (1 files)
+
+LINE | SYM         | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+-----+-------------+-----+-------+----+-----+------+------+---+-----
+tests/c/hello-world/hello-world.c:
+1    | hello-world |     |       |    |     |      |      | 0 | FILE
+1    | Test:       |     |       |    |     |      |      | 0 | COM 
+1    | Simple      |     |       |    |     |      |      | 0 | COM 
+1    | hello       |     |       |    |     |      |      | 0 | COM 
+1    | world       |     |       |    |     |      |      | 0 | COM 
+1    | program     |     |       |    |     |      |      | 0 | COM 
+2    | <stdio.h>   |     |       |    |     |      |      | 0 | IMP 
+4    | Main        |     |       |    |     |      |      | 0 | COM 
+4    | entry       |     |       |    |     |      |      | 0 | COM 
+4    | point       |     |       |    |     |      |      | 0 | COM 
+5    | main        |     |       |    |     |      | int  | 1 | FUNC
+6    | Display     |     |       |    |     |      |      | 0 | COM 
+6    | greeting    |     |       |    |     |      |      | 0 | COM 
+7    | printf      |     |       |    |     |      |      | 0 | CALL
+7    | Hello       |     |       |    |     |      |      | 0 | STR 
+7    | World!      |     |       |    |     |      |      | 0 | STR 
+
+Found 16 matches
