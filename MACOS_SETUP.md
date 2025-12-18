@@ -1,6 +1,6 @@
-# macOS Setup Guide for indexer-c
+# MacOS Setup Guide for SourceMinder
 
-This document outlines the steps needed to compile the indexer-c project on a fresh macOS installation.
+This document outlines the steps needed to compile SourceMinder on a fresh macOS installation.
 
 ## Prerequisites
 
@@ -42,22 +42,21 @@ brew install tree-sitter-cli
 The project requires tree-sitter grammar repositories for each supported language. These should be cloned in the project root directory:
 
 ```bash
-cd /path/to/indexer-c
+cd /path/to/SourceMinder
 
 # Clone required grammar repositories
 git clone https://github.com/tree-sitter/tree-sitter-c.git
 git clone https://github.com/tree-sitter/tree-sitter-go.git
 git clone https://github.com/tree-sitter/tree-sitter-php.git
+git clone https://github.com/tree-sitter/tree-sitter-python.git
 git clone https://github.com/tree-sitter/tree-sitter-typescript.git
 ```
-
-**Note:** The Makefile is configured to reference these external repositories directly, so you don't need to copy `parser.c` files into the language directories. This makes updates easier.
 
 ### Grammar Repository Structure
 
 After cloning, your directory should look like:
 ```
-indexer-c/
+SourceMinder/
 ├── tree-sitter-c/
 │   └── src/parser.c
 ├── tree-sitter-go/
@@ -149,7 +148,7 @@ This will:
    - `index-go` (if enabled)
    - `index-python` (if enabled)
 
-2. Install config files to `/usr/local/share/code-indexer/`:
+2. Install config files to `/usr/local/share/sourceminder/`:
    - `shared/config/` - Shared filter configuration (stopwords, exclusion patterns)
    - `c/config/` - C language configuration (if enabled)
    - `typescript/config/` - TypeScript language configuration (if enabled)
@@ -162,8 +161,8 @@ This will:
 The indexers use a smart path resolution system with the following search order:
 
 1. **Current directory** (development mode): Looks for `./c/config`, `./shared/config`, etc.
-2. **System installation** (macOS): `/usr/local/share/code-indexer/`
-3. **System installation** (Linux): `/usr/share/code-indexer/`
+2. **System installation** (macOS): `/usr/local/share/sourceminder/`
+3. **System installation** (Linux): `/usr/share/sourceminder/`
 
 This means:
 - **Development**: Run from the project directory without installation
@@ -192,7 +191,7 @@ sudo make uninstall
 
 This removes:
 - All binaries from `/usr/local/bin/`
-- All config files from `/usr/local/share/code-indexer/`
+- All config files from `/usr/local/share/sourceminder/`
 
 ## macOS-Specific Adaptations
 
@@ -296,7 +295,7 @@ If you see this warning during `make clean`, it means Homebrew isn't in the PATH
 ## File Structure
 
 ```
-indexer-c/
+SourceMinder/
 ├── tree-sitter-c/          # C grammar (external repo)
 ├── tree-sitter-go/         # Go grammar (external repo)
 ├── tree-sitter-php/        # PHP grammar (external repo)
@@ -335,7 +334,7 @@ indexer-c/
 
 3. Clone tree-sitter grammar repositories
    ```bash
-   cd /path/to/indexer-c
+   cd /path/to/SourceMinder
    git clone https://github.com/tree-sitter/tree-sitter-c.git
    git clone https://github.com/tree-sitter/tree-sitter-go.git
    git clone https://github.com/tree-sitter/tree-sitter-php.git
