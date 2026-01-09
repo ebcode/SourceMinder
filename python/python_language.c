@@ -1654,7 +1654,7 @@ void parser_set_debug(PythonParser *parser, int debug) {
 
 /* Parse a Python file */
 int parser_parse_file(PythonParser *parser, const char *filepath, const char *project_root, ParseResult *result) {
-    FILE *fp = safe_fopen(filepath, "r", 0);
+    FILE *fp = safe_fopen(filepath, "rb", 0);  /* binary mode for accurate byte count */
     if (!fp) {
         fprintf(stderr, "Cannot open file: %s\n", filepath);
         return -1;
