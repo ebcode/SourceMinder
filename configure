@@ -11,13 +11,23 @@ CC="${CC:-gcc}"
 
 # Detect OS for platform-specific commands
 UNAME_S=$(uname -s)
-if [ "$UNAME_S" = "Darwin" ]; then
-    # macOS requires empty string after -i
-    SED_INPLACE="sed -i ''"
-else
-    # Linux uses -i directly
-    SED_INPLACE="sed -i"
-fi
+IS_MSYS=0
+
+# Check for MSYS2/MinGW environment
+case "$UNAME_S" in
+    MINGW*|MSYS*)
+        IS_MSYS=1
+        SED_INPLACE="sed -i"
+        ;;
+    Darwin)
+        # macOS requires empty string after -i
+        SED_INPLACE="sed -i ''"
+        ;;
+    *)
+        # Linux uses -i directly
+        SED_INPLACE="sed -i"
+        ;;
+esac
 
 # Parse command line arguments
 show_help() {
@@ -285,17 +295,35 @@ PHP_GRAMMAR_DIR = tree-sitter-php/php
 GO_GRAMMAR_DIR = tree-sitter-go
 PYTHON_GRAMMAR_DIR = tree-sitter-python
 
-# macOS (Homebrew) paths
-ifeq ($(UNAME_S),Darwin)
+# Detect MSYS2/MinGW environment
+IS_MSYS := $(findstring MINGW,$(UNAME_S))$(findstring MSYS,$(UNAME_S))
+
+ifneq ($(IS_MSYS),)
+    # MSYS2/MinGW paths (Windows)
+    # Detect MSYS2 prefix (UCRT64 vs MINGW64)
+    MSYS2_PREFIX := $(shell test -d /ucrt64 && echo /ucrt64 || echo /mingw64)
+    # Include tree-sitter/lib/include for api.h (clone tree-sitter repo if needed)
+    # Also include tree-sitter/lib/src for internal headers needed by lib.c
+    INCLUDE_PATHS = -I$(MSYS2_PREFIX)/include -Itree-sitter/lib/include -Itree-sitter/lib/src -I. -I$(TS_GRAMMAR_DIR)/src -I$(C_GRAMMAR_DIR)/src -I$(PHP_GRAMMAR_DIR)/src -I$(GO_GRAMMAR_DIR)/src -I$(PYTHON_GRAMMAR_DIR)/src
+    LIB_PATHS = -L$(MSYS2_PREFIX)/lib
+    # Executable extension for Windows
+    EXE_EXT = .exe
+    # Build tree-sitter from source (MSYS2 package doesn't include the library)
+    TREE_SITTER_SRC = tree-sitter/lib/src/lib.c
+    TREE_SITTER_OBJ = tree-sitter/lib/src/lib.o
+else ifeq ($(UNAME_S),Darwin)
+    # macOS (Homebrew) paths
     # Try to detect Homebrew prefix (Apple Silicon vs Intel)
     HOMEBREW_PREFIX := $(shell test -d /opt/homebrew && echo /opt/homebrew || echo /usr/local)
     SQLITE_PREFIX := $(HOMEBREW_PREFIX)/opt/sqlite
     INCLUDE_PATHS = -I$(HOMEBREW_PREFIX)/include -I$(SQLITE_PREFIX)/include -I. -I$(TS_GRAMMAR_DIR)/src -I$(C_GRAMMAR_DIR)/src -I$(PHP_GRAMMAR_DIR)/src -I$(GO_GRAMMAR_DIR)/src -I$(PYTHON_GRAMMAR_DIR)/src
     LIB_PATHS = -L$(HOMEBREW_PREFIX)/lib -L$(SQLITE_PREFIX)/lib
+    EXE_EXT =
 else
     # Linux paths
     INCLUDE_PATHS = -I/usr/local/include -I/usr/include -I. -I$(TS_GRAMMAR_DIR)/src -I$(C_GRAMMAR_DIR)/src -I$(PHP_GRAMMAR_DIR)/src -I$(GO_GRAMMAR_DIR)/src -I$(PYTHON_GRAMMAR_DIR)/src
     LIB_PATHS = -L/usr/local/lib -Wl,-rpath,/usr/local/lib
+    EXE_EXT =
 endif
 
 # Base flags for release and debug
@@ -305,8 +333,15 @@ BASE_CFLAGS_DEBUG = -g -O0 -std=c11 -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE 
 # Default to release build
 BASE_CFLAGS = $(BASE_CFLAGS_RELEASE)
 
-LDFLAGS = $(LIB_PATHS) -lsqlite3 -ltree-sitter
-LDFLAGS_DEBUG = $(LIB_PATHS) -lsqlite3 -ltree-sitter -rdynamic
+# Linker flags - platform specific
+ifneq ($(IS_MSYS),)
+    # Windows: tree-sitter built from source, libsystre provides POSIX regex
+    LDFLAGS = $(LIB_PATHS) -lsqlite3 -lsystre
+    LDFLAGS_DEBUG = $(LIB_PATHS) -lsqlite3 -lsystre
+else
+    LDFLAGS = $(LIB_PATHS) -lsqlite3 -ltree-sitter
+    LDFLAGS_DEBUG = $(LIB_PATHS) -lsqlite3 -ltree-sitter -rdynamic
+endif
 
 # Compiler-specific warning flags for our code (strict)
 GCC_WARNINGS = -Wall -Wextra -fprefetch-loop-arrays
@@ -335,6 +370,13 @@ endif
 # Shared source files
 SHARED_SRC = shared/database.c shared/filter.c shared/file_walker.c shared/file_watcher.c shared/validation.c shared/comment_utils.c shared/string_utils.c shared/file_opener.c shared/indexer_main.c shared/extensions.c shared/parse_result.c shared/file_utils.c shared/paths.c shared/toc.c shared/debug.c shared/version.c shared/sql_builder.c
 SHARED_OBJ = $(SHARED_SRC:.c=.o)
+
+# On MSYS2, we need to build tree-sitter from source (package only has CLI, no library)
+ifneq ($(IS_MSYS),)
+    TREE_SITTER_LIB_OBJ = tree-sitter/lib/src/lib.o
+else
+    TREE_SITTER_LIB_OBJ =
+endif
 
 # TypeScript language files
 TS_TREE_SITTER_SRC = $(TS_GRAMMAR_DIR)/src/parser.c $(TS_GRAMMAR_DIR)/src/scanner.c
@@ -401,27 +443,27 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 # TypeScript indexer
-$(BUILD_DIR)/index-ts: $(SHARED_OBJ) $(TS_TREE_SITTER_OBJ) $(TS_LANGUAGE_OBJ) $(TS_MAIN_OBJ)
+$(BUILD_DIR)/index-ts: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(TS_TREE_SITTER_OBJ) $(TS_LANGUAGE_OBJ) $(TS_MAIN_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # C indexer
-$(BUILD_DIR)/index-c: $(SHARED_OBJ) $(C_TREE_SITTER_OBJ) $(C_LANGUAGE_OBJ) $(C_MAIN_OBJ)
+$(BUILD_DIR)/index-c: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(C_TREE_SITTER_OBJ) $(C_LANGUAGE_OBJ) $(C_MAIN_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # PHP indexer
-$(BUILD_DIR)/index-php: $(SHARED_OBJ) $(PHP_TREE_SITTER_OBJ) $(PHP_LANGUAGE_OBJ) $(PHP_MAIN_OBJ)
+$(BUILD_DIR)/index-php: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(PHP_TREE_SITTER_OBJ) $(PHP_LANGUAGE_OBJ) $(PHP_MAIN_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Go indexer
-$(BUILD_DIR)/index-go: $(SHARED_OBJ) $(GO_TREE_SITTER_OBJ) $(GO_LANGUAGE_OBJ) $(GO_MAIN_OBJ)
+$(BUILD_DIR)/index-go: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(GO_TREE_SITTER_OBJ) $(GO_LANGUAGE_OBJ) $(GO_MAIN_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Python indexer
-$(BUILD_DIR)/index-python: $(SHARED_OBJ) $(PYTHON_TREE_SITTER_OBJ) $(PYTHON_LANGUAGE_OBJ) $(PYTHON_MAIN_OBJ)
+$(BUILD_DIR)/index-python: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(PYTHON_TREE_SITTER_OBJ) $(PYTHON_LANGUAGE_OBJ) $(PYTHON_MAIN_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Query tool
-$(BUILD_DIR)/qi: $(SHARED_OBJ) $(QUERY_OBJ)
+$(BUILD_DIR)/qi: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(QUERY_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Convenience symlinks in root
@@ -442,6 +484,12 @@ $(BUILD_DIR)/qi: $(SHARED_OBJ) $(QUERY_OBJ)
 
 ./qi: $(BUILD_DIR)/qi
 	ln -sf $(BUILD_DIR)/qi qi
+
+# Build tree-sitter library from source (MSYS2 only - package doesn't include library)
+ifneq ($(IS_MSYS),)
+tree-sitter/lib/src/lib.o: tree-sitter/lib/src/lib.c
+	$(CC) $(THIRD_PARTY_CFLAGS) -c $< -o $@
+endif
 
 # Pattern rules for object files
 # Third-party tree-sitter parser code (relaxed warnings)
@@ -465,7 +513,7 @@ $(PYTHON_GRAMMAR_DIR)/src/%.o: $(PYTHON_GRAMMAR_DIR)/src/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(SHARED_OBJ) $(TS_TREE_SITTER_OBJ) $(TS_LANGUAGE_OBJ) $(TS_MAIN_OBJ) $(C_TREE_SITTER_OBJ) $(C_LANGUAGE_OBJ) $(C_MAIN_OBJ) $(PHP_TREE_SITTER_OBJ) $(PHP_LANGUAGE_OBJ) $(PHP_MAIN_OBJ) $(GO_TREE_SITTER_OBJ) $(GO_LANGUAGE_OBJ) $(GO_MAIN_OBJ) $(PYTHON_TREE_SITTER_OBJ) $(PYTHON_LANGUAGE_OBJ) $(PYTHON_MAIN_OBJ) $(QUERY_OBJ)
+	rm -f $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(TS_TREE_SITTER_OBJ) $(TS_LANGUAGE_OBJ) $(TS_MAIN_OBJ) $(C_TREE_SITTER_OBJ) $(C_LANGUAGE_OBJ) $(C_MAIN_OBJ) $(PHP_TREE_SITTER_OBJ) $(PHP_LANGUAGE_OBJ) $(PHP_MAIN_OBJ) $(GO_TREE_SITTER_OBJ) $(GO_LANGUAGE_OBJ) $(GO_MAIN_OBJ) $(PYTHON_TREE_SITTER_OBJ) $(PYTHON_LANGUAGE_OBJ) $(PYTHON_MAIN_OBJ) $(QUERY_OBJ)
 	rm -rf $(BUILD_DIR)
 	rm -f index-ts index-c index-php index-go index-python qi
 

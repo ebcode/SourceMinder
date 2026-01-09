@@ -2209,7 +2209,7 @@ int parser_init(TypeScriptParser *parser, SymbolFilter *filter) {
 int parser_parse_file(TypeScriptParser *parser, const char *filepath, const char *project_root, ParseResult *result) {
     if (g_debug) fprintf(stderr, "[DEBUG] parser_parse_file: Starting to parse %s (g_debug=%d)\n", filepath, g_debug);
 
-    FILE *fp = safe_fopen(filepath, "r", 0);
+    FILE *fp = safe_fopen(filepath, "rb", 0);  /* binary mode for accurate byte count */
     if (!fp) {
         fprintf(stderr, "Cannot open file: %s\n", filepath);
         return -1;

@@ -1,18 +1,18 @@
 /* SourceMinder
- * Copyright 2025 Eli Bird 
- * 
+ * Copyright 2025 Eli Bird
+ *
  * This file is part of SourceMinder.
- * 
- * SourceMinder is free software: you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
+ *
+ * SourceMinder is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or (at
  *  your option) any later version.
  *
- * SourceMinder is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * SourceMinder is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * You should have received a copy of the GNU General Public License 
+ * You should have received a copy of the GNU General Public License
  * along with SourceMinder. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "file_opener.h"
@@ -24,9 +24,15 @@ FILE *safe_fopen(const char *filepath, const char *mode, int silent) {
         return NULL;
     }
 
-    /* Use lstat to avoid following symlinks */
+    /* Use lstat to avoid following symlinks (stat on Windows where lstat isn't available) */
     struct stat st;
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+    /* Windows: use stat (symlinks are less common and handled differently) */
+    if (stat(filepath, &st) != 0) {
+#else
+    /* Unix: use lstat to not follow symlinks */
     if (lstat(filepath, &st) != 0) {
+#endif
         /* File doesn't exist or can't be accessed - this is normal, return NULL silently */
         return NULL;
     }

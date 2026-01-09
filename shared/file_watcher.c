@@ -1,18 +1,18 @@
 /* SourceMinder
- * Copyright 2025 Eli Bird 
- * 
+ * Copyright 2025 Eli Bird
+ *
  * This file is part of SourceMinder.
- * 
- * SourceMinder is free software: you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
+ *
+ * SourceMinder is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or (at
  *  your option) any later version.
  *
- * SourceMinder is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * SourceMinder is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * You should have received a copy of the GNU General Public License 
+ * You should have received a copy of the GNU General Public License
  * along with SourceMinder. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "file_watcher.h"
@@ -20,14 +20,312 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <dirent.h>
 #include <errno.h>
 #include <time.h>
+
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+/* ============================================================================
+ * Windows implementation using ReadDirectoryChangesW
+ * ============================================================================ */
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <dirent.h>
 #include <sys/stat.h>
 
-#if defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-/* BSD kqueue implementation (macOS, FreeBSD, OpenBSD, NetBSD, DragonFly BSD) */
+/* Directory watch handle */
+typedef struct {
+    HANDLE hDir;           /* Directory handle */
+    char path[4096];       /* Directory path */
+    OVERLAPPED overlapped; /* Overlapped I/O structure */
+    char buffer[8192];     /* Buffer for change notifications */
+} DirWatch;
+
+/* File watcher structure for Windows */
+struct FileWatcher {
+    DirWatch *watches;                         /* Array of directory watches */
+    int watch_count;                           /* Number of watches */
+    int watch_capacity;                        /* Capacity of watches array */
+    char extensions[MAX_FILE_EXTENSIONS][FILE_EXTENSION_MAX_LENGTH];  /* File extensions */
+    int extension_count;                       /* Number of extensions */
+};
+
+/* Check if filename has valid extension */
+static int has_valid_extension_array(const char *filename, char extensions[][FILE_EXTENSION_MAX_LENGTH], int count) {
+    if (!filename) return 0;
+
+    const char *dot = strrchr(filename, '.');
+    if (!dot) return 0;
+
+    for (int i = 0; i < count; i++) {
+        if (_stricmp(dot, extensions[i]) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* Get current time in milliseconds */
+static long long current_time_ms(void) {
+    LARGE_INTEGER freq, counter;
+    QueryPerformanceFrequency(&freq);
+    QueryPerformanceCounter(&counter);
+    return (long long)(counter.QuadPart * 1000 / freq.QuadPart);
+}
+
+/* Add watch for a single directory */
+static int add_watch(FileWatcher *watcher, const char *path) {
+    /* Expand array if needed */
+    if (watcher->watch_count >= watcher->watch_capacity) {
+        int new_capacity = watcher->watch_capacity == 0 ? 16 : watcher->watch_capacity * 2;
+        DirWatch *new_watches = realloc(watcher->watches, (size_t)new_capacity * sizeof(DirWatch));
+        if (!new_watches) {
+            fprintf(stderr, "Error: Failed to expand watch array\n");
+            return -1;
+        }
+        watcher->watches = new_watches;
+        watcher->watch_capacity = new_capacity;
+    }
+
+    /* Open directory handle for monitoring */
+    HANDLE hDir = CreateFileA(
+        path,
+        FILE_LIST_DIRECTORY,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        NULL,
+        OPEN_EXISTING,
+        FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OVERLAPPED,
+        NULL
+    );
+
+    if (hDir == INVALID_HANDLE_VALUE) {
+        /* Silently skip directories we can't watch */
+        return 0;
+    }
+
+    DirWatch *watch = &watcher->watches[watcher->watch_count];
+    watch->hDir = hDir;
+    strncpy(watch->path, path, sizeof(watch->path) - 1);
+    watch->path[sizeof(watch->path) - 1] = '\0';
+    memset(&watch->overlapped, 0, sizeof(watch->overlapped));
+    watch->overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    /* Start watching */
+    BOOL success = ReadDirectoryChangesW(
+        hDir,
+        watch->buffer,
+        sizeof(watch->buffer),
+        FALSE,  /* Don't watch subtree - we add each dir separately */
+        FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_SIZE,
+        NULL,
+        &watch->overlapped,
+        NULL
+    );
+
+    if (!success) {
+        CloseHandle(watch->overlapped.hEvent);
+        CloseHandle(hDir);
+        return 0;
+    }
+
+    watcher->watch_count++;
+    return 0;
+}
+
+/* Recursively add watches for directory and subdirectories */
+static int add_watch_recursive(FileWatcher *watcher, const char *directory) {
+    /* Add watch for this directory */
+    if (add_watch(watcher, directory) != 0) {
+        return -1;
+    }
+
+    /* Recursively add subdirectories */
+    DIR *dir = opendir(directory);
+    if (!dir) return 0;
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+
+        char path[4096];
+        snprintf(path, sizeof(path), "%s/%s", directory, entry->d_name);
+
+        struct stat st;
+        if (stat(path, &st) == 0 && S_ISDIR(st.st_mode)) {
+            add_watch_recursive(watcher, path);
+        }
+    }
+
+    closedir(dir);
+    return 0;
+}
+
+FileWatcher* file_watcher_init(void) {
+    FileWatcher *watcher = calloc(1, sizeof(FileWatcher));
+    if (!watcher) {
+        fprintf(stderr, "Error: Failed to allocate file watcher\n");
+        return NULL;
+    }
+    return watcher;
+}
+
+int file_watcher_add_directory(FileWatcher *watcher, const char *directory,
+                                const char **extensions, int extension_count) {
+    if (!watcher || !directory) return -1;
+
+    /* Copy extensions */
+    watcher->extension_count = extension_count < MAX_FILE_EXTENSIONS ? extension_count : MAX_FILE_EXTENSIONS;
+    for (int i = 0; i < watcher->extension_count; i++) {
+        if (extensions[i]) {
+            snprintf(watcher->extensions[i], FILE_EXTENSION_MAX_LENGTH, "%s", extensions[i]);
+        } else {
+            watcher->extensions[i][0] = '\0';
+        }
+    }
+
+    return add_watch_recursive(watcher, directory);
+}
+
+int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
+    if (!watcher || !events || watcher->watch_count == 0) return -1;
+
+    int event_count = 0;
+    long long last_event_time = 0;
+
+    /* Build array of event handles */
+    HANDLE *handles = malloc((size_t)watcher->watch_count * sizeof(HANDLE));
+    if (!handles) return -1;
+
+    for (int i = 0; i < watcher->watch_count; i++) {
+        handles[i] = watcher->watches[i].overlapped.hEvent;
+    }
+
+    while (1) {
+        /* Calculate timeout */
+        DWORD timeout_ms;
+        if (last_event_time > 0) {
+            long long elapsed = current_time_ms() - last_event_time;
+            if (elapsed >= DEBOUNCE_MS) {
+                break;
+            }
+            timeout_ms = (DWORD)(DEBOUNCE_MS - elapsed);
+        } else {
+            timeout_ms = INFINITE;
+        }
+
+        /* Wait for any directory change */
+        DWORD result = WaitForMultipleObjects((DWORD)watcher->watch_count, handles, FALSE, timeout_ms);
+
+        if (result == WAIT_TIMEOUT) {
+            break;  /* Debounce complete */
+        }
+
+        if (result == WAIT_FAILED) {
+            free(handles);
+            return -1;
+        }
+
+        if (result >= WAIT_OBJECT_0 && result < WAIT_OBJECT_0 + (DWORD)watcher->watch_count) {
+            int idx = (int)(result - WAIT_OBJECT_0);
+            DirWatch *watch = &watcher->watches[idx];
+
+            /* Get the result */
+            DWORD bytes_returned;
+            if (GetOverlappedResult(watch->hDir, &watch->overlapped, &bytes_returned, FALSE)) {
+                /* Process notifications */
+                FILE_NOTIFY_INFORMATION *notify = (FILE_NOTIFY_INFORMATION *)watch->buffer;
+
+                while (1) {
+                    /* Convert wide filename to UTF-8 */
+                    char filename[512];
+                    int len = WideCharToMultiByte(CP_UTF8, 0,
+                        notify->FileName, (int)(notify->FileNameLength / sizeof(WCHAR)),
+                        filename, sizeof(filename) - 1, NULL, NULL);
+                    filename[len] = '\0';
+
+                    /* Check extension */
+                    if (has_valid_extension_array(filename, watcher->extensions, watcher->extension_count)) {
+                        /* Build full path */
+                        char filepath[4096];
+                        snprintf(filepath, sizeof(filepath), "%s/%s", watch->path, filename);
+
+                        /* Check for duplicates */
+                        int already_exists = 0;
+                        for (int i = 0; i < event_count; i++) {
+                            if (strcmp(events[i].filepath, filepath) == 0) {
+                                already_exists = 1;
+                                break;
+                            }
+                        }
+
+                        if (!already_exists && event_count < max_events) {
+                            strncpy(events[event_count].filepath, filepath, sizeof(events[0].filepath) - 1);
+                            events[event_count].filepath[sizeof(events[0].filepath) - 1] = '\0';
+
+                            switch (notify->Action) {
+                                case FILE_ACTION_ADDED:
+                                case FILE_ACTION_RENAMED_NEW_NAME:
+                                    events[event_count].type = FILE_EVENT_CREATED;
+                                    break;
+                                case FILE_ACTION_REMOVED:
+                                case FILE_ACTION_RENAMED_OLD_NAME:
+                                    events[event_count].type = FILE_EVENT_DELETED;
+                                    break;
+                                default:
+                                    events[event_count].type = FILE_EVENT_MODIFIED;
+                                    break;
+                            }
+
+                            event_count++;
+                            last_event_time = current_time_ms();
+                        }
+                    }
+
+                    if (notify->NextEntryOffset == 0) break;
+                    notify = (FILE_NOTIFY_INFORMATION *)((char *)notify + notify->NextEntryOffset);
+                }
+            }
+
+            /* Reset the event and start watching again */
+            ResetEvent(watch->overlapped.hEvent);
+            ReadDirectoryChangesW(
+                watch->hDir,
+                watch->buffer,
+                sizeof(watch->buffer),
+                FALSE,
+                FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_SIZE,
+                NULL,
+                &watch->overlapped,
+                NULL
+            );
+        }
+    }
+
+    free(handles);
+    return event_count;
+}
+
+void file_watcher_free(FileWatcher *watcher) {
+    if (!watcher) return;
+
+    for (int i = 0; i < watcher->watch_count; i++) {
+        CancelIo(watcher->watches[i].hDir);
+        CloseHandle(watcher->watches[i].overlapped.hEvent);
+        CloseHandle(watcher->watches[i].hDir);
+    }
+
+    free(watcher->watches);
+    free(watcher);
+}
+
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+/* ============================================================================
+ * BSD kqueue implementation (macOS, FreeBSD, OpenBSD, NetBSD, DragonFly BSD)
+ * ============================================================================ */
+#include <unistd.h>
+#include <dirent.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
@@ -295,7 +593,12 @@ void file_watcher_free(FileWatcher *watcher) {
 }
 
 #else
-/* Linux inotify implementation */
+/* ============================================================================
+ * Linux inotify implementation
+ * ============================================================================ */
+#include <unistd.h>
+#include <dirent.h>
+#include <sys/stat.h>
 #include <sys/inotify.h>
 #include <sys/select.h>
 
