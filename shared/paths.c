@@ -1,18 +1,18 @@
 /* SourceMinder
- * Copyright 2025 Eli Bird 
- * 
+ * Copyright 2025 Eli Bird
+ *
  * This file is part of SourceMinder.
- * 
- * SourceMinder is free software: you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
+ *
+ * SourceMinder is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or (at
  *  your option) any later version.
  *
- * SourceMinder is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * SourceMinder is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * You should have received a copy of the GNU General Public License 
+ * You should have received a copy of the GNU General Public License
  * along with SourceMinder. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "paths.h"
@@ -20,7 +20,38 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+#include <io.h>
+#include <windows.h>
+#define access _access
+#define F_OK 0
+
+/* Get directory containing the current executable */
+static int get_executable_dir(char *out_path, size_t out_size) {
+    char exe_path[MAX_PATH];
+    DWORD len = GetModuleFileNameA(NULL, exe_path, MAX_PATH);
+    if (len == 0 || len >= MAX_PATH) {
+        return -1;
+    }
+    /* Find last backslash or forward slash and truncate */
+    char *last_sep = strrchr(exe_path, '\\');
+    char *last_fwd = strrchr(exe_path, '/');
+    if (last_fwd && (!last_sep || last_fwd > last_sep)) {
+        last_sep = last_fwd;
+    }
+    if (last_sep) {
+        *last_sep = '\0';
+    }
+    if (strlen(exe_path) >= out_size) {
+        return -1;
+    }
+    strcpy(out_path, exe_path);
+    return 0;
+}
+#else
 #include <unistd.h>
+#endif
 
 /* Check if a directory exists */
 static int dir_exists(const char *path) {
@@ -59,7 +90,35 @@ int resolve_lang_data_dir(const char *lang, char *out_path, size_t out_size) {
     }
 
     /* 3. Check platform-specific installation directories */
-#ifdef __APPLE__
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+    /* Windows: First check relative to executable (works outside MSYS2) */
+    char exe_dir[PATH_MAX_LENGTH];
+    if (get_executable_dir(exe_dir, sizeof(exe_dir)) == 0) {
+        /* Check exe_dir/../<lang>/data (typical layout) */
+        snprintf(candidate, sizeof(candidate), "%s/../%s/data", exe_dir, lang);
+        if (dir_exists(candidate)) {
+            snprintf(out_path, out_size, "%s", candidate);
+            return 0;
+        }
+        /* Check exe_dir/<lang>/data */
+        snprintf(candidate, sizeof(candidate), "%s/%s/data", exe_dir, lang);
+        if (dir_exists(candidate)) {
+            snprintf(out_path, out_size, "%s", candidate);
+            return 0;
+        }
+    }
+    /* MSYS2: Check MSYS2 virtual paths (only work inside MSYS2 shell) */
+    snprintf(candidate, sizeof(candidate), "/ucrt64/share/sourceminder/%s/data", lang);
+    if (dir_exists(candidate)) {
+        snprintf(out_path, out_size, "%s", candidate);
+        return 0;
+    }
+    snprintf(candidate, sizeof(candidate), "/mingw64/share/sourceminder/%s/data", lang);
+    if (dir_exists(candidate)) {
+        snprintf(out_path, out_size, "%s", candidate);
+        return 0;
+    }
+#elif defined(__APPLE__)
     /* macOS: /usr/local/share/indexer-c/<lang>/data */
     snprintf(candidate, sizeof(candidate), "/usr/local/share/indexer-c/%s/data", lang);
     if (dir_exists(candidate)) {
@@ -104,7 +163,35 @@ int resolve_shared_data_dir(char *out_path, size_t out_size) {
     }
 
     /* 3. Check platform-specific installation directories */
-#ifdef __APPLE__
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+    /* Windows: First check relative to executable (works outside MSYS2) */
+    char exe_dir[PATH_MAX_LENGTH];
+    if (get_executable_dir(exe_dir, sizeof(exe_dir)) == 0) {
+        /* Check exe_dir/../shared/data (typical layout) */
+        snprintf(candidate, sizeof(candidate), "%s/../shared/data", exe_dir);
+        if (dir_exists(candidate)) {
+            snprintf(out_path, out_size, "%s", candidate);
+            return 0;
+        }
+        /* Check exe_dir/shared/data */
+        snprintf(candidate, sizeof(candidate), "%s/shared/data", exe_dir);
+        if (dir_exists(candidate)) {
+            snprintf(out_path, out_size, "%s", candidate);
+            return 0;
+        }
+    }
+    /* MSYS2: Check MSYS2 virtual paths (only work inside MSYS2 shell) */
+    snprintf(candidate, sizeof(candidate), "/ucrt64/share/sourceminder/shared/data");
+    if (dir_exists(candidate)) {
+        snprintf(out_path, out_size, "%s", candidate);
+        return 0;
+    }
+    snprintf(candidate, sizeof(candidate), "/mingw64/share/sourceminder/shared/data");
+    if (dir_exists(candidate)) {
+        snprintf(out_path, out_size, "%s", candidate);
+        return 0;
+    }
+#elif defined(__APPLE__)
     /* macOS: /usr/local/share/indexer-c/shared/data */
     snprintf(candidate, sizeof(candidate), "/usr/local/share/indexer-c/shared/data");
     if (dir_exists(candidate)) {
@@ -149,7 +236,35 @@ int resolve_data_file(const char *relative_path, char *out_path, size_t out_size
     }
 
     /* 3. Check platform-specific installation directories */
-#ifdef __APPLE__
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+    /* Windows: First check relative to executable (works outside MSYS2) */
+    char exe_dir[PATH_MAX_LENGTH];
+    if (get_executable_dir(exe_dir, sizeof(exe_dir)) == 0) {
+        /* Check exe_dir/../<relative_path> (typical layout) */
+        snprintf(candidate, sizeof(candidate), "%s/../%s", exe_dir, relative_path);
+        if (file_exists(candidate)) {
+            snprintf(out_path, out_size, "%s", candidate);
+            return 0;
+        }
+        /* Check exe_dir/<relative_path> */
+        snprintf(candidate, sizeof(candidate), "%s/%s", exe_dir, relative_path);
+        if (file_exists(candidate)) {
+            snprintf(out_path, out_size, "%s", candidate);
+            return 0;
+        }
+    }
+    /* MSYS2: Check MSYS2 virtual paths (only work inside MSYS2 shell) */
+    snprintf(candidate, sizeof(candidate), "/ucrt64/share/sourceminder/%s", relative_path);
+    if (file_exists(candidate)) {
+        snprintf(out_path, out_size, "%s", candidate);
+        return 0;
+    }
+    snprintf(candidate, sizeof(candidate), "/mingw64/share/sourceminder/%s", relative_path);
+    if (file_exists(candidate)) {
+        snprintf(out_path, out_size, "%s", candidate);
+        return 0;
+    }
+#elif defined(__APPLE__)
     /* macOS: /usr/local/share/indexer-c/<relative_path> */
     snprintf(candidate, sizeof(candidate), "/usr/local/share/indexer-c/%s", relative_path);
     if (file_exists(candidate)) {

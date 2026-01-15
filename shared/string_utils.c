@@ -1,18 +1,18 @@
 /* SourceMinder
- * Copyright 2025 Eli Bird 
- * 
+ * Copyright 2025 Eli Bird
+ *
  * This file is part of SourceMinder.
- * 
- * SourceMinder is free software: you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
+ *
+ * SourceMinder is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or (at
  *  your option) any later version.
  *
- * SourceMinder is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * SourceMinder is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * You should have received a copy of the GNU General Public License 
+ * You should have received a copy of the GNU General Public License
  * along with SourceMinder. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "string_utils.h"
@@ -20,8 +20,15 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+/* Windows: backtrace not available */
+#define HAS_BACKTRACE 0
+#else
 #include <execinfo.h>  /* For backtrace() */
 #include <unistd.h>    /* For readlink() */
+#define HAS_BACKTRACE 1
+#endif
 
 size_t strnlength(const char *s, size_t n)
 {
@@ -78,6 +85,7 @@ void safe_extract_node_text(const char *source_code, TSNode node, char *buffer,
         fprintf(stderr, "If this seems like a bug, the extraction logic may need fixing.\n");
 
         /* Print stack trace to help identify the caller */
+#if HAS_BACKTRACE
         fprintf(stderr, "\nStack trace:\n");
         void *stack_frames[20];
         int frame_count = backtrace(stack_frames, 20);
@@ -136,6 +144,9 @@ void safe_extract_node_text(const char *source_code, TSNode node, char *buffer,
         } else {
             fprintf(stderr, "  (backtrace_symbols failed)\n");
         }
+#else
+        fprintf(stderr, "\n(Stack trace not available on Windows)\n");
+#endif
 
         fprintf(stderr, "======================================\n");
         exit(1);
