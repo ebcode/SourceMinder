@@ -1,23 +1,22 @@
 /* SourceMinder
- * Copyright 2025 Eli Bird 
- * 
+ * Copyright 2025 Eli Bird
+ *
  * This file is part of SourceMinder.
- * 
- * SourceMinder is free software: you can redistribute it and/or modify 
- * it under the terms of the GNU General Public License as published by 
+ *
+ * SourceMinder is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or (at
  *  your option) any later version.
  *
- * SourceMinder is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * SourceMinder is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  * General Public License for more details.
- * You should have received a copy of the GNU General Public License 
+ * You should have received a copy of the GNU General Public License
  * along with SourceMinder. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "file_walker.h"
 #include "string_utils.h"
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
@@ -25,7 +24,77 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+/* Windows/MinGW: provide fnmatch compatibility */
+#include <io.h>
+#define FNM_PATHNAME 1
+#define FNM_NOMATCH 1
+
+/* Simple fnmatch implementation for Windows */
+static int fnmatch(const char *pattern, const char *string, int flags) {
+    const char *p = pattern;
+    const char *s = string;
+
+    while (*p && *s) {
+        if (*p == '*') {
+            /* Skip consecutive asterisks */
+            while (*p == '*') p++;
+            if (*p == '\0') return 0;  /* Trailing * matches everything */
+
+            /* Try matching the rest of the pattern */
+            while (*s) {
+                if (fnmatch(p, s, flags) == 0) return 0;
+                /* If FNM_PATHNAME is set, don't match past '/' */
+                if ((flags & FNM_PATHNAME) && *s == '/') break;
+                s++;
+            }
+            return FNM_NOMATCH;
+        } else if (*p == '?') {
+            /* Match any single character (except '/' if FNM_PATHNAME) */
+            if ((flags & FNM_PATHNAME) && *s == '/') return FNM_NOMATCH;
+            p++;
+            s++;
+        } else if (*p == '[') {
+            /* Character class - simplified implementation */
+            int inverted = 0;
+            int matched = 0;
+            p++;
+            if (*p == '!' || *p == '^') {
+                inverted = 1;
+                p++;
+            }
+            while (*p && *p != ']') {
+                if (p[1] == '-' && p[2] && p[2] != ']') {
+                    /* Range */
+                    if (*s >= *p && *s <= p[2]) matched = 1;
+                    p += 3;
+                } else {
+                    if (*s == *p) matched = 1;
+                    p++;
+                }
+            }
+            if (*p == ']') p++;
+            if (inverted) matched = !matched;
+            if (!matched) return FNM_NOMATCH;
+            s++;
+        } else {
+            /* Literal character match */
+            if (*p != *s) return FNM_NOMATCH;
+            p++;
+            s++;
+        }
+    }
+
+    /* Handle trailing asterisks */
+    while (*p == '*') p++;
+
+    return (*p == '\0' && *s == '\0') ? 0 : FNM_NOMATCH;
+}
+#else
+#include <unistd.h>
 #include <fnmatch.h>
+#endif
 
 /* FileList growth constants */
 #define FILE_LIST_INITIAL_CAPACITY 32

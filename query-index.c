@@ -19,12 +19,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <ctype.h>
-#include <regex.h>
 #include <errno.h>
 #include <limits.h>
 #include <sys/stat.h>
+
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+/* Windows/MinGW: provide POSIX compatibility */
+#define strcasecmp _stricmp
+#define strncasecmp _strnicmp
+
+/* strndup is not available on Windows */
+static char *strndup(const char *s, size_t n) {
+    size_t len = strnlen(s, n);
+    char *new_str = malloc(len + 1);
+    if (new_str) {
+        memcpy(new_str, s, len);
+        new_str[len] = '\0';
+    }
+    return new_str;
+}
+#else
+#include <strings.h>
+#endif
+
+#include <regex.h>
 #include "shared/database.h"
 #include "shared/constants.h"
 #include "shared/file_opener.h"

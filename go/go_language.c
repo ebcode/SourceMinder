@@ -2686,8 +2686,8 @@ void parser_free(GoParser *parser) {
 
 int parser_parse_file(GoParser *parser, const char *filepath,
                       const char *project_root, ParseResult *result) {
-    /* Open file */
-    FILE *file = safe_fopen(filepath, "r", 0);
+    /* Open file in binary mode for accurate byte count */
+    FILE *file = safe_fopen(filepath, "rb", 0);
     if (!file) {
         fprintf(stderr, "Failed to open file: %s\n", filepath);
         return -1;
