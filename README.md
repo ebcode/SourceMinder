@@ -33,7 +33,7 @@ git clone https://github.com/tree-sitter/tree-sitter-c.git
 git clone https://github.com/tree-sitter/tree-sitter-go.git
 git clone https://github.com/tree-sitter/tree-sitter-php.git
 git clone https://github.com/tree-sitter/tree-sitter-python.git
-git clone https://github.com/tree-sitter/tree-sitter-typesript.git
+git clone https://github.com/tree-sitter/tree-sitter-typescript.git
 ```
 
 ### Configure
