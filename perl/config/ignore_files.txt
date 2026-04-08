@@ -1,0 +1,11 @@
+.git
+node_modules
+blib
+_build
+.build
+inc
+local
+cpanm
+.cpanm
+fatlib
+vendor

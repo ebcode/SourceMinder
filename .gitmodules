@@ -1,0 +1,3 @@
+[submodule "tree-sitter-perl"]
+	path = tree-sitter-perl
+	url = https://github.com/tree-sitter-perl/tree-sitter-perl.git
