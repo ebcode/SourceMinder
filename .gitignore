@@ -24,6 +24,7 @@ tools/ast-explorer-python
 tools/ast-explorer-ts
 tools/ast-explorer-go
 tools/*
+!tools/sources
 !tools/*.*
 !/tools/*/*
 benchmark/*
