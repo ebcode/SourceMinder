@@ -169,7 +169,7 @@
  */
 
 /* Buffer for extracting text from comments and string literals */
-#define COMMENT_TEXT_BUFFER 8192
+#define COMMENT_TEXT_BUFFER 32768
 
 /* Buffer for constructing SQL queries */
 #define SQL_QUERY_BUFFER 4096
@@ -187,7 +187,7 @@
 #define LINE_BUFFER_MEDIUM 256
 
 /* Large line buffer for regex patterns and long lines */
-#define LINE_BUFFER_LARGE 512
+#define LINE_BUFFER_LARGE 1024
 
 
 /* ============================================================================

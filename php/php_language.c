@@ -506,7 +506,7 @@ static void extract_symbols_from_expression(TSNode expr_node, const char *source
             TSNode child = ts_node_child(expr_node, i);
             TSSymbol child_sym = ts_node_symbol(child);
             if (child_sym == php_symbols.string_value || child_sym == php_symbols.string_content) {
-                char string_text[SYMBOL_MAX_LENGTH];
+                char string_text[CLEANED_WORD_BUFFER];
                 safe_extract_node_text(source_code, child, string_text, sizeof(string_text), filename);
                 process_string_content(string_text, line, directory, filename, result, filter, namespace_buf, "");
             }
