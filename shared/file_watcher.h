@@ -21,7 +21,7 @@
 #include <stddef.h>
 
 /* Maximum number of watched directories */
-#define MAX_WATCH_DIRS 8192
+#define MAX_WATCH_DIRS 16384
 
 /* Maximum number of file events to return in one batch */
 #define MAX_FILE_EVENTS 128
