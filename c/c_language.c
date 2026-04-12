@@ -593,6 +593,11 @@ static void extract_type_from_declaration(TSNode declaration_node, const char *s
     }
 }
 
+/* Forward declaration — handle_struct_specifier is defined after handle_declaration */
+static void handle_struct_specifier(TSNode node, const char *source_code, const char *directory,
+                                    const char *filename, ParseResult *result, SymbolFilter *filter,
+                                    int line);
+
 static void handle_declaration(TSNode node, const char *source_code, const char *directory,
                                 const char *filename, ParseResult *result, SymbolFilter *filter,
                                 int line) {
@@ -725,6 +730,13 @@ static void handle_declaration(TSNode node, const char *source_code, const char 
                     }
                 }
             }
+        } else if (child_sym == c_symbols.struct_specifier ||
+                   child_sym == c_symbols.union_specifier) {
+            /* Anonymous struct/union defined inline in a declaration:
+             *   static struct { TSSymbol foo; } my_symbols;
+             * handle_declaration is never called recursively on the struct_specifier
+             * child, so we must invoke handle_struct_specifier directly here. */
+            handle_struct_specifier(child, source_code, directory, filename, result, filter, line);
         }
     }
 }
