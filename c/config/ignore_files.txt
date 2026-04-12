@@ -8,6 +8,7 @@ tree-sitter-typescript
 tree-sitter-php
 tree-sitter-go
 tree-sitter-python
+tree-sitter-perl
 c/src
 php/src
 typescript/src/

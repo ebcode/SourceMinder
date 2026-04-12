@@ -23,6 +23,7 @@
 #include "../shared/filter.h"
 #include "../shared/parse_result.h"
 #include "../shared/debug.h"
+#include "../shared/comment_utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -50,6 +51,14 @@ static struct {
 
     /* Imports */
     TSSymbol use_statement;
+    TSSymbol package_name;
+    TSSymbol require_expression;
+    TSSymbol autoquoted_bareword;
+    TSSymbol quoted_word_list;
+
+    /* Method calls */
+    TSSymbol method_call_expression;
+    TSSymbol method;
 
     /* Expressions and statements */
     TSSymbol expression_statement;
@@ -93,7 +102,15 @@ static void init_perl_symbols(const TSLanguage *language) {
     perl_symbols.package_statement = ts_language_symbol_for_name(language, "package_statement", 17, true);
 
     /* Imports */
-    perl_symbols.use_statement = ts_language_symbol_for_name(language, "use_statement", 13, true);
+    perl_symbols.use_statement        = ts_language_symbol_for_name(language, "use_statement",        13, true);
+    perl_symbols.package_name         = ts_language_symbol_for_name(language, "package",               7, true);
+    perl_symbols.require_expression   = ts_language_symbol_for_name(language, "require_expression",   18, true);
+    perl_symbols.autoquoted_bareword  = ts_language_symbol_for_name(language, "autoquoted_bareword",  19, true);
+    perl_symbols.quoted_word_list     = ts_language_symbol_for_name(language, "quoted_word_list",     16, true);
+
+    /* Method calls */
+    perl_symbols.method_call_expression = ts_language_symbol_for_name(language, "method_call_expression", 22, true);
+    perl_symbols.method                 = ts_language_symbol_for_name(language, "method",                  6, true);
 
     /* Expressions and statements */
     perl_symbols.expression_statement = ts_language_symbol_for_name(language, "expression_statement", 20, true);
@@ -174,6 +191,237 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
     }
 }
 
+/* Index a package_statement: the second 'package' child is the module name */
+static void handle_package_statement(TSNode node, const char *source_code,
+                                     const char *directory, const char *filename,
+                                     ParseResult *result, SymbolFilter *filter,
+                                     int line) {
+    /* The keyword "package" is anonymous; perl_symbols.package_name (named=true)
+     * only matches the module name node — so the first match is what we want. */
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) == perl_symbols.package_name) {
+            char name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            if (filter_should_index(filter, name)) {
+                add_entry(result, name, line, CONTEXT_NAMESPACE,
+                          directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+            }
+            break;
+        }
+    }
+}
+
+/* Index a subroutine_declaration_statement: bareword child is the sub name */
+static void handle_subroutine_declaration(TSNode node, const char *source_code,
+                                          const char *directory, const char *filename,
+                                          ParseResult *result, SymbolFilter *filter,
+                                          int line) {
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) == perl_symbols.bareword) {
+            char name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            if (filter_should_index(filter, name)) {
+                add_entry(result, name, line, CONTEXT_FUNCTION,
+                          directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+            }
+            break;
+        }
+    }
+    /* Recurse into the block body to index variables, comments, etc. */
+    process_children(node, source_code, directory, filename, result, filter);
+}
+
+/* Index a method_call_expression: the method name as CONTEXT_CALL */
+static void handle_method_call(TSNode node, const char *source_code,
+                               const char *directory, const char *filename,
+                               ParseResult *result, SymbolFilter *filter,
+                               int line) {
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) == perl_symbols.method) {
+            char name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            if (filter_should_index(filter, name)) {
+                add_entry(result, name, line, CONTEXT_CALL,
+                          directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+            }
+            break;
+        }
+    }
+    /* Recurse to catch any nested method calls in arguments */
+    process_children(node, source_code, directory, filename, result, filter);
+}
+
+/* Index a use_statement: module name + optional qw() imported names */
+static void handle_use_statement(TSNode node, const char *source_code,
+                                 const char *directory, const char *filename,
+                                 ParseResult *result, SymbolFilter *filter,
+                                 int line) {
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        TSSymbol child_sym = ts_node_symbol(child);
+
+        if (child_sym == perl_symbols.package_name) {
+            char module_name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, module_name, sizeof(module_name), filename);
+            if (filter_should_index(filter, module_name)) {
+                add_entry(result, module_name, line, CONTEXT_IMPORT,
+                          directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+            }
+        } else if (child_sym == perl_symbols.quoted_word_list) {
+            /* Index each imported name from qw(...) */
+            uint32_t qw_count = ts_node_child_count(child);
+            for (uint32_t j = 0; j < qw_count; j++) {
+                TSNode qw_child = ts_node_child(child, j);
+                if (ts_node_symbol(qw_child) != perl_symbols.string_content) continue;
+
+                char content[COMMENT_TEXT_BUFFER];
+                safe_extract_node_text(source_code, qw_child, content, sizeof(content), filename);
+
+                char word[SYMBOL_MAX_LENGTH];
+                char *word_start = content;
+                for (char *p = content; ; p++) {
+                    if (*p == '\0' || isspace(*p)) {
+                        if (p > word_start) {
+                            size_t word_len = (size_t)(p - word_start);
+                            if (word_len < sizeof(word)) {
+                                snprintf(word, sizeof(word), "%.*s", (int)word_len, word_start);
+                                if (word[0] && filter_should_index(filter, word)) {
+                                    add_entry(result, word, line, CONTEXT_IMPORT,
+                                              directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+                                }
+                            }
+                        }
+                        word_start = p + 1;
+                        if (*p == '\0') break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* Index a require_expression: the module name being loaded at runtime */
+static void handle_require_expression(TSNode node, const char *source_code,
+                                      const char *directory, const char *filename,
+                                      ParseResult *result, SymbolFilter *filter,
+                                      int line) {
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        TSSymbol child_sym = ts_node_symbol(child);
+
+        if (child_sym == perl_symbols.autoquoted_bareword ||
+            child_sym == perl_symbols.bareword           ||
+            child_sym == perl_symbols.string_literal) {
+            char module_name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, module_name, sizeof(module_name), filename);
+            if (filter_should_index(filter, module_name)) {
+                add_entry(result, module_name, line, CONTEXT_IMPORT,
+                          directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+            }
+            break;
+        }
+    }
+}
+
+/* Index words from a Perl # comment */
+static void handle_comment(TSNode node, const char *source_code,
+                           const char *directory, const char *filename,
+                           ParseResult *result, SymbolFilter *filter,
+                           int line) {
+    char comment_text[COMMENT_TEXT_BUFFER];
+    safe_extract_node_text(source_code, node, comment_text, sizeof(comment_text), filename);
+
+    /* Skip shebang line */
+    if (comment_text[0] == '#' && comment_text[1] == '!') return;
+
+    char *text_start = strip_comment_delimiters(comment_text);
+
+    char word[CLEANED_WORD_BUFFER];
+    char cleaned[CLEANED_WORD_BUFFER];
+    char *word_start = text_start;
+
+    for (char *p = text_start; ; p++) {
+        if (*p == '\0' || isspace(*p)) {
+            if (p > word_start) {
+                size_t word_len = (size_t)(p - word_start);
+                if (word_len < sizeof(word)) {
+                    snprintf(word, sizeof(word), "%.*s", (int)word_len, word_start);
+                    filter_clean_string_symbol(word, cleaned, sizeof(cleaned));
+                    if (cleaned[0] && filter_should_index(filter, cleaned)) {
+                        add_entry(result, cleaned, line, CONTEXT_COMMENT,
+                                  directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+                    }
+                }
+            }
+            word_start = p + 1;
+            if (*p == '\0') break;
+        }
+    }
+}
+
+/* Index words from a POD documentation block, skipping directive lines (=head1, =cut, etc.) */
+static void handle_pod(TSNode node, const char *source_code,
+                       const char *directory, const char *filename,
+                       ParseResult *result, SymbolFilter *filter,
+                       int line) {
+    char pod_text[COMMENT_TEXT_BUFFER];
+    safe_extract_node_text(source_code, node, pod_text, sizeof(pod_text), filename);
+
+    char word[CLEANED_WORD_BUFFER];
+    char cleaned[CLEANED_WORD_BUFFER];
+    char *p = pod_text;
+    int current_line = line;
+
+    while (*p) {
+        /* Directive lines start with '=': skip the directive keyword (=head1, =cut, etc.)
+         * but index any remaining words on the line (e.g. "NAME" from "=head1 NAME") */
+        if (*p == '=') {
+            while (*p && !isspace(*p)) p++;  /* skip directive keyword */
+        }
+
+        /* Collect a line's words */
+        char *word_start = p;
+        while (*p && *p != '\n') {
+            if (isspace(*p)) {
+                if (p > word_start) {
+                    size_t word_len = (size_t)(p - word_start);
+                    if (word_len < sizeof(word)) {
+                        snprintf(word, sizeof(word), "%.*s", (int)word_len, word_start);
+                        filter_clean_string_symbol(word, cleaned, sizeof(cleaned));
+                        if (cleaned[0] && filter_should_index(filter, cleaned)) {
+                            add_entry(result, cleaned, current_line, CONTEXT_COMMENT,
+                                      directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+                        }
+                    }
+                }
+                word_start = p + 1;
+            }
+            p++;
+        }
+        /* Flush last word on line */
+        if (p > word_start) {
+            size_t word_len = (size_t)(p - word_start);
+            if (word_len < sizeof(word)) {
+                snprintf(word, sizeof(word), "%.*s", (int)word_len, word_start);
+                filter_clean_string_symbol(word, cleaned, sizeof(cleaned));
+                if (cleaned[0] && filter_should_index(filter, cleaned)) {
+                    add_entry(result, cleaned, current_line, CONTEXT_COMMENT,
+                              directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+                }
+            }
+        }
+        if (*p == '\n') { p++; current_line++; }
+    }
+}
+
 /* Recursively process all children of a node */
 static void process_children(TSNode node, const char *source_code,
                              const char *directory, const char *filename,
@@ -217,10 +465,34 @@ static void visit_node(TSNode node, const char *source_code,
         return;
     }
 
-    /* TODO: subroutine_declaration_statement */
-    /* TODO: package_statement */
-    /* TODO: use_statement */
-    /* TODO: comment */
+    if (node_sym == perl_symbols.subroutine_declaration_statement) {
+        handle_subroutine_declaration(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.package_statement) {
+        handle_package_statement(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.method_call_expression) {
+        handle_method_call(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.use_statement) {
+        handle_use_statement(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.require_expression) {
+        handle_require_expression(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.comment) {
+        handle_comment(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.pod) {
+        handle_pod(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
     /* TODO: expression_statement */
 
     /* No handler — recurse into children */
