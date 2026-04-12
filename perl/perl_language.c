@@ -56,9 +56,12 @@ static struct {
     TSSymbol autoquoted_bareword;
     TSSymbol quoted_word_list;
 
-    /* Method calls */
+    /* Method and function calls */
     TSSymbol method_call_expression;
     TSSymbol method;
+    TSSymbol function_call_expression;
+    TSSymbol ambiguous_function_call_expression;
+    TSSymbol function;
 
     /* Expressions and statements */
     TSSymbol expression_statement;
@@ -109,8 +112,11 @@ static void init_perl_symbols(const TSLanguage *language) {
     perl_symbols.quoted_word_list     = ts_language_symbol_for_name(language, "quoted_word_list",     16, true);
 
     /* Method calls */
-    perl_symbols.method_call_expression = ts_language_symbol_for_name(language, "method_call_expression", 22, true);
-    perl_symbols.method                 = ts_language_symbol_for_name(language, "method",                  6, true);
+    perl_symbols.method_call_expression          = ts_language_symbol_for_name(language, "method_call_expression",          22, true);
+    perl_symbols.method                          = ts_language_symbol_for_name(language, "method",                            6, true);
+    perl_symbols.function_call_expression        = ts_language_symbol_for_name(language, "function_call_expression",        24, true);
+    perl_symbols.ambiguous_function_call_expression = ts_language_symbol_for_name(language, "ambiguous_function_call_expression", 34, true);
+    perl_symbols.function                        = ts_language_symbol_for_name(language, "function",                          8, true);
 
     /* Expressions and statements */
     perl_symbols.expression_statement = ts_language_symbol_for_name(language, "expression_statement", 20, true);
@@ -254,6 +260,28 @@ static void handle_method_call(TSNode node, const char *source_code,
         }
     }
     /* Recurse to catch any nested method calls in arguments */
+    process_children(node, source_code, directory, filename, result, filter);
+}
+
+/* Index a function_call_expression or ambiguous_function_call_expression:
+ * the function name as CONTEXT_CALL */
+static void handle_function_call(TSNode node, const char *source_code,
+                                 const char *directory, const char *filename,
+                                 ParseResult *result, SymbolFilter *filter,
+                                 int line) {
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) == perl_symbols.function) {
+            char name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            if (filter_should_index(filter, name)) {
+                add_entry(result, name, line, CONTEXT_CALL,
+                          directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+            }
+            break;
+        }
+    }
     process_children(node, source_code, directory, filename, result, filter);
 }
 
@@ -475,6 +503,11 @@ static void visit_node(TSNode node, const char *source_code,
     }
     if (node_sym == perl_symbols.method_call_expression) {
         handle_method_call(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.function_call_expression ||
+        node_sym == perl_symbols.ambiguous_function_call_expression) {
+        handle_function_call(node, source_code, directory, filename, result, filter, line);
         return;
     }
     if (node_sym == perl_symbols.use_statement) {
