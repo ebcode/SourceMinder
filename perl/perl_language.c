@@ -65,6 +65,8 @@ static struct {
     TSSymbol ambiguous_function_call_expression;
     TSSymbol function;
     TSSymbol coderef_call_expression;
+    TSSymbol func1op_call_expression;
+    TSSymbol anonymous_hash_expression;
 
     /* Expressions and statements */
     TSSymbol expression_statement;
@@ -81,6 +83,13 @@ static struct {
     /* Comments and documentation */
     TSSymbol comment;
     TSSymbol pod;
+
+    /* Goto and labels */
+    TSSymbol statement_label;
+    TSSymbol goto_expression;
+    TSSymbol loopex_expression;
+    TSSymbol identifier;
+    TSSymbol label;
 } perl_symbols;
 
 /* Forward declarations */
@@ -123,6 +132,8 @@ static void init_perl_symbols(const TSLanguage *language) {
     perl_symbols.ambiguous_function_call_expression = ts_language_symbol_for_name(language, "ambiguous_function_call_expression", 34, true);
     perl_symbols.function                        = ts_language_symbol_for_name(language, "function",                          8, true);
     perl_symbols.coderef_call_expression         = ts_language_symbol_for_name(language, "coderef_call_expression",           23, true);
+    perl_symbols.func1op_call_expression         = ts_language_symbol_for_name(language, "func1op_call_expression",           23, true);
+    perl_symbols.anonymous_hash_expression       = ts_language_symbol_for_name(language, "anonymous_hash_expression",         25, true);
 
     /* Expressions and statements */
     perl_symbols.expression_statement = ts_language_symbol_for_name(language, "expression_statement", 20, true);
@@ -139,6 +150,13 @@ static void init_perl_symbols(const TSLanguage *language) {
     /* Comments and documentation */
     perl_symbols.comment = ts_language_symbol_for_name(language, "comment", 7, true);
     perl_symbols.pod = ts_language_symbol_for_name(language, "pod", 3, true);
+
+    /* Goto and labels */
+    perl_symbols.statement_label  = ts_language_symbol_for_name(language, "statement_label",  15, true);
+    perl_symbols.goto_expression  = ts_language_symbol_for_name(language, "goto_expression",  15, true);
+    perl_symbols.loopex_expression = ts_language_symbol_for_name(language, "loopex_expression", 17, true);
+    perl_symbols.identifier       = ts_language_symbol_for_name(language, "identifier",       10, true);
+    perl_symbols.label            = ts_language_symbol_for_name(language, "label",             5, true);
 }
 
 /* Extract variable name from a scalar/array/hash node and index it */
@@ -191,9 +209,9 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
         else if (strcmp(kw, "local") == 0) modifier = "local";
     }
 
-    /* Detect parameter extraction: my (...) = @_
-     * If the parent assignment_expression has @_ as its RHS, these are
-     * function parameters — index them as CONTEXT_ARGUMENT instead of VAR. */
+    /* Detect parameter extraction patterns — index as CONTEXT_ARGUMENT:
+     *   Case 1: my ($self, $name) = @_
+     *   Case 2: my $self = shift  (implicit @_, no explicit array target) */
     ContextType ctx = CONTEXT_VARIABLE;
     TSNode parent = ts_node_parent(node);
     if (!ts_node_is_null(parent) &&
@@ -201,19 +219,114 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
         uint32_t parent_count = ts_node_child_count(parent);
         for (uint32_t i = 0; i < parent_count; i++) {
             TSNode sibling = ts_node_child(parent, i);
-            if (ts_node_symbol(sibling) != perl_symbols.array) continue;
-            uint32_t ac = ts_node_child_count(sibling);
+            TSSymbol sib_sym = ts_node_symbol(sibling);
+
+            /* Case 1: RHS is @_ array */
+            if (sib_sym == perl_symbols.array) {
+                uint32_t ac = ts_node_child_count(sibling);
+                for (uint32_t j = 0; j < ac; j++) {
+                    TSNode ac_child = ts_node_child(sibling, j);
+                    if (ts_node_symbol(ac_child) != perl_symbols.varname) continue;
+                    char name[8];
+                    safe_extract_node_text(source_code, ac_child, name, sizeof(name), filename);
+                    if (strcmp(name, "_") == 0) ctx = CONTEXT_ARGUMENT;
+                    break;
+                }
+            }
+
+            /* Case 2: RHS is shift with no explicit non-@_ array target */
+            if (sib_sym == perl_symbols.func1op_call_expression) {
+                TSNode fn = ts_node_child_by_field_name(sibling, "function", 8);
+                if (!ts_node_is_null(fn)) {
+                    char fn_text[16];
+                    safe_extract_node_text(source_code, fn, fn_text, sizeof(fn_text), filename);
+                    if (strcmp(fn_text, "shift") == 0) {
+                        /* Check whether an explicit non-@_ array was passed */
+                        bool has_explicit_target = false;
+                        uint32_t sc = ts_node_child_count(sibling);
+                        for (uint32_t j = 0; j < sc; j++) {
+                            TSNode sc_child = ts_node_child(sibling, j);
+                            if (ts_node_symbol(sc_child) != perl_symbols.array) continue;
+                            /* Has array child — is it @_? */
+                            uint32_t vc = ts_node_child_count(sc_child);
+                            bool is_at_under = false;
+                            for (uint32_t k = 0; k < vc; k++) {
+                                TSNode vn = ts_node_child(sc_child, k);
+                                if (ts_node_symbol(vn) != perl_symbols.varname) continue;
+                                char name[8];
+                                safe_extract_node_text(source_code, vn, name, sizeof(name), filename);
+                                if (strcmp(name, "_") == 0) is_at_under = true;
+                                break;
+                            }
+                            if (!is_at_under) has_explicit_target = true;
+                            break;
+                        }
+                        if (!has_explicit_target) ctx = CONTEXT_ARGUMENT;
+                    }
+                }
+            }
+
+            if (ctx == CONTEXT_ARGUMENT) break;
+        }
+    }
+
+    /* Detect export lists: our @EXPORT = qw(...) / our @EXPORT_OK = qw(...)
+     * Index each exported name as CONTEXT_EXPORT. */
+    if (strcmp(modifier, "our") == 0 &&
+        !ts_node_is_null(parent) &&
+        ts_node_symbol(parent) == perl_symbols.assignment_expression) {
+        /* Find the array varname inside this declaration */
+        char export_varname[32] = {0};
+        for (uint32_t i = 0; i < child_count; i++) {
+            TSNode child = ts_node_child(node, i);
+            if (ts_node_symbol(child) != perl_symbols.array) continue;
+            uint32_t ac = ts_node_child_count(child);
             for (uint32_t j = 0; j < ac; j++) {
-                TSNode ac_child = ts_node_child(sibling, j);
-                if (ts_node_symbol(ac_child) != perl_symbols.varname) continue;
-                char name[8];
-                safe_extract_node_text(source_code, ac_child, name, sizeof(name), filename);
-                if (strcmp(name, "_") == 0) {
-                    ctx = CONTEXT_ARGUMENT;
+                TSNode vn = ts_node_child(child, j);
+                if (ts_node_symbol(vn) != perl_symbols.varname) continue;
+                safe_extract_node_text(source_code, vn, export_varname, sizeof(export_varname), filename);
+                break;
+            }
+            break;
+        }
+        if (strcmp(export_varname, "EXPORT") == 0 ||
+            strcmp(export_varname, "EXPORT_OK") == 0) {
+            /* Find the quoted_word_list on the RHS */
+            uint32_t pc = ts_node_child_count(parent);
+            for (uint32_t i = 0; i < pc; i++) {
+                TSNode sib = ts_node_child(parent, i);
+                if (ts_node_symbol(sib) != perl_symbols.quoted_word_list) continue;
+                uint32_t qc = ts_node_child_count(sib);
+                for (uint32_t j = 0; j < qc; j++) {
+                    TSNode qchild = ts_node_child(sib, j);
+                    if (ts_node_symbol(qchild) != perl_symbols.string_content) continue;
+                    char content[COMMENT_TEXT_BUFFER];
+                    safe_extract_node_text(source_code, qchild, content, sizeof(content), filename);
+                    int exp_line = (int)ts_node_start_point(qchild).row + 1;
+                    char word[SYMBOL_MAX_LENGTH];
+                    char *word_start = content;
+                    for (char *p = content; ; p++) {
+                        if (*p == '\0' || isspace((unsigned char)*p)) {
+                            if (p > word_start) {
+                                size_t wlen = (size_t)(p - word_start);
+                                if (wlen < sizeof(word)) {
+                                    snprintf(word, sizeof(word), "%.*s", (int)wlen, word_start);
+                                    if (word[0] && filter_should_index(filter, word)) {
+                                        add_entry(result, word, exp_line, CONTEXT_EXPORT,
+                                                  directory, filename, NULL,
+                                                  &(ExtColumns){.definition = "1"});
+                                    }
+                                }
+                                exp_line++;
+                            }
+                            word_start = p + 1;
+                            if (*p == '\0') break;
+                        }
+                    }
+                    break;
                 }
                 break;
             }
-            if (ctx == CONTEXT_ARGUMENT) break;
         }
     }
 
@@ -402,23 +515,136 @@ static void handle_coderef_call(TSNode node, const char *source_code,
     }
 }
 
+/* Index a statement_label: OUTER: while (...) { ... } → "OUTER" as CONTEXT_LABEL */
+static void handle_statement_label(TSNode node, const char *source_code,
+                                   const char *directory, const char *filename,
+                                   ParseResult *result, SymbolFilter *filter,
+                                   int line) {
+    uint32_t count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) == perl_symbols.identifier) {
+            char name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            if (filter_should_index(filter, name)) {
+                add_entry(result, name, line, CONTEXT_LABEL,
+                          directory, filename, NULL, &(ExtColumns){.definition = "1"});
+            }
+            break;
+        }
+    }
+    /* Recurse into the labeled statement */
+    process_children(node, source_code, directory, filename, result, filter);
+}
+
+/* Index a goto_expression:
+ *   goto LABEL   → label name as CONTEXT_GOTO
+ *   goto &func   → function name as CONTEXT_GOTO (tail call)
+ *   goto $expr   → skip (computed target) */
+static void handle_goto_expression(TSNode node, const char *source_code,
+                                   const char *directory, const char *filename,
+                                   ParseResult *result, SymbolFilter *filter,
+                                   int line) {
+    uint32_t count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        TSSymbol child_sym = ts_node_symbol(child);
+
+        if (child_sym == perl_symbols.label) {
+            /* goto LABEL */
+            char name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            if (filter_should_index(filter, name)) {
+                add_entry(result, name, line, CONTEXT_GOTO,
+                          directory, filename, NULL, &(ExtColumns){.definition = "0"});
+            }
+            return;
+        }
+        if (child_sym == perl_symbols.function_call_expression) {
+            /* goto &func — extract varname from inside the function field */
+            TSNode fn = ts_node_child_by_field_name(child, "function", 8);
+            if (!ts_node_is_null(fn)) {
+                uint32_t fn_count = ts_node_child_count(fn);
+                for (uint32_t j = 0; j < fn_count; j++) {
+                    TSNode fn_child = ts_node_child(fn, j);
+                    if (ts_node_symbol(fn_child) == perl_symbols.varname) {
+                        char name[SYMBOL_MAX_LENGTH];
+                        safe_extract_node_text(source_code, fn_child, name, sizeof(name), filename);
+                        if (filter_should_index(filter, name)) {
+                            add_entry(result, name, line, CONTEXT_GOTO,
+                                      directory, filename, NULL, &(ExtColumns){.definition = "0"});
+                        }
+                        return;
+                    }
+                }
+            }
+            return;
+        }
+    }
+}
+
+/* Index a loopex_expression: last/next/redo LABEL → label name as CONTEXT_GOTO */
+static void handle_loopex_expression(TSNode node, const char *source_code,
+                                     const char *directory, const char *filename,
+                                     ParseResult *result, SymbolFilter *filter,
+                                     int line) {
+    uint32_t count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) == perl_symbols.label) {
+            char name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            if (filter_should_index(filter, name)) {
+                add_entry(result, name, line, CONTEXT_GOTO,
+                          directory, filename, NULL, &(ExtColumns){.definition = "0"});
+            }
+            return;
+        }
+    }
+}
+
+/* Recursively index autoquoted_bareword nodes as constants (use constant PI => ...) */
+static void index_constant_names(TSNode node, const char *source_code,
+                                 const char *directory, const char *filename,
+                                 ParseResult *result, SymbolFilter *filter,
+                                 int line) {
+    uint32_t count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) == perl_symbols.autoquoted_bareword) {
+            char name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            if (filter_should_index(filter, name)) {
+                add_entry(result, name, line, CONTEXT_VARIABLE,
+                          directory, filename, NULL, &(ExtColumns){.modifier = "const", .definition = "1"});
+            }
+        } else {
+            index_constant_names(child, source_code, directory, filename, result, filter, line);
+        }
+    }
+}
+
 /* Index a use_statement: module name + optional qw() imported names */
 static void handle_use_statement(TSNode node, const char *source_code,
                                  const char *directory, const char *filename,
                                  ParseResult *result, SymbolFilter *filter,
                                  int line) {
+    char module_name[SYMBOL_MAX_LENGTH] = {0};
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; i++) {
         TSNode child = ts_node_child(node, i);
         TSSymbol child_sym = ts_node_symbol(child);
 
         if (child_sym == perl_symbols.package_name) {
-            char module_name[SYMBOL_MAX_LENGTH];
             safe_extract_node_text(source_code, child, module_name, sizeof(module_name), filename);
             if (filter_should_index(filter, module_name)) {
                 add_entry(result, module_name, line, CONTEXT_IMPORT,
                           directory, filename, NULL, &(ExtColumns){.definition = "0"});
             }
+        } else if (strcmp(module_name, "constant") == 0) {
+            /* use constant NAME => val  or  use constant { NAME => val, ... }
+             * Recurse into any non-package child to collect autoquoted_bareword keys */
+            index_constant_names(child, source_code, directory, filename, result, filter, line);
         } else if (child_sym == perl_symbols.quoted_word_list) {
             /* Index each imported name from qw(...) */
             uint32_t qw_count = ts_node_child_count(child);
@@ -696,6 +922,18 @@ static void visit_node(TSNode node, const char *source_code,
     }
     if (node_sym == perl_symbols.pod) {
         handle_pod(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.statement_label) {
+        handle_statement_label(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.goto_expression) {
+        handle_goto_expression(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.loopex_expression) {
+        handle_loopex_expression(node, source_code, directory, filename, result, filter, line);
         return;
     }
     /* TODO: expression_statement */

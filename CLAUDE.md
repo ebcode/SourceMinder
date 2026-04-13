@@ -1,4 +1,3 @@
-- when running a test involving qi, always search for the word "test": $ qi test --limit 5
 - the code index database is named code-index.db
 - prefer the qi tool to manual sqlite3 queries when testing the index
 - you can use the qi tool to query multiple words by separating them with a space: qi symbol1 symbol2
