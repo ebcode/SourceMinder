@@ -60,7 +60,7 @@ int parse_source_location(const char *source_location, int *start_line, int *sta
 }
 
 int print_lines_range(const char *filepath, int start_line, int end_line,
-                     int start_column, int end_column) {
+                     int start_column, int end_column, int raw) {
     if (!filepath || start_line < 1 || end_line < start_line) {
         return -1;
     }
@@ -76,35 +76,40 @@ int print_lines_range(const char *filepath, int start_line, int end_line,
     char line[4096];
     int current_line = 0;
 
-    printf("--\n");
+    if (!raw) printf("--\n");
     while (fgets(line, sizeof(line), fp)) {
         current_line++;
         if (current_line >= start_line && current_line <= end_line) {
-            /* Handle column boundaries */
-            if (current_line == start_line && current_line == end_line) {
-                /* Single line: respect both start and end columns */
-                printf("%d:", current_line);
-                for (int i = start_column; i <= end_column && line[i] != '\0'; i++) {
-                    putchar(line[i]);
-                }
-                if (line[end_column] != '\n' && line[end_column] != '\0') {
-                    putchar('\n');
-                }
-            } else if (current_line == start_line) {
-                /* First line: skip characters before start_column */
-                printf("%d:%s", current_line, &line[start_column]);
-            } else if (current_line == end_line) {
-                /* Last line: print up to end_column */
-                printf("%d:", current_line);
-                for (int i = 0; i <= end_column && line[i] != '\0'; i++) {
-                    putchar(line[i]);
-                }
-                if (line[end_column] != '\n' && line[end_column] != '\0') {
-                    putchar('\n');
-                }
+            if (raw) {
+                /* Raw mode: print full lines without line number prefix or column trimming */
+                printf("%s", line);
             } else {
-                /* Middle lines: print entire line */
-                printf("%d:%s", current_line, line);
+                /* Handle column boundaries */
+                if (current_line == start_line && current_line == end_line) {
+                    /* Single line: respect both start and end columns */
+                    printf("%d:", current_line);
+                    for (int i = start_column; i <= end_column && line[i] != '\0'; i++) {
+                        putchar(line[i]);
+                    }
+                    if (line[end_column] != '\n' && line[end_column] != '\0') {
+                        putchar('\n');
+                    }
+                } else if (current_line == start_line) {
+                    /* First line: skip characters before start_column */
+                    printf("%d:%s", current_line, &line[start_column]);
+                } else if (current_line == end_line) {
+                    /* Last line: print up to end_column */
+                    printf("%d:", current_line);
+                    for (int i = 0; i <= end_column && line[i] != '\0'; i++) {
+                        putchar(line[i]);
+                    }
+                    if (line[end_column] != '\n' && line[end_column] != '\0') {
+                        putchar('\n');
+                    }
+                } else {
+                    /* Middle lines: print entire line */
+                    printf("%d:%s", current_line, line);
+                }
             }
         }
         if (current_line > end_line) {
