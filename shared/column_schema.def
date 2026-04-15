@@ -99,5 +99,5 @@ COLUMN(type,          TEXT, COL_TYPE_STRING, 20, "TYPE",      "TYPE",  type,    
 
 /* INTEGER columns - use INT_COLUMN macro */
 INT_COLUMN(is_definition, INTEGER, COL_TYPE_INT, 1, "DEF", "D", definition, d, \
-           "filter by definition status (0=usage, 1=definition)", \
-           "qi getUserById --def  (definitions only)")
+           "show D column; optionally filter: -d 0=usages, -d 1=definitions", \
+           "qi fh -d        (show D col)  qi fh -d 1  (defs only)  qi fh --usage")

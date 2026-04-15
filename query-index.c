@@ -2514,6 +2514,9 @@ int main(int argc, char *argv[]) {
         printf("  qi user -x noise            # Exclude comments and strings\n");
         printf("  qi user -f *.py             # Only in .py files\n");
         printf("  qi user -C 3                # Show code context (like grep -C)\n");
+        printf("  qi user --def               # Only definitions (where 'user' is declared)\n");
+        printf("  qi user --usage             # Only usages (call sites, references)\n");
+        printf("  qi user -d                  # Show D column (1=def, 0=usage) without filtering\n");
         printf("\n");
         printf("Tip: Use -x noise to exclude comments and strings (reduces false positives)\n");
         printf("\n");

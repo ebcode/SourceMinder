@@ -37,6 +37,9 @@ const TSLanguage *tree_sitter_perl(void);
 /* Global debug flag */
 static int g_debug = 0;
 
+/* Byte position of a scalar already indexed as filehandle; skipped in visit_node to avoid re-indexing as scalar */
+static uint32_t g_skip_scalar_start = UINT32_MAX;
+
 /* Pre-looked-up node type IDs for fast dispatch */
 static struct {
     /* Variables */
@@ -66,7 +69,11 @@ static struct {
     TSSymbol function;
     TSSymbol coderef_call_expression;
     TSSymbol func1op_call_expression;
+    TSSymbol func0op_call_expression;
     TSSymbol anonymous_hash_expression;
+    TSSymbol refgen_expression;
+    TSSymbol readline_expression;
+    TSSymbol filehandle;
 
     /* Expressions and statements */
     TSSymbol expression_statement;
@@ -97,6 +104,9 @@ static struct {
     /* Container variables (direct hash/array element access: $hash{key}, $arr[idx]) */
     TSSymbol container_variable;
     TSSymbol hash_element_expression;
+    TSSymbol array_element_expression;
+    TSSymbol slice_expression;
+    TSSymbol slice_container_variable;
 
     /* Subroutine signature parameters */
     TSSymbol mandatory_parameter;
@@ -111,6 +121,9 @@ static void process_children(TSNode node, const char *source_code,
 static void visit_node(TSNode node, const char *source_code,
                        const char *directory, const char *filename,
                        ParseResult *result, SymbolFilter *filter);
+static bool extract_sigil_varname(TSNode node, const char *source_code,
+                                  const char *filename,
+                                  char *buf, size_t bufsize);
 
 /* Initialize symbol lookup table (called once) */
 static void init_perl_symbols(const TSLanguage *language) {
@@ -145,7 +158,11 @@ static void init_perl_symbols(const TSLanguage *language) {
     perl_symbols.function                        = ts_language_symbol_for_name(language, "function",                          8, true);
     perl_symbols.coderef_call_expression         = ts_language_symbol_for_name(language, "coderef_call_expression",           23, true);
     perl_symbols.func1op_call_expression         = ts_language_symbol_for_name(language, "func1op_call_expression",           23, true);
+    perl_symbols.func0op_call_expression         = ts_language_symbol_for_name(language, "func0op_call_expression",           23, true);
     perl_symbols.anonymous_hash_expression       = ts_language_symbol_for_name(language, "anonymous_hash_expression",         25, true);
+    perl_symbols.refgen_expression               = ts_language_symbol_for_name(language, "refgen_expression",                 17, true);
+    perl_symbols.readline_expression             = ts_language_symbol_for_name(language, "readline_expression",               19, true);
+    perl_symbols.filehandle                      = ts_language_symbol_for_name(language, "filehandle",                        10, true);
 
     /* Expressions and statements */
     perl_symbols.expression_statement = ts_language_symbol_for_name(language, "expression_statement", 20, true);
@@ -174,8 +191,11 @@ static void init_perl_symbols(const TSLanguage *language) {
     perl_symbols.phaser_statement = ts_language_symbol_for_name(language, "phaser_statement", 16, true);
 
     /* Container variables */
-    perl_symbols.container_variable      = ts_language_symbol_for_name(language, "container_variable",      18, true);
-    perl_symbols.hash_element_expression = ts_language_symbol_for_name(language, "hash_element_expression", 23, true);
+    perl_symbols.container_variable        = ts_language_symbol_for_name(language, "container_variable",        18, true);
+    perl_symbols.hash_element_expression   = ts_language_symbol_for_name(language, "hash_element_expression",   23, true);
+    perl_symbols.array_element_expression  = ts_language_symbol_for_name(language, "array_element_expression",  24, true);
+    perl_symbols.slice_expression          = ts_language_symbol_for_name(language, "slice_expression",          16, true);
+    perl_symbols.slice_container_variable  = ts_language_symbol_for_name(language, "slice_container_variable",  24, true);
 
     /* Subroutine signature parameters */
     perl_symbols.mandatory_parameter = ts_language_symbol_for_name(language, "mandatory_parameter", 19, true);
@@ -378,6 +398,28 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
         }
     }
 
+    /* Detect filehandle context: my $fh as first arg to open(my $fh, ...) */
+    /* Walk up: parent = list_expression, grandparent = function_call_expression("open") */
+    const char *decl_type_override = NULL;
+    {
+        TSNode p = ts_node_parent(node);
+        if (!ts_node_is_null(p)) {
+            TSNode gp = ts_node_parent(p);
+            if (!ts_node_is_null(gp) &&
+                ts_node_symbol(gp) == perl_symbols.function_call_expression) {
+                uint32_t gp_count = ts_node_child_count(gp);
+                for (uint32_t i = 0; i < gp_count; i++) {
+                    TSNode fn = ts_node_child(gp, i);
+                    if (ts_node_symbol(fn) != perl_symbols.function) continue;
+                    char fn_name[16];
+                    safe_extract_node_text(source_code, fn, fn_name, sizeof(fn_name), filename);
+                    if (strcmp(fn_name, "open") == 0) decl_type_override = PERL_TYPE_FILEHANDLE;
+                    break;
+                }
+            }
+        }
+    }
+
     /* Walk all children looking for scalar/array/hash nodes */
     for (uint32_t i = 0; i < child_count; i++) {
         TSNode child = ts_node_child(node, i);
@@ -386,8 +428,21 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
         if (sym == perl_symbols.scalar ||
             sym == perl_symbols.array  ||
             sym == perl_symbols.hash) {
-            index_sigil_node(child, source_code, directory, filename,
-                             result, filter, modifier, "1", ctx);
+            if (decl_type_override) {
+                char varname[SYMBOL_MAX_LENGTH];
+                if (extract_sigil_varname(child, source_code, filename, varname, sizeof(varname))) {
+                    if (filter_should_index(filter, varname)) {
+                        int vline = (int)ts_node_start_point(child).row + 1;
+                        add_entry(result, varname, vline, ctx,
+                                  directory, filename, NULL,
+                                  &(ExtColumns){.modifier = modifier, .definition = "1",
+                                                .type = decl_type_override});
+                    }
+                }
+            } else {
+                index_sigil_node(child, source_code, directory, filename,
+                                 result, filter, modifier, "1", ctx);
+            }
         }
     }
 }
@@ -573,10 +628,37 @@ static void handle_method_call(TSNode node, const char *source_code,
 
 /* Index a function_call_expression or ambiguous_function_call_expression:
  * the function name as CONTEXT_CALL */
+/* Perl I/O functions whose first argument is always a filehandle */
+static const char *const perl_io_calls[] = {
+    "close", "seek", "read", "binmode", "eof", "fileno",
+    "flock", "sysread", "syswrite", "sysseek",
+    NULL
+};
+
+/* Find the first scalar/container_variable arg in a function call node.
+ * Looks at direct children and one level deeper (for list_expression wrapper). */
+static TSNode find_first_scalar_arg(TSNode node) {
+    uint32_t count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        TSSymbol sym = ts_node_symbol(child);
+        if (sym == perl_symbols.scalar || sym == perl_symbols.container_variable) return child;
+        uint32_t inner = ts_node_child_count(child);
+        for (uint32_t j = 0; j < inner; j++) {
+            TSNode gc = ts_node_child(child, j);
+            if (ts_node_symbol(gc) == perl_symbols.scalar ||
+                ts_node_symbol(gc) == perl_symbols.container_variable) return gc;
+        }
+    }
+    TSNode null_node = {0};
+    return null_node;
+}
+
 static void handle_function_call(TSNode node, const char *source_code,
                                  const char *directory, const char *filename,
                                  ParseResult *result, SymbolFilter *filter,
                                  int line) {
+    char fn_name[SYMBOL_MAX_LENGTH] = "";
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; i++) {
         TSNode child = ts_node_child(node, i);
@@ -587,10 +669,149 @@ static void handle_function_call(TSNode node, const char *source_code,
                 add_entry(result, name, line, CONTEXT_CALL,
                           directory, filename, NULL, &(ExtColumns){.definition = "0"});
             }
+            snprintf(fn_name, sizeof(fn_name), "%s", name);
+            break;
+        }
+    }
+
+    /* I/O functions: index the first scalar arg as filehandle */
+    for (int i = 0; perl_io_calls[i]; i++) {
+        if (strcmp(fn_name, perl_io_calls[i]) == 0) {
+            TSNode fh_arg = find_first_scalar_arg(node);
+            if (!ts_node_is_null(fh_arg)) {
+                char varname[SYMBOL_MAX_LENGTH];
+                if (extract_sigil_varname(fh_arg, source_code, filename, varname, sizeof(varname))) {
+                    if (filter_should_index(filter, varname)) {
+                        add_entry(result, varname, line, CONTEXT_VARIABLE,
+                                  directory, filename, NULL,
+                                  &(ExtColumns){.definition = "0", .type = PERL_TYPE_FILEHANDLE});
+                    }
+                    g_skip_scalar_start = ts_node_start_byte(fh_arg);
+                }
+            }
+            break;
+        }
+    }
+
+    process_children(node, source_code, directory, filename, result, filter);
+}
+
+/* Index a refgen_expression (\&SubName): the sub name as CONTEXT_CALL */
+static void handle_refgen_expression(TSNode node, const char *source_code,
+                                     const char *directory, const char *filename,
+                                     ParseResult *result, SymbolFilter *filter,
+                                     int line) {
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) == perl_symbols.function) {
+            /* \&SubName — the function node contains &+varname; extract varname */
+            uint32_t fn_count = ts_node_child_count(child);
+            for (uint32_t j = 0; j < fn_count; j++) {
+                TSNode fn_child = ts_node_child(child, j);
+                if (ts_node_symbol(fn_child) == perl_symbols.varname) {
+                    char name[SYMBOL_MAX_LENGTH];
+                    safe_extract_node_text(source_code, fn_child, name, sizeof(name), filename);
+                    if (filter_should_index(filter, name)) {
+                        add_entry(result, name, line, CONTEXT_CALL,
+                                  directory, filename, NULL, &(ExtColumns){.definition = "0"});
+                    }
+                    break;
+                }
+            }
             break;
         }
     }
     process_children(node, source_code, directory, filename, result, filter);
+}
+
+/* Index a readline_expression (<$fh> or <STDIN>): the filehandle as VAR */
+static void handle_readline_expression(TSNode node, const char *source_code,
+                                       const char *directory, const char *filename,
+                                       ParseResult *result, SymbolFilter *filter,
+                                       int line) {
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) != perl_symbols.filehandle) continue;
+
+        char name[SYMBOL_MAX_LENGTH];
+        uint32_t fh_count = ts_node_child_count(child);
+        if (fh_count > 0) {
+            /* Lexical filehandle: <$fh> — extract varname child */
+            for (uint32_t j = 0; j < fh_count; j++) {
+                TSNode fh_child = ts_node_child(child, j);
+                if (ts_node_symbol(fh_child) == perl_symbols.varname) {
+                    safe_extract_node_text(source_code, fh_child, name, sizeof(name), filename);
+                    if (strlen(name) > 1 && filter_should_index(filter, name)) {
+                        add_entry(result, name, line, CONTEXT_VARIABLE,
+                                  directory, filename, NULL,
+                                  &(ExtColumns){.definition = "0", .type = PERL_TYPE_FILEHANDLE});
+                    }
+                    break;
+                }
+            }
+        } else {
+            /* Bareword filehandle: <STDIN> — extract node text directly */
+            safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            if (strlen(name) > 1 && filter_should_index(filter, name)) {
+                add_entry(result, name, line, CONTEXT_VARIABLE,
+                          directory, filename, NULL, &(ExtColumns){.definition = "0"});
+            }
+        }
+        break;
+    }
+}
+
+/* Handle func1op_call_expression: emit CALL for the function name, detect I/O filehandle arg */
+static void handle_func1op_call(TSNode node, const char *source_code,
+                                const char *directory, const char *filename,
+                                ParseResult *result, SymbolFilter *filter,
+                                int line) {
+    char fn_name[SYMBOL_MAX_LENGTH] = "";
+    TSNode fn_node = ts_node_child_by_field_name(node, "function", 8);
+    if (!ts_node_is_null(fn_node)) {
+        safe_extract_node_text(source_code, fn_node, fn_name, sizeof(fn_name), filename);
+        if (filter_should_index(filter, fn_name)) {
+            add_entry(result, fn_name, line, CONTEXT_CALL,
+                      directory, filename, NULL, &(ExtColumns){.definition = "0"});
+        }
+    }
+
+    /* I/O functions: index the first scalar arg as filehandle */
+    for (int i = 0; perl_io_calls[i]; i++) {
+        if (strcmp(fn_name, perl_io_calls[i]) == 0) {
+            TSNode fh_arg = find_first_scalar_arg(node);
+            if (!ts_node_is_null(fh_arg)) {
+                char varname[SYMBOL_MAX_LENGTH];
+                if (extract_sigil_varname(fh_arg, source_code, filename, varname, sizeof(varname))) {
+                    if (filter_should_index(filter, varname)) {
+                        add_entry(result, varname, line, CONTEXT_VARIABLE,
+                                  directory, filename, NULL,
+                                  &(ExtColumns){.definition = "0", .type = PERL_TYPE_FILEHANDLE});
+                    }
+                    g_skip_scalar_start = ts_node_start_byte(fh_arg);
+                }
+            }
+            break;
+        }
+    }
+
+    process_children(node, source_code, directory, filename, result, filter);
+}
+
+/* Handle func0op_call_expression: zero-argument built-in (wantarray, time, etc.)
+ * The node text is the function name (e.g. "wantarray"). */
+static void handle_func0op_call(TSNode node, const char *source_code,
+                                const char *directory, const char *filename,
+                                ParseResult *result, SymbolFilter *filter,
+                                int line) {
+    char fn_name[SYMBOL_MAX_LENGTH];
+    safe_extract_node_text(source_code, node, fn_name, sizeof(fn_name), filename);
+    if (strlen(fn_name) > 1 && filter_should_index(filter, fn_name)) {
+        add_entry(result, fn_name, line, CONTEXT_CALL,
+                  directory, filename, NULL, &(ExtColumns){.definition = "0"});
+    }
 }
 
 static void handle_coderef_call(TSNode node, const char *source_code,
@@ -733,26 +954,40 @@ static bool extract_sigil_varname(TSNode node, const char *source_code,
     return false;
 }
 
-/* Handle $obj->{key} and $hash{key}: index the container as VAR and the key as PROP with parent */
-static void handle_hash_element_expression(TSNode node, const char *source_code,
-                                           const char *directory, const char *filename,
-                                           ParseResult *result, SymbolFilter *filter,
-                                           int line) {
+/* Handle $hash{k}, $arr[i], @hash{@k}, @arr[@i]:
+ * detect container type from bracket ({ = hash, [ = array), index container as VAR,
+ * static keys as PROP, dynamic subscripts via visit_node. */
+static void handle_subscript_expression(TSNode node, const char *source_code,
+                                        const char *directory, const char *filename,
+                                        ParseResult *result, SymbolFilter *filter,
+                                        int line) {
     char parent_name[SYMBOL_MAX_LENGTH] = "";
     bool has_parent = false;
 
     uint32_t count = ts_node_child_count(node);
+
+    /* Detect container type from the bracket */
+    const char *container_type = PERL_TYPE_HASH;
+    for (uint32_t i = 0; i < count; i++) {
+        const char *nt = ts_node_type(ts_node_child(node, i));
+        if (nt[0] == '[') { container_type = PERL_TYPE_ARRAY; break; }
+        if (nt[0] == '{') {                                    break; }
+    }
+
     for (uint32_t i = 0; i < count; i++) {
         TSNode child = ts_node_child(node, i);
         TSSymbol sym = ts_node_symbol(child);
 
-        if (sym == perl_symbols.scalar || sym == perl_symbols.container_variable) {
-            /* Extract container name for use as parent, and index it as VAR */
+        if (!has_parent && (sym == perl_symbols.scalar             ||
+                            sym == perl_symbols.container_variable ||
+                            sym == perl_symbols.slice_container_variable)) {
+            /* Container variable — index with detected type */
             if (extract_sigil_varname(child, source_code, filename, parent_name, sizeof(parent_name))) {
                 has_parent = true;
                 if (filter_should_index(filter, parent_name)) {
                     add_entry(result, parent_name, line, CONTEXT_VARIABLE,
-                              directory, filename, NULL, &(ExtColumns){.definition = "0"});
+                              directory, filename, NULL,
+                              &(ExtColumns){.definition = "0", .type = container_type});
                 }
             }
         } else if (sym == perl_symbols.autoquoted_bareword) {
@@ -768,7 +1003,7 @@ static void handle_hash_element_expression(TSNode node, const char *source_code,
                           });
             }
         } else {
-            /* Dynamic key or nested expression — recurse normally */
+            /* Dynamic subscript or nested expression — recurse normally */
             visit_node(child, source_code, directory, filename, result, filter);
         }
     }
@@ -1052,8 +1287,10 @@ static void visit_node(TSNode node, const char *source_code,
         return;
     }
 
-    if (node_sym == perl_symbols.hash_element_expression) {
-        handle_hash_element_expression(node, source_code, directory, filename, result, filter, line);
+    if (node_sym == perl_symbols.hash_element_expression  ||
+        node_sym == perl_symbols.array_element_expression ||
+        node_sym == perl_symbols.slice_expression) {
+        handle_subscript_expression(node, source_code, directory, filename, result, filter, line);
         return;
     }
 
@@ -1062,6 +1299,11 @@ static void visit_node(TSNode node, const char *source_code,
         node_sym == perl_symbols.array          ||
         node_sym == perl_symbols.hash           ||
         node_sym == perl_symbols.container_variable) {
+        /* Skip if already indexed as filehandle by handle_function_call */
+        if (ts_node_start_byte(node) == g_skip_scalar_start) {
+            g_skip_scalar_start = UINT32_MAX;
+            return;
+        }
         index_sigil_node(node, source_code, directory, filename,
                          result, filter, "", "0", CONTEXT_VARIABLE);
         return;
@@ -1101,6 +1343,22 @@ static void visit_node(TSNode node, const char *source_code,
     }
     if (node_sym == perl_symbols.coderef_call_expression) {
         handle_coderef_call(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.func1op_call_expression) {
+        handle_func1op_call(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.func0op_call_expression) {
+        handle_func0op_call(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.refgen_expression) {
+        handle_refgen_expression(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.readline_expression) {
+        handle_readline_expression(node, source_code, directory, filename, result, filter, line);
         return;
     }
     if (node_sym == perl_symbols.string_literal ||
