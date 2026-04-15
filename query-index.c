@@ -1310,7 +1310,7 @@ static int lookup_within_definitions(CodeIndexDatabase *db, WithinFilter *within
  */
 static void print_context_lines(const char *filepath, int target_line,
                                  char **patterns, int pattern_count,
-                                 int before, int after) {
+                                 int before, int after, int raw) {
     FILE *fp = safe_fopen(filepath, "r", 1);  /* silent=1 */
     if (!fp) {
         fprintf(stderr, "Warning: Could not read file '%s' for context lines (file may have moved or permissions changed)\n", filepath);
@@ -1327,66 +1327,71 @@ static void print_context_lines(const char *filepath, int target_line,
     const char *RESET = "\033[0m";
 
     /* Print separator before context lines (grep-style) */
-    printf("--\n");
+    if (!raw) printf("--\n");
 
     while (fgets(line, sizeof(line), fp)) {
         current_line++;
         /* Print lines in range (including match line) */
         if (current_line >= start_line && current_line <= end_line) {
-            /* Highlight all patterns that appear in this line */
-            char output[LINE_BUFFER_LARGE * 2];  /* Double size for color codes */
-            char *src = line;
-            char *dst = output;
-            size_t remaining = sizeof(output) - 1;
+            if (raw) {
+                /* Raw mode: no line number prefix, no color codes */
+                printf("%s", line);
+            } else {
+                /* Highlight all patterns that appear in this line */
+                char output[LINE_BUFFER_LARGE * 2];  /* Double size for color codes */
+                char *src = line;
+                char *dst = output;
+                size_t remaining = sizeof(output) - 1;
 
-            while (*src && remaining > 0) {
-                /* Check if any pattern matches at this position */
-                int matched = 0;
-                for (int i = 0; i < pattern_count; i++) {
-                    /* Skip SQL wildcards - only highlight literal patterns */
-                    if (strchr(patterns[i], '%') != NULL || strchr(patterns[i], '_') != NULL) {
-                        continue;
-                    }
-
-                    size_t pattern_len = strlen(patterns[i]);
-                    /* Case-insensitive comparison */
-                    if (strncasecmp(src, patterns[i], pattern_len) == 0) {
-                        /* Add highlighting */
-                        size_t color_len = strlen(GREEN);
-                        if (remaining > color_len) {
-                            memcpy(dst, GREEN, color_len);
-                            dst += color_len;
-                            remaining -= color_len;
+                while (*src && remaining > 0) {
+                    /* Check if any pattern matches at this position */
+                    int matched = 0;
+                    for (int i = 0; i < pattern_count; i++) {
+                        /* Skip SQL wildcards - only highlight literal patterns */
+                        if (strchr(patterns[i], '%') != NULL || strchr(patterns[i], '_') != NULL) {
+                            continue;
                         }
 
-                        /* Copy the actual matched text */
-                        size_t copy_len = (pattern_len < remaining) ? pattern_len : remaining;
-                        memcpy(dst, src, copy_len);
-                        dst += copy_len;
-                        src += pattern_len;
-                        remaining -= copy_len;
+                        size_t pattern_len = strlen(patterns[i]);
+                        /* Case-insensitive comparison */
+                        if (strncasecmp(src, patterns[i], pattern_len) == 0) {
+                            /* Add highlighting */
+                            size_t color_len = strlen(GREEN);
+                            if (remaining > color_len) {
+                                memcpy(dst, GREEN, color_len);
+                                dst += color_len;
+                                remaining -= color_len;
+                            }
 
-                        /* Add reset code */
-                        size_t reset_len = strlen(RESET);
-                        if (remaining > reset_len) {
-                            memcpy(dst, RESET, reset_len);
-                            dst += reset_len;
-                            remaining -= reset_len;
+                            /* Copy the actual matched text */
+                            size_t copy_len = (pattern_len < remaining) ? pattern_len : remaining;
+                            memcpy(dst, src, copy_len);
+                            dst += copy_len;
+                            src += pattern_len;
+                            remaining -= copy_len;
+
+                            /* Add reset code */
+                            size_t reset_len = strlen(RESET);
+                            if (remaining > reset_len) {
+                                memcpy(dst, RESET, reset_len);
+                                dst += reset_len;
+                                remaining -= reset_len;
+                            }
+
+                            matched = 1;
+                            break;
                         }
+                    }
 
-                        matched = 1;
-                        break;
+                    if (!matched && remaining > 0) {
+                        /* No pattern matched, copy single character */
+                        *dst++ = *src++;
+                        remaining--;
                     }
                 }
-
-                if (!matched && remaining > 0) {
-                    /* No pattern matched, copy single character */
-                    *dst++ = *src++;
-                    remaining--;
-                }
+                *dst = '\0';
+                printf("%d:%s", current_line, output);
             }
-            *dst = '\0';
-            printf("%d:%s", current_line, output);
         }
         /* Early termination once we've passed the range */
         if (current_line > end_line) break;
@@ -2101,7 +2106,7 @@ static void print_row_output(RowData *row, int show_all_columns, int compact) {
 static void print_expansion_or_context(const char *filepath, int line,
                                       const char *source_location, int is_definition,
                                       int expand, int context_before, int context_after,
-                                      PatternList *patterns) {
+                                      PatternList *patterns, int raw) {
     /* Print expanded definition or context lines if requested
      * Note: is_definition is an INT_COLUMN (int), not COLUMN (const char *),
      * so compare directly to 1, not strcmp(is_definition, "1") */
@@ -2111,14 +2116,14 @@ static void print_expansion_or_context(const char *filepath, int line,
         int start_line, start_column, end_line, end_column;
         if (parse_source_location(source_location, &start_line, &start_column,
                                  &end_line, &end_column) == 0) {
-            print_lines_range(filepath, start_line, end_line, start_column, end_column);
-            printf("--\n");  /* Closing separator after definition */
+            print_lines_range(filepath, start_line, end_line, start_column, end_column, raw);
+            if (!raw) printf("--\n");  /* Closing separator after definition */
         }
     } else if (context_before > 0 || context_after > 0) {
         /* Fall back to context lines for non-definitions or when expand not set */
         print_context_lines(filepath, line, patterns->patterns, patterns->count,
-                          context_before, context_after);
-        printf("--\n");  /* Closing separator after context */
+                          context_before, context_after, raw);
+        if (!raw) printf("--\n");  /* Closing separator after context */
     }
 }
 
@@ -2168,7 +2173,7 @@ static void print_summary_stats(CodeIndexDatabase *db, PatternList *patterns,
 
 static void print_results_by_file(CodeIndexDatabase *db, PatternList *patterns,
                                   ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
-                                  WithinRangeList *within_ranges, int limit, int limit_per_file, int compact, int line_range, int expand, int context_before, int context_after, int debug, int show_all_columns, const FileExtensions *known_exts) {
+                                  WithinRangeList *within_ranges, int limit, int limit_per_file, int compact, int line_range, int expand, int context_before, int context_after, int debug, int show_all_columns, int raw, const FileExtensions *known_exts) {
 
     /* Two-step proximity search for line_range > 0 */
     if (line_range > 0 && patterns->count > 1) {
@@ -2319,10 +2324,12 @@ retry_query:
     }
 
     /* Print table header only if we have results */
-    if (show_all_columns) {
-        print_all_columns_header();
-    } else {
-        print_table_header(compact);
+    if (!raw) {
+        if (show_all_columns) {
+            print_all_columns_header();
+        } else {
+            print_table_header(compact);
+        }
     }
 
     /* Process first row */
@@ -2350,7 +2357,8 @@ retry_query:
         snprintf(filepath, sizeof(filepath), "%s%s", directory ? directory : "", filename ? filename : "");
 
         /* Print file header if file changed */
-        print_file_header_if_changed(filepath, current_file, sizeof(current_file), &current_file_count);
+        if (!raw) print_file_header_if_changed(filepath, current_file, sizeof(current_file), &current_file_count);
+        else if (strcmp(filepath, current_file) != 0) { snprintf(current_file, sizeof(current_file), "%s", filepath); current_file_count = 0; }
 
         /* Skip if we've hit the per-file limit for this file */
         if (limit_per_file > 0 && current_file_count >= limit_per_file) {
@@ -2390,11 +2398,11 @@ retry_query:
 #undef INT_COLUMN
             };
         }
-        print_row_output(&row, show_all_columns, compact);
+        if (!raw) print_row_output(&row, show_all_columns, compact);
 
         /* Print expansion or context if requested */
         print_expansion_or_context(filepath, line, source_location, is_definition,
-                                  expand, context_before, context_after, patterns);
+                                  expand, context_before, context_after, patterns, raw);
 
         total_count++;
         current_file_count++;  /* Increment per-file counter */
@@ -2407,7 +2415,7 @@ retry_query:
     sqlite3_finalize(stmt);
 
     /* Print summary statistics */
-    print_summary_stats(db, patterns, include, exclude, filters, file_filter, within_ranges,
+    if (!raw) print_summary_stats(db, patterns, include, exclude, filters, file_filter, within_ranges,
                        line_range, total_count, limit, debug);
 }
 
@@ -2590,6 +2598,9 @@ int main(int argc, char *argv[]) {
         printf("      --full                     use full column names (PARENT vs PAR, CONTEXT vs CTX)\n");
         printf("      --compact                  use abbreviated column names (default)\n");
         printf("      --debug                    show SQL queries sent to database\n");
+        printf("      --raw                      suppress all non-source output (headers, line numbers,\n");
+        printf("                                 separators, stats); use with -e or -B/-A for bare source\n");
+        printf("                                 lines suitable for copy-paste into Edit old_string\n");
         printf("\n");
 
         print_context_types();
@@ -2700,6 +2711,7 @@ int main(int argc, char *argv[]) {
     int context_before = 0;
     int context_after = 0;
     int debug = 0;  /* Debug mode - show SQL queries */
+    int raw_mode = 0;  /* Raw mode - suppress all non-source output */
     const char *db_file = "code-index.db";  /* Default database location */
     CodeIndexDatabase db = {0};  /* Initialize early so cleanup is safe */
 
@@ -2823,6 +2835,9 @@ int main(int argc, char *argv[]) {
         }
         if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--expand") == 0) {
             expand = 1;
+        }
+        if (strcmp(argv[i], "--raw") == 0) {
+            raw_mode = 1;
         }
         if (strcmp(argv[i], "--files") == 0) {
             files_only = 1;
@@ -3411,79 +3426,81 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /* Print header */
-    printf("\nSearching for:");
-    for (int j = 0; j < patterns.count; j++) {
-        printf(" %s", patterns.patterns[j]);
-    }
-    printf("\n");
-    if (include.count > 0) {
-        printf("Including context types:");
-        for (int j = 0; j < include.count; j++) {
-            printf(" %s", context_to_string(include.types[j], compact));
+    /* Print header (suppressed in raw mode) */
+    if (!raw_mode) {
+        printf("\nSearching for:");
+        for (int j = 0; j < patterns.count; j++) {
+            printf(" %s", patterns.patterns[j]);
         }
         printf("\n");
-    }
-    if (exclude.count > 0) {
-        printf("Excluding context types:");
-        for (int j = 0; j < exclude.count; j++) {
-            printf(" %s", context_to_string(exclude.types[j], compact));
-        }
-        printf("\n");
-    }
-    if (file_filter.count > 0) {
-        printf("Filtering by file:");
-        for (int j = 0; j < file_filter.count; j++) {
-            if (file_filter.patterns[j].directory != NULL) {
-                /* Directory already has trailing slash */
-                printf(" %s%s", file_filter.patterns[j].directory, file_filter.patterns[j].filename);
-            } else {
-                printf(" %s", file_filter.patterns[j].filename);
+        if (include.count > 0) {
+            printf("Including context types:");
+            for (int j = 0; j < include.count; j++) {
+                printf(" %s", context_to_string(include.types[j], compact));
             }
-        }
-
-        /* Count and display number of files matching the filter */
-        int file_count = count_distinct_files(&db, &include, &exclude, &filters, &file_filter, &within_ranges, debug);
-        printf(" (%d files)\n", file_count);
-
-        /* Provide suggestions if no files matched */
-        if (file_count == 0) {
-            printf("\nNo files matched. Try:\n");
-            printf("  -f filename.ext       Match specific filename (e.g., -f database.c)\n");
-            printf("  -f .ext               Match by extension (e.g., -f .c for all .c files)\n");
-            printf("  -f dir/               Match all files in directory (e.g., -f shared/)\n");
-            printf("  -f %%pattern%%          Use %% wildcards (e.g., -f shared/%%.c)\n");
             printf("\n");
         }
-    }
-    /* X-Macro: Print extensible column filters */
+        if (exclude.count > 0) {
+            printf("Excluding context types:");
+            for (int j = 0; j < exclude.count; j++) {
+                printf(" %s", context_to_string(exclude.types[j], compact));
+            }
+            printf("\n");
+        }
+        if (file_filter.count > 0) {
+            printf("Filtering by file:");
+            for (int j = 0; j < file_filter.count; j++) {
+                if (file_filter.patterns[j].directory != NULL) {
+                    /* Directory already has trailing slash */
+                    printf(" %s%s", file_filter.patterns[j].directory, file_filter.patterns[j].filename);
+                } else {
+                    printf(" %s", file_filter.patterns[j].filename);
+                }
+            }
+
+            /* Count and display number of files matching the filter */
+            int file_count = count_distinct_files(&db, &include, &exclude, &filters, &file_filter, &within_ranges, debug);
+            printf(" (%d files)\n", file_count);
+
+            /* Provide suggestions if no files matched */
+            if (file_count == 0) {
+                printf("\nNo files matched. Try:\n");
+                printf("  -f filename.ext       Match specific filename (e.g., -f database.c)\n");
+                printf("  -f .ext               Match by extension (e.g., -f .c for all .c files)\n");
+                printf("  -f dir/               Match all files in directory (e.g., -f shared/)\n");
+                printf("  -f %%pattern%%          Use %% wildcards (e.g., -f shared/%%.c)\n");
+                printf("\n");
+            }
+        }
+        /* X-Macro: Print extensible column filters */
 #define COLUMN(name, sql_type, c_type, width, full, compact_name, long_flag, short_flag, ...) \
-    if (filters.name.count > 0) { \
-        printf("Filtering by " #name ":"); \
-        for (int j = 0; j < filters.name.count; j++) { \
-            printf(" %s", filters.name.values[j]); \
-        } \
-        printf("\n"); \
-    }
+        if (filters.name.count > 0) { \
+            printf("Filtering by " #name ":"); \
+            for (int j = 0; j < filters.name.count; j++) { \
+                printf(" %s", filters.name.values[j]); \
+            } \
+            printf("\n"); \
+        }
 #define INT_COLUMN(name, sql_type, c_type, width, full, compact_name, long_flag, short_flag, ...) \
-    if (filters.name.count > 0) { \
-        printf("Filtering by " #name ":"); \
-        for (int j = 0; j < filters.name.count; j++) { \
-            printf(" %s", filters.name.values[j]); \
-        } \
-        printf("\n"); \
-    }
+        if (filters.name.count > 0) { \
+            printf("Filtering by " #name ":"); \
+            for (int j = 0; j < filters.name.count; j++) { \
+                printf(" %s", filters.name.values[j]); \
+            } \
+            printf("\n"); \
+        }
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
 
-    /* Print within filter info */
-    if (within_filter.count > 0) {
-        printf("Within symbol%s:", within_filter.count > 1 ? "s" : "");
-        for (int j = 0; j < within_filter.count; j++) {
-            printf(" %s", within_filter.symbols[j]);
+        /* Print within filter info */
+        if (within_filter.count > 0) {
+            printf("Within symbol%s:", within_filter.count > 1 ? "s" : "");
+            for (int j = 0; j < within_filter.count; j++) {
+                printf(" %s", within_filter.symbols[j]);
+            }
+            printf(" (%d instance%s)\n", within_ranges.count, within_ranges.count != 1 ? "s" : "");
         }
-        printf(" (%d instance%s)\n", within_ranges.count, within_ranges.count != 1 ? "s" : "");
     }
 
     /* Setup columns based on flags */
@@ -3502,7 +3519,7 @@ int main(int argc, char *argv[]) {
     if (files_only) {
         print_files_only(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, line_range, debug);
     } else {
-        print_results_by_file(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, limit_per_file, compact, line_range, expand, context_before, context_after, debug, show_all_columns, &known_extensions);
+        print_results_by_file(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, limit_per_file, compact, line_range, expand, context_before, context_after, debug, show_all_columns, raw_mode, &known_extensions);
     }
 
 cleanup:

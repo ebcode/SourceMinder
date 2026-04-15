@@ -50,6 +50,6 @@ int parse_source_location(const char *source_location, int *start_line, int *sta
  * Returns: 0 on success, -1 on error
  */
 int print_lines_range(const char *filepath, int start_line, int end_line,
-                     int start_column, int end_column);
+                     int start_column, int end_column, int raw);
 
 #endif /* FILE_UTILS_H */

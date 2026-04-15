@@ -85,6 +85,7 @@ sudo make install       # Install to /usr/local/bin
 | `--columns` | Custom columns | `qi user --columns line symbol context parent` |
 | `-v` | Verbose (all columns) | `qi user -v` |
 | `--full` | Full context names | `qi user --full` |
+| `--raw` | Bare source lines only (no headers, line numbers, separators, or stats); use with `-e` or `-B`/`-A` | `qi new -f file.pl -e --raw` |
 
 **IMPORTANT: Multi-Value Arguments (Non-Standard UNIX Pattern)**
 
