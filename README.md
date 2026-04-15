@@ -2,7 +2,7 @@
 
 Multi-language code indexer (written in C11) for semantic search, built on SQLite and tree-sitter.
 
-**Languages currently implemented:** C, Go, PHP, Python, TypeScript
+**Languages currently implemented:** C, Go, Perl, PHP, Python, TypeScript
 
 **Database:** Creates `code-index.db` in current working directory
 
@@ -31,6 +31,7 @@ Clone the tree-sitter grammars (at least one):
 ```bash
 git clone https://github.com/tree-sitter/tree-sitter-c.git
 git clone https://github.com/tree-sitter/tree-sitter-go.git
+git clone https://github.com/tree-sitter-perl/tree-sitter-perl.git
 git clone https://github.com/tree-sitter/tree-sitter-php.git
 git clone https://github.com/tree-sitter/tree-sitter-python.git
 git clone https://github.com/tree-sitter/tree-sitter-typescript.git
@@ -54,7 +55,7 @@ make                    # Build indexers and query tool
 sudo make install       # Install to /usr/local/bin
 ```
 
-**Installed binaries:** `index-c`, `index-ts`, `index-php`, `index-go`, `index-python`, `qi`
+**Installed binaries:** `index-c`, `index-ts`, `index-php`, `index-go`, `index-python`, `index-perl`, `qi`
 **Config files:** `/usr/local/share/sourceminder/<language>/config/`
 
 

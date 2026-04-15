@@ -1,5 +1,5 @@
 #!/bin/bash
-# Configuration script for indexer-c
+# Configuration script for sourceminder
 
 # Default values - all languages disabled by default
 ENABLE_TS=0
@@ -126,7 +126,7 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-echo "Configuring indexer-c..."
+echo "Configuring sourceminder..."
 echo ""
 
 # Check for required tools
@@ -257,12 +257,12 @@ cat > config.h << EOF
 #define CONFIG_H
 
 /* Language support */
-#define ENABLE_TYPESCRIPT $ENABLE_TS
 #define ENABLE_C $ENABLE_C
-#define ENABLE_PHP $ENABLE_PHP
 #define ENABLE_GO $ENABLE_GO
-#define ENABLE_PYTHON $ENABLE_PYTHON
 #define ENABLE_PERL $ENABLE_PERL
+#define ENABLE_PHP $ENABLE_PHP
+#define ENABLE_PYTHON $ENABLE_PYTHON
+#define ENABLE_TYPESCRIPT $ENABLE_TS
 
 /* Convenience macro for checking if a language is enabled */
 #define ENABLED(lang) (ENABLE_##lang)
@@ -318,12 +318,12 @@ CC = @CC@
 UNAME_S := $(shell uname -s)
 
 # Tree-sitter grammar directories (reference external repos)
-TS_GRAMMAR_DIR = tree-sitter-typescript/typescript
 C_GRAMMAR_DIR = tree-sitter-c
-PHP_GRAMMAR_DIR = tree-sitter-php/php
 GO_GRAMMAR_DIR = tree-sitter-go
-PYTHON_GRAMMAR_DIR = tree-sitter-python
 PERL_GRAMMAR_DIR = tree-sitter-perl
+PHP_GRAMMAR_DIR = tree-sitter-php/php
+PYTHON_GRAMMAR_DIR = tree-sitter-python
+TS_GRAMMAR_DIR = tree-sitter-typescript/typescript
 
 # Detect MSYS2/MinGW environment
 IS_MSYS := $(findstring MINGW,$(UNAME_S))$(findstring MSYS,$(UNAME_S))
@@ -577,24 +577,24 @@ install: all install-data
 	@echo "Binaries installed to /usr/local/bin/"
 	@echo "Data files installed to:"
 ifeq ($(UNAME_S),Darwin)
-	@echo "  /usr/local/share/indexer-c/"
+	@echo "  /usr/local/share/sourceminder/"
 else
-	@echo "  /usr/share/indexer-c/"
+	@echo "  /usr/share/sourceminder/"
 endif
 
 # Install config files to system location
 install-data:
 ifeq ($(UNAME_S),Darwin)
-	@echo "Installing config files to /usr/local/share/indexer-c/..."
-	mkdir -p /usr/local/share/indexer-c/shared/config
-	cp shared/config/*.txt /usr/local/share/indexer-c/shared/config/
+	@echo "Installing config files to /usr/local/share/sourceminder/..."
+	mkdir -p /usr/local/share/sourceminder/shared/config
+	cp shared/config/*.txt /usr/local/share/sourceminder/shared/config/
 @INSTALL_DATA_MAC_TARGETS@
 
 # IMPORTANT: blank line above is required to prevent sed from appending 'else' to last cp command
 else
-	@echo "Installing config files to /usr/share/indexer-c/..."
-	mkdir -p /usr/share/indexer-c/shared/config
-	cp shared/config/*.txt /usr/share/indexer-c/shared/config/
+	@echo "Installing config files to /usr/share/sourceminder/..."
+	mkdir -p /usr/share/sourceminder/shared/config
+	cp shared/config/*.txt /usr/share/sourceminder/shared/config/
 @INSTALL_DATA_LINUX_TARGETS@
 
 # IMPORTANT: blank line above is required to prevent sed from appending 'endif' to last cp command
@@ -607,11 +607,11 @@ uninstall:
 
 # IMPORTANT: blank line above is required to prevent sed from appending 'ifeq' to last rm command
 ifeq ($(UNAME_S),Darwin)
-	rm -rf /usr/local/share/indexer-c
-	@echo "Uninstalled from /usr/local/bin/ and /usr/local/share/indexer-c/"
+	rm -rf /usr/local/share/sourceminder
+	@echo "Uninstalled from /usr/local/bin/ and /usr/local/share/sourceminder/"
 else
-	rm -rf /usr/share/indexer-c
-	@echo "Uninstalled from /usr/local/bin/ and /usr/share/indexer-c/"
+	rm -rf /usr/share/sourceminder
+	@echo "Uninstalled from /usr/local/bin/ and /usr/share/sourceminder/"
 endif
 
 lint:
@@ -658,43 +658,43 @@ INSTALL_DATA_LINUX=""
 if [ $ENABLE_TS -eq 1 ]; then
     INSTALL_TARGETS="$INSTALL_TARGETS\n\tcp \$(BUILD_DIR)/index-ts /usr/local/bin/index-ts"
     UNINSTALL_TARGETS="$UNINSTALL_TARGETS\n\trm -f /usr/local/bin/index-ts"
-    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/indexer-c/typescript/config\n\tcp typescript/config/*.txt /usr/local/share/indexer-c/typescript/config/"
-    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/indexer-c/typescript/config\n\tcp typescript/config/*.txt /usr/share/indexer-c/typescript/config/"
+    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/sourceminder/typescript/config\n\tcp typescript/config/*.txt /usr/local/share/sourceminder/typescript/config/"
+    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/sourceminder/typescript/config\n\tcp typescript/config/*.txt /usr/share/sourceminder/typescript/config/"
 fi
 
 if [ $ENABLE_C -eq 1 ]; then
     INSTALL_TARGETS="$INSTALL_TARGETS\n\tcp \$(BUILD_DIR)/index-c /usr/local/bin/index-c"
     UNINSTALL_TARGETS="$UNINSTALL_TARGETS\n\trm -f /usr/local/bin/index-c"
-    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/indexer-c/c/config\n\tcp c/config/*.txt /usr/local/share/indexer-c/c/config/"
-    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/indexer-c/c/config\n\tcp c/config/*.txt /usr/share/indexer-c/c/config/"
+    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/sourceminder/c/config\n\tcp c/config/*.txt /usr/local/share/sourceminder/c/config/"
+    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/sourceminder/c/config\n\tcp c/config/*.txt /usr/share/sourceminder/c/config/"
 fi
 
 if [ $ENABLE_PHP -eq 1 ]; then
     INSTALL_TARGETS="$INSTALL_TARGETS\n\tcp \$(BUILD_DIR)/index-php /usr/local/bin/index-php"
     UNINSTALL_TARGETS="$UNINSTALL_TARGETS\n\trm -f /usr/local/bin/index-php"
-    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/indexer-c/php/config\n\tcp php/config/*.txt /usr/local/share/indexer-c/php/config/"
-    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/indexer-c/php/config\n\tcp php/config/*.txt /usr/share/indexer-c/php/config/"
+    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/sourceminder/php/config\n\tcp php/config/*.txt /usr/local/share/sourceminder/php/config/"
+    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/sourceminder/php/config\n\tcp php/config/*.txt /usr/share/sourceminder/php/config/"
 fi
 
 if [ $ENABLE_GO -eq 1 ]; then
     INSTALL_TARGETS="$INSTALL_TARGETS\n\tcp \$(BUILD_DIR)/index-go /usr/local/bin/index-go"
     UNINSTALL_TARGETS="$UNINSTALL_TARGETS\n\trm -f /usr/local/bin/index-go"
-    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/indexer-c/go/config\n\tcp go/config/*.txt /usr/local/share/indexer-c/go/config/"
-    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/indexer-c/go/config\n\tcp go/config/*.txt /usr/share/indexer-c/go/config/"
+    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/sourceminder/go/config\n\tcp go/config/*.txt /usr/local/share/sourceminder/go/config/"
+    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/sourceminder/go/config\n\tcp go/config/*.txt /usr/share/sourceminder/go/config/"
 fi
 
 if [ $ENABLE_PYTHON -eq 1 ]; then
     INSTALL_TARGETS="$INSTALL_TARGETS\n\tcp \$(BUILD_DIR)/index-python /usr/local/bin/index-python"
     UNINSTALL_TARGETS="$UNINSTALL_TARGETS\n\trm -f /usr/local/bin/index-python"
-    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/indexer-c/python/config\n\tcp python/config/*.txt /usr/local/share/indexer-c/python/config/"
-    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/indexer-c/python/config\n\tcp python/config/*.txt /usr/share/indexer-c/python/config/"
+    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/sourceminder/python/config\n\tcp python/config/*.txt /usr/local/share/sourceminder/python/config/"
+    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/sourceminder/python/config\n\tcp python/config/*.txt /usr/share/sourceminder/python/config/"
 fi
 
 if [ $ENABLE_PERL -eq 1 ]; then
     INSTALL_TARGETS="$INSTALL_TARGETS\n\tcp \$(BUILD_DIR)/index-perl /usr/local/bin/index-perl"
     UNINSTALL_TARGETS="$UNINSTALL_TARGETS\n\trm -f /usr/local/bin/index-perl"
-    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/indexer-c/perl/config\n\tcp perl/config/*.txt /usr/local/share/indexer-c/perl/config/"
-    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/indexer-c/perl/config\n\tcp perl/config/*.txt /usr/share/indexer-c/perl/config/"
+    INSTALL_DATA_MAC="$INSTALL_DATA_MAC\n\tmkdir -p /usr/local/share/sourceminder/perl/config\n\tcp perl/config/*.txt /usr/local/share/sourceminder/perl/config/"
+    INSTALL_DATA_LINUX="$INSTALL_DATA_LINUX\n\tmkdir -p /usr/share/sourceminder/perl/config\n\tcp perl/config/*.txt /usr/share/sourceminder/perl/config/"
 fi
 
 # Use printf to handle newlines correctly

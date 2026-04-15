@@ -1312,7 +1312,7 @@ go doc http.Client
 ./qi --version  # If implemented
 
 # Report issues
-# https://github.com/your-repo/indexer-c/issues
+# https://github.com/ebcode/SourceMinder/issues
 ```
 
 ---

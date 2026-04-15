@@ -119,15 +119,15 @@ int resolve_lang_data_dir(const char *lang, char *out_path, size_t out_size) {
         return 0;
     }
 #elif defined(__APPLE__)
-    /* macOS: /usr/local/share/indexer-c/<lang>/data */
-    snprintf(candidate, sizeof(candidate), "/usr/local/share/indexer-c/%s/data", lang);
+    /* macOS: /usr/local/share/sourceminder/<lang>/data */
+    snprintf(candidate, sizeof(candidate), "/usr/local/share/sourceminder/%s/data", lang);
     if (dir_exists(candidate)) {
         snprintf(out_path, out_size, "%s", candidate);
         return 0;
     }
 #else
-    /* Linux: /usr/share/indexer-c/<lang>/data */
-    snprintf(candidate, sizeof(candidate), "/usr/share/indexer-c/%s/data", lang);
+    /* Linux: /usr/share/sourceminder/<lang>/data */
+    snprintf(candidate, sizeof(candidate), "/usr/share/sourceminder/%s/data", lang);
     if (dir_exists(candidate)) {
         snprintf(out_path, out_size, "%s", candidate);
         return 0;
@@ -192,15 +192,15 @@ int resolve_shared_data_dir(char *out_path, size_t out_size) {
         return 0;
     }
 #elif defined(__APPLE__)
-    /* macOS: /usr/local/share/indexer-c/shared/data */
-    snprintf(candidate, sizeof(candidate), "/usr/local/share/indexer-c/shared/data");
+    /* macOS: /usr/local/share/sourceminder/shared/data */
+    snprintf(candidate, sizeof(candidate), "/usr/local/share/sourceminder/shared/data");
     if (dir_exists(candidate)) {
         snprintf(out_path, out_size, "%s", candidate);
         return 0;
     }
 #else
-    /* Linux: /usr/share/indexer-c/shared/data */
-    snprintf(candidate, sizeof(candidate), "/usr/share/indexer-c/shared/data");
+    /* Linux: /usr/share/sourceminder/shared/data */
+    snprintf(candidate, sizeof(candidate), "/usr/share/sourceminder/shared/data");
     if (dir_exists(candidate)) {
         snprintf(out_path, out_size, "%s", candidate);
         return 0;
@@ -265,15 +265,15 @@ int resolve_data_file(const char *relative_path, char *out_path, size_t out_size
         return 0;
     }
 #elif defined(__APPLE__)
-    /* macOS: /usr/local/share/indexer-c/<relative_path> */
-    snprintf(candidate, sizeof(candidate), "/usr/local/share/indexer-c/%s", relative_path);
+    /* macOS: /usr/local/share/sourceminder/<relative_path> */
+    snprintf(candidate, sizeof(candidate), "/usr/local/share/sourceminder/%s", relative_path);
     if (file_exists(candidate)) {
         snprintf(out_path, out_size, "%s", candidate);
         return 0;
     }
 #else
-    /* Linux: /usr/share/indexer-c/<relative_path> */
-    snprintf(candidate, sizeof(candidate), "/usr/share/indexer-c/%s", relative_path);
+    /* Linux: /usr/share/sourceminder/<relative_path> */
+    snprintf(candidate, sizeof(candidate), "/usr/share/sourceminder/%s", relative_path);
     if (file_exists(candidate)) {
         snprintf(out_path, out_size, "%s", candidate);
         return 0;

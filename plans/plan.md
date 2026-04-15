@@ -203,7 +203,7 @@ c/
 ---
 
 ### Phase 5: Full Project Indexing & Validation (Session 5)
-**Goal**: Index the entire indexer-c project and validate results
+**Goal**: Index the entire sourceminder project and validate results
 
 **Tasks**:
 1. Run full index on project:

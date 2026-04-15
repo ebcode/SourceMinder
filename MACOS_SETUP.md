@@ -47,6 +47,7 @@ cd /path/to/SourceMinder
 # Clone required grammar repositories
 git clone https://github.com/tree-sitter/tree-sitter-c.git
 git clone https://github.com/tree-sitter/tree-sitter-go.git
+git clone https://github.com/tree-sitter-perl/tree-sitter-perl.git
 git clone https://github.com/tree-sitter/tree-sitter-php.git
 git clone https://github.com/tree-sitter/tree-sitter-python.git
 git clone https://github.com/tree-sitter/tree-sitter-typescript.git
@@ -61,6 +62,9 @@ SourceMinder/
 │   └── src/parser.c
 ├── tree-sitter-go/
 │   └── src/parser.c
+├── tree-sitter-perl/
+│   └── src/parser.c
+│   └── src/scanner.c
 ├── tree-sitter-php/
 │   └── php/src/parser.c
 │   └── php/src/scanner.c
@@ -106,6 +110,7 @@ This will:
 Binaries are created in the `build/` directory:
 - `build/index-ts` - TypeScript indexer (if enabled)
 - `build/index-c` - C indexer (if enabled)
+- `build/index-perl` - Perl indexer (if enabled)
 - `build/index-php` - PHP indexer (if enabled)
 - `build/index-go` - Go indexer (if enabled)
 - `build/index-python` - Python indexer (if enabled)
@@ -114,6 +119,7 @@ Binaries are created in the `build/` directory:
 Symlinks in the project root (for enabled languages):
 - `index-ts` → `build/index-ts`
 - `index-c` → `build/index-c`
+- `index-perl` → `build/index-perl`
 - `index-php` → `build/index-php`
 - `index-go` → `build/index-go`
 - `index-python` → `build/index-python`
@@ -298,6 +304,7 @@ If you see this warning during `make clean`, it means Homebrew isn't in the PATH
 SourceMinder/
 ├── tree-sitter-c/          # C grammar (external repo)
 ├── tree-sitter-go/         # Go grammar (external repo)
+├── tree-sitter-perl/       # Perl grammar (external repo)
 ├── tree-sitter-php/        # PHP grammar (external repo)
 ├── tree-sitter-typescript/ # TypeScript grammar (external repo)
 ├── c/                      # C indexer code
@@ -337,9 +344,10 @@ SourceMinder/
    cd /path/to/SourceMinder
    git clone https://github.com/tree-sitter/tree-sitter-c.git
    git clone https://github.com/tree-sitter/tree-sitter-go.git
+   git clone https://github.com/tree-sitter-perl/tree-sitter-perl.git
    git clone https://github.com/tree-sitter/tree-sitter-php.git
-   git clone https://github.com/tree-sitter/tree-sitter-typescript.git
    git clone https://github.com/tree-sitter/tree-sitter-python.git
+   git clone https://github.com/tree-sitter/tree-sitter-typescript.git
    ```
 
 4. Configure and compile
