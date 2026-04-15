@@ -27,8 +27,8 @@
  * Search order:
  * 1. $INDEXER_DATA_DIR/<lang>/data (if env var set)
  * 2. ./<lang>/data (current directory, development mode)
- * 3. /usr/local/share/indexer-c/<lang>/data (macOS)
- * 4. /usr/share/indexer-c/<lang>/data (Linux)
+ * 3. /usr/local/share/sourceminder/<lang>/data (macOS)
+ * 4. /usr/share/sourceminder/<lang>/data (Linux)
  *
  * @param lang Language name (e.g., "c", "typescript", "php", "go")
  * @param out_path Output buffer for resolved path
@@ -43,8 +43,8 @@ int resolve_lang_data_dir(const char *lang, char *out_path, size_t out_size);
  * Search order:
  * 1. $INDEXER_DATA_DIR/shared/data (if env var set)
  * 2. ./shared/data (current directory, development mode)
- * 3. /usr/local/share/indexer-c/shared/data (macOS)
- * 4. /usr/share/indexer-c/shared/data (Linux)
+ * 3. /usr/local/share/sourceminder/shared/data (macOS)
+ * 4. /usr/share/sourceminder/shared/data (Linux)
  *
  * @param out_path Output buffer for resolved path
  * @param out_size Size of output buffer
@@ -61,8 +61,8 @@ int resolve_shared_data_dir(char *out_path, size_t out_size);
  * Search order:
  * 1. $INDEXER_DATA_DIR/<relative_path> (if env var set)
  * 2. ./<relative_path> (current directory, development mode)
- * 3. /usr/local/share/indexer-c/<relative_path> (macOS)
- * 4. /usr/share/indexer-c/<relative_path> (Linux)
+ * 3. /usr/local/share/sourceminder/<relative_path> (macOS)
+ * 4. /usr/share/sourceminder/<relative_path> (Linux)
  *
  * @param relative_path Relative path to file (e.g., "shared/data/stopwords.txt")
  * @param out_path Output buffer for resolved absolute path

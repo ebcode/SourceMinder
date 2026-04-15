@@ -1379,7 +1379,7 @@ qi "test" --columns invalid   # Shows available columns in error
 qi --version
 
 # Report issues
-# https://github.com/your-repo/indexer-c/issues
+# https://github.com/ebcode/SourceMinder/issues
 ```
 
 ---
