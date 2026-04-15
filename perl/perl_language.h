@@ -18,6 +18,11 @@
 #ifndef PERL_LANGUAGE_H
 #define PERL_LANGUAGE_H
 
+/* Perl sigil type strings for the TYPE column */
+#define PERL_TYPE_SCALAR  "scalar"
+#define PERL_TYPE_ARRAY   "array"
+#define PERL_TYPE_HASH    "hash"
+
 #include "../shared/parse_result.h"
 #include "../shared/filter.h"
 #include <tree_sitter/api.h>

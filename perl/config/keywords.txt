@@ -66,6 +66,5 @@ read
 write
 binmode
 bless
-self
 true
 false

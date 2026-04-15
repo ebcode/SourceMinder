@@ -90,6 +90,18 @@ static struct {
     TSSymbol loopex_expression;
     TSSymbol identifier;
     TSSymbol label;
+
+    /* Special blocks */
+    TSSymbol phaser_statement;
+
+    /* Container variables (direct hash/array element access: $hash{key}, $arr[idx]) */
+    TSSymbol container_variable;
+    TSSymbol hash_element_expression;
+
+    /* Subroutine signature parameters */
+    TSSymbol mandatory_parameter;
+    TSSymbol optional_parameter;
+    TSSymbol slurpy_parameter;
 } perl_symbols;
 
 /* Forward declarations */
@@ -157,6 +169,18 @@ static void init_perl_symbols(const TSLanguage *language) {
     perl_symbols.loopex_expression = ts_language_symbol_for_name(language, "loopex_expression", 17, true);
     perl_symbols.identifier       = ts_language_symbol_for_name(language, "identifier",       10, true);
     perl_symbols.label            = ts_language_symbol_for_name(language, "label",             5, true);
+
+    /* Special blocks */
+    perl_symbols.phaser_statement = ts_language_symbol_for_name(language, "phaser_statement", 16, true);
+
+    /* Container variables */
+    perl_symbols.container_variable      = ts_language_symbol_for_name(language, "container_variable",      18, true);
+    perl_symbols.hash_element_expression = ts_language_symbol_for_name(language, "hash_element_expression", 23, true);
+
+    /* Subroutine signature parameters */
+    perl_symbols.mandatory_parameter = ts_language_symbol_for_name(language, "mandatory_parameter", 19, true);
+    perl_symbols.optional_parameter  = ts_language_symbol_for_name(language, "optional_parameter",  18, true);
+    perl_symbols.slurpy_parameter    = ts_language_symbol_for_name(language, "slurpy_parameter",    16, true);
 }
 
 /* Extract variable name from a scalar/array/hash node and index it */
@@ -173,6 +197,22 @@ static void index_sigil_node(TSNode node, const char *source_code,
             continue;
         }
 
+        /* Complex dereference: @{$ref}, %{$href} — varname contains a nested sigil node.
+         * Recurse into the inner scalar/array/hash rather than extracting the raw text span. */
+        uint32_t vnc = ts_node_child_count(child);
+        if (vnc > 0) {
+            for (uint32_t j = 0; j < vnc; j++) {
+                TSNode inner = ts_node_child(child, j);
+                TSSymbol isym = ts_node_symbol(inner);
+                if (isym == perl_symbols.scalar  || isym == perl_symbols.array ||
+                    isym == perl_symbols.hash     || isym == perl_symbols.container_variable) {
+                    index_sigil_node(inner, source_code, directory, filename,
+                                     result, filter, modifier, definition, ctx);
+                }
+            }
+            break;
+        }
+
         char varname[SYMBOL_MAX_LENGTH];
         safe_extract_node_text(source_code, child, varname, sizeof(varname), filename);
 
@@ -185,10 +225,18 @@ static void index_sigil_node(TSNode node, const char *source_code,
             continue;
         }
 
+        /* Derive sigil type from node kind */
+        TSSymbol node_sym = ts_node_symbol(node);
+        const char *sigil_type = PERL_TYPE_SCALAR;
+        if (node_sym == perl_symbols.array) sigil_type = PERL_TYPE_ARRAY;
+        else if (node_sym == perl_symbols.hash) sigil_type = PERL_TYPE_HASH;
+        /* scalar and container_variable both yield PERL_TYPE_SCALAR */
+
         int line = (int)ts_node_start_point(node).row + 1;
         add_entry(result, varname, line, ctx,
                   directory, filename, NULL,
-                  &(ExtColumns){ .modifier = modifier, .definition = definition });
+                  &(ExtColumns){ .modifier = modifier, .definition = definition,
+                                 .type = sigil_type });
         break;
     }
 }
@@ -344,6 +392,28 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
     }
 }
 
+/* Handle signature parameters (mandatory, optional, slurpy): index sigil child as ARG,
+ * recurse into everything else so default values in optional parameters are indexed. */
+static void handle_parameter(TSNode node, const char *source_code,
+                             const char *directory, const char *filename,
+                             ParseResult *result, SymbolFilter *filter,
+                             int line) {
+    (void)line;
+    uint32_t count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        TSSymbol sym = ts_node_symbol(child);
+        if (sym == perl_symbols.scalar ||
+            sym == perl_symbols.array  ||
+            sym == perl_symbols.hash) {
+            index_sigil_node(child, source_code, directory, filename,
+                             result, filter, "", "1", CONTEXT_ARGUMENT);
+        } else {
+            visit_node(child, source_code, directory, filename, result, filter);
+        }
+    }
+}
+
 /* Index a package_statement: the second 'package' child is the module name */
 static void handle_package_statement(TSNode node, const char *source_code,
                                      const char *directory, const char *filename,
@@ -405,6 +475,27 @@ static void handle_anonymous_sub(TSNode node, const char *source_code,
     process_children(node, source_code, directory, filename, result, filter);
 }
 
+/* Handle BEGIN/END/INIT/CHECK/UNITCHECK phaser blocks */
+static void handle_phaser_statement(TSNode node, const char *source_code,
+                                    const char *directory, const char *filename,
+                                    ParseResult *result, SymbolFilter *filter,
+                                    int line) {
+    /* First child is the keyword node (BEGIN, END, etc.) — its type IS the name */
+    TSNode keyword = ts_node_child(node, 0);
+    if (ts_node_is_null(keyword)) return;
+
+    const char *phaser_name = ts_node_type(keyword);
+
+    char location[128];
+    format_source_location(node, location, sizeof(location));
+
+    add_entry(result, phaser_name, line, CONTEXT_FUNCTION,
+              directory, filename, location, &(ExtColumns){.definition = "1"});
+
+    /* Recurse into the block body */
+    process_children(node, source_code, directory, filename, result, filter);
+}
+
 /* Index a method_call_expression: the method name as CONTEXT_CALL */
 static void handle_method_call(TSNode node, const char *source_code,
                                const char *directory, const char *filename,
@@ -441,7 +532,29 @@ static void handle_method_call(TSNode node, const char *source_code,
         }
 
         if (child_sym == perl_symbols.method) {
-            safe_extract_node_text(source_code, child, method_name, sizeof(method_name), filename);
+            /* Static method: method node contains plain text */
+            /* Dynamic method: $self->$orig() — method node contains a nested scalar */
+            uint32_t mc = ts_node_child_count(child);
+            bool found = false;
+            for (uint32_t j = 0; j < mc; j++) {
+                TSNode m = ts_node_child(child, j);
+                if (ts_node_symbol(m) == perl_symbols.scalar) {
+                    /* Dynamic: dig into scalar's varname */
+                    uint32_t sc = ts_node_child_count(m);
+                    for (uint32_t k = 0; k < sc; k++) {
+                        TSNode vn = ts_node_child(m, k);
+                        if (ts_node_symbol(vn) == perl_symbols.varname) {
+                            safe_extract_node_text(source_code, vn, method_name, sizeof(method_name), filename);
+                            found = true;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            if (!found) {
+                safe_extract_node_text(source_code, child, method_name, sizeof(method_name), filename);
+            }
         }
     }
 
@@ -604,6 +717,76 @@ static void handle_loopex_expression(TSNode node, const char *source_code,
 }
 
 /* Recursively index autoquoted_bareword nodes as constants (use constant PI => ...) */
+/* Extract varname text from a scalar/array/hash/container_variable node without indexing it.
+ * Returns true if a usable name was found (length > 1, skipping single-char Perl internals). */
+static bool extract_sigil_varname(TSNode node, const char *source_code,
+                                  const char *filename,
+                                  char *buf, size_t bufsize) {
+    uint32_t count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) == perl_symbols.varname) {
+            safe_extract_node_text(source_code, child, buf, bufsize, filename);
+            return strlen(buf) > 1;
+        }
+    }
+    return false;
+}
+
+/* Handle $obj->{key} and $hash{key}: index the container as VAR and the key as PROP with parent */
+static void handle_hash_element_expression(TSNode node, const char *source_code,
+                                           const char *directory, const char *filename,
+                                           ParseResult *result, SymbolFilter *filter,
+                                           int line) {
+    char parent_name[SYMBOL_MAX_LENGTH] = "";
+    bool has_parent = false;
+
+    uint32_t count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        TSSymbol sym = ts_node_symbol(child);
+
+        if (sym == perl_symbols.scalar || sym == perl_symbols.container_variable) {
+            /* Extract container name for use as parent, and index it as VAR */
+            if (extract_sigil_varname(child, source_code, filename, parent_name, sizeof(parent_name))) {
+                has_parent = true;
+                if (filter_should_index(filter, parent_name)) {
+                    add_entry(result, parent_name, line, CONTEXT_VARIABLE,
+                              directory, filename, NULL, &(ExtColumns){.definition = "0"});
+                }
+            }
+        } else if (sym == perl_symbols.autoquoted_bareword) {
+            /* Static key — index as PROP with parent */
+            char key[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, child, key, sizeof(key), filename);
+            if (filter_should_index(filter, key)) {
+                add_entry(result, key, line, CONTEXT_PROPERTY,
+                          directory, filename, NULL,
+                          &(ExtColumns){
+                              .definition = "0",
+                              .parent = has_parent ? parent_name : NULL
+                          });
+            }
+        } else {
+            /* Dynamic key or nested expression — recurse normally */
+            visit_node(child, source_code, directory, filename, result, filter);
+        }
+    }
+}
+
+/* Handle autoquoted barewords used as hash keys: $hash{KEY}, bless { key => val }, method(key => val) */
+static void handle_autoquoted_bareword(TSNode node, const char *source_code,
+                                       const char *directory, const char *filename,
+                                       ParseResult *result, SymbolFilter *filter,
+                                       int line) {
+    char name[SYMBOL_MAX_LENGTH];
+    safe_extract_node_text(source_code, node, name, sizeof(name), filename);
+    if (filter_should_index(filter, name)) {
+        add_entry(result, name, line, CONTEXT_PROPERTY,
+                  directory, filename, NULL, &(ExtColumns){.definition = "0"});
+    }
+}
+
 static void index_constant_names(TSNode node, const char *source_code,
                                  const char *directory, const char *filename,
                                  ParseResult *result, SymbolFilter *filter,
@@ -869,12 +1052,25 @@ static void visit_node(TSNode node, const char *source_code,
         return;
     }
 
-    /* Standalone scalar/array/hash outside a declaration — index as reference */
-    if (node_sym == perl_symbols.scalar ||
-        node_sym == perl_symbols.array  ||
-        node_sym == perl_symbols.hash) {
+    if (node_sym == perl_symbols.hash_element_expression) {
+        handle_hash_element_expression(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+
+    /* Standalone scalar/array/hash/container_variable outside a declaration — index as reference */
+    if (node_sym == perl_symbols.scalar         ||
+        node_sym == perl_symbols.array          ||
+        node_sym == perl_symbols.hash           ||
+        node_sym == perl_symbols.container_variable) {
         index_sigil_node(node, source_code, directory, filename,
                          result, filter, "", "0", CONTEXT_VARIABLE);
+        return;
+    }
+
+    if (node_sym == perl_symbols.mandatory_parameter ||
+        node_sym == perl_symbols.optional_parameter  ||
+        node_sym == perl_symbols.slurpy_parameter) {
+        handle_parameter(node, source_code, directory, filename, result, filter, line);
         return;
     }
 
@@ -884,6 +1080,10 @@ static void visit_node(TSNode node, const char *source_code,
     }
     if (node_sym == perl_symbols.anonymous_subroutine_expression) {
         handle_anonymous_sub(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.phaser_statement) {
+        handle_phaser_statement(node, source_code, directory, filename, result, filter, line);
         return;
     }
     if (node_sym == perl_symbols.package_statement) {
@@ -934,6 +1134,10 @@ static void visit_node(TSNode node, const char *source_code,
     }
     if (node_sym == perl_symbols.loopex_expression) {
         handle_loopex_expression(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == perl_symbols.autoquoted_bareword) {
+        handle_autoquoted_bareword(node, source_code, directory, filename, result, filter, line);
         return;
     }
     /* TODO: expression_statement */
