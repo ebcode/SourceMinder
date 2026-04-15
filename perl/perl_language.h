@@ -19,9 +19,10 @@
 #define PERL_LANGUAGE_H
 
 /* Perl sigil type strings for the TYPE column */
-#define PERL_TYPE_SCALAR  "scalar"
-#define PERL_TYPE_ARRAY   "array"
-#define PERL_TYPE_HASH    "hash"
+#define PERL_TYPE_SCALAR      "scalar"
+#define PERL_TYPE_ARRAY       "array"
+#define PERL_TYPE_HASH        "hash"
+#define PERL_TYPE_FILEHANDLE  "filehandle"
 
 #include "../shared/parse_result.h"
 #include "../shared/filter.h"

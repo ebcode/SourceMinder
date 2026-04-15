@@ -13,6 +13,7 @@ parser.c
 tree-sitter-*
 index-c
 index-go
+index-perl
 index-php
 index-python
 index-ts
