@@ -471,6 +471,8 @@ qi user -x noise               # Exclude comments and strings (recommended defau
 ```bash
 qi user -f .c                           # All .c files
 qi user -f .c .h                        # .c OR .h files
+qi user -f src/                         # All files in src/ (partial path match)
+qi user -f tools/sources/perl/          # All files in that exact directory
 qi user -f src/* lib/* include/*        # Multiple directories
 qi user -f auth/*.c session/*.c         # .c files in multiple dirs
 qi user -f database.c utils.c helpers.c # Specific files
@@ -792,10 +794,11 @@ qi '\--help'    # Search for --help symbol
 
 ### File Filtering
 ```bash
-qi user -f .c              # By extension
-qi user -f src/*           # By directory
-qi user -f ./auth/*.c      # Specific path
-qi user -f .c .h           # Multiple patterns (OR)
+qi user -f .c                      # By extension
+qi user -f src/                    # All files in src/ (partial path)
+qi user -f tools/sources/perl/     # All files in exact directory
+qi user -f ./auth/*.c              # Specific path
+qi user -f .c .h                   # Multiple patterns (OR)
 ```
 
 ### Common Workflows

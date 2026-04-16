@@ -79,6 +79,7 @@ static struct {
     TSSymbol expression_statement;
     TSSymbol assignment_expression;
     TSSymbol return_expression;
+    TSSymbol list_expression;
     TSSymbol block;
 
     /* Literals and identifiers */
@@ -188,7 +189,8 @@ static void init_perl_symbols(const TSLanguage *language) {
     perl_symbols.label            = ts_language_symbol_for_name(language, "label",             5, true);
 
     /* Special blocks */
-    perl_symbols.phaser_statement = ts_language_symbol_for_name(language, "phaser_statement", 16, true);
+    perl_symbols.phaser_statement  = ts_language_symbol_for_name(language, "phaser_statement",  16, true);
+    perl_symbols.list_expression   = ts_language_symbol_for_name(language, "list_expression",   15, true);
 
     /* Container variables */
     perl_symbols.container_variable        = ts_language_symbol_for_name(language, "container_variable",        18, true);
@@ -201,6 +203,31 @@ static void init_perl_symbols(const TSLanguage *language) {
     perl_symbols.mandatory_parameter = ts_language_symbol_for_name(language, "mandatory_parameter", 19, true);
     perl_symbols.optional_parameter  = ts_language_symbol_for_name(language, "optional_parameter",  18, true);
     perl_symbols.slurpy_parameter    = ts_language_symbol_for_name(language, "slurpy_parameter",    16, true);
+}
+
+/* Recursively search for the first scalar/array/hash/container_variable descendant.
+ * Used for complex dereferences like @{$ref} where the inner sigil is nested
+ * inside a block or similar wrapper. Returns a null TSNode if none found. */
+static TSNode find_inner_sigil(TSNode node) {
+    uint32_t count = ts_node_child_count(node);
+    /* Breadth-first: check direct children first */
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        TSSymbol sym = ts_node_symbol(child);
+        if (sym == perl_symbols.scalar             ||
+            sym == perl_symbols.array              ||
+            sym == perl_symbols.hash               ||
+            sym == perl_symbols.container_variable) {
+            return child;
+        }
+    }
+    /* Then recurse into children */
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(node, i);
+        TSNode found = find_inner_sigil(child);
+        if (!ts_node_is_null(found)) return found;
+    }
+    return (TSNode){0};
 }
 
 /* Extract variable name from a scalar/array/hash node and index it */
@@ -217,18 +244,14 @@ static void index_sigil_node(TSNode node, const char *source_code,
             continue;
         }
 
-        /* Complex dereference: @{$ref}, %{$href} — varname contains a nested sigil node.
-         * Recurse into the inner scalar/array/hash rather than extracting the raw text span. */
+        /* Complex dereference: @{$ref}, %{$href}, @{$obj->{key}} — varname wraps
+         * a block or other expression. Walk descendants to find the inner sigil. */
         uint32_t vnc = ts_node_child_count(child);
         if (vnc > 0) {
-            for (uint32_t j = 0; j < vnc; j++) {
-                TSNode inner = ts_node_child(child, j);
-                TSSymbol isym = ts_node_symbol(inner);
-                if (isym == perl_symbols.scalar  || isym == perl_symbols.array ||
-                    isym == perl_symbols.hash     || isym == perl_symbols.container_variable) {
-                    index_sigil_node(inner, source_code, directory, filename,
-                                     result, filter, modifier, definition, ctx);
-                }
+            TSNode inner = find_inner_sigil(child);
+            if (!ts_node_is_null(inner)) {
+                index_sigil_node(inner, source_code, directory, filename,
+                                 result, filter, modifier, definition, ctx);
             }
             break;
         }
@@ -363,37 +386,79 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
             uint32_t pc = ts_node_child_count(parent);
             for (uint32_t i = 0; i < pc; i++) {
                 TSNode sib = ts_node_child(parent, i);
-                if (ts_node_symbol(sib) != perl_symbols.quoted_word_list) continue;
-                uint32_t qc = ts_node_child_count(sib);
-                for (uint32_t j = 0; j < qc; j++) {
-                    TSNode qchild = ts_node_child(sib, j);
-                    if (ts_node_symbol(qchild) != perl_symbols.string_content) continue;
-                    char content[COMMENT_TEXT_BUFFER];
-                    safe_extract_node_text(source_code, qchild, content, sizeof(content), filename);
-                    int exp_line = (int)ts_node_start_point(qchild).row + 1;
-                    char word[SYMBOL_MAX_LENGTH];
-                    char *word_start = content;
-                    for (char *p = content; ; p++) {
-                        if (*p == '\0' || isspace((unsigned char)*p)) {
-                            if (p > word_start) {
-                                size_t wlen = (size_t)(p - word_start);
-                                if (wlen < sizeof(word)) {
-                                    snprintf(word, sizeof(word), "%.*s", (int)wlen, word_start);
-                                    if (word[0] && filter_should_index(filter, word)) {
-                                        add_entry(result, word, exp_line, CONTEXT_EXPORT,
-                                                  directory, filename, NULL,
-                                                  &(ExtColumns){.definition = "1"});
+                TSSymbol sib_sym = ts_node_symbol(sib);
+
+                /* qw(...) form */
+                if (sib_sym == perl_symbols.quoted_word_list) {
+                    uint32_t qc = ts_node_child_count(sib);
+                    for (uint32_t j = 0; j < qc; j++) {
+                        TSNode qchild = ts_node_child(sib, j);
+                        if (ts_node_symbol(qchild) != perl_symbols.string_content) continue;
+                        char content[COMMENT_TEXT_BUFFER];
+                        safe_extract_node_text(source_code, qchild, content, sizeof(content), filename);
+                        int exp_line = (int)ts_node_start_point(qchild).row + 1;
+                        char word[SYMBOL_MAX_LENGTH];
+                        char *word_start = content;
+                        for (char *p = content; ; p++) {
+                            if (*p == '\0' || isspace((unsigned char)*p)) {
+                                if (p > word_start) {
+                                    size_t wlen = (size_t)(p - word_start);
+                                    if (wlen < sizeof(word)) {
+                                        snprintf(word, sizeof(word), "%.*s", (int)wlen, word_start);
+                                        if (word[0] && filter_should_index(filter, word)) {
+                                            add_entry(result, word, exp_line, CONTEXT_EXPORT,
+                                                      directory, filename, NULL,
+                                                      &(ExtColumns){.definition = "1"});
+                                        }
                                     }
+                                    exp_line++;
                                 }
-                                exp_line++;
+                                word_start = p + 1;
+                                if (*p == '\0') break;
                             }
-                            word_start = p + 1;
-                            if (*p == '\0') break;
+                        }
+                        break;
+                    }
+                    break;
+                }
+
+                /* ('foo', 'bar') list form — collect string_literal nodes */
+                if (sib_sym == perl_symbols.list_expression ||
+                    sib_sym == perl_symbols.string_literal) {
+                    /* Flatten: if list_expression, iterate its children for string_literal;
+                     * if already a string_literal, treat it as a single-element list. */
+                    uint32_t lc = (sib_sym == perl_symbols.list_expression)
+                                  ? ts_node_child_count(sib) : 0;
+                    TSNode candidates[256];
+                    uint32_t ncand = 0;
+                    if (sib_sym == perl_symbols.string_literal) {
+                        candidates[ncand++] = sib;
+                    } else {
+                        for (uint32_t j = 0; j < lc && ncand < 256; j++) {
+                            TSNode lchild = ts_node_child(sib, j);
+                            if (ts_node_symbol(lchild) == perl_symbols.string_literal)
+                                candidates[ncand++] = lchild;
+                        }
+                    }
+                    for (uint32_t j = 0; j < ncand; j++) {
+                        TSNode lit = candidates[j];
+                        uint32_t sc = ts_node_child_count(lit);
+                        for (uint32_t k = 0; k < sc; k++) {
+                            TSNode sc_node = ts_node_child(lit, k);
+                            if (ts_node_symbol(sc_node) != perl_symbols.string_content) continue;
+                            char word[SYMBOL_MAX_LENGTH];
+                            safe_extract_node_text(source_code, sc_node, word, sizeof(word), filename);
+                            int exp_line = (int)ts_node_start_point(sc_node).row + 1;
+                            if (word[0] && filter_should_index(filter, word)) {
+                                add_entry(result, word, exp_line, CONTEXT_EXPORT,
+                                          directory, filename, NULL,
+                                          &(ExtColumns){.definition = "1"});
+                            }
+                            break;
                         }
                     }
                     break;
                 }
-                break;
             }
         }
     }
@@ -440,8 +505,35 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
                     }
                 }
             } else {
-                index_sigil_node(child, source_code, directory, filename,
-                                 result, filter, modifier, "1", ctx);
+                /* Check if RHS is an anonymous sub — emit as FUNC with modifier+type */
+                bool is_anon_sub = false;
+                if (sym == perl_symbols.scalar &&
+                    !ts_node_is_null(parent) &&
+                    ts_node_symbol(parent) == perl_symbols.assignment_expression) {
+                    uint32_t pc = ts_node_child_count(parent);
+                    for (uint32_t j = 0; j < pc; j++) {
+                        if (ts_node_symbol(ts_node_child(parent, j)) ==
+                            perl_symbols.anonymous_subroutine_expression) {
+                            is_anon_sub = true;
+                            break;
+                        }
+                    }
+                }
+                if (is_anon_sub) {
+                    char varname[SYMBOL_MAX_LENGTH];
+                    if (extract_sigil_varname(child, source_code, filename, varname, sizeof(varname))) {
+                        if (filter_should_index(filter, varname)) {
+                            int vline = (int)ts_node_start_point(child).row + 1;
+                            add_entry(result, varname, vline, CONTEXT_FUNCTION,
+                                      directory, filename, NULL,
+                                      &(ExtColumns){.modifier = modifier, .definition = "1",
+                                                    .type = PERL_TYPE_SCALAR});
+                        }
+                    }
+                } else {
+                    index_sigil_node(child, source_code, directory, filename,
+                                     result, filter, modifier, "1", ctx);
+                }
             }
         }
     }
@@ -946,10 +1038,21 @@ static bool extract_sigil_varname(TSNode node, const char *source_code,
     uint32_t count = ts_node_child_count(node);
     for (uint32_t i = 0; i < count; i++) {
         TSNode child = ts_node_child(node, i);
-        if (ts_node_symbol(child) == perl_symbols.varname) {
-            safe_extract_node_text(source_code, child, buf, bufsize, filename);
-            return strlen(buf) > 1;
+        if (ts_node_symbol(child) != perl_symbols.varname) continue;
+
+        /* Complex dereference: @{$ref}, %{$href}, @{$obj->{key}} — varname wraps
+         * a block or other expression. Walk descendants to find the inner sigil. */
+        uint32_t vnc = ts_node_child_count(child);
+        if (vnc > 0) {
+            TSNode inner = find_inner_sigil(child);
+            if (!ts_node_is_null(inner)) {
+                return extract_sigil_varname(inner, source_code, filename, buf, bufsize);
+            }
+            return false;
         }
+
+        safe_extract_node_text(source_code, child, buf, bufsize, filename);
+        return strlen(buf) > 1;
     }
     return false;
 }
