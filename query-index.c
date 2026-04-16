@@ -824,8 +824,13 @@ static int process_file_pattern(const char *input, char **dir_out, char **file_o
         needs_prefix = 0;  /* Absolute path */
     }
 
-    /* Add %/ prefix if needed for boundary matching */
+    /* Add prefix for boundary matching.
+     * Single-component names (e.g. "perl") use %/ to avoid matching "myperl/".
+     * Multi-component paths (e.g. "tools/sources/perl") use % only — the path
+     * is already specific enough, and %/ would require a character before the
+     * first component, failing to match top-level relative paths. */
     if (needs_prefix) {
+        int is_multi = (strchr(dir_part, '/') != NULL);
         size_t new_len = strlen(dir_part) + 4;  /* %/ + / + \0 */
         char *prefixed = malloc(new_len);
         if (!prefixed) {
@@ -834,7 +839,7 @@ static int process_file_pattern(const char *input, char **dir_out, char **file_o
             free(file_part);
             return -1;
         }
-        snprintf(prefixed, new_len, "%%/%s/", dir_part);
+        snprintf(prefixed, new_len, is_multi ? "%%%s/" : "%%/%s/", dir_part);
         free(dir_part);
         dir_part = prefixed;
     } else {
@@ -2538,10 +2543,11 @@ int main(int argc, char *argv[]) {
         printf("  -f, --file PATTERN...          search only files matching pattern\n");
         printf("\n");
         printf("  Pattern types:\n");
-        printf("    Filename:      database.py        matches ./shared/database.py\n");
-        printf("    Extension:     .py                all .py files\n");
-        printf("    Directory:     shared/            all files in shared/\n");
-        printf("    Wildcard:      shared/*.py        all .py files in shared/\n");
+        printf("    Filename:      database.py              matches ./shared/database.py\n");
+        printf("    Extension:     .py                      all .py files\n");
+        printf("    Directory:     shared/                  all files in shared/ (partial path)\n");
+        printf("    Directory:     tools/sources/perl/      all files in that exact directory\n");
+        printf("    Wildcard:      shared/*.py              all .py files in shared/\n");
         printf("\n");
         printf("  Note: Use * for wildcards (also supports SQL LIKE %% syntax)\n");
         printf("\n");
