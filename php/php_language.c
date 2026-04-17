@@ -1309,7 +1309,8 @@ static void handle_string(TSNode node, const char *source_code, const char *dire
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; i++) {
         TSNode child = ts_node_child(node, i);
-        if (strcmp(ts_node_type(child), "string_value") == 0) {
+        TSSymbol child_sym = ts_node_symbol(child);
+        if (child_sym == php_symbols.string_value || child_sym == php_symbols.string_content) {
             char string_text[COMMENT_TEXT_BUFFER];
             safe_extract_node_text(source_code, child, string_text, sizeof(string_text), filename);
             process_string_content(string_text, line, directory, filename, result, filter, namespace_buf, "");
@@ -1332,11 +1333,12 @@ static void handle_heredoc(TSNode node, const char *source_code, const char *dir
     for (uint32_t i = 0; i < child_count; i++) {
         TSNode child = ts_node_child(node, i);
         if (strcmp(ts_node_type(child), "heredoc_body") == 0) {
-            /* Extract all string_value children */
+            /* Extract all string_value/string_content children */
             uint32_t body_child_count = ts_node_child_count(child);
             for (uint32_t j = 0; j < body_child_count; j++) {
                 TSNode body_child = ts_node_child(child, j);
-                if (strcmp(ts_node_type(body_child), "string_value") == 0) {
+                TSSymbol body_child_sym = ts_node_symbol(body_child);
+                if (body_child_sym == php_symbols.string_value || body_child_sym == php_symbols.string_content) {
                     char string_text[COMMENT_TEXT_BUFFER];
                     safe_extract_node_text(source_code, body_child, string_text, sizeof(string_text), filename);
                     process_string_content(string_text, line, directory, filename, result, filter, namespace_buf, "heredoc");
@@ -2024,7 +2026,9 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
                 child_sym == php_symbols.subscript_expression ||
                 child_sym == php_symbols.member_access_expression ||
                 child_sym == php_symbols.member_call_expression ||
-                child_sym == php_symbols.parenthesized_expression) {
+                child_sym == php_symbols.parenthesized_expression ||
+                child_sym == php_symbols.string ||
+                child_sym == php_symbols.encapsed_string) {
                 extract_symbols_from_expression(child, source_code, directory, filename, result, filter, namespace_buf);
             }
         }
