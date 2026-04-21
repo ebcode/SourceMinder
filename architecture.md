@@ -12,7 +12,8 @@
   - index-<lang>.c — thin entry point: registers 4 function pointers (parser_init, parser_parse_file, parser_free, parser_set_debug) and calls indexer_main()
   - <lang>_language.c — the AST walking logic (e.g. handle_function_definition, handle_declaration, visit_node, etc.), driven by tree-sitter
 
-  All 5 indexers are structurally identical at the entry point level (same call sites, same line numbers).
+  The indexer entry points follow the same wrapper pattern: each builds an IndexerConfig with
+  language-specific parser callbacks and delegates the shared runtime behavior to indexer_main().
 
   ---
   Shared Library (shared/)
@@ -59,9 +60,10 @@
 
   source file
       → tree-sitter AST
-      → <lang>_language.c (visit_node → handle_* → add_entry)
-      → ParseResult (array of IndexEntry)
-      → filter_should_index() (stopwords/keywords/regex)
+      → <lang>_language.c (visit_node → handle_* extraction)
+      → filter_should_index() at extraction time (stopwords/keywords/regex)
+      → add_entry()
+      → ParseResult (array of accepted IndexEntry records)
       → db_insert() → SQLite (code-index.db)
       → qi queries it
 
@@ -72,4 +74,3 @@
   - Wrapper functions (parser_init_wrapper etc.) in each index-<lang>.c allow indexer_main to call language parsers generically via function pointers
   - WAL mode enables concurrent multi-language indexing without locks
   - ~/.smconfig config file mirrors CLI flags for persistent defaults
-
