@@ -197,3 +197,67 @@ int is_plaintext_extension(const char *extension) {
 
     return 0;
 }
+
+static int has_configured_extension(const char *filepath, const FileExtensions *extensions) {
+    if (!filepath || !extensions || extensions->count == 0) {
+        return 0;
+    }
+
+    size_t len = strnlength(filepath, FILENAME_MAX_LENGTH);
+    for (int i = 0; i < extensions->count; i++) {
+        size_t ext_len = strnlength(extensions->extensions[i], FILE_EXTENSION_MAX_LENGTH);
+        if (len > ext_len && strcmp(filepath + len - ext_len, extensions->extensions[i]) == 0) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static int basename_has_extension(const char *filepath) {
+    if (!filepath || !*filepath) {
+        return 0;
+    }
+
+    const char *basename = strrchr(filepath, '/');
+    const char *windows_basename = strrchr(filepath, '\\');
+    if (!basename || (windows_basename && windows_basename > basename)) {
+        basename = windows_basename;
+    }
+    basename = basename ? basename + 1 : filepath;
+
+    const char *last_dot = strrchr(basename, '.');
+    return (last_dot && last_dot != basename);
+}
+
+static int has_perl_shebang(const char *filepath) {
+    FILE *file = safe_fopen(filepath, "r", 1);
+    if (!file) {
+        return 0;
+    }
+
+    char line[LINE_BUFFER_SMALL];
+    int is_perl = 0;
+    if (fgets(line, sizeof(line), file) && strncmp(line, "#!", 2) == 0 && strstr(line, "perl") != NULL) {
+        is_perl = 1;
+    }
+
+    fclose(file);
+    return is_perl;
+}
+
+int path_matches_extensions(const char *filepath, const FileExtensions *extensions) {
+    if (!filepath || !extensions || extensions->count == 0) {
+        return 0;
+    }
+
+    if (has_configured_extension(filepath, extensions)) {
+        return 1;
+    }
+
+    if (!basename_has_extension(filepath) && is_known_extension(".pl", extensions) && has_perl_shebang(filepath)) {
+        return 1;
+    }
+
+    return 0;
+}

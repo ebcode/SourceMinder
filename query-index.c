@@ -1219,6 +1219,8 @@ static int lookup_within_definitions(CodeIndexDatabase *db, WithinFilter *within
     /* Look up each symbol separately */
     for (int sym_idx = 0; sym_idx < within_filter->count; sym_idx++) {
         const char *symbol = within_filter->symbols[sym_idx];
+        char normalized_symbol[SYMBOL_MAX_LENGTH];
+        to_lowercase_copy(symbol, normalized_symbol, sizeof(normalized_symbol));
 
         /* Build SQL query to find all definitions */
         SqlQueryBuilder builder;
@@ -1226,7 +1228,7 @@ static int lookup_within_definitions(CodeIndexDatabase *db, WithinFilter *within
             continue;
         }
 
-        char *escaped_symbol = sqlite3_mprintf("%q", symbol);
+        char *escaped_symbol = sqlite3_mprintf("%q", normalized_symbol);
         int ret = sql_append(&builder,
             "SELECT directory, filename, source_location FROM code_index "
             "WHERE symbol = '%s' AND is_definition = 1 AND source_location IS NOT NULL",
