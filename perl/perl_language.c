@@ -318,7 +318,7 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
                 for (uint32_t j = 0; j < ac; j++) {
                     TSNode ac_child = ts_node_child(sibling, j);
                     if (ts_node_symbol(ac_child) != perl_symbols.varname) continue;
-                    char name[8];
+                    char name[SYMBOL_MAX_LENGTH];
                     safe_extract_node_text(source_code, ac_child, name, sizeof(name), filename);
                     if (strcmp(name, "_") == 0) ctx = CONTEXT_ARGUMENT;
                     break;
@@ -344,7 +344,7 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
                             for (uint32_t k = 0; k < vc; k++) {
                                 TSNode vn = ts_node_child(sc_child, k);
                                 if (ts_node_symbol(vn) != perl_symbols.varname) continue;
-                                char name[8];
+                                char name[SYMBOL_MAX_LENGTH];
                                 safe_extract_node_text(source_code, vn, name, sizeof(name), filename);
                                 if (strcmp(name, "_") == 0) is_at_under = true;
                                 break;
@@ -1306,25 +1306,26 @@ static void handle_pod(TSNode node, const char *source_code,
                        const char *directory, const char *filename,
                        ParseResult *result, SymbolFilter *filter,
                        int line) {
-    char pod_text[COMMENT_TEXT_BUFFER];
-    safe_extract_node_text(source_code, node, pod_text, sizeof(pod_text), filename);
-
     char word[CLEANED_WORD_BUFFER];
     char cleaned[CLEANED_WORD_BUFFER];
-    char *p = pod_text;
+    uint32_t start = ts_node_start_byte(node);
+    uint32_t end = ts_node_end_byte(node);
+    const char *p = source_code + start;
+    const char *pod_end = source_code + end;
     int current_line = line;
 
-    while (*p) {
+    /* POD blocks can be much larger than COMMENT_TEXT_BUFFER in real scripts like exiftool. */
+    while (p < pod_end) {
         /* Directive lines start with '=': skip the directive keyword (=head1, =cut, etc.)
          * but index any remaining words on the line (e.g. "NAME" from "=head1 NAME") */
         if (*p == '=') {
-            while (*p && !isspace(*p)) p++;  /* skip directive keyword */
+            while (p < pod_end && *p != '\n' && !isspace((unsigned char)*p)) p++;  /* skip directive keyword */
         }
 
         /* Collect a line's words */
-        char *word_start = p;
-        while (*p && *p != '\n') {
-            if (isspace(*p)) {
+        const char *word_start = p;
+        while (p < pod_end && *p != '\n') {
+            if (isspace((unsigned char)*p)) {
                 if (p > word_start) {
                     size_t word_len = (size_t)(p - word_start);
                     if (word_len < sizeof(word)) {
@@ -1352,7 +1353,7 @@ static void handle_pod(TSNode node, const char *source_code,
                 }
             }
         }
-        if (*p == '\n') { p++; current_line++; }
+        if (p < pod_end && *p == '\n') { p++; current_line++; }
     }
 }
 

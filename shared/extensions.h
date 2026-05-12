@@ -68,4 +68,17 @@ int is_known_extension(const char *extension, const FileExtensions *known);
  */
 int is_plaintext_extension(const char *extension);
 
+/**
+ * Check whether a path matches the configured source file types.
+ *
+ * Primarily matches by configured extension. As a narrow fallback, this also
+ * accepts extensionless Perl scripts when Perl extensions are configured and
+ * the file shebang identifies a Perl interpreter.
+ *
+ * @param filepath Full path or filename to check
+ * @param extensions Configured source extensions for the current language
+ * @return 1 if the file should be indexed, 0 otherwise
+ */
+int path_matches_extensions(const char *filepath, const FileExtensions *extensions);
+
 #endif /* EXTENSIONS_H */

@@ -16,6 +16,7 @@
  * along with SourceMinder. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "file_walker.h"
+#include "extensions.h"
 #include "string_utils.h"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -293,20 +294,6 @@ static int is_file_ignored(const char *full_path, const char *filename, const Wo
     return 0;
 }
 
-static int has_valid_extension(const char *filename, const FileExtensions *extensions) {
-    if (!extensions || extensions->count == 0) return 0;
-
-    size_t len = strnlength(filename, FILENAME_MAX_LENGTH);
-
-    for (int i = 0; i < extensions->count; i++) {
-        size_t ext_len = strnlength(extensions->extensions[i], FILE_EXTENSION_MAX_LENGTH);
-        if (len > ext_len && strcmp(filename + len - ext_len, extensions->extensions[i]) == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
-
 static void walk_directory(const char *dir_path, FileList *files, const ExcludeDirs *exclude_dirs, const FileExtensions *extensions, const WordSet *ignore_dirs) {
     DIR *dir;
     struct dirent *entry;
@@ -352,7 +339,7 @@ static void walk_directory(const char *dir_path, FileList *files, const ExcludeD
                 continue;
             }
             /* Check if file has valid extension */
-            if (has_valid_extension(entry->d_name, extensions)) {
+            if (path_matches_extensions(path, extensions)) {
                 add_file_to_list(files, path);
             }
         }

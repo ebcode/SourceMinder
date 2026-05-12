@@ -24,6 +24,7 @@
 #include "string_utils.h"
 #include "file_opener.h"
 #include "constants.h"
+#include "extensions.h"
 #include "parse_result.h"
 #include "version.h"
 #include <stdio.h>
@@ -53,20 +54,6 @@ static int is_directory(const char *path) {
         return 0;
     }
     return S_ISDIR(st.st_mode);
-}
-
-static int has_valid_extension(const char *filename, const FileExtensions *extensions) {
-    if (!extensions || extensions->count == 0) return 0;
-
-    size_t len = strnlength(filename, FILENAME_MAX_LENGTH);
-
-    for (int i = 0; i < extensions->count; i++) {
-        size_t ext_len = strnlength(extensions->extensions[i], FILE_EXTENSION_MAX_LENGTH);
-        if (len > ext_len && strcmp(filename + len - ext_len, extensions->extensions[i]) == 0) {
-            return 1;
-        }
-    }
-    return 0;
 }
 
 static int db_exists(const char *path) {
@@ -382,7 +369,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     /* Validate file extensions if in file mode */
     if (mode == MODE_FILES) {
         for (int i = 0; i < target_count; i++) {
-            if (!has_valid_extension(targets[i], extensions)) {
+            if (!path_matches_extensions(targets[i], extensions)) {
                 fprintf(stderr, "Error: File '%s' does not match configured extensions:", targets[i]);
                 for (int j = 0; j < extensions->count; j++) {
                     fprintf(stderr, " %s", extensions->extensions[j]);
