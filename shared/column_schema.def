@@ -78,7 +78,7 @@ COLUMN(parent_symbol, TEXT, COL_TYPE_STRING, 8, "PARENT",    "PAR",   parent,   
        "qi count -p patterns  (finds patterns->count)")
 
 /* OOP-specific columns - only when OOP languages are enabled */
-#if ENABLED(TYPESCRIPT) || ENABLED(PHP) || ENABLED(GO) || ENABLED(PYTHON) || ENABLED(PERL)
+#if ENABLED(TYPESCRIPT) || ENABLED(PHP) || ENABLED(GO) || ENABLED(PYTHON) || ENABLED(PERL) || ENABLED(RUST)
 COLUMN(scope,         TEXT, COL_TYPE_STRING, 8,  "SCOPE",     "SCOPE", scope,     s, SCOPE_MAX_LENGTH, \
        "filter by scope (public, private, protected)", \
        "qi '*' -s public  (public members)")
