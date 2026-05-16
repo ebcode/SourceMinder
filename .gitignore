@@ -16,14 +16,16 @@ index-go
 index-perl
 index-php
 index-python
+index-rust
 index-ts
 qi
 query-index
 tools/ast-explorer-c
+tools/ast-explorer-go
 tools/ast-explorer-php
 tools/ast-explorer-python
+tools/ast-explorer-rust
 tools/ast-explorer-ts
-tools/ast-explorer-go
 tools/*
 !tools/sources
 !tools/*.*
