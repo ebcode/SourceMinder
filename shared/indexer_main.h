@@ -39,6 +39,7 @@ typedef struct IndexerConfig {
     ParserFreeFunc parser_free;       /* Function to free parser resources */
     ParserSetDebugFunc parser_set_debug; /* Optional function to enable debug mode */
     GetLanguageFunc get_language;     /* Optional: return TSLanguage* for ABI check */
+    const char *grammar_dir;          /* Optional: path to grammar repo (e.g. "tree-sitter-perl") */
 } IndexerConfig;
 
 /* Main indexer entry point

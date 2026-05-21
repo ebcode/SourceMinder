@@ -32,6 +32,12 @@ typedef const void *(*GetLanguageFunc)(void);
  * Returns 0 if compatible, -1 on mismatch.
  */
 int check_abi_version(GetLanguageFunc get_language, const char *lang_name,
+                      const char *grammar_dir,
                       int verbose, int troubleshoot, PreflightReport *report);
+
+/* Offer to run 'git checkout <tag>' interactively after a mismatch.
+ * Only call when STDIN_IS_TTY() is true and report->suggested_grammar_tag is set. */
+void offer_grammar_downgrade(const char *grammar_dir,
+                             const char *suggested_tag);
 
 #endif /* ABI_CHECK_H */
