@@ -55,6 +55,11 @@ static void parser_set_debug_wrapper(void *parser, int debug) {
     parser_set_debug((PerlParser*)parser, debug);
 }
 
+/* Wrapper for tree_sitter_perl to match GetLanguageFunc signature */
+static const void *get_language_wrapper(void) {
+    return (const void *)tree_sitter_perl();
+}
+
 int main(int argc, char *argv[]) {
     /* Check for --version flag */
     for (int i = 1; i < argc; i++) {
@@ -70,7 +75,8 @@ int main(int argc, char *argv[]) {
         .parser_init = parser_init_wrapper,
         .parser_parse = parser_parse_wrapper,
         .parser_free = parser_free_wrapper,
-        .parser_set_debug = parser_set_debug_wrapper
+        .parser_set_debug = parser_set_debug_wrapper,
+        .get_language = get_language_wrapper
     };
 
     return indexer_main(argc, argv, &config);

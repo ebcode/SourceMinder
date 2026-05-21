@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include "constants.h"
+#include "preflight_report.h"
 
 /* Validation result codes */
 #define VALIDATE_OK 0
@@ -63,22 +64,17 @@ ValidationResult validate_file_extensions(const char *filepath);
 /* Validation for regex patterns */
 ValidationResult validate_regex_patterns(const char *filepath);
 
-/* Print validation error (detailed, user-friendly) */
-void print_validation_error(const ValidationResult *result);
-
-/* Preflight validation: check ALL configuration before proceeding
+/* Preflight validation — split into start and end to allow additional checks
+ * (e.g. ABI compatibility) to be injected and reported in the same block.
  *
- * Validates all configuration files in lang_data_dir:
- * - stopwords.txt (required)
- * - keywords.txt (required)
- * - file-extensions.txt (required)
- * - ignore_files.txt (optional)
- * - regex-patterns.txt (optional)
+ * preflight_validation_start: runs all config-file and compile-time checks,
+ *   appending results to report.  Returns report->error_count.
  *
- * Also validates compile-time constants are sane.
- *
- * Returns 0 on success, -1 if any validation fails.
+ * preflight_validation_end: prints all deferred output and the PASSED/FAILED
+ *   banner.  Returns 0 on success, -1 if report->error_count > 0.
  */
-int preflight_validation(const char *lang_data_dir, int verbose);
+int  preflight_validation_start(const char *lang_data_dir, int verbose,
+                                PreflightReport *report);
+int  preflight_validation_end(const PreflightReport *report, int verbose);
 
 #endif /* VALIDATION_H */

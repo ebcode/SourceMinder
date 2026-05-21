@@ -34,6 +34,8 @@ typedef struct {
     int debug;
 } PerlParser;
 
+const TSLanguage *tree_sitter_perl(void);
+
 int parser_init(PerlParser *parser, SymbolFilter *filter);
 void parser_set_debug(PerlParser *parser, int debug);
 int parser_parse_file(PerlParser *parser, const char *filepath, const char *project_root, ParseResult *result);

@@ -21,6 +21,7 @@
 #include "database.h"
 #include "filter.h"
 #include "parse_result.h"
+#include "abi_check.h"
 
 /* Function pointer types for language-specific operations */
 typedef void* (*ParserInitFunc)(SymbolFilter *filter);
@@ -37,6 +38,7 @@ typedef struct IndexerConfig {
     ParserParseFunc parser_parse;     /* Function to parse a file */
     ParserFreeFunc parser_free;       /* Function to free parser resources */
     ParserSetDebugFunc parser_set_debug; /* Optional function to enable debug mode */
+    GetLanguageFunc get_language;     /* Optional: return TSLanguage* for ABI check */
 } IndexerConfig;
 
 /* Main indexer entry point
