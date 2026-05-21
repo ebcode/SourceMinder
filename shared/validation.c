@@ -18,12 +18,14 @@
 /* validation.c - Configuration file validation implementation */
 
 #include "validation.h"
+#include "preflight_report.h"
 #include "file_opener.h"
 #include "string_utils.h"
 #include "paths.h"
 #include "constants.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 /* Validate that a file exists and can be opened */
 ValidationResult validate_file_exists(const char *filepath) {
@@ -216,160 +218,159 @@ ValidationResult validate_regex_patterns(const char *filepath) {
 }
 
 /* Print detailed validation error message */
-void print_validation_error(const ValidationResult *result) {
-    fprintf(stderr, "\nERROR: Validation failed for %s\n", result->filepath);
-    fprintf(stderr, "       %s\n", result->message);
-
-    if (result->line > 0) {
-        fprintf(stderr, "       Line: %d\n", result->line);
+static void report_validation_error(PreflightReport *report,
+                                    const ValidationResult *result) {
+    if (result->line > 0 && result->actual_value > 0) {
+        preflight_report_add(report, PF_ERROR,
+            "%s: %s (line %d, found %zu, max %zu)",
+            result->filepath, result->message, result->line,
+            result->actual_value, result->max_allowed);
+    } else if (result->line > 0) {
+        preflight_report_add(report, PF_ERROR, "%s: %s (line %d)",
+            result->filepath, result->message, result->line);
+    } else if (result->actual_value > 0) {
+        preflight_report_add(report, PF_ERROR,
+            "%s: %s (found %zu, max %zu)",
+            result->filepath, result->message,
+            result->actual_value, result->max_allowed);
+    } else {
+        preflight_report_add(report, PF_ERROR, "%s: %s",
+            result->filepath, result->message);
     }
-
-    if (result->actual_value > 0 && result->max_allowed > 0) {
-        fprintf(stderr, "       Found: %zu, Maximum: %zu\n",
-                result->actual_value, result->max_allowed);
-    }
-
-    fprintf(stderr, "\n");
 }
 
-/* Preflight validation: Check ALL configuration before proceeding */
-int preflight_validation(const char *lang_data_dir, int verbose) {
+int preflight_validation_start(const char *lang_data_dir, int verbose,
+                               PreflightReport *report) {
     char filepath[PATH_MAX_LENGTH];
     char resolved_path[PATH_MAX_LENGTH];
     ValidationResult result;
-    int failed = 0;
 
-    if (verbose) {
-        printf("=== Preflight Validation ===\n");
-        printf("Data directory: %s\n\n", lang_data_dir);
-    }
+    (void)verbose; /* output is deferred; verbose controls end output only */
 
     /* --- Required Files --- */
 
-    /* 1. Validate stopwords.txt (shared, language-agnostic) */
     snprintf(filepath, sizeof(filepath), "%s/%s", SHARED_CONFIG_DIR, STOPWORDS_FILENAME);
-    if (verbose) printf("Checking %s...\n", filepath);
-
     if (resolve_data_file(filepath, resolved_path, sizeof(resolved_path)) == 0) {
         result = validate_word_list_file(resolved_path, MAX_FILTER_WORDS, WORD_MAX_LENGTH, 1);
-        if (result.code != VALIDATE_OK) {
-            print_validation_error(&result);
-            failed = 1;
-        } else if (verbose) {
-            printf("  VALID (%zu words)\n", result.actual_value);
-        }
+        if (result.code != VALIDATE_OK)
+            report_validation_error(report, &result);
+        else
+            preflight_report_add(report, PF_OK, "stopwords.txt (%zu words)",
+                                 result.actual_value);
     } else {
-        fprintf(stderr, "ERROR: Cannot find required file: %s\n", filepath);
-        failed = 1;
+        preflight_report_add(report, PF_ERROR,
+                             "Cannot find required file: %s", filepath);
     }
 
-    /* 2. Validate keywords.txt (language-specific) */
     snprintf(filepath, sizeof(filepath), "%s/%s", lang_data_dir, KEYWORDS_FILENAME);
-    if (verbose) printf("Checking %s...\n", filepath);
-
     if (resolve_data_file(filepath, resolved_path, sizeof(resolved_path)) == 0) {
         result = validate_word_list_file(resolved_path, MAX_FILTER_WORDS, WORD_MAX_LENGTH, 0);
-        if (result.code != VALIDATE_OK) {
-            print_validation_error(&result);
-            failed = 1;
-        } else if (verbose) {
-            printf("  VALID (%zu words)\n", result.actual_value);
-        }
+        if (result.code != VALIDATE_OK)
+            report_validation_error(report, &result);
+        else
+            preflight_report_add(report, PF_OK, "keywords.txt (%zu words)",
+                                 result.actual_value);
     } else {
-        fprintf(stderr, "ERROR: Cannot find required file: %s\n", filepath);
-        failed = 1;
+        preflight_report_add(report, PF_ERROR,
+                             "Cannot find required file: %s", filepath);
     }
 
-    /* 3. Validate file-extensions.txt */
     snprintf(filepath, sizeof(filepath), "%s/%s", lang_data_dir, FILE_EXTENSIONS_FILENAME);
-    if (verbose) printf("Checking %s...\n", filepath);
-
     if (resolve_data_file(filepath, resolved_path, sizeof(resolved_path)) == 0) {
         result = validate_file_extensions(resolved_path);
-        if (result.code != VALIDATE_OK) {
-            print_validation_error(&result);
-            failed = 1;
-        } else if (verbose) {
-            printf("  VALID (%zu extensions)\n", result.actual_value);
-        }
+        if (result.code != VALIDATE_OK)
+            report_validation_error(report, &result);
+        else
+            preflight_report_add(report, PF_OK, "file-extensions.txt (%zu extensions)",
+                                 result.actual_value);
     } else {
-        fprintf(stderr, "ERROR: Cannot find required file: %s\n", filepath);
-        failed = 1;
+        preflight_report_add(report, PF_ERROR,
+                             "Cannot find required file: %s", filepath);
     }
 
-    /* --- Optional Files (warnings only) --- */
+    /* --- Optional Files --- */
 
-    /* 4. Validate ignore_files.txt (optional) */
     snprintf(filepath, sizeof(filepath), "%s/%s", lang_data_dir, IGNORE_FILES_FILENAME);
-    if (verbose) printf("Checking %s...\n", filepath);
-
     if (resolve_data_file(filepath, resolved_path, sizeof(resolved_path)) == 0) {
         result = validate_file_exists(resolved_path);
         if (result.code == VALIDATE_OK) {
             result = validate_word_list_file(resolved_path, MAX_FILTER_WORDS, WORD_MAX_LENGTH, 1);
-            if (result.code != VALIDATE_OK) {
-                print_validation_error(&result);
-                failed = 1;
-            } else if (verbose) {
-                printf("  VALID (%zu directories)\n", result.actual_value);
-            }
+            if (result.code != VALIDATE_OK)
+                report_validation_error(report, &result);
+            else
+                preflight_report_add(report, PF_OK, "ignore_files.txt (%zu entries)",
+                                     result.actual_value);
         }
-    } else if (verbose) {
-        printf("  WARNING: Not found (optional, will use empty list)\n");
+    } else {
+        preflight_report_add(report, PF_WARNING,
+                             "ignore_files.txt not found (optional, using empty list)");
     }
 
-    /* 5. Validate regex-patterns.txt (optional) */
     snprintf(filepath, sizeof(filepath), "%s/%s", SHARED_CONFIG_DIR, REGEX_PATTERNS_FILENAME);
-    if (verbose) printf("Checking %s...\n", filepath);
-
     if (resolve_data_file(filepath, resolved_path, sizeof(resolved_path)) == 0) {
         result = validate_file_exists(resolved_path);
         if (result.code == VALIDATE_OK) {
             result = validate_regex_patterns(resolved_path);
-            if (result.code != VALIDATE_OK) {
-                print_validation_error(&result);
-                failed = 1;
-            } else if (verbose) {
-                printf("  VALID (%zu patterns)\n", result.actual_value);
-            }
+            if (result.code != VALIDATE_OK)
+                report_validation_error(report, &result);
+            else
+                preflight_report_add(report, PF_OK, "regex-patterns.txt (%zu patterns)",
+                                     result.actual_value);
         }
-    } else if (verbose) {
-        printf("  WARNING: Not found (optional, will use empty list)\n");
+    } else {
+        preflight_report_add(report, PF_WARNING,
+                             "regex-patterns.txt not found (optional, using empty list)");
     }
 
-    /* --- System Constraints --- */
+    /* --- Compile-time constants (redundant with _Static_assert, runtime feedback) --- */
 
-    /* 6. Validate buffer sizes are sane */
-    if (verbose) printf("\nChecking compile-time constants...\n");
-
-    /* These checks are redundant with _Static_assert but provide runtime feedback */
     if (PATH_MAX_LENGTH < DIRECTORY_MAX_LENGTH) {
-        fprintf(stderr, "FATAL ERROR: PATH_MAX_LENGTH (%d) < DIRECTORY_MAX_LENGTH (%d)\n",
-                PATH_MAX_LENGTH, DIRECTORY_MAX_LENGTH);
-        fprintf(stderr, "This should never happen (caught by _Static_assert)\n");
-        failed = 1;
-    } else if (verbose) {
-        printf("  OK: PATH_MAX_LENGTH (%d) >= DIRECTORY_MAX_LENGTH (%d)\n",
-               PATH_MAX_LENGTH, DIRECTORY_MAX_LENGTH);
+        preflight_report_add(report, PF_ERROR,
+            "PATH_MAX_LENGTH (%d) < DIRECTORY_MAX_LENGTH (%d) — should never happen",
+            PATH_MAX_LENGTH, DIRECTORY_MAX_LENGTH);
+    } else {
+        preflight_report_add(report, PF_OK, "PATH_MAX_LENGTH (%d) >= DIRECTORY_MAX_LENGTH (%d)",
+                             PATH_MAX_LENGTH, DIRECTORY_MAX_LENGTH);
     }
 
     if (SYMBOL_MAX_LENGTH <= MIN_SYMBOL_LENGTH) {
-        fprintf(stderr, "FATAL ERROR: SYMBOL_MAX_LENGTH (%d) <= MIN_SYMBOL_LENGTH (%d)\n",
-                SYMBOL_MAX_LENGTH, MIN_SYMBOL_LENGTH);
-        fprintf(stderr, "This should never happen (caught by _Static_assert)\n");
-        failed = 1;
-    } else if (verbose) {
-        printf("  OK: SYMBOL_MAX_LENGTH (%d) > MIN_SYMBOL_LENGTH (%d)\n",
-               SYMBOL_MAX_LENGTH, MIN_SYMBOL_LENGTH);
+        preflight_report_add(report, PF_ERROR,
+            "SYMBOL_MAX_LENGTH (%d) <= MIN_SYMBOL_LENGTH (%d) — should never happen",
+            SYMBOL_MAX_LENGTH, MIN_SYMBOL_LENGTH);
+    } else {
+        preflight_report_add(report, PF_OK, "SYMBOL_MAX_LENGTH (%d) > MIN_SYMBOL_LENGTH (%d)",
+                             SYMBOL_MAX_LENGTH, MIN_SYMBOL_LENGTH);
     }
 
-    /* --- Final Report --- */
+    return report->error_count;
+}
+
+int preflight_validation_end(const PreflightReport *report, int verbose) {
+    int failed = report->error_count > 0;
 
     if (verbose) {
+        printf("=== Preflight Validation ===\n\n");
+        for (int i = 0; i < report->count; i++) {
+            const PreflightMessage *m = &report->messages[i];
+            switch (m->severity) {
+                case PF_OK:      printf("  OK: %s\n",      m->text); break;
+                case PF_WARNING: printf("  WARNING: %s\n", m->text); break;
+                case PF_ERROR:   printf("  FAIL: %s\n",    m->text); break;
+                case PF_HINT:    printf("  %s\n",           m->text); break;
+            }
+        }
         printf("\n=== Preflight Validation %s ===\n", failed ? "FAILED" : "PASSED");
     }
 
     if (failed) {
+        if (!verbose) {
+            /* In non-verbose mode errors were not shown above — print them now */
+            for (int i = 0; i < report->count; i++) {
+                const PreflightMessage *m = &report->messages[i];
+                if (m->severity == PF_ERROR || m->severity == PF_HINT)
+                    fprintf(stderr, "  %s\n", m->text);
+            }
+        }
         fprintf(stderr, "\nPreflight validation failed. Please fix the errors above.\n");
         return -1;
     }

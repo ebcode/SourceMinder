@@ -31,9 +31,6 @@
 #include <ctype.h>
 #include <sys/stat.h>
 
-/* Declare the tree-sitter Perl language function */
-const TSLanguage *tree_sitter_perl(void);
-
 /* Global debug flag */
 static int g_debug = 0;
 
@@ -1525,7 +1522,13 @@ int parser_init(PerlParser *parser, SymbolFilter *filter) {
 
     const TSLanguage *lang = tree_sitter_perl();
     if (!ts_parser_set_language(parser->parser, lang)) {
-        fprintf(stderr, "index-perl: failed to set Perl language (ABI mismatch?)\n");
+        uint32_t grammar_abi = ts_language_abi_version(lang);
+        fprintf(stderr, "index-perl: ABI mismatch: grammar ABI=%u, "
+                "library supports %d-%d\n",
+                grammar_abi,
+                TREE_SITTER_MIN_COMPATIBLE_LANGUAGE_VERSION,
+                TREE_SITTER_LANGUAGE_VERSION);
+        fprintf(stderr, "Run: index-perl --troubleshoot  for diagnosis\n");
         ts_parser_delete(parser->parser);
         parser->parser = NULL;
         return -1;

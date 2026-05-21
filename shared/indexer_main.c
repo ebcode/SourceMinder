@@ -210,6 +210,7 @@ static void print_usage(const IndexerConfig *config) {
     printf("      --quiet-init               suppress initial indexing output (still shows re-index messages)\n");
     printf("      --silent                   suppress all output (initial + re-index messages)\n");
     printf("      --verbose                  show preflight checks and validation\n");
+    printf("      --troubleshoot             diagnose tree-sitter ABI and library issues, then exit\n");
     printf("      --exclude-dir DIR...       exclude directories (can specify multiple)\n");
     printf("  -f, --db-file PATH             database file location (default: code-index.db)\n");
     printf("      --echo MESSAGE             print message and continue (for testing)\n");
@@ -269,6 +270,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     int silent = 0;
     int verbose = 0;
     int debug = 0;
+    int troubleshoot = 0;
     int daemon_mode = 1;  /* Daemon mode enabled by default */
     ExcludeDirs exclude_dirs = { .count = 0 };
     char *targets[MAX_TARGETS];
@@ -286,6 +288,8 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
             silent = 1;
         } else if (strcmp(argv[i], "--verbose") == 0) {
             verbose = 1;
+        } else if (strcmp(argv[i], "--troubleshoot") == 0) {
+            troubleshoot = 1;
         } else if (strcmp(argv[i], "--debug") == 0) {
             debug = 1;
         } else if (strcmp(argv[i], "--echo") == 0) {
@@ -320,6 +324,19 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         }
     }
 
+    /* --troubleshoot implies --verbose */
+    if (troubleshoot) verbose = 1;
+
+    /* --troubleshoot: run full preflight diagnostics and exit (no targets needed) */
+    if (troubleshoot) {
+        PreflightReport report = {0};
+        preflight_validation_start(config->data_dir, verbose, &report);
+        if (config->get_language)
+            check_abi_version(config->get_language, config->name, verbose, 1, &report);
+        preflight_validation_end(&report, verbose);
+        return 0;
+    }
+
     if (target_count == 0) {
         fprintf(stderr, "Error: at least one directory or file required\n");
         return 1;
@@ -348,9 +365,14 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         daemon_mode = 0;  /* Silently disable for file mode */
     }
 
-    /* PREFLIGHT VALIDATION - Check ALL configuration before proceeding */
-    if (preflight_validation(config->data_dir, verbose) != 0) {
-        return EXIT_FAILURE;
+    /* PREFLIGHT VALIDATION */
+    {
+        PreflightReport report = {0};
+        preflight_validation_start(config->data_dir, verbose, &report);
+        if (config->get_language)
+            check_abi_version(config->get_language, config->name, verbose, 0, &report);
+        if (preflight_validation_end(&report, verbose) != 0)
+            return EXIT_FAILURE;
     }
 
     /* Initialize filter (all files validated) */
