@@ -27,6 +27,7 @@
 #include "extensions.h"
 #include "parse_result.h"
 #include "version.h"
+#include "interactive.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -332,8 +333,13 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         PreflightReport report = {0};
         preflight_validation_start(config->data_dir, verbose, &report);
         if (config->get_language)
-            check_abi_version(config->get_language, config->name, verbose, 1, &report);
+            check_abi_version(config->get_language, config->name, config->grammar_dir, verbose, 1, &report);
         preflight_validation_end(&report, verbose);
+        if (report.error_count > 0 &&
+            report.suggested_grammar_tag[0] != '\0' &&
+            config->grammar_dir &&
+            STDIN_IS_TTY())
+            offer_grammar_downgrade(config->grammar_dir, report.suggested_grammar_tag);
         return 0;
     }
 
@@ -370,7 +376,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         PreflightReport report = {0};
         preflight_validation_start(config->data_dir, verbose, &report);
         if (config->get_language)
-            check_abi_version(config->get_language, config->name, verbose, 0, &report);
+            check_abi_version(config->get_language, config->name, config->grammar_dir, verbose, 0, &report);
         if (preflight_validation_end(&report, verbose) != 0)
             return EXIT_FAILURE;
     }

@@ -16,6 +16,7 @@
  * along with SourceMinder. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "abi_check.h"
+#include "interactive.h"
 #include <tree_sitter/api.h>
 #include <stdio.h>
 #include <string.h>
@@ -133,9 +134,66 @@ static void report_runtime_linkage(PreflightReport *report) {
     popen_to_report(report, cmd, "  (no tree-sitter entry found)");
 }
 
+/* ── Compatible grammar tag search ──────────────────────────────────────── */
+
+#define MAX_TAGS_TO_SCAN 20
+
+/* Scan grammar_dir's git tags newest-first for the most recent tag whose
+ * parser.c LANGUAGE_VERSION falls within the library's supported ABI range.
+ * Writes the tag name into tag_out on success.  Returns 1 if found, 0 if not. */
+static int find_compatible_grammar_tag(const char *grammar_dir,
+                                       char *tag_out, size_t tag_size) {
+    char cmd[4096];
+    char tag[256];
+    int count = 0;
+
+    snprintf(cmd, sizeof(cmd),
+             "git -C \"%s\" tag --sort=-version:refname 2>/dev/null", grammar_dir);
+    FILE *tags = popen(cmd, "r");
+    if (!tags) return 0;
+
+    while (fgets(tag, sizeof(tag), tags) && count < MAX_TAGS_TO_SCAN) {
+        chomp(tag);
+        if (tag[0] == '\0') continue;
+        count++;
+
+        char ver_cmd[4096];
+        snprintf(ver_cmd, sizeof(ver_cmd),
+            "git -C \"%s\" show \"%s\":src/parser.c 2>/dev/null"
+            " | grep -m1 \"^#define LANGUAGE_VERSION\"",
+            grammar_dir, tag);
+
+        FILE *fp = popen(ver_cmd, "r");
+        if (!fp) continue;
+
+        char line[256];
+        int matched = 0;
+        if (fgets(line, sizeof(line), fp)) {
+            int ver = 0;
+            if (sscanf(line, "#define LANGUAGE_VERSION %d", &ver) == 1 &&
+                ver >= TREE_SITTER_MIN_COMPATIBLE_LANGUAGE_VERSION &&
+                ver <= TREE_SITTER_LANGUAGE_VERSION) {
+                strncpy(tag_out, tag, tag_size - 1);
+                tag_out[tag_size - 1] = '\0';
+                matched = 1;
+            }
+        }
+        pclose(fp);
+
+        if (matched) {
+            pclose(tags);
+            return 1;
+        }
+    }
+
+    pclose(tags);
+    return 0;
+}
+
 /* ── Public interface ────────────────────────────────────────────────────── */
 
 int check_abi_version(GetLanguageFunc get_language, const char *lang_name,
+                      const char *grammar_dir,
                       int verbose, int troubleshoot, PreflightReport *report) {
     const TSLanguage *lang = (const TSLanguage *)get_language();
     uint32_t grammar_abi = ts_language_abi_version(lang);
@@ -164,14 +222,72 @@ int check_abi_version(GetLanguageFunc get_language, const char *lang_name,
         report_runtime_linkage(report);
         if (!abi_ok) {
             preflight_report_add(report, PF_HINT,
-                "Fix: install a tree-sitter library whose ABI range includes %u",
-                grammar_abi);
+                "Option 1 — upgrade your library to one supporting ABI %u:", grammar_abi);
             preflight_report_add(report, PF_HINT,
-                "See docs/TROUBLESHOOTING.md for step-by-step instructions");
+                "  See docs/TROUBLESHOOTING.md for step-by-step instructions");
+
+            if (grammar_dir) {
+                char tag[256];
+                preflight_report_add(report, PF_HINT,
+                    "Option 2 — downgrade grammar to match your library"
+                    " (checking %s tags):", grammar_dir);
+                if (find_compatible_grammar_tag(grammar_dir, tag, sizeof(tag))) {
+                    strncpy(report->suggested_grammar_tag, tag,
+                            sizeof(report->suggested_grammar_tag) - 1);
+                    report->suggested_grammar_tag[
+                        sizeof(report->suggested_grammar_tag) - 1] = '\0';
+                    preflight_report_add(report, PF_HINT,
+                        "  Compatible tag found: %s", tag);
+                    preflight_report_add(report, PF_HINT,
+                        "  (note: older grammar may have reduced parse coverage)");
+                } else {
+                    preflight_report_add(report, PF_HINT,
+                        "  No compatible tag found in last %d tags",
+                        MAX_TAGS_TO_SCAN);
+                }
+            }
         }
     }
 
     (void)verbose; /* verbose controls output in preflight_validation_end, not here */
 
     return abi_ok ? 0 : -1;
+}
+
+/* ── Interactive grammar downgrade ──────────────────────────────────────── */
+
+void offer_grammar_downgrade(const char *grammar_dir, const char *suggested_tag) {
+    printf("\nFound compatible grammar tag: %s\n", suggested_tag);
+
+    char question[512];
+    snprintf(question, sizeof(question),
+             "Run: git -C %s checkout %s", grammar_dir, suggested_tag);
+
+    if (!prompt_yes_no(question)) {
+        printf("Skipped.\n");
+        return;
+    }
+
+    char cmd[4096];
+    snprintf(cmd, sizeof(cmd),
+             "git -C \"%s\" checkout \"%s\" 2>&1", grammar_dir, suggested_tag);
+
+    FILE *fp = popen(cmd, "r");
+    if (!fp) {
+        fprintf(stderr, "  Failed to run git checkout\n");
+        return;
+    }
+
+    char buf[512];
+    while (fgets(buf, sizeof(buf), fp)) printf("  %s", buf);
+    int status = pclose(fp);
+
+    if (status == 0) {
+        printf("\n  Checked out %s successfully.\n", suggested_tag);
+        printf("\nNext steps:\n");
+        printf("  1. cd %s && tree-sitter generate\n", grammar_dir);
+        printf("  2. Return to the SourceMinder directory and run: make\n");
+    } else {
+        fprintf(stderr, "  git checkout failed (exit code %d)\n", status);
+    }
 }

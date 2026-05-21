@@ -76,7 +76,8 @@ int main(int argc, char *argv[]) {
         .parser_parse = parser_parse_wrapper,
         .parser_free = parser_free_wrapper,
         .parser_set_debug = parser_set_debug_wrapper,
-        .get_language = get_language_wrapper
+        .get_language = get_language_wrapper,
+        .grammar_dir  = "tree-sitter-perl"
     };
 
     return indexer_main(argc, argv, &config);

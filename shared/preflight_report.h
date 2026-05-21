@@ -37,6 +37,7 @@ typedef struct {
     PreflightMessage messages[PREFLIGHT_MAX_MESSAGES];
     int count;
     int error_count;
+    char suggested_grammar_tag[256]; /* set by ABI check when a compatible downgrade tag is found */
 } PreflightReport;
 
 /* Append a formatted message to the report.  Silently drops messages beyond
