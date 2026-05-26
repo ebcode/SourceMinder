@@ -78,6 +78,7 @@ static int dir_exists(const char *path) {
     return (stat(path, &st) == 0 && S_ISDIR(st.st_mode));
 }
 
+/* HOST_ONLY: discovers extension metadata from language config files on the local filesystem. */
 int load_all_language_extensions(FileExtensions *all_exts) {
     all_exts->count = 0;
 

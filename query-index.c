@@ -266,6 +266,7 @@ static int should_skip_config_line(const char *line, int cli_flags) {
 }
 
 /* Load config file from ~/.smconfig and prepend args to argv */
+/* HOST_ONLY: reads CLI defaults from HOME and the local filesystem. */
 static int load_config_file(int *argc_ptr, char ***argv_ptr, int cli_flags) {
     /* Security note: We trust HOME environment variable for config file location.
      * If an attacker can set HOME, they can already execute arbitrary code in this
@@ -760,6 +761,7 @@ static void print_all_columns_row(RowData *data) {
 
 /* Process file pattern into directory and filename parts with %/ boundary matching
  * Returns: 0 on success, -1 on allocation failure */
+/* WEB_SAFE: normalizes file-pattern filters without requiring host services. */
 static int process_file_pattern(const char *input, char **dir_out, char **file_out) {
     /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) first */
     char converted_input[PATH_MAX_LENGTH];
@@ -865,6 +867,7 @@ static int process_file_pattern(const char *input, char **dir_out, char **file_o
 /* Helper function to build common filter clauses (file, context type, extensible columns)
  * Returns: 0 on success, -1 on error (buffer overflow or allocation failure)
  */
+/* WEB_SAFE: builds SQL filter clauses over indexed metadata only. */
 static int build_common_filters(SqlQueryBuilder *builder,
                                   ContextTypeList *include, ContextTypeList *exclude,
                                   QueryFilters *filters, FileFilterList *file_filter,
@@ -990,6 +993,7 @@ static int build_common_filters(SqlQueryBuilder *builder,
     return 0;
 }
 
+/* WEB_SAFE: composes pattern matching and common filters into query predicates. */
 static int build_query_filters(SqlQueryBuilder *builder, PatternList *patterns,
                                ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
                                WithinRangeList *within_ranges, int line_range, int debug) {
@@ -1205,6 +1209,7 @@ static void calculate_column_widths_from_query(CodeIndexDatabase *db, PatternLis
 
 /* Look up definitions for --within filter
  * Returns: 0 on success, -1 on error */
+/* WEB_SAFE: resolves --within scopes entirely from indexed definitions. */
 static int lookup_within_definitions(CodeIndexDatabase *db, WithinFilter *within_filter,
                                       WithinRangeList *within_ranges, int debug) {
     if (!within_filter || within_filter->count == 0) {
@@ -1315,6 +1320,7 @@ static int lookup_within_definitions(CodeIndexDatabase *db, WithinFilter *within
  * before: Number of lines to show before match
  * after: Number of lines to show after match
  */
+/* HOST_BRIDGED: requires source file contents; CLI reads locally, web must fetch via a host bridge. */
 static void print_context_lines(const char *filepath, int target_line,
                                  char **patterns, int pattern_count,
                                  int before, int after, int raw) {
@@ -1778,6 +1784,7 @@ static int get_total_file_count(CodeIndexDatabase *db, PatternList *patterns,
     return total;
 }
 
+/* HOST_ONLY: executes a query but renders CLI-oriented file-only output directly to stdout. */
 static void print_files_only(CodeIndexDatabase *db, PatternList *patterns,
                              ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
                              WithinRangeList *within_ranges, int limit, int line_range, int debug) {
@@ -1849,6 +1856,7 @@ static void print_files_only(CodeIndexDatabase *db, PatternList *patterns,
 }
 
 /* Execute two-step proximity search and populate temp table with results */
+/* WEB_SAFE: performs indexed proximity matching entirely inside SQLite. */
 static int execute_proximity_to_temp_table(CodeIndexDatabase *db, PatternList *patterns,
                                             ContextTypeList *include, ContextTypeList *exclude,
                                             QueryFilters *filters, FileFilterList *file_filter,
@@ -2110,6 +2118,7 @@ static void print_row_output(RowData *row, int show_all_columns, int compact) {
 }
 
 /* Helper: Print expansion or context lines if requested */
+/* HOST_BRIDGED: computes source spans locally but depends on host-provided source content retrieval. */
 static void print_expansion_or_context(const char *filepath, int line,
                                       const char *source_location, int is_definition,
                                       int expand, int context_before, int context_after,
@@ -2137,6 +2146,7 @@ static void print_expansion_or_context(const char *filepath, int line,
 /* Helper: Build SQL query (proximity vs normal)
  * Returns: 0 on success, -1 on error
  */
+/* WEB_SAFE: builds the final SQL query for indexed result retrieval. */
 static int build_query_sql(SqlQueryBuilder *builder, PatternList *patterns,
                             ContextTypeList *include, ContextTypeList *exclude,
                             QueryFilters *filters, FileFilterList *file_filter,
@@ -2178,6 +2188,7 @@ static void print_summary_stats(CodeIndexDatabase *db, PatternList *patterns,
     }
 }
 
+/* HOST_ONLY: mixes indexed querying with terminal rendering and host-backed source expansion. */
 static void print_results_by_file(CodeIndexDatabase *db, PatternList *patterns,
                                   ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
                                   WithinRangeList *within_ranges, int limit, int limit_per_file, int compact, int line_range, int expand, int context_before, int context_after, int debug, int show_all_columns, int raw, const FileExtensions *known_exts) {
@@ -2456,6 +2467,7 @@ static void print_context_types(void) {
     printf("  Special: -x noise expands to -x comment string\n");
 }
 
+/* HOST_ONLY: CLI entry point depends on argv parsing, filesystem checks, environment, and terminal output. */
 int main(int argc, char *argv[]) {
     int retval = 0;  /* Return value: 0 = success, 1 = error */
 

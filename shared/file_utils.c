@@ -43,6 +43,7 @@ void get_relative_path(const char *filepath, const char *project_root,
     }
 }
 
+/* WEB_SAFE: parses indexed source span metadata without accessing host resources. */
 int parse_source_location(const char *source_location, int *start_line, int *start_column,
                          int *end_line, int *end_column) {
     if (!source_location || !start_line || !start_column || !end_line || !end_column) {
@@ -59,6 +60,7 @@ int parse_source_location(const char *source_location, int *start_line, int *sta
     return 0;
 }
 
+/* HOST_BRIDGED: requires source file contents; CLI reads from disk, web must fetch through a host bridge. */
 int print_lines_range(const char *filepath, int start_line, int end_line,
                      int start_column, int end_column, int raw) {
     if (!filepath || start_line < 1 || end_line < start_line) {

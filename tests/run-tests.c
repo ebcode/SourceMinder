@@ -31,6 +31,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
+#include <time.h>
 
 #define MAX_PATH 4096
 #define MAX_CMD 8192
@@ -54,6 +56,8 @@ static int update_mode = 0;
 static int passed = 0;
 static int failed = 0;
 static int total = 0;
+
+static const char *daemon_test_symbol = "daemon_delete_probe";
 
 // Get language config by directory name
 static const Language *get_language(const char *dir_name) {
@@ -109,6 +113,167 @@ static int copy_file(const char *src, const char *dst) {
     char cmd[MAX_CMD];
     snprintf(cmd, sizeof(cmd), "cp %s %s", src, dst);
     return system(cmd);
+}
+
+static int write_text_file(const char *path, const char *contents) {
+    FILE *fp = fopen(path, "w");
+    if (!fp) {
+        return -1;
+    }
+
+    if (fputs(contents, fp) == EOF) {
+        fclose(fp);
+        return -1;
+    }
+
+    return fclose(fp);
+}
+
+static int file_contains_text(const char *path, const char *needle) {
+    FILE *fp = fopen(path, "r");
+    if (!fp) {
+        return 0;
+    }
+
+    char buffer[4096];
+    int found = 0;
+    while (fgets(buffer, sizeof(buffer), fp)) {
+        if (strstr(buffer, needle) != NULL) {
+            found = 1;
+            break;
+        }
+    }
+
+    fclose(fp);
+    return found;
+}
+
+static void sleep_ms(int milliseconds) {
+    struct timespec ts;
+    ts.tv_sec = milliseconds / 1000;
+    ts.tv_nsec = (long)(milliseconds % 1000) * 1000000L;
+    nanosleep(&ts, NULL);
+}
+
+static int wait_for_symbol_state(const char *db_path, const char *symbol,
+                                 const char *filename, int expect_present,
+                                 int timeout_ms) {
+    char output_path[MAX_PATH];
+    char cmd[MAX_CMD];
+    const int poll_ms = 100;
+    int elapsed = 0;
+
+    snprintf(output_path, sizeof(output_path), "scratch/daemon-delete-query-%d.txt", getpid());
+
+    while (elapsed <= timeout_ms) {
+        snprintf(cmd, sizeof(cmd), "./qi %s --db-file %s --files", symbol, db_path);
+        unlink(output_path);
+        if (run_command(cmd, output_path) == 0) {
+            int found = file_contains_text(output_path, filename);
+            if (found == expect_present) {
+                unlink(output_path);
+                return 0;
+            }
+        }
+
+        sleep_ms(poll_ms);
+        elapsed += poll_ms;
+    }
+
+    unlink(output_path);
+    return -1;
+}
+
+static void cleanup_daemon_test_paths(const char *db_path, const char *fixture_path,
+                                      const char *temp_dir) {
+    unlink(fixture_path);
+    unlink(db_path);
+    rmdir(temp_dir);
+}
+
+static void run_daemon_delete_smoke_test(void) {
+    char temp_dir[MAX_PATH];
+    char fixture_path[MAX_PATH];
+    char db_path[MAX_PATH];
+    const char *fixture_source = "int daemon_delete_probe(void) { return 7; }\n";
+    pid_t daemon_pid;
+    int status;
+
+    total++;
+    printf("  daemon/delete-smoke ... ");
+    fflush(stdout);
+
+    mkdir("scratch", 0755);
+
+    if (snprintf(temp_dir, sizeof(temp_dir), "scratch/sm-daemon-delete-%d", getpid()) >= (int)sizeof(temp_dir) ||
+        snprintf(fixture_path, sizeof(fixture_path), "%s/watched.c", temp_dir) >= (int)sizeof(fixture_path) ||
+        snprintf(db_path, sizeof(db_path), "scratch/sm-daemon-delete-%d.db", getpid()) >= (int)sizeof(db_path)) {
+        printf("FAIL (path too long)\n");
+        failed++;
+        cleanup_daemon_test_paths("", "", temp_dir);
+        return;
+    }
+
+    unlink(db_path);
+    if (mkdir(temp_dir, 0700) != 0 && errno != EEXIST) {
+        printf("FAIL (could not create temp dir)\n");
+        failed++;
+        cleanup_daemon_test_paths(db_path, fixture_path, temp_dir);
+        return;
+    }
+    if (write_text_file(fixture_path, fixture_source) != 0) {
+        printf("FAIL (could not create fixture)\n");
+        failed++;
+        cleanup_daemon_test_paths(db_path, fixture_path, temp_dir);
+        return;
+    }
+
+    daemon_pid = fork();
+    if (daemon_pid == -1) {
+        printf("FAIL (could not start daemon)\n");
+        failed++;
+        cleanup_daemon_test_paths(db_path, fixture_path, temp_dir);
+        return;
+    }
+
+    if (daemon_pid == 0) {
+        execl("./index-c", "./index-c", temp_dir, "--db-file", db_path, "--quiet-init", (char *)NULL);
+        _exit(127);
+    }
+
+    if (wait_for_symbol_state(db_path, daemon_test_symbol, "watched.c", 1, 5000) != 0) {
+        kill(daemon_pid, SIGTERM);
+        waitpid(daemon_pid, &status, 0);
+        printf("FAIL (symbol never appeared)\n");
+        failed++;
+        cleanup_daemon_test_paths(db_path, fixture_path, temp_dir);
+        return;
+    }
+
+    if (unlink(fixture_path) != 0) {
+        kill(daemon_pid, SIGTERM);
+        waitpid(daemon_pid, &status, 0);
+        printf("FAIL (could not delete fixture)\n");
+        failed++;
+        cleanup_daemon_test_paths(db_path, fixture_path, temp_dir);
+        return;
+    }
+
+    if (wait_for_symbol_state(db_path, daemon_test_symbol, "watched.c", 0, 5000) != 0) {
+        kill(daemon_pid, SIGTERM);
+        waitpid(daemon_pid, &status, 0);
+        printf("FAIL (symbol remained after delete)\n");
+        failed++;
+        cleanup_daemon_test_paths(db_path, fixture_path, temp_dir);
+        return;
+    }
+
+    kill(daemon_pid, SIGTERM);
+    waitpid(daemon_pid, &status, 0);
+
+    printf("PASS\n");
+    passed++;
+    cleanup_daemon_test_paths(db_path, fixture_path, temp_dir);
 }
 
 // Run a single test
@@ -306,8 +471,16 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "   Please compile first: make\n");
             return 2;
         }
+        if (strcmp(filter_lang, "c") == 0) {
+            run_daemon_delete_smoke_test();
+        }
         run_language_tests(filter_lang, lang);
     } else {
+        if (file_exists("./index-c")) {
+            printf("daemon tests:\n");
+            run_daemon_delete_smoke_test();
+            printf("\n");
+        }
         for (int i = 0; languages[i].name != NULL; i++) {
             if (!file_exists(languages[i].indexer)) {
                 printf("Skipping %s (indexer not found: %s)\n\n",

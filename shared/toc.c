@@ -50,6 +50,7 @@ static int add_entry_to_file(FileToc **files, int *file_count, const char *filep
                              const char *symbol, int start_line, int end_line, const char *context, int limit_per_file);
 
 /* Build SQL query for TOC */
+/* WEB_SAFE: builds TOC SQL from indexed metadata and caller-supplied filters. */
 static char *build_toc_query(const TocConfig *config) {
     static char query[8192];
     char *pos = query;
@@ -364,6 +365,7 @@ static void cleanup_files(FileToc *files, int file_count) {
 }
 
 /* Main TOC generation function */
+/* HOST_ONLY: current TOC entry point opens a DB by path and prints CLI-formatted output. */
 int build_toc(const TocConfig *config) {
     /* Validate config */
     if (config->file_pattern_count == 0) {

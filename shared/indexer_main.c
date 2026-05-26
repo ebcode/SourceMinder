@@ -23,6 +23,7 @@
 #include "validation.h"
 #include "string_utils.h"
 #include "file_opener.h"
+#include "file_utils.h"
 #include "constants.h"
 #include "extensions.h"
 #include "parse_result.h"
@@ -57,9 +58,38 @@ static int is_directory(const char *path) {
     return S_ISDIR(st.st_mode);
 }
 
-static int db_exists(const char *path) {
-    struct stat st;
-    return (stat(path, &st) == 0);
+static int delete_index_entries_for_path(CodeIndexDatabase *db, const char *filepath,
+                                         const char *project_root) {
+    char directory[DIRECTORY_MAX_LENGTH];
+    char filename[FILENAME_MAX_LENGTH];
+
+    get_relative_path(filepath, project_root, directory, filename);
+    return db_delete_by_file(db, directory, filename);
+}
+
+static int reindex_single_file(void *parser, ParserParseFunc parser_parse,
+                               CodeIndexDatabase *db, ParseResult *result,
+                               const char *filepath, const char *project_root,
+                               int *entry_count) {
+    if (parser_parse(parser, filepath, project_root, result) != 0) {
+        return -1;
+    }
+
+    if (delete_index_entries_for_path(db, filepath, project_root) != SQLITE_OK) {
+        return -1;
+    }
+
+    for (int i = 0; i < result->count; i++) {
+        if (db_insert(db, &result->entries[i]) != SQLITE_OK) {
+            return -1;
+        }
+    }
+
+    if (entry_count) {
+        *entry_count = result->count;
+    }
+
+    return 0;
 }
 
 /* Flag bits for tracking which CLI flags are present */
@@ -496,8 +526,6 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
 
     if (mode == MODE_FILES) {
         /* File mode: index individual files */
-        int db_already_exists = db_exists(db_file);
-
         /* Get current working directory for relative path calculation */
         char cwd[PATH_MAX_LENGTH];
         if (getcwd(cwd, sizeof(cwd)) == NULL) {
@@ -506,21 +534,11 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
 
         for (int i = 0; i < target_count; i++) {
             /* Parse the file to get directory and filename */
-            if (config->parser_parse(parser, targets[i], cwd, result) == 0) {
-                if (result->count > 0) {
-                    /* Delete existing entries if database existed */
-                    if (db_already_exists) {
-                        db_delete_by_file(&db, result->entries[0].directory, result->entries[0].filename);
-                    }
-
-                    /* Insert new entries */
-                    for (int j = 0; j < result->count; j++) {
-                        db_insert(&db, &result->entries[j]);
-                    }
-                }
-
+            int entry_count = 0;
+            if (reindex_single_file(parser, config->parser_parse, &db, result,
+                                    targets[i], cwd, &entry_count) == 0) {
                 if (!quiet_init && !silent) {
-                    printf("Indexed %s: %d entries\n", targets[i], result->count);
+                    printf("Indexed %s: %d entries\n", targets[i], entry_count);
                 }
                 total_files_processed++;
             }
@@ -560,19 +578,12 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
 
             /* Index each file */
             for (int i = 0; i < files->count; i++) {
-                if (config->parser_parse(parser, files->files[i], cwd, result) == 0) {
-                    if (result->count > 0) {
-                        /* Delete existing entries for this file */
-                        db_delete_by_file(&db, result->entries[0].directory, result->entries[0].filename);
-
-                        /* Insert new entries */
-                        for (int j = 0; j < result->count; j++) {
-                            db_insert(&db, &result->entries[j]);
-                        }
-                    }
+                int entry_count = 0;
+                if (reindex_single_file(parser, config->parser_parse, &db, result,
+                                        files->files[i], cwd, &entry_count) == 0) {
 
                     if (!quiet_init && !silent) {
-                        printf("Indexed %s: %d entries\n", files->files[i], result->count);
+                        printf("Indexed %s: %d entries\n", files->files[i], entry_count);
                     }
                 }
             }
@@ -631,6 +642,11 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
 
         /* Watch loop */
         FileEvent events[MAX_FILE_EVENTS];
+        char cwd[PATH_MAX_LENGTH];
+        if (getcwd(cwd, sizeof(cwd)) == NULL) {
+            snprintf(cwd, sizeof(cwd), ".");
+        }
+
         while (keep_running) {
             int event_count = file_watcher_wait(watcher, events, MAX_FILE_EVENTS);
             if (event_count < 0) {
@@ -681,25 +697,18 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
                     continue;  /* Skip ignored files */
                 }
 
-                /* Get current working directory for relative path calculation */
-                char cwd[PATH_MAX_LENGTH];
-                if (getcwd(cwd, sizeof(cwd)) == NULL) {
-                    snprintf(cwd, sizeof(cwd), ".");
+                if (events[i].type == FILE_EVENT_DELETED) {
+                    if (delete_index_entries_for_path(&db, events[i].filepath, cwd) == SQLITE_OK && !silent) {
+                        printf("Removed from index: %s\n", events[i].filepath);
+                    }
+                    continue;
                 }
 
-                if (config->parser_parse(parser, events[i].filepath, cwd, result) == 0) {
-                    if (result->count > 0) {
-                        /* Delete existing entries for this file */
-                        db_delete_by_file(&db, result->entries[0].directory, result->entries[0].filename);
-
-                        /* Insert new entries */
-                        for (int j = 0; j < result->count; j++) {
-                            db_insert(&db, &result->entries[j]);
-                        }
-                    }
-
+                int entry_count = 0;
+                if (reindex_single_file(parser, config->parser_parse, &db, result,
+                                        events[i].filepath, cwd, &entry_count) == 0) {
                     if (!silent) {
-                        printf("Reindexed: %s (%d symbols)\n", events[i].filepath, result->count);
+                        printf("Reindexed: %s (%d symbols)\n", events[i].filepath, entry_count);
                     }
                 }
             }

@@ -211,6 +211,7 @@ int resolve_shared_data_dir(char *out_path, size_t out_size) {
     return -1;
 }
 
+/* HOST_ONLY: resolves installed data files via environment variables and platform-specific filesystem paths. */
 int resolve_data_file(const char *relative_path, char *out_path, size_t out_size) {
     if (!relative_path || !out_path || out_size == 0) {
         return -1;

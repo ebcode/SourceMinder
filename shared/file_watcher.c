@@ -64,6 +64,16 @@ static int has_valid_extension_array(const char *filename, char extensions[][FIL
     return 0;
 }
 
+static int path_is_directory(const char *path) {
+    struct stat st;
+
+    if (stat(path, &st) != 0) {
+        return 0;
+    }
+
+    return S_ISDIR(st.st_mode);
+}
+
 /* Get current time in milliseconds */
 static long long current_time_ms(void) {
     LARGE_INTEGER freq, counter;
@@ -244,12 +254,21 @@ int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
                         filename, sizeof(filename) - 1, NULL, NULL);
                     filename[len] = '\0';
 
+                    /* Build full path before filtering so new directories can extend the watch set. */
+                    char filepath[4096];
+                    snprintf(filepath, sizeof(filepath), "%s/%s", watch->path, filename);
+
+                    if ((notify->Action == FILE_ACTION_ADDED ||
+                         notify->Action == FILE_ACTION_RENAMED_NEW_NAME) &&
+                        path_is_directory(filepath)) {
+                        add_watch_recursive(watcher, filepath);
+                        if (notify->NextEntryOffset == 0) break;
+                        notify = (FILE_NOTIFY_INFORMATION *)((char *)notify + notify->NextEntryOffset);
+                        continue;
+                    }
+
                     /* Check extension */
                     if (has_valid_extension_array(filename, watcher->extensions, watcher->extension_count)) {
-                        /* Build full path */
-                        char filepath[4096];
-                        snprintf(filepath, sizeof(filepath), "%s/%s", watch->path, filename);
-
                         /* Check for duplicates */
                         int already_exists = 0;
                         for (int i = 0; i < event_count; i++) {
@@ -334,17 +353,20 @@ void file_watcher_free(FileWatcher *watcher) {
 /* File descriptor tracking */
 typedef struct {
     int fd;                /* File descriptor */
-    char path[4096];       /* File path */
-} FileDescriptor;
+    char path[4096];       /* File or directory path */
+    int is_directory;      /* 1 for directory watches, 0 for file watches */
+} WatchEntry;
 
 /* File watcher structure for BSD */
 struct FileWatcher {
     int kq;                                    /* kqueue file descriptor */
-    FileDescriptor *fds;                       /* Array of file descriptors being watched */
-    int fd_count;                              /* Number of file descriptors */
-    int fd_capacity;                           /* Capacity of fds array */
+    WatchEntry *entries;                       /* Array of file/directory watches */
+    int entry_count;                           /* Number of active watches */
+    int entry_capacity;                        /* Capacity of entries array */
     char extensions[MAX_FILE_EXTENSIONS][FILE_EXTENSION_MAX_LENGTH];  /* File extensions */
     int extension_count;                       /* Number of extensions */
+    char roots[MAX_WATCH_DIRS][4096];          /* Root directories to rescan */
+    int root_count;                            /* Number of root directories */
 };
 
 /* Check if filename has valid extension */
@@ -362,38 +384,94 @@ static int has_valid_extension_array(const char *filename, char extensions[][FIL
     return 0;
 }
 
-/* Add file to watch list */
-static int add_file_watch(FileWatcher *watcher, const char *filepath) {
-    if (!has_valid_extension_array(filepath, watcher->extensions, watcher->extension_count)) {
-        return 0;  /* Skip files with wrong extension */
-    }
+static int path_exists(const char *path) {
+    struct stat st;
+    return stat(path, &st) == 0;
+}
 
-    /* Check if already watching this file */
-    for (int i = 0; i < watcher->fd_count; i++) {
-        if (strcmp(watcher->fds[i].path, filepath) == 0) {
-            return 0;  /* Already watching */
+static int add_event(FileEvent *events, int *event_count, int max_events,
+                     const char *filepath, FileEventType type) {
+    for (int i = 0; i < *event_count; i++) {
+        if (strcmp(events[i].filepath, filepath) == 0) {
+            if (type == FILE_EVENT_DELETED ||
+                (type == FILE_EVENT_CREATED && events[i].type == FILE_EVENT_MODIFIED)) {
+                events[i].type = type;
+            }
+            return 0;
         }
     }
 
-    /* Expand array if needed */
-    if (watcher->fd_count >= watcher->fd_capacity) {
-        size_t new_capacity = watcher->fd_capacity == 0 ? FILE_WATCHER_INITIAL_CAPACITY : (size_t)watcher->fd_capacity * 2;
-        FileDescriptor *new_fds = realloc(watcher->fds, new_capacity * sizeof(FileDescriptor));
-        if (!new_fds) {
-            fprintf(stderr, "Error: Failed to expand file descriptor array\n");
-            return -1;
-        }
-        watcher->fds = new_fds;
-        watcher->fd_capacity = (int)new_capacity;
+    if (*event_count >= max_events) {
+        return -1;
     }
 
-    /* Open file for monitoring */
-    int fd = open(filepath, O_RDONLY);
+    strncpy(events[*event_count].filepath, filepath, sizeof(events[*event_count].filepath) - 1);
+    events[*event_count].filepath[sizeof(events[*event_count].filepath) - 1] = '\0';
+    events[*event_count].type = type;
+    (*event_count)++;
+    return 0;
+}
+
+static int find_watch_index(FileWatcher *watcher, const char *path, int is_directory) {
+    for (int i = 0; i < watcher->entry_count; i++) {
+        if (watcher->entries[i].is_directory == is_directory &&
+            strcmp(watcher->entries[i].path, path) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static void remove_watch_entry(FileWatcher *watcher, int index) {
+    close(watcher->entries[index].fd);
+    watcher->entry_count--;
+    if (index != watcher->entry_count) {
+        watcher->entries[index] = watcher->entries[watcher->entry_count];
+    }
+}
+
+static int ensure_watch_capacity(FileWatcher *watcher) {
+    if (watcher->entry_count < watcher->entry_capacity) {
+        return 0;
+    }
+
+    size_t new_capacity = watcher->entry_capacity == 0 ? FILE_WATCHER_INITIAL_CAPACITY
+                                                       : (size_t)watcher->entry_capacity * 2;
+    WatchEntry *new_entries = realloc(watcher->entries, new_capacity * sizeof(WatchEntry));
+    if (!new_entries) {
+        fprintf(stderr, "Error: Failed to expand file descriptor array\n");
+        return -1;
+    }
+
+    watcher->entries = new_entries;
+    watcher->entry_capacity = (int)new_capacity;
+    return 0;
+}
+
+static int add_watch_entry(FileWatcher *watcher, const char *path, int is_directory) {
+    if (!is_directory &&
+        !has_valid_extension_array(path, watcher->extensions, watcher->extension_count)) {
+        return 0;
+    }
+
+    if (find_watch_index(watcher, path, is_directory) >= 0) {
+        return 0;
+    }
+
+    if (ensure_watch_capacity(watcher) != 0) {
+        return -1;
+    }
+
+#ifdef O_EVTONLY
+    int flags = is_directory ? O_EVTONLY : O_RDONLY;
+#else
+    int flags = O_RDONLY;
+#endif
+    int fd = open(path, flags);
     if (fd == -1) {
-        return 0;  /* Skip files we can't open */
+        return 0;
     }
 
-    /* Add to kqueue */
     struct kevent change;
     EV_SET(&change, fd, EVFILT_VNODE, EV_ADD | EV_CLEAR,
            NOTE_DELETE | NOTE_WRITE | NOTE_EXTEND | NOTE_ATTRIB | NOTE_RENAME,
@@ -401,51 +479,73 @@ static int add_file_watch(FileWatcher *watcher, const char *filepath) {
 
     if (kevent(watcher->kq, &change, 1, NULL, 0, NULL) == -1) {
         close(fd);
-        return 0;  /* Skip if we can't add to kqueue */
+        return 0;
     }
 
-    /* Store in our tracking array */
-    watcher->fds[watcher->fd_count].fd = fd;
-    strncpy(watcher->fds[watcher->fd_count].path, filepath, sizeof(watcher->fds[0].path) - 1);
-    watcher->fds[watcher->fd_count].path[sizeof(watcher->fds[0].path) - 1] = '\0';
-    watcher->fd_count++;
-
+    watcher->entries[watcher->entry_count].fd = fd;
+    watcher->entries[watcher->entry_count].is_directory = is_directory;
+    strncpy(watcher->entries[watcher->entry_count].path, path,
+            sizeof(watcher->entries[watcher->entry_count].path) - 1);
+    watcher->entries[watcher->entry_count].path[sizeof(watcher->entries[watcher->entry_count].path) - 1] = '\0';
+    watcher->entry_count++;
     return 0;
 }
 
-/* Recursively add all matching files in directory */
-static int add_directory_recursive(FileWatcher *watcher, const char *directory) {
+static int sync_directory_recursive(FileWatcher *watcher, const char *directory,
+                                    FileEvent *events, int *event_count, int max_events) {
     DIR *dir = opendir(directory);
-    if (!dir) return 0;
+    if (!dir) {
+        return 0;
+    }
+
+    add_watch_entry(watcher, directory, 1);
 
     struct dirent *entry;
     while ((entry = readdir(dir)) != NULL) {
-        /* Skip . and .. */
         if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
             continue;
         }
 
-        /* Build full path */
         char path[4096];
         snprintf(path, sizeof(path), "%s/%s", directory, entry->d_name);
 
-        /* Get file type */
         struct stat st;
         if (stat(path, &st) == -1) {
             continue;
         }
 
         if (S_ISDIR(st.st_mode)) {
-            /* Recursively add subdirectories */
-            add_directory_recursive(watcher, path);
-        } else if (S_ISREG(st.st_mode)) {
-            /* Add regular file */
-            add_file_watch(watcher, path);
+            sync_directory_recursive(watcher, path, events, event_count, max_events);
+        } else if (S_ISREG(st.st_mode) &&
+                   has_valid_extension_array(path, watcher->extensions, watcher->extension_count)) {
+            if (find_watch_index(watcher, path, 0) < 0) {
+                if (add_watch_entry(watcher, path, 0) == 0) {
+                    if (events) {
+                        add_event(events, event_count, max_events, path, FILE_EVENT_CREATED);
+                    }
+                }
+            }
         }
     }
 
     closedir(dir);
     return 0;
+}
+
+static void prune_missing_watches(FileWatcher *watcher, FileEvent *events,
+                                  int *event_count, int max_events) {
+    for (int i = watcher->entry_count - 1; i >= 0; i--) {
+        if (path_exists(watcher->entries[i].path)) {
+            continue;
+        }
+
+        if (!watcher->entries[i].is_directory) {
+            add_event(events, event_count, max_events,
+                      watcher->entries[i].path, FILE_EVENT_DELETED);
+        }
+
+        remove_watch_entry(watcher, i);
+    }
 }
 
 /* Get current time in milliseconds */
@@ -490,8 +590,14 @@ int file_watcher_add_directory(FileWatcher *watcher, const char *directory,
         }
     }
 
-    /* Recursively add all files in directory */
-    return add_directory_recursive(watcher, directory);
+    if (watcher->root_count < MAX_WATCH_DIRS) {
+        snprintf(watcher->roots[watcher->root_count], sizeof(watcher->roots[watcher->root_count]),
+                 "%s", directory);
+        watcher->root_count++;
+    }
+
+    int ignored_event_count = 0;
+    return sync_directory_recursive(watcher, directory, NULL, &ignored_event_count, 0);
 }
 
 int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
@@ -500,6 +606,7 @@ int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
     struct kevent eventlist[128];
     int event_count = 0;
     long long last_event_time = 0;
+    int rescan_required = 0;
 
     while (1) {
         /* Calculate timeout */
@@ -537,43 +644,41 @@ int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
         for (int i = 0; i < nev && event_count < max_events; i++) {
             struct kevent *kev = &eventlist[i];
 
-            /* Find the file path for this fd */
-            const char *filepath = NULL;
-            for (int j = 0; j < watcher->fd_count; j++) {
-                if (watcher->fds[j].fd == (int)kev->ident) {
-                    filepath = watcher->fds[j].path;
+            /* Find the path for this fd */
+            WatchEntry *watch_entry = NULL;
+            for (int j = 0; j < watcher->entry_count; j++) {
+                if (watcher->entries[j].fd == (int)kev->ident) {
+                    watch_entry = &watcher->entries[j];
                     break;
                 }
             }
 
-            if (!filepath) continue;
+            if (!watch_entry) continue;
 
-            /* Check if already in events (deduplicate) */
-            int already_exists = 0;
-            for (int j = 0; j < event_count; j++) {
-                if (strcmp(events[j].filepath, filepath) == 0) {
-                    already_exists = 1;
-                    break;
-                }
-            }
-
-            if (!already_exists) {
-                strncpy(events[event_count].filepath, filepath, sizeof(events[0].filepath) - 1);
-                events[event_count].filepath[sizeof(events[0].filepath) - 1] = '\0';
-
-                /* Determine event type */
-                if (kev->fflags & NOTE_DELETE) {
-                    events[event_count].type = FILE_EVENT_DELETED;
-                } else if (kev->fflags & (NOTE_WRITE | NOTE_EXTEND)) {
-                    events[event_count].type = FILE_EVENT_MODIFIED;
-                } else {
-                    events[event_count].type = FILE_EVENT_MODIFIED;
-                }
-
-                event_count++;
+            if (watch_entry->is_directory) {
+                rescan_required = 1;
                 last_event_time = current_time_ms();
+                continue;
             }
+
+            if (kev->fflags & (NOTE_DELETE | NOTE_RENAME)) {
+                add_event(events, &event_count, max_events,
+                          watch_entry->path, FILE_EVENT_DELETED);
+                rescan_required = 1;
+            } else if (kev->fflags & (NOTE_WRITE | NOTE_EXTEND | NOTE_ATTRIB)) {
+                add_event(events, &event_count, max_events,
+                          watch_entry->path, FILE_EVENT_MODIFIED);
+            }
+
+            last_event_time = current_time_ms();
         }
+    }
+
+    if (rescan_required) {
+        for (int i = 0; i < watcher->root_count; i++) {
+            sync_directory_recursive(watcher, watcher->roots[i], events, &event_count, max_events);
+        }
+        prune_missing_watches(watcher, events, &event_count, max_events);
     }
 
     return event_count;
@@ -583,11 +688,11 @@ void file_watcher_free(FileWatcher *watcher) {
     if (!watcher) return;
 
     /* Close all file descriptors */
-    for (int i = 0; i < watcher->fd_count; i++) {
-        close(watcher->fds[i].fd);
+    for (int i = 0; i < watcher->entry_count; i++) {
+        close(watcher->entries[i].fd);
     }
 
-    free(watcher->fds);
+    free(watcher->entries);
     close(watcher->kq);
     free(watcher);
 }
@@ -639,7 +744,8 @@ static int add_watch(FileWatcher *watcher, const char *path) {
         return -1;
     }
 
-    int wd = inotify_add_watch(watcher->fd, path, IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO);
+    int wd = inotify_add_watch(watcher->fd, path,
+                               IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO | IN_MOVED_FROM);
     if (wd == -1) {
         /* Silently skip directories we can't watch (permissions, etc.) */
         return 0;
@@ -787,16 +893,8 @@ int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
         for (char *ptr = buf; ptr < buf + len; ptr += sizeof(struct inotify_event) + event->len) {
             event = (const struct inotify_event *)ptr;
 
-            /* Skip directory events */
-            if (event->mask & IN_ISDIR) continue;
-
             /* Skip if no name */
             if (event->len == 0) continue;
-
-            /* Check extension */
-            if (!has_valid_extension_array(event->name, watcher->extensions, watcher->extension_count)) {
-                continue;
-            }
 
             /* Find directory path */
             const char *dir = find_watch_path(watcher, event->wd);
@@ -805,6 +903,19 @@ int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
             /* Build full path */
             char filepath[4096];
             snprintf(filepath, sizeof(filepath), "%s/%s", dir, event->name);
+
+            if (event->mask & IN_ISDIR) {
+                if (event->mask & (IN_CREATE | IN_MOVED_TO)) {
+                    add_watch_recursive(watcher, filepath);
+                }
+                last_event_time = current_time_ms();
+                continue;
+            }
+
+            /* Check extension */
+            if (!has_valid_extension_array(event->name, watcher->extensions, watcher->extension_count)) {
+                continue;
+            }
 
             /* Check if we already have this file in the events array (deduplicate) */
             int already_exists = 0;
@@ -824,7 +935,7 @@ int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
                     events[event_count].type = FILE_EVENT_MODIFIED;
                 } else if (event->mask & IN_CREATE) {
                     events[event_count].type = FILE_EVENT_CREATED;
-                } else if (event->mask & IN_DELETE) {
+                } else if (event->mask & (IN_DELETE | IN_MOVED_FROM)) {
                     events[event_count].type = FILE_EVENT_DELETED;
                 }
 
