@@ -1,0 +1,92 @@
+{
+  "name": "@sqlite.org/sqlite-wasm",
+  "version": "3.53.0-build1",
+  "description": "SQLite Wasm conveniently wrapped as an ES Module.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sqlite/sqlite-wasm.git"
+  },
+  "author": "Thomas Steiner (tomac@google.com)",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/sqlite/sqlite-wasm/issues"
+  },
+  "homepage": "https://github.com/sqlite/sqlite-wasm#readme",
+  "keywords": [
+    "sqlite",
+    "sqlite3",
+    "sqlite-wasm",
+    "sqlite3-wasm",
+    "webassembly",
+    "wasm",
+    "esm",
+    "opfs",
+    "origin-private-file-system"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.mjs",
+  "node": "./dist/node.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "node": "./dist/node.mjs",
+      "import": "./dist/index.mjs",
+      "main": "./dist/index.mjs",
+      "browser": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json",
+    "./sqlite3.wasm": "./dist/sqlite3.wasm"
+  },
+  "workspaces": [
+    "demos/*"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "vitest",
+    "test:node": "vitest --project node",
+    "test:browser": "vitest --project browser",
+    "publint": "npx publint",
+    "check-types": "tsgo",
+    "build": "tsdown",
+    "dev:kvvfs": "npm run dev -w demos/kvvfs-demo",
+    "dev:opfs": "npm run dev -w demos/opfs-demo",
+    "dev:opfs-wl": "npm run dev -w demos/opfs-wl-demo",
+    "dev:sahpool": "npm run dev -w demos/sahpool-demo",
+    "dev:sahpool-webpack": "npm run dev -w demos/sahpool-webpack-demo",
+    "dev:sahpool-parcel": "npm run dev -w demos/sahpool-parcel-demo",
+    "dev:sahpool-rsbuild": "npm run dev -w demos/sahpool-rsbuild-demo",
+    "dev:main-thread": "npm run dev -w demos/main-thread-demo",
+    "dev:in-worker": "npm run dev -w demos/in-worker-demo",
+    "start": "npx http-server --coop",
+    "start:node": "cd demo && node node.mjs",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "prepare": "lefthook install",
+    "prepublishOnly": "npm run build && npm run format && npm run publint && npm run check-types",
+    "deploy": "npm run prepublishOnly && git add . && git commit -am 'New release' && git push && npm publish --tag=latest"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260421.2",
+    "@vitest/browser": "^4.1.5",
+    "@vitest/browser-playwright": "^4.1.5",
+    "happy-dom": "20.9.0",
+    "lefthook": "2.1.6",
+    "oxfmt": "^0.46.0",
+    "playwright": "^1.59.1",
+    "publint": "^0.3.18",
+    "tsdown": "^0.21.9",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  }
+}

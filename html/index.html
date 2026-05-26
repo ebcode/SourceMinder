@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SourceMinder WASM SQLite Test</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, system-ui, sans-serif;
+      background: #0b1020;
+      color: #e6edf7;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #152040 0%, #0b1020 60%);
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 3vw, 3rem);
+    }
+
+    p {
+      color: #b9c3d4;
+      line-height: 1.5;
+    }
+
+    .panel {
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      background: rgba(8, 13, 28, 0.8);
+      backdrop-filter: blur(8px);
+    }
+
+    .status {
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .card {
+      padding: 16px;
+      border-radius: 12px;
+      background: #111a33;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .label {
+      display: block;
+      color: #93a1bc;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      vertical-align: top;
+    }
+
+    th {
+      color: #93a1bc;
+      font-weight: 600;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      color: #9dd4ff;
+    }
+
+    .error {
+      color: #ff9c9c;
+      white-space: pre-wrap;
+    }
+
+    .query-shell {
+      margin-top: 20px;
+    }
+
+    textarea,
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      background: #0d152b;
+      color: #e6edf7;
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 280px;
+      padding: 14px;
+      resize: vertical;
+    }
+
+    input {
+      margin-top: 12px;
+      padding: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>SourceMinder WASM SQLite Test</h1>
+    <p>
+      This page loads a browser-safe snapshot of the SourceMinder index into SQLite's official browser WASM build.
+      It is the first step toward running <code>qi</code> semantics in-browser while keeping source expansion on a separate API path.
+    </p>
+
+    <section class="panel">
+      <p id="status" class="status">Loading SQLite WASM...</p>
+      <div id="summary" class="grid" hidden></div>
+      <div id="contexts" hidden>
+        <h2>Top Context Counts</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Context</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody id="contexts-body"></tbody>
+        </table>
+      </div>
+      <div id="sample" hidden>
+        <h2>Sample Rows</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Context</th>
+              <th>File</th>
+              <th>Line</th>
+            </tr>
+          </thead>
+          <tbody id="sample-body"></tbody>
+        </table>
+      </div>
+      <div class="query-shell" hidden id="query-shell">
+        <h2>Tiny Query Form</h2>
+        <textarea id="query-output" readonly>Loading browser database...</textarea>
+        <input id="query-input" type="text" placeholder="Enter a qi command, for example: qi % -i call -x noise --limit 20">
+      </div>
+      <p id="error" class="error" hidden></p>
+    </section>
+  </main>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

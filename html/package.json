@@ -1,0 +1,12 @@
+{
+  "name": "sourceminder-html-test",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Minimal browser SQLite/WASM harness for SourceMinder",
+  "scripts": {
+    "serve": "python3 -m http.server 8000"
+  },
+  "dependencies": {
+    "@sqlite.org/sqlite-wasm": "^3.53.0-build1"
+  }
+}
