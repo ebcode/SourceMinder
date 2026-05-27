@@ -512,6 +512,13 @@ RUST_MAIN_OBJ = $(RUST_MAIN_SRC:.c=.o)
 QUERY_SRC = query-index.c
 QUERY_OBJ = $(QUERY_SRC:.c=.o)
 
+# Web/WASM query slice
+WEB_SRC = query-index-web.c
+WEB_ENTRY_SRC = qi-web-entry.c
+WEB_DIR = $(BUILD_DIR)/web
+WASM_DIR = wasm
+WEB_SHARED_SRC = shared/sql_builder.c shared/database.c shared/string_utils.c
+
 # Build directory
 BUILD_DIR = build
 
@@ -685,7 +692,29 @@ tests/run-tests: tests/run-tests.c
 	@echo "Compiling test runner..."
 	@$(CC) -std=c11 -Wall -Wextra -o tests/run-tests tests/run-tests.c
 
-.PHONY: all clean install install-data uninstall lint debug test
+# Web/WASM slice compile-only smoke test
+web-smoke: $(WEB_DIR)
+	emcc -I. -Ishared -std=c11 -c $(WEB_SRC) -o $(WEB_DIR)/query-index-web.o
+
+# Linked web/WASM module: qi SQL builder + output formatter (no sqlite3)
+web: $(WEB_DIR)
+	emcc -I$(WASM_DIR) -I. -Ishared -std=c11 -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE \
+		-O2 \
+		-sMODULARIZE=1 \
+		-sEXPORT_ES6=1 \
+		-sEXPORT_NAME='QiWebModule' \
+		-sEXPORTED_FUNCTIONS='["_qi_web_build","_qi_web_format","_qi_web_free_result","_malloc","_free"]' \
+		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString","lengthBytesUTF8","stringToUTF8"]' \
+		-sALLOW_MEMORY_GROWTH=1 \
+		-sINITIAL_MEMORY=32MB \
+		-o $(WEB_DIR)/qi-web.js \
+		$(WEB_SRC) $(WEB_ENTRY_SRC) $(WEB_SHARED_SRC)
+	cp $(WEB_DIR)/qi-web.js $(WEB_DIR)/qi-web.wasm html/
+
+$(WEB_DIR):
+	mkdir -p $(WEB_DIR)
+
+.PHONY: all clean install install-data uninstall lint debug test web web-smoke
 EOF_MAKEFILE
 
 # Substitute variables in Makefile

@@ -38,3 +38,9 @@ tmp/*
 token-science
 ai-log
 tmp/cachegrind*
+
+# WASM artifacts (generated)
+html/qi-web.js
+html/qi-web.wasm
+wasm/sqlite3.c
+wasm/sqlite3.h

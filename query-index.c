@@ -1412,7 +1412,7 @@ static void print_context_lines(const char *filepath, int target_line,
     fclose(fp);
 }
 
-/* Count distinct files matching the filters (excluding symbol search patterns) */
+/* WEB_SAFE: counts indexed files using SQLite filters only. */
 static int count_distinct_files(CodeIndexDatabase *db,
                                   ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
                                   WithinRangeList *within_ranges, int debug) {
@@ -1452,7 +1452,7 @@ static int count_distinct_files(CodeIndexDatabase *db,
     return file_count;
 }
 
-/* Count how many times a single pattern appears (ignoring all other filters) */
+/* WEB_SAFE: counts pattern matches against the indexed symbol column. */
 static int count_pattern_matches(CodeIndexDatabase *db, const char *pattern) {
     SqlQueryBuilder builder;
     if (init_sql_builder(&builder) != 0) {
@@ -1619,7 +1619,7 @@ static int has_any_filters(ContextTypeList *include, ContextTypeList *exclude, Q
     return 0;
 }
 
-/* Get total count of matches (ignoring limit) */
+/* WEB_SAFE: computes total match count from indexed data via SQL. */
 static int get_total_count(CodeIndexDatabase *db, PatternList *patterns,
                           ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
                           WithinRangeList *within_ranges, int line_range, int debug) {
@@ -1674,7 +1674,7 @@ static int get_total_count(CodeIndexDatabase *db, PatternList *patterns,
     return total;
 }
 
-/* Get context type summary for results (used when limit is hit) */
+/* WEB_SAFE: aggregates context-type counts from indexed data via SQL GROUP BY. */
 static void get_context_summary(CodeIndexDatabase *db, PatternList *patterns,
                                 ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
                                 WithinRangeList *within_ranges, int line_range, int debug) {
@@ -1738,7 +1738,7 @@ static void get_context_summary(CodeIndexDatabase *db, PatternList *patterns,
     free_sql_builder(&builder);
 }
 
-/* Get total count of distinct files matching filters */
+/* WEB_SAFE: counts distinct indexed files matching the full query. */
 static int get_total_file_count(CodeIndexDatabase *db, PatternList *patterns,
                                 ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter, WithinRangeList *within_ranges, int line_range, int debug) {
     /* Build SQL query with COUNT(DISTINCT ...) */
