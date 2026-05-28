@@ -763,14 +763,10 @@ static void print_all_columns_row(RowData *data) {
  * Returns: 0 on success, -1 on allocation failure */
 /* WEB_SAFE: normalizes file-pattern filters without requiring host services. */
 static int process_file_pattern(const char *input, char **dir_out, char **file_out) {
-    /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) first */
-    char converted_input[PATH_MAX_LENGTH];
-    convert_wildcards(input, converted_input, sizeof(converted_input));
-
-    /* Handle shorthand: .c → %.c, .h → %.h, etc. */
-    if ((converted_input[0] == '_' || converted_input[0] == '.') && converted_input[1] != '/' && converted_input[1] != '.') {
-        /* Extension shorthand detected */
-        size_t pattern_len = strlen(converted_input) + 2; /* % + extension + \0 */
+    /* Handle extension shorthand BEFORE wildcard conversion: .c → %.c, .h → %.h, etc.
+     * Must use raw input so '.' stays literal rather than becoming '_' (LIKE wildcard). */
+    if (input[0] == '.' && input[1] != '/' && input[1] != '.') {
+        size_t pattern_len = strlen(input) + 2; /* % + extension + \0 */
         char *expanded = malloc(pattern_len);
         if (!expanded) {
             fprintf(stderr, "Error: Failed to allocate memory for file pattern\n");
@@ -778,11 +774,15 @@ static int process_file_pattern(const char *input, char **dir_out, char **file_o
             *file_out = NULL;
             return -1;
         }
-        snprintf(expanded, pattern_len, "%%%s", converted_input);
+        snprintf(expanded, pattern_len, "%%%s", input);
         *dir_out = NULL;
         *file_out = expanded;
         return 0;
     }
+
+    /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) */
+    char converted_input[PATH_MAX_LENGTH];
+    convert_wildcards(input, converted_input, sizeof(converted_input));
 
     const char *last_slash = strrchr(converted_input, '/');
 
@@ -1031,7 +1031,12 @@ static int build_query_filters(SqlQueryBuilder *builder, PatternList *patterns,
             if (ret != 0) return -1;
         }
 
-        if (sql_append(builder, "))") != 0) return -1;  /* Close symbol filter and WHERE clause */
+        if (sql_append(builder, ")") != 0) return -1;  /* Close symbol filter */
+
+        /* Re-apply metadata filters to outer result rows */
+        if (build_common_filters(builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) return -1;
+
+        if (sql_append(builder, ")") != 0) return -1;  /* Close WHERE clause */
     } else {
         /* Original OR-based query for any-pattern matching */
         for (int i = 0; i < patterns->count; i++) {
@@ -1423,13 +1428,18 @@ static int count_distinct_files(CodeIndexDatabase *db,
         return 0;
     }
 
-    if (sql_append(&builder, "SELECT COUNT(DISTINCT directory || filename) FROM code_index WHERE 1=1") != 0) {
+    if (sql_append(&builder, "SELECT COUNT(*) FROM (SELECT DISTINCT directory, filename FROM code_index WHERE 1=1") != 0) {
         free_sql_builder(&builder);
         return 0;
     }
 
     /* Apply filters (file, context types, extensible columns) but NOT symbol search */
     if (build_common_filters(&builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
+        free_sql_builder(&builder);
+        return 0;
+    }
+
+    if (sql_append(&builder, ")") != 0) {
         free_sql_builder(&builder);
         return 0;
     }
@@ -1747,11 +1757,16 @@ static int get_total_file_count(CodeIndexDatabase *db, PatternList *patterns,
         return 0;
     }
 
-    if (sql_append(&builder, "SELECT COUNT(DISTINCT directory || filename) FROM code_index WHERE (") != 0) {
+    if (sql_append(&builder, "SELECT COUNT(*) FROM (SELECT DISTINCT directory, filename FROM code_index WHERE (") != 0) {
         free_sql_builder(&builder);
         return 0;
     }
     if (build_query_filters(&builder, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug) != 0) {
+        free_sql_builder(&builder);
+        return 0;
+    }
+
+    if (sql_append(&builder, ")") != 0) {
         free_sql_builder(&builder);
         return 0;
     }
@@ -1965,6 +1980,107 @@ static int execute_proximity_to_temp_table(CodeIndexDatabase *db, PatternList *p
         printf("SQL: [Range query template] %s\n", range_builder.sql);
     }
 
+    /* Pre-compile per-pattern EXISTS check statements (fixes #4 wildcard bug, #5 perf) */
+    int num_secondaries = patterns->count - 1;
+    sqlite3_stmt **check_stmts = calloc(num_secondaries, sizeof(sqlite3_stmt *));
+    if (!check_stmts) {
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+
+    int check_build_failed = 0;
+    for (int i = 0; i < num_secondaries; i++) {
+        SqlQueryBuilder check_builder;
+        if (init_sql_builder(&check_builder) != 0) {
+            check_build_failed = 1;
+            break;
+        }
+
+        char *escaped_pattern = sqlite3_mprintf("%q", patterns->patterns[i + 1]);
+        ret = sql_append(&check_builder,
+            "SELECT 1 FROM code_index WHERE filename = ? AND directory = ? "
+            "AND line BETWEEN ? AND ? AND symbol LIKE '%s' ESCAPE '\\' LIMIT 1",
+            escaped_pattern);
+        sqlite3_free(escaped_pattern);
+        if (ret != 0) {
+            free_sql_builder(&check_builder);
+            check_build_failed = 1;
+            break;
+        }
+
+        if (build_common_filters(&check_builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
+            free_sql_builder(&check_builder);
+            check_build_failed = 1;
+            break;
+        }
+
+        if (sqlite3_prepare_v2(db->db, check_builder.sql, -1, &check_stmts[i], NULL) != SQLITE_OK) {
+            free_sql_builder(&check_builder);
+            check_build_failed = 1;
+            break;
+        }
+        free_sql_builder(&check_builder);
+    }
+
+    if (check_build_failed) {
+        for (int i = 0; i < num_secondaries; i++) {
+            if (check_stmts[i]) sqlite3_finalize(check_stmts[i]);
+        }
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+
+    /* Pre-compile anchor insert statement */
+    SqlQueryBuilder insert_builder;
+    if (init_sql_builder(&insert_builder) != 0) {
+        for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+
+    char *escaped_anchor_insert = sqlite3_mprintf("%q", patterns->patterns[0]);
+    ret = sql_append(&insert_builder,
+        "INSERT INTO proximity_results "
+        "SELECT * FROM code_index WHERE filename = ? AND directory = ? "
+        "AND line = ? AND symbol LIKE '%s' ESCAPE '\\'", escaped_anchor_insert);
+    sqlite3_free(escaped_anchor_insert);
+    if (ret != 0) {
+        free_sql_builder(&insert_builder);
+        for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+
+    sqlite3_stmt *insert_stmt;
+    if (sqlite3_prepare_v2(db->db, insert_builder.sql, -1, &insert_stmt, NULL) != SQLITE_OK) {
+        free_sql_builder(&insert_builder);
+        for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+    free_sql_builder(&insert_builder);
+
+    /* Pre-compile range insert statement for secondaries */
+    sqlite3_stmt *range_stmt;
+    if (sqlite3_prepare_v2(db->db, range_builder.sql, -1, &range_stmt, NULL) != SQLITE_OK) {
+        sqlite3_finalize(insert_stmt);
+        for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+    free_sql_builder(&range_builder);
+
     int anchor_count = 0;
     int complete_matches = 0;
 
@@ -1974,118 +2090,50 @@ static int execute_proximity_to_temp_table(CodeIndexDatabase *db, PatternList *p
         int anchor_line = sqlite3_column_int(anchor_stmt, 2);
         anchor_count++;
 
-        /* Calculate range bounds */
         int min_line = anchor_line - line_range;
         if (min_line < 1) min_line = 1;
         int max_line = anchor_line + line_range;
 
-        /* First, check if ALL secondary patterns exist in range */
-        SqlQueryBuilder check_builder;
-        if (init_sql_builder(&check_builder) != 0) {
-            continue;
-        }
+        /* Check that EACH secondary pattern exists in range */
+        int all_found = 1;
+        for (int i = 0; i < num_secondaries; i++) {
+            sqlite3_reset(check_stmts[i]);
+            sqlite3_bind_text(check_stmts[i], 1, filename, -1, SQLITE_STATIC);
+            sqlite3_bind_text(check_stmts[i], 2, directory, -1, SQLITE_STATIC);
+            sqlite3_bind_int(check_stmts[i], 3, min_line);
+            sqlite3_bind_int(check_stmts[i], 4, max_line);
 
-        if (sql_append(&check_builder,
-            "SELECT COUNT(DISTINCT symbol) FROM code_index WHERE filename = ? AND directory = ? "
-            "AND line BETWEEN ? AND ? AND (") != 0) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-
-        int check_failed = 0;
-        for (int i = 1; i < patterns->count; i++) {
-            if (i > 1) {
-                if (sql_append(&check_builder, " OR ") != 0) {
-                    check_failed = 1;
-                    break;
-                }
-            }
-            char *escaped_pattern = sqlite3_mprintf("%q", patterns->patterns[i]);
-            ret = sql_append(&check_builder, "symbol LIKE '%s' ESCAPE '\\'", escaped_pattern);
-            sqlite3_free(escaped_pattern);
-            if (ret != 0) {
-                check_failed = 1;
+            if (sqlite3_step(check_stmts[i]) != SQLITE_ROW) {
+                all_found = 0;
                 break;
             }
         }
 
-        if (check_failed) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-
-        if (sql_append(&check_builder, ")") != 0) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-        if (build_common_filters(&check_builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-
-        sqlite3_stmt *check_stmt;
-        if (sqlite3_prepare_v2(db->db, check_builder.sql, -1, &check_stmt, NULL) != SQLITE_OK) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-        free_sql_builder(&check_builder);
-
-        sqlite3_bind_text(check_stmt, 1, filename, -1, SQLITE_STATIC);
-        sqlite3_bind_text(check_stmt, 2, directory, -1, SQLITE_STATIC);
-        sqlite3_bind_int(check_stmt, 3, min_line);
-        sqlite3_bind_int(check_stmt, 4, max_line);
-
-        int distinct_count = 0;
-        if (sqlite3_step(check_stmt) == SQLITE_ROW) {
-            distinct_count = sqlite3_column_int(check_stmt, 0);
-        }
-        sqlite3_finalize(check_stmt);
-
-        /* Only insert if ALL secondary patterns found */
-        if (distinct_count == patterns->count - 1) {
+        if (all_found) {
             complete_matches++;
 
             /* Insert anchor symbol */
-            SqlQueryBuilder insert_builder;
-            if (init_sql_builder(&insert_builder) != 0) {
-                continue;
-            }
-
-            char *escaped_anchor_insert = sqlite3_mprintf("%q", patterns->patterns[0]);
-            ret = sql_append(&insert_builder,
-                "INSERT INTO proximity_results "
-                "SELECT * FROM code_index WHERE filename = ? AND directory = ? "
-                "AND line = ? AND symbol LIKE '%s' ESCAPE '\\'", escaped_anchor_insert);
-            sqlite3_free(escaped_anchor_insert);
-            if (ret != 0) {
-                free_sql_builder(&insert_builder);
-                continue;
-            }
-
-            sqlite3_stmt *insert_stmt;
-            if (sqlite3_prepare_v2(db->db, insert_builder.sql, -1, &insert_stmt, NULL) == SQLITE_OK) {
-                sqlite3_bind_text(insert_stmt, 1, filename, -1, SQLITE_STATIC);
-                sqlite3_bind_text(insert_stmt, 2, directory, -1, SQLITE_STATIC);
-                sqlite3_bind_int(insert_stmt, 3, anchor_line);
-                sqlite3_step(insert_stmt);
-                sqlite3_finalize(insert_stmt);
-            }
-            free_sql_builder(&insert_builder);
+            sqlite3_reset(insert_stmt);
+            sqlite3_bind_text(insert_stmt, 1, filename, -1, SQLITE_STATIC);
+            sqlite3_bind_text(insert_stmt, 2, directory, -1, SQLITE_STATIC);
+            sqlite3_bind_int(insert_stmt, 3, anchor_line);
+            sqlite3_step(insert_stmt);
 
             /* Insert matching secondaries within range */
-            sqlite3_stmt *range_stmt;
-            if (sqlite3_prepare_v2(db->db, range_builder.sql, -1, &range_stmt, NULL) == SQLITE_OK) {
-                sqlite3_bind_text(range_stmt, 1, filename, -1, SQLITE_STATIC);
-                sqlite3_bind_text(range_stmt, 2, directory, -1, SQLITE_STATIC);
-                sqlite3_bind_int(range_stmt, 3, min_line);
-                sqlite3_bind_int(range_stmt, 4, max_line);
-                sqlite3_step(range_stmt);
-                sqlite3_finalize(range_stmt);
-            }
+            sqlite3_reset(range_stmt);
+            sqlite3_bind_text(range_stmt, 1, filename, -1, SQLITE_STATIC);
+            sqlite3_bind_text(range_stmt, 2, directory, -1, SQLITE_STATIC);
+            sqlite3_bind_int(range_stmt, 3, min_line);
+            sqlite3_bind_int(range_stmt, 4, max_line);
+            sqlite3_step(range_stmt);
         }
     }
+
     sqlite3_finalize(anchor_stmt);
-    free_sql_builder(&range_builder);
+    sqlite3_finalize(insert_stmt);
+    sqlite3_finalize(range_stmt);
+    for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+    free(check_stmts);
 
     if (debug) {
         printf("Proximity search: %d anchors found, %d complete matches\n",
@@ -2847,28 +2895,28 @@ int main(int argc, char *argv[]) {
         if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) {
             verbose = 1;
         }
-        if (strcmp(argv[i], "--compact") == 0) {
+        else if (strcmp(argv[i], "--compact") == 0) {
             compact = 1;
         }
-        if (strcmp(argv[i], "--full") == 0) {
+        else if (strcmp(argv[i], "--full") == 0) {
             compact = 0;
         }
-        if (strcmp(argv[i], "--debug") == 0) {
+        else if (strcmp(argv[i], "--debug") == 0) {
             debug = 1;
         }
-        if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--expand") == 0) {
+        else if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--expand") == 0) {
             expand = 1;
         }
-        if (strcmp(argv[i], "--raw") == 0) {
+        else if (strcmp(argv[i], "--raw") == 0) {
             raw_mode = 1;
         }
-        if (strcmp(argv[i], "--files") == 0) {
+        else if (strcmp(argv[i], "--files") == 0) {
             files_only = 1;
         }
-        if (strcmp(argv[i], "--toc") == 0) {
+        else if (strcmp(argv[i], "--toc") == 0) {
             toc_mode = 1;
         }
-        if ((strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--include-context") == 0)) {
+        else if ((strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--include-context") == 0)) {
             has_include = 1;
             /* Collect all include types until we hit another flag or end */
             while (i + 1 < argc && argv[i + 1][0] != '-') {
@@ -3049,11 +3097,11 @@ int main(int argc, char *argv[]) {
                 i++;
             }
         }
-        if (strcmp(argv[i], "--db-file") == 0 && i + 1 < argc) {
+        else if (strcmp(argv[i], "--db-file") == 0 && i + 1 < argc) {
             db_file = argv[i + 1];
             i++;
         }
-        if (strcmp(argv[i], "--limit") == 0 && i + 1 < argc) {
+        else if (strcmp(argv[i], "--limit") == 0 && i + 1 < argc) {
             char *endptr;
             errno = 0;
             long val = strtol(argv[i + 1], &endptr, 10);
@@ -3066,7 +3114,7 @@ int main(int argc, char *argv[]) {
             limit = (int)val;
             i++;
         }
-        if (strcmp(argv[i], "--limit-per-file") == 0 && i + 1 < argc) {
+        else if (strcmp(argv[i], "--limit-per-file") == 0 && i + 1 < argc) {
             char *endptr;
             errno = 0;
             long val = strtol(argv[i + 1], &endptr, 10);
@@ -3079,7 +3127,7 @@ int main(int argc, char *argv[]) {
             limit_per_file = (int)val;
             i++;
         }
-        if (strcmp(argv[i], "--lines") == 0 && i + 1 < argc) {
+        else if (strcmp(argv[i], "--lines") == 0 && i + 1 < argc) {
             /* Parse line range: "LINE" or "START-END" */
             const char *range_str = argv[i + 1];
             char *dash = strchr(range_str, '-');
@@ -3131,7 +3179,7 @@ int main(int argc, char *argv[]) {
             }
             i++;
         }
-        if (strcmp(argv[i], "--within") == 0 || strcmp(argv[i], "-w") == 0) {
+        else if (strcmp(argv[i], "--within") == 0 || strcmp(argv[i], "-w") == 0) {
             /* Collect all non-flag arguments as within symbols */
             if(debug){
               fprintf(stdout, "DEBUG: WITHIN FLAG PASSED\n");
@@ -3147,8 +3195,7 @@ int main(int argc, char *argv[]) {
                 i++;
             }
         }
-
-        if (strcmp(argv[i], "--and") == 0 || strcmp(argv[i], "--same-line") == 0) {
+        else if (strcmp(argv[i], "--and") == 0 || strcmp(argv[i], "--same-line") == 0) {
             /* Check if next arg is a number (range value) */
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 char *endptr;
@@ -3166,7 +3213,7 @@ int main(int argc, char *argv[]) {
                 line_range = 0;  /* No number provided, default to same line */
             }
         }
-        if (strcmp(argv[i], "-A") == 0) {
+        else if (strcmp(argv[i], "-A") == 0) {
             /* Check if next arg is a number or another flag */
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 char *endptr;
@@ -3189,7 +3236,7 @@ int main(int argc, char *argv[]) {
                 context_after = DEFAULT_CONTEXT_RANGE;
             }
         }
-        if (strcmp(argv[i], "-B") == 0) {
+        else if (strcmp(argv[i], "-B") == 0) {
             /* Check if next arg is a number or another flag */
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 char *endptr;
@@ -3212,7 +3259,7 @@ int main(int argc, char *argv[]) {
                 context_before = DEFAULT_CONTEXT_RANGE;
             }
         }
-        if (strcmp(argv[i], "-C") == 0) {
+        else if (strcmp(argv[i], "-C") == 0) {
             /* Check if next arg is a number or another flag */
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 char *endptr;
@@ -3234,7 +3281,13 @@ int main(int argc, char *argv[]) {
                 /* No argument provided, use default */
                 context_before = context_after = DEFAULT_CONTEXT_RANGE;
             }
-        }        
+        }
+        else if (argv[i][0] == '-') {
+            fprintf(stderr, "Error: Unrecognized option '%s'\n", argv[i]);
+            fprintf(stderr, "Run 'qi --help' for a list of valid options.\n");
+            retval = 1;
+            goto cleanup;
+        }
     }
 
     /* Validate --and (--same-line) requires 2+ patterns */
