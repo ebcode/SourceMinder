@@ -61,37 +61,106 @@ function runQuery(input) {
         return 'Error: No SQL built for query.\r\n';
     }
 
-    /* 2. Execute SQL against the in-memory DB */
-    var countSql = 'SELECT COUNT(*) FROM (' + sql + ' LIMIT -1)';
-    var total = expectSingleValue(activeDb, countSql);
-    console.log('[worker] total matches:', total);
+    /* Handle --within: resolve definition locations and inject WHERE clauses */
+    if (buildLines.WITHIN_SQL) {
+        var withinSql = buildLines.WITHIN_SQL;
+        console.log('[worker] WITHIN_SQL:', withinSql);
 
-    var rows = activeDb.selectArrays(sql + ' LIMIT ' + limit);
-    console.log('[worker] row count:', rows.length);
+        var t0 = performance.now();
+        var withinRows = activeDb.selectArrays(withinSql);
+        var t1 = performance.now();
+        console.log('[worker] within lookup rows:', withinRows.length, 'time:', (t1 - t0).toFixed(2) + 'ms');
 
-    if (rows.length > 0) {
-        console.log('[worker] first row (all columns):', JSON.stringify(rows[0]));
-        console.log('[worker]   row[0] (expect symbol?):', JSON.stringify(rows[0][0]));
-        console.log('[worker]   row[1] (expect dir?):   ', JSON.stringify(rows[0][1]));
-        console.log('[worker]   row[2] (expect file?):  ', JSON.stringify(rows[0][2]));
-        console.log('[worker]   row[3] (expect line?):  ', JSON.stringify(rows[0][3]));
-        console.log('[worker]   row[4] (expect ctx?):   ', JSON.stringify(rows[0][4]));
-        console.log('[worker]   row[5]:', JSON.stringify(rows[0][5]));
-        console.log('[worker]   row[6]:', JSON.stringify(rows[0][6]));
+        if (withinRows.length === 0) {
+            var syms = buildLines.WITHIN_SYMBOLS || '(unknown)';
+            return 'Error: No definition found for symbol ' + syms + '\r\n';
+        }
+
+        /* Verify each requested symbol was actually found */
+        var foundSyms = {};
+        for (var ri = 0; ri < withinRows.length; ri++) {
+            var matchedSym = String(withinRows[ri][3] || '').toLowerCase();
+            foundSyms[matchedSym] = true;
+        }
+        var withinSyms = (buildLines.WITHIN_SYMBOLS || '').split(/\s+/);
+        for (var si = 0; si < withinSyms.length; si++) {
+            var sym = withinSyms[si].toLowerCase();
+            if (sym && !foundSyms[sym]) {
+                return "Error: No definition found for symbol '" + sym + "'\r\n";
+            }
+        }
+
+        /* Determine column prefix based on whether query uses self-join alias */
+        var colPrefix = (sql.indexOf('code_index ci') >= 0) ? 'ci.' : '';
+
+        /* Build within WHERE clause from lookup results */
+        var withinClauses = [];
+        for (var ri = 0; ri < withinRows.length; ri++) {
+            var row = withinRows[ri];
+            var dir = String(row[0] || '');
+            var file = String(row[1] || '');
+            var srcloc = String(row[2] || '');
+
+            /* Parse source_location: "2150:1-2166:1" -> start=2150, end=2166 */
+            var startLine = 0, endLine = 0;
+            var dash = srcloc.indexOf('-');
+            if (dash >= 0) {
+                var startPart = srcloc.substring(0, dash);
+                var endPart = srcloc.substring(dash + 1);
+                var colon1 = startPart.indexOf(':');
+                var colon2 = endPart.indexOf(':');
+                startLine = parseInt(colon1 >= 0 ? startPart.substring(0, colon1) : startPart, 10);
+                endLine = parseInt(colon2 >= 0 ? endPart.substring(0, colon2) : endPart, 10);
+            }
+
+            if (startLine > 0 && endLine > 0) {
+                var d = dir.replace(/'/g, "''");
+                var f = file.replace(/'/g, "''");
+                withinClauses.push(
+                    '(' + colPrefix + "directory = '" + d + "'" +
+                    ' AND ' + colPrefix + "filename = '" + f + "'" +
+                    ' AND ' + colPrefix + 'line BETWEEN ' + startLine + ' AND ' + endLine + ')'
+                );
+            }
+        }
+
+        if (withinClauses.length > 0) {
+            var withinWhere = ' AND (' + withinClauses.join(' OR ') + ')';
+
+            /* Inject before ORDER BY */
+            var orderIdx = sql.indexOf('ORDER BY');
+            if (orderIdx >= 0) {
+                sql = sql.substring(0, orderIdx) + withinWhere + ' ' + sql.substring(orderIdx);
+            } else {
+                sql = sql + withinWhere;
+            }
+            console.log('[worker] SQL with within injected (first 400 chars):\n' + sql.substring(0, 400));
+        }
     }
 
-    /* 3. Marshal rows as TSV (line, context, symbol, directory, filename) */
+    /* 2. Execute SQL against the in-memory DB */
+    var countSql = buildLines.COUNT_SQL || ('SELECT COUNT(*) FROM (' + sql + ' LIMIT -1)');
+    var t0 = performance.now();
+    var total = expectSingleValue(activeDb, countSql);
+    var t1 = performance.now();
+    console.log('[worker] COUNT query:', (t1 - t0).toFixed(2) + 'ms', 'total matches:', total);
+
+    t0 = performance.now();
+    var rows = activeDb.selectArrays(sql + ' LIMIT ' + limit);
+    t1 = performance.now();
+    console.log('[worker] main query:', (t1 - t0).toFixed(2) + 'ms', 'row count:', rows.length);
+
+    if (rows.length > 0) {
+        console.log('[worker] first row (all 14 columns):', JSON.stringify(rows[0]));
+    }
+
+    /* 3. Marshal rows as TSV (all 14 columns, canonical SELECT * order) */
     var tsvLines = rows.map(function(row) {
-        return [
-            row[3] != null ? row[3] : '',
-            row[4] != null ? row[4] : '',
-            row[0] != null ? row[0] : '',
-            row[1] != null ? row[1] : '',
-            row[2] != null ? row[2] : ''
-        ].join('\t');
+        return row.map(function(v) { return v != null ? String(v) : ''; }).join('\t');
     });
     var rowsTsv = tsvLines.join('\n');
     console.log('[worker] rowsTsv (first 300 chars):\n' + rowsTsv.substring(0, 300));
+    console.log('[worker] TSV fields per row:', (tsvLines[0] || '').split('\t').length);
 
     /* 4. Format qi output via WASM */
     var formatted = qiModule.ccall('qi_web_format', 'string',
@@ -144,7 +213,7 @@ async function init() {
 
     /* Summary stats for the cards */
     var totalRows       = expectSingleValue(db, 'SELECT COUNT(*) FROM code_index');
-    var totalFiles      = expectSingleValue(db, 'SELECT COUNT(DISTINCT directory || filename) FROM code_index');
+    var totalFiles      = expectSingleValue(db, 'SELECT COUNT(*) FROM (SELECT DISTINCT directory, filename FROM code_index)');
     var distinctSymbols = expectSingleValue(db, 'SELECT COUNT(DISTINCT symbol) FROM code_index');
     var definitions     = expectSingleValue(db, 'SELECT COUNT(*) FROM code_index WHERE is_definition = 1');
 

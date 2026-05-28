@@ -95,21 +95,6 @@ typedef struct {
     int count;
 } WithinRangeList;
 
-typedef struct {
-    char *symbols[MAX_PATTERNS];
-    int count;
-} WithinFilter;
-
-typedef struct {
-    char context[CONTEXT_TYPE_MAX_LENGTH];
-    int count;
-} ContextCount;
-
-typedef struct {
-    ContextCount entries[MAX_CONTEXT_TYPES];
-    int count;
-} ContextSummary;
-
 /* -- Forward declarations from shared helpers (needed by web entry point) -- */
 
 /* from shared/string_utils.h */
@@ -133,7 +118,8 @@ int  process_file_pattern_web(const char *input, char **dir_out, char **file_out
 int  build_common_filters_web(SqlQueryBuilder *builder,
                               ContextTypeList *include, ContextTypeList *exclude,
                               QueryFilters *filters, FileFilterList *file_filter,
-                              WithinRangeList *within_ranges, int debug);
+                              WithinRangeList *within_ranges, int debug,
+                              const char *col_prefix);
 int  build_query_filters_web(SqlQueryBuilder *builder, PatternList *patterns,
                              ContextTypeList *include, ContextTypeList *exclude,
                              QueryFilters *filters, FileFilterList *file_filter,
@@ -142,29 +128,5 @@ int  build_query_sql_web(SqlQueryBuilder *builder, PatternList *patterns,
                          ContextTypeList *include, ContextTypeList *exclude,
                          QueryFilters *filters, FileFilterList *file_filter,
                          WithinRangeList *within_ranges, int line_range, int debug);
-int  count_distinct_files_web(CodeIndexDatabase *db,
-                              ContextTypeList *include, ContextTypeList *exclude,
-                              QueryFilters *filters, FileFilterList *file_filter,
-                              WithinRangeList *within_ranges, int debug);
-int  count_pattern_matches_web(CodeIndexDatabase *db, const char *pattern);
-int  get_total_count_web(CodeIndexDatabase *db, PatternList *patterns,
-                         ContextTypeList *include, ContextTypeList *exclude,
-                         QueryFilters *filters, FileFilterList *file_filter,
-                         WithinRangeList *within_ranges, int line_range, int debug);
-int  get_total_file_count_web(CodeIndexDatabase *db, PatternList *patterns,
-                              ContextTypeList *include, ContextTypeList *exclude,
-                              QueryFilters *filters, FileFilterList *file_filter,
-                              WithinRangeList *within_ranges, int line_range, int debug);
-int  get_context_summary_web(CodeIndexDatabase *db, PatternList *patterns,
-                             ContextTypeList *include, ContextTypeList *exclude,
-                             QueryFilters *filters, FileFilterList *file_filter,
-                             WithinRangeList *within_ranges, int line_range,
-                             int debug, ContextSummary *summary);
-int  lookup_within_definitions_web(CodeIndexDatabase *db, WithinFilter *within_filter,
-                                   WithinRangeList *within_ranges, int debug);
-int  execute_proximity_to_temp_table_web(CodeIndexDatabase *db, PatternList *patterns,
-                                         ContextTypeList *include, ContextTypeList *exclude,
-                                         QueryFilters *filters, FileFilterList *file_filter,
-                                         WithinRangeList *within_ranges, int line_range, int debug);
 
 #endif /* QUERY_INDEX_WEB_H */

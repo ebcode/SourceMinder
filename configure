@@ -694,11 +694,11 @@ tests/run-tests: tests/run-tests.c
 
 # Web/WASM slice compile-only smoke test
 web-smoke: $(WEB_DIR)
-	emcc -I. -Ishared -std=c11 -c $(WEB_SRC) -o $(WEB_DIR)/query-index-web.o
+	emcc -I. -Ishared -std=c11 -c -DENABLE_TYPESCRIPT=1 $(WEB_SRC) -o $(WEB_DIR)/query-index-web.o
 
 # Linked web/WASM module: qi SQL builder + output formatter (no sqlite3)
 web: $(WEB_DIR)
-	emcc -I$(WASM_DIR) -I. -Ishared -std=c11 -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE \
+	emcc -I$(WASM_DIR) -I. -Ishared -std=c11 -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE -DENABLE_TYPESCRIPT=1 \
 		-O2 \
 		-sMODULARIZE=1 \
 		-sEXPORT_ES6=1 \

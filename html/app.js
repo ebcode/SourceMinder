@@ -13,8 +13,14 @@ var errorEl = document.getElementById("error");
 
 var term = null;
 var cmdBuffer = "";
+var cursorPos = 0;
 var isExecuting = false;
 var PROMPT = "qi> ";
+
+/* Command history */
+var history = [];
+var historyIndex = -1;
+var savedBuffer = "";
 
 var worker = new Worker("./qi-worker.js", { type: "module" });
 
@@ -32,42 +38,84 @@ function termWrite(text) {
     if (term) term.write(text.replace(/\n/g, "\r\n"));
 }
 
+/* Redraw the prompt line using VT sequences: clear line, write prompt+buffer,
+ * position cursor.  Avoids character-by-character artifacts. */
+function redrawPrompt() {
+    if (!term) return;
+    term.write("\r\x1b[K" + PROMPT + cmdBuffer);
+    if (cmdBuffer.length > cursorPos)
+        term.write("\r\x1b[" + (PROMPT.length + cursorPos) + "C");
+}
+
+/* Called after completing a command (Enter / clear) to reset prompt state. */
+function resetPrompt() {
+    cmdBuffer = "";
+    cursorPos = 0;
+    redrawPrompt();
+}
+
 function runTinyQuery(input) {
-    if (isExecuting) { console.log('[main] runTinyQuery skipped: already executing'); return; }
+    if (isExecuting) { console.log("[main] runTinyQuery skipped: already executing"); return; }
     isExecuting = true;
-    console.log('[main] runTinyQuery posting:', input);
+    console.log("[main] runTinyQuery posting:", input);
     worker.postMessage({ type: "query", cmd: input });
+}
+
+/* History navigation */
+function historyUp() {
+    if (history.length === 0) return;
+    if (historyIndex === -1) savedBuffer = cmdBuffer;
+    if (historyIndex < history.length - 1) {
+        historyIndex++;
+        cmdBuffer = history[history.length - 1 - historyIndex];
+        cursorPos = cmdBuffer.length;
+        redrawPrompt();
+    }
+}
+
+function historyDown() {
+    if (historyIndex === -1) return;
+    if (historyIndex > 0) {
+        historyIndex--;
+        cmdBuffer = history[history.length - 1 - historyIndex];
+    } else {
+        historyIndex = -1;
+        cmdBuffer = savedBuffer;
+        savedBuffer = "";
+    }
+    cursorPos = cmdBuffer.length;
+    redrawPrompt();
 }
 
 worker.onmessage = function(event) {
     var msg = event.data;
-    console.log('[main] worker msg type:', msg.type);
+    console.log("[main] worker msg type:", msg.type);
 
     switch (msg.type) {
     case "status":
-        console.log('[main] status:', msg.message);
+        console.log("[main] status:", msg.message);
         setStatus(msg.message);
         break;
 
     case "ready":
-        console.log('[main] ready, version:', msg.version);
+        console.log("[main] ready, version:", msg.version);
         renderSummary(msg.summary);
         installTerminal();
         setStatus("SQLite WASM is running in-browser with SQLite " + msg.version + ".");
         break;
 
     case "output":
-        console.log('[main] output, length:', msg.text.length, 'first 200:', JSON.stringify(msg.text.substring(0, 200)));
+        console.log("[main] output, length:", msg.text.length, "first 200:", JSON.stringify(msg.text.substring(0, 200)));
         termWrite(msg.text);
         isExecuting = false;
-        termWrite(PROMPT);
+        resetPrompt();
         break;
 
     case "error":
-        console.error('[main] error:', msg.message);
+        console.error("[main] error:", msg.message);
         termWrite("Error: " + msg.message + "\r\n");
         isExecuting = false;
-        termWrite(PROMPT);
+        resetPrompt();
         break;
     }
 };
@@ -96,7 +144,37 @@ function installTerminal() {
     term.loadAddon(fitAddon);
     term.open(terminalContainerEl);
 
-    /* Handle keyboard input */
+    /* Intercept arrow keys, Home, End, Delete before xterm processes them.
+     * Return false to prevent xterm from emitting terminal escape sequences. */
+    term.attachCustomKeyEventHandler(function(event) {
+        if (isExecuting || event.type !== "keydown") return true;
+
+        switch (event.key) {
+        case "ArrowUp":    historyUp();   return false;
+        case "ArrowDown":  historyDown(); return false;
+        case "ArrowLeft":
+            if (cursorPos > 0) { cursorPos--; redrawPrompt(); }
+            return false;
+        case "ArrowRight":
+            if (cursorPos < cmdBuffer.length) { cursorPos++; redrawPrompt(); }
+            return false;
+        case "Home":
+            cursorPos = 0; redrawPrompt();
+            return false;
+        case "End":
+            cursorPos = cmdBuffer.length; redrawPrompt();
+            return false;
+        case "Delete":
+            if (cursorPos < cmdBuffer.length) {
+                cmdBuffer = cmdBuffer.slice(0, cursorPos) + cmdBuffer.slice(cursorPos + 1);
+                redrawPrompt();
+            }
+            return false;
+        }
+        return true; /* let xterm handle all other keys */
+    });
+
+    /* Handle keyboard input — printable chars, Backspace, Enter. */
     term.onData(function(data) {
         if (isExecuting) return;
 
@@ -104,30 +182,34 @@ function installTerminal() {
             var ch = data[i];
 
             if (ch === "\r") {
-                /* Enter pressed */
+                /* Enter pressed — submit command */
                 termWrite("\r\n");
                 var cmd = cmdBuffer.trim();
-                cmdBuffer = "";
                 if (cmd) {
                     if (cmd === "clear" || cmd === "cls") {
                         term.clear();
-                        termWrite(PROMPT);
+                        resetPrompt();
                     } else {
+                        if (history.length === 0 || history[history.length - 1] !== cmd)
+                            history.push(cmd);
+                        historyIndex = -1;
                         runTinyQuery(cmd);
                     }
                 } else {
-                    termWrite(PROMPT);
+                    resetPrompt();
                 }
             } else if (ch === "\x7f") {
-                /* Backspace */
-                if (cmdBuffer.length > 0) {
-                    cmdBuffer = cmdBuffer.slice(0, -1);
-                    termWrite("\b \b");
+                /* Backspace — delete character before cursor */
+                if (cursorPos > 0) {
+                    cmdBuffer = cmdBuffer.slice(0, cursorPos - 1) + cmdBuffer.slice(cursorPos);
+                    cursorPos--;
+                    redrawPrompt();
                 }
             } else if (ch >= " ") {
-                /* Printable character */
-                cmdBuffer += ch;
-                termWrite(ch);
+                /* Printable character — insert at cursor position */
+                cmdBuffer = cmdBuffer.slice(0, cursorPos) + ch + cmdBuffer.slice(cursorPos);
+                cursorPos++;
+                redrawPrompt();
             }
         }
     });
@@ -139,10 +221,10 @@ function installTerminal() {
     });
 
     termWrite("qi WASM bridge ready. Type a qi command.\r\n");
-    termWrite(PROMPT);
+    resetPrompt();
 
     /* Self-test */
-    var testCmd = "qi % -i call -x noise --limit 20";
+    var testCmd = "qi % -i call -v -x noise --limit 5";
     termWrite(testCmd + "\r\n");
     runTinyQuery(testCmd);
 }

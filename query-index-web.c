@@ -206,14 +206,11 @@ void convert_wildcards_web(const char *pattern, char *output, size_t output_size
 
 /* WEB_SAFE: exact extraction from query-index.c for browser-side file filter normalization. */
 int process_file_pattern_web(const char *input, char **dir_out, char **file_out) {
-    /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) first */
-    char converted_input[PATH_MAX_LENGTH];
-    convert_wildcards_web(input, converted_input, sizeof(converted_input));
-
-    /* Handle shorthand: .c -> %.c, .h -> %.h, etc. */
-    if ((converted_input[0] == '_' || converted_input[0] == '.') && converted_input[1] != '/' && converted_input[1] != '.') {
-        /* Extension shorthand detected */
-        size_t pattern_len = strlen(converted_input) + 2; /* % + extension + \0 */
+    /* Handle extension shorthand (.c, .h, .py, etc.) on raw input BEFORE
+     * wildcard conversion.  If conversion happened first, '.' → '_' and
+     * the pattern would incorrectly become a single-char LIKE wildcard. */
+    if (input[0] == '.' && input[1] != '\0' && input[1] != '/' && input[1] != '.') {
+        size_t pattern_len = strlen(input) + 2; /* % + extension + \0 */
         char *expanded = malloc(pattern_len);
         if (!expanded) {
             fprintf(stderr, "Error: Failed to allocate memory for file pattern\n");
@@ -221,11 +218,15 @@ int process_file_pattern_web(const char *input, char **dir_out, char **file_out)
             *file_out = NULL;
             return -1;
         }
-        snprintf(expanded, pattern_len, "%%%s", converted_input);
+        snprintf(expanded, pattern_len, "%%%s", input);
         *dir_out = NULL;
         *file_out = expanded;
         return 0;
     }
+
+    /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) */
+    char converted_input[PATH_MAX_LENGTH];
+    convert_wildcards_web(input, converted_input, sizeof(converted_input));
 
     const char *last_slash = strrchr(converted_input, '/');
 
@@ -307,11 +308,15 @@ int process_file_pattern_web(const char *input, char **dir_out, char **file_out)
     return 0;
 }
 
-/* WEB_SAFE: exact extraction from query-index.c for indexed metadata filter construction. */
+/* WEB_SAFE: exact extraction from query-index.c for indexed metadata filter
+ * construction.  col_prefix is prepended to column names to support table
+ * aliases (e.g. "ci.") in self-join proximity queries; pass "" for
+ * unaliased queries. */
 int build_common_filters_web(SqlQueryBuilder *builder,
                                     ContextTypeList *include, ContextTypeList *exclude,
                                     QueryFilters *filters, FileFilterList *file_filter,
-                                    WithinRangeList *within_ranges, int debug) {
+                                    WithinRangeList *within_ranges, int debug,
+                                    const char *col_prefix) {
     /* Add file filter (directory + filename) */
     if (file_filter && file_filter->count > 0) {
         if (sql_append(builder, " AND (") != 0) return -1;
@@ -325,8 +330,8 @@ int build_common_filters_web(SqlQueryBuilder *builder,
                 char *escaped_dir = sqlite3_mprintf("%q", file_filter->patterns[i].directory);
                 char *escaped_file = sqlite3_mprintf("%q", file_filter->patterns[i].filename);
                 int ret = sql_append(builder,
-                    "(directory LIKE %s ESCAPE '\\' AND filename LIKE %s ESCAPE '\\')",
-                    escaped_dir, escaped_file);
+                    "(%sdirectory LIKE %s ESCAPE '\\' AND %sfilename LIKE %s ESCAPE '\\')",
+                    col_prefix, escaped_dir, col_prefix, escaped_file);
                 sqlite3_free(escaped_dir);
                 sqlite3_free(escaped_file);
                 if (ret != 0) return -1;
@@ -334,8 +339,8 @@ int build_common_filters_web(SqlQueryBuilder *builder,
                 /* No directory part - filter filename only */
                 char *escaped_file = sqlite3_mprintf("%q", file_filter->patterns[i].filename);
                 int ret = sql_append(builder,
-                    "filename LIKE %s ESCAPE '\\'",
-                    escaped_file);
+                    "%sfilename LIKE %s ESCAPE '\\'",
+                    col_prefix, escaped_file);
                 sqlite3_free(escaped_file);
                 if (ret != 0) return -1;
             }
@@ -346,10 +351,10 @@ int build_common_filters_web(SqlQueryBuilder *builder,
     /* Add line range filter */
     if (filters && filters->line_start >= 0) {
         if (filters->line_end == filters->line_start) {
-            if (sql_append(builder, " AND line = %d", filters->line_start) != 0) return -1;
+            if (sql_append(builder, " AND %sline = %d", col_prefix, filters->line_start) != 0) return -1;
         } else {
-            if (sql_append(builder, " AND line BETWEEN %d AND %d",
-                filters->line_start, filters->line_end) != 0) return -1;
+            if (sql_append(builder, " AND %sline BETWEEN %d AND %d",
+                col_prefix, filters->line_start, filters->line_end) != 0) return -1;
         }
     }
 
@@ -368,8 +373,8 @@ int build_common_filters_web(SqlQueryBuilder *builder,
             char *escaped_dir = sqlite3_mprintf("%q", within_ranges->ranges[i].directory);
             char *escaped_file = sqlite3_mprintf("%q", within_ranges->ranges[i].filename);
             int ret = sql_append(builder,
-                "(directory = %s AND filename = %s AND line BETWEEN %d AND %d)",
-                escaped_dir, escaped_file,
+                "(%sdirectory = %s AND %sfilename = %s AND %sline BETWEEN %d AND %d)",
+                col_prefix, escaped_dir, col_prefix, escaped_file, col_prefix,
                 within_ranges->ranges[i].line_start, within_ranges->ranges[i].line_end);
             sqlite3_free(escaped_dir);
             sqlite3_free(escaped_file);
@@ -384,7 +389,7 @@ int build_common_filters_web(SqlQueryBuilder *builder,
 
     /* Add include filter - database now uses compact form */
     if (include && include->count > 0) {
-        if (sql_append(builder, " AND context IN (") != 0) return -1;
+        if (sql_append(builder, " AND %scontext IN (", col_prefix) != 0) return -1;
         for (int i = 0; i < include->count; i++) {
             if (sql_append(builder, "%s'%s'",
                 i > 0 ? ", " : "", context_to_string(include->types[i], 1)) != 0) return -1;
@@ -394,7 +399,7 @@ int build_common_filters_web(SqlQueryBuilder *builder,
 
     /* Add exclude filter - database now uses compact form */
     if (exclude && exclude->count > 0) {
-        if (sql_append(builder, " AND context NOT IN (") != 0) return -1;
+        if (sql_append(builder, " AND %scontext NOT IN (", col_prefix) != 0) return -1;
         for (int i = 0; i < exclude->count; i++) {
             if (sql_append(builder, "%s'%s'",
                 i > 0 ? ", " : "", context_to_string(exclude->types[i], 1)) != 0) return -1;
@@ -408,8 +413,8 @@ int build_common_filters_web(SqlQueryBuilder *builder,
         if (sql_append(builder, " AND (") != 0) return -1; \
         for (int i = 0; i < filters->name.count; i++) { \
             char *escaped_value = sqlite3_mprintf("%q", filters->name.values[i]); \
-            int ret = sql_append(builder, "%s" #name " LIKE %s ESCAPE '\\\\'", \
-                i > 0 ? " OR " : "", escaped_value); \
+            int ret = sql_append(builder, "%s%s" #name " LIKE %s ESCAPE '\\'", \
+                i > 0 ? " OR " : "", col_prefix, escaped_value); \
             sqlite3_free(escaped_value); \
             if (ret != 0) return -1; \
         } \
@@ -420,8 +425,8 @@ int build_common_filters_web(SqlQueryBuilder *builder,
         if (sql_append(builder, " AND (") != 0) return -1; \
         for (int i = 0; i < filters->name.count; i++) { \
             char *escaped_value = sqlite3_mprintf("%q", filters->name.values[i]); \
-            int ret = sql_append(builder, "%s" #name " LIKE %s ESCAPE '\\\\'", \
-                i > 0 ? " OR " : "", escaped_value); \
+            int ret = sql_append(builder, "%s%s" #name " LIKE %s ESCAPE '\\'", \
+                i > 0 ? " OR " : "", col_prefix, escaped_value); \
             sqlite3_free(escaped_value); \
             if (ret != 0) return -1; \
         } \
@@ -457,7 +462,7 @@ int build_query_filters_web(SqlQueryBuilder *builder, PatternList *patterns,
             if (ret != 0) return -1;
 
             /* Add all filters to each INTERSECT subquery */
-            if (build_common_filters_web(builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) return -1;
+            if (build_common_filters_web(builder, include, exclude, filters, file_filter, within_ranges, debug, "") != 0) return -1;
         }
 
         if (sql_append(builder, ") AND (") != 0) return -1;
@@ -472,6 +477,12 @@ int build_query_filters_web(SqlQueryBuilder *builder, PatternList *patterns,
             sqlite3_free(escaped_pattern);
             if (ret != 0) return -1;
         }
+
+        /* Re-apply metadata filters to the outer rows so only
+         * matching rows at intersection lines are returned */
+        if (build_common_filters_web(builder, include, exclude, filters,
+                                     file_filter, within_ranges, debug, "") != 0)
+            return -1;
 
         if (sql_append(builder, "))") != 0) return -1;
     } else {
@@ -488,260 +499,66 @@ int build_query_filters_web(SqlQueryBuilder *builder, PatternList *patterns,
         if (sql_append(builder, ")") != 0) return -1;
 
         /* Add filters once at the end for OR mode */
-        if (build_common_filters_web(builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) return -1;
+        if (build_common_filters_web(builder, include, exclude, filters, file_filter, within_ranges, debug, "") != 0) return -1;
     }
 
     return 0;
 }
 
-/* ==========================================================================
- * WEB_SAFE query execution layer
- * ========================================================================== */
+/* WEB_SAFE: builds a self-join EXISTS query for proximity search (--and RANGE).
+ * Produces single-SQL results equivalent to the temp-table approach used by
+ * the native CLI, without requiring multi-statement execution in the bridge.
+ *
+ * Generates:
+ *   SELECT * FROM code_index ci WHERE (
+ *     ci.symbol LIKE 'p1' ESCAPE '\' OR ci.symbol LIKE 'p2' ESCAPE '\'
+ *   )
+ *   [common filters with "ci." prefix]
+ *   AND EXISTS (SELECT 1 FROM code_index WHERE symbol LIKE 'p1' ESCAPE '\'
+ *     AND directory=ci.directory AND filename=ci.filename
+ *     AND ABS(line-ci.line)<=R [common filters with "" prefix])
+ *   ...
+ *   ORDER BY ci.directory, ci.filename, ci.line */
+static int build_query_sql_proximity_web(SqlQueryBuilder *builder,
+        PatternList *patterns, int line_range,
+        ContextTypeList *include, ContextTypeList *exclude,
+        QueryFilters *filters, FileFilterList *file_filter,
+        WithinRangeList *within_ranges, int debug) {
+    if (sql_append(builder, "SELECT * FROM code_index ci WHERE (") != 0) return -1;
 
-/* WEB_SAFE: counts indexed files using SQLite filters only. */
-int count_distinct_files_web(CodeIndexDatabase *db,
-                                     ContextTypeList *include, ContextTypeList *exclude,
-                                     QueryFilters *filters, FileFilterList *file_filter,
-                                     WithinRangeList *within_ranges, int debug) {
-    /* Build SQL query to count distinct files - apply all filters EXCEPT symbol patterns */
-    SqlQueryBuilder builder;
-    if (init_sql_builder(&builder) != 0) {
-        fprintf(stderr, "Error: Failed to initialize SQL query builder\n");
-        return 0;
-    }
-
-    if (sql_append(&builder, "SELECT COUNT(DISTINCT directory || filename) FROM code_index WHERE 1=1") != 0) {
-        free_sql_builder(&builder);
-        return 0;
-    }
-
-    /* Apply filters (file, context types, extensible columns) but NOT symbol search */
-    if (build_common_filters_web(&builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
-        free_sql_builder(&builder);
-        return 0;
-    }
-
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db->db, builder.sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Failed to prepare file count query: %s\n", sqlite3_errmsg(db->db));
-        free_sql_builder(&builder);
-        return 0;
-    }
-
-    int file_count = 0;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        file_count = sqlite3_column_int(stmt, 0);
-    }
-
-    sqlite3_finalize(stmt);
-    free_sql_builder(&builder);
-    return file_count;
-}
-
-/* WEB_SAFE: counts pattern matches against the indexed symbol column. */
-int count_pattern_matches_web(CodeIndexDatabase *db, const char *pattern) {
-    SqlQueryBuilder builder;
-    if (init_sql_builder(&builder) != 0) {
-        return -1;
-    }
-
-    if (sql_append(&builder, "SELECT COUNT(*) FROM code_index WHERE full_symbol LIKE ? ESCAPE '\\'") != 0) {
-        free_sql_builder(&builder);
-        return -1;
-    }
-
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db->db, builder.sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        free_sql_builder(&builder);
-        return -1;  /* Error */
-    }
-    free_sql_builder(&builder);
-
-    sqlite3_bind_text(stmt, 1, pattern, -1, SQLITE_STATIC);
-
-    int count = 0;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        count = sqlite3_column_int(stmt, 0);
-    }
-
-    sqlite3_finalize(stmt);
-    return count;
-}
-
-/* WEB_SAFE: computes total match count from indexed data via SQL. */
-int get_total_count_web(CodeIndexDatabase *db, PatternList *patterns,
-                                ContextTypeList *include, ContextTypeList *exclude,
-                                QueryFilters *filters, FileFilterList *file_filter,
-                                WithinRangeList *within_ranges, int line_range, int debug) {
-    /* Build SQL query with COUNT(*) */
-    SqlQueryBuilder builder;
-    if (init_sql_builder(&builder) != 0) {
-        return 0;
-    }
-
-    /* For proximity search, query temp table; otherwise query code_index */
-    if (line_range > 0 && patterns->count > 1) {
-        if (sql_append(&builder, "SELECT COUNT(*) FROM proximity_results") != 0) {
-            free_sql_builder(&builder);
-            return 0;
+    for (int i = 0; i < patterns->count; i++) {
+        if (i > 0) {
+            if (sql_append(builder, " OR ") != 0) return -1;
         }
-    } else {
-        if (sql_append(&builder, "SELECT COUNT(*) FROM code_index WHERE (") != 0) {
-            free_sql_builder(&builder);
-            return 0;
-        }
-        if (build_query_filters_web(&builder, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug) != 0) {
-            free_sql_builder(&builder);
-            return 0;
-        }
+        char *escaped = sqlite3_mprintf("%q", patterns->patterns[i]);
+        int ret = sql_append(builder, "ci.symbol LIKE %s ESCAPE '\\'", escaped);
+        sqlite3_free(escaped);
+        if (ret != 0) return -1;
     }
+    if (sql_append(builder, ")") != 0) return -1;
 
-    if (debug) {
-        fprintf(stderr, "SQL: [Get total count] %s\n", builder.sql);
-    }
-
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db->db, builder.sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        free_sql_builder(&builder);
-        return 0;  /* Return 0 if query fails */
-    }
-
-    /* Bind pattern parameters (only for OR mode) */
-    if (line_range < 0) {
-        for (int i = 0; i < patterns->count; i++) {
-            sqlite3_bind_text(stmt, i + 1, patterns->patterns[i], -1, SQLITE_STATIC);
-        }
-    }
-
-    int total = 0;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        total = sqlite3_column_int(stmt, 0);
-    }
-
-    sqlite3_finalize(stmt);
-    free_sql_builder(&builder);
-    return total;
-}
-
-/* WEB_SAFE: counts distinct indexed files matching the full query. */
-int get_total_file_count_web(CodeIndexDatabase *db, PatternList *patterns,
-                                     ContextTypeList *include, ContextTypeList *exclude,
-                                     QueryFilters *filters, FileFilterList *file_filter,
-                                     WithinRangeList *within_ranges, int line_range, int debug) {
-    /* Build SQL query with COUNT(DISTINCT ...) */
-    SqlQueryBuilder builder;
-    if (init_sql_builder(&builder) != 0) {
-        return 0;
-    }
-
-    if (sql_append(&builder, "SELECT COUNT(DISTINCT directory || filename) FROM code_index WHERE (") != 0) {
-        free_sql_builder(&builder);
-        return 0;
-    }
-    if (build_query_filters_web(&builder, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug) != 0) {
-        free_sql_builder(&builder);
-        return 0;
-    }
-
-    if (debug) {
-        fprintf(stderr, "SQL: [Get total file count] %s\n", builder.sql);
-    }
-
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db->db, builder.sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        free_sql_builder(&builder);
-        return 0;  /* Return 0 if query fails */
-    }
-
-    /* Bind pattern parameters (only for OR mode) */
-    if (line_range < 0) {
-        for (int i = 0; i < patterns->count; i++) {
-            sqlite3_bind_text(stmt, i + 1, patterns->patterns[i], -1, SQLITE_STATIC);
-        }
-    }
-
-    int total = 0;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        total = sqlite3_column_int(stmt, 0);
-    }
-
-    sqlite3_finalize(stmt);
-    free_sql_builder(&builder);
-    return total;
-}
-
-/* WEB_SAFE: aggregates context-type counts from indexed data via SQL GROUP BY.
- * In the web path, results accumulate into a ContextSummary struct instead of
- * printing to stdout (the CLI print behaviour lives in query-index.c). */
-int get_context_summary_web(CodeIndexDatabase *db, PatternList *patterns,
-                                    ContextTypeList *include, ContextTypeList *exclude,
-                                    QueryFilters *filters, FileFilterList *file_filter,
-                                    WithinRangeList *within_ranges, int line_range,
-                                    int debug, ContextSummary *summary) {
-    if (!summary) return -1;
-    summary->count = 0;
-
-    /* Build SQL query with GROUP BY context */
-    SqlQueryBuilder builder;
-    if (init_sql_builder(&builder) != 0) {
+    if (build_common_filters_web(builder, include, exclude, filters,
+                                 file_filter, within_ranges, debug, "ci.") != 0)
         return -1;
+
+    for (int i = 0; i < patterns->count; i++) {
+        if (sql_append(builder, " AND EXISTS (SELECT 1 FROM code_index WHERE ") != 0) return -1;
+
+        char *escaped = sqlite3_mprintf("%q", patterns->patterns[i]);
+        int ret = sql_append(builder,
+            "symbol LIKE %s ESCAPE '\\' AND directory=ci.directory AND filename=ci.filename AND ABS(line-ci.line)<=%d",
+            escaped, line_range);
+        sqlite3_free(escaped);
+        if (ret != 0) return -1;
+
+        if (build_common_filters_web(builder, include, exclude, filters,
+                                     file_filter, within_ranges, debug, "") != 0)
+            return -1;
+
+        if (sql_append(builder, ")") != 0) return -1;
     }
 
-    if (sql_append(&builder, "SELECT context, COUNT(*) as count FROM code_index WHERE (") != 0) {
-        free_sql_builder(&builder);
-        return -1;
-    }
-    if (build_query_filters_web(&builder, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug) != 0) {
-        free_sql_builder(&builder);
-        return -1;
-    }
-    if (sql_append(&builder, " GROUP BY context ORDER BY count DESC") != 0) {
-        free_sql_builder(&builder);
-        return -1;
-    }
-
-    if (debug) {
-        fprintf(stderr, "SQL: [Get context summary] %s\n", builder.sql);
-    }
-
-    sqlite3_stmt *stmt;
-    int rc = sqlite3_prepare_v2(db->db, builder.sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        free_sql_builder(&builder);
-        return -1;
-    }
-
-    /* Bind pattern parameters (only for OR mode) */
-    if (line_range < 0) {
-        for (int i = 0; i < patterns->count; i++) {
-            sqlite3_bind_text(stmt, i + 1, patterns->patterns[i], -1, SQLITE_STATIC);
-        }
-    }
-
-    while (sqlite3_step(stmt) == SQLITE_ROW && summary->count < MAX_CONTEXT_TYPES) {
-        const char *context_full = (const char *)sqlite3_column_text(stmt, 0);
-        int count = sqlite3_column_int(stmt, 1);
-
-        /* Convert to compact form for the summary entry */
-        char upper[CONTEXT_TYPE_MAX_LENGTH];
-        snprintf(upper, sizeof(upper), "%s", context_full);
-        to_upper(upper);
-        ContextType type = string_to_context(upper);
-        const char *context_compact = context_to_string(type, 1);
-
-        snprintf(summary->entries[summary->count].context,
-                 sizeof(summary->entries[summary->count].context),
-                 "%s", context_compact);
-        summary->entries[summary->count].count = count;
-        summary->count++;
-    }
-
-    sqlite3_finalize(stmt);
-    free_sql_builder(&builder);
+    if (sql_append(builder, " ORDER BY ci.directory, ci.filename, ci.line") != 0) return -1;
     return 0;
 }
 
@@ -750,351 +567,15 @@ int build_query_sql_web(SqlQueryBuilder *builder, PatternList *patterns,
                                 ContextTypeList *include, ContextTypeList *exclude,
                                 QueryFilters *filters, FileFilterList *file_filter,
                                 WithinRangeList *within_ranges, int line_range, int debug) {
-    /* For proximity search, query the temp table; otherwise query code_index */
+    /* For proximity search with range, use self-join EXISTS (single SQL) */
     if (line_range > 0 && patterns->count > 1) {
-        if (sql_append(builder,
-            "SELECT * FROM proximity_results ORDER BY directory, filename, line") != 0) {
-            return -1;
-        }
-    } else {
-        if (sql_append(builder, "SELECT * FROM code_index WHERE (") != 0) return -1;
-        if (build_query_filters_web(builder, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug) != 0) return -1;
-        if (sql_append(builder, " ORDER BY directory, filename, line") != 0) return -1;
+        return build_query_sql_proximity_web(builder, patterns, line_range,
+            include, exclude, filters, file_filter, within_ranges, debug);
     }
+
+    if (sql_append(builder, "SELECT * FROM code_index WHERE (") != 0) return -1;
+    if (build_query_filters_web(builder, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug) != 0) return -1;
+    if (sql_append(builder, " ORDER BY directory, filename, line") != 0) return -1;
     return 0;
 }
 
-/* WEB_SAFE: resolves --within scopes entirely from indexed definitions. */
-int lookup_within_definitions_web(CodeIndexDatabase *db, WithinFilter *within_filter,
-                                          WithinRangeList *within_ranges, int debug) {
-    if (!within_filter || within_filter->count == 0) {
-        if (debug) {
-            fprintf(stderr, "DEBUG: lookup_within_definitions, count: %d\n",
-                    within_filter ? within_filter->count : -1);
-        }
-        return 0;  /* No within filter, nothing to do */
-    }
-
-    int found_count = 0;
-
-    /* Look up each symbol separately */
-    for (int sym_idx = 0; sym_idx < within_filter->count; sym_idx++) {
-        const char *symbol = within_filter->symbols[sym_idx];
-        char normalized_symbol[SYMBOL_MAX_LENGTH];
-        to_lowercase_copy(symbol, normalized_symbol, sizeof(normalized_symbol));
-
-        /* Build SQL query to find all definitions */
-        SqlQueryBuilder builder;
-        if (init_sql_builder(&builder) != 0) {
-            continue;
-        }
-
-        char *escaped_symbol = sqlite3_mprintf("%q", normalized_symbol);
-        int ret = sql_append(&builder,
-            "SELECT directory, filename, source_location FROM code_index "
-            "WHERE symbol = %s AND is_definition = 1 AND source_location IS NOT NULL",
-            escaped_symbol);
-        sqlite3_free(escaped_symbol);
-        if (ret != 0) {
-            free_sql_builder(&builder);
-            continue;
-        }
-
-        if (debug) {
-            fprintf(stderr, "DEBUG: Within lookup SQL: %s\n", builder.sql);
-        }
-
-        sqlite3_stmt *stmt;
-        int rc = sqlite3_prepare_v2(db->db, builder.sql, -1, &stmt, NULL);
-        if (rc != SQLITE_OK) {
-            fprintf(stderr, "Error: Failed to prepare within lookup query: %s\n", sqlite3_errmsg(db->db));
-            free_sql_builder(&builder);
-            return -1;
-        }
-        free_sql_builder(&builder);
-
-        /* Execute query and collect ranges */
-        int symbol_found = 0;
-        while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-            if (within_ranges->count >= MAX_PATTERNS) {
-                fprintf(stderr, "Warning: Maximum within range limit (%d) reached\n", MAX_PATTERNS);
-                break;
-            }
-
-            const char *directory = (const char *)sqlite3_column_text(stmt, 0);
-            const char *filename = (const char *)sqlite3_column_text(stmt, 1);
-            const char *source_location = (const char *)sqlite3_column_text(stmt, 2);
-
-            /* Parse source_location to get line range */
-            int start_line, start_column, end_line, end_column;
-            if (parse_source_location(source_location, &start_line, &start_column,
-                                       &end_line, &end_column) == 0) {
-                /* Add range to list */
-                WithinRange *range = &within_ranges->ranges[within_ranges->count];
-                strncpy(range->directory, directory, DIRECTORY_MAX_LENGTH - 1);
-                range->directory[DIRECTORY_MAX_LENGTH - 1] = '\0';
-                strncpy(range->filename, filename, FILENAME_MAX_LENGTH - 1);
-                range->filename[FILENAME_MAX_LENGTH - 1] = '\0';
-                range->line_start = start_line;
-                range->line_end = end_line;
-                within_ranges->count++;
-                symbol_found = 1;
-                found_count++;
-
-                if (debug) {
-                    fprintf(stderr, "DEBUG: Found definition: %s/%s lines %d-%d\n",
-                            directory, filename, start_line, end_line);
-                }
-            }
-        }
-
-        sqlite3_finalize(stmt);
-
-        /* Error if this symbol had no definitions */
-        if (!symbol_found) {
-            fprintf(stderr, "Error: No definition found for symbol '%s'\n", symbol);
-            return -1;
-        }
-    }
-
-    return 0;
-}
-
-/* WEB_SAFE: performs indexed proximity matching entirely inside SQLite. */
-int execute_proximity_to_temp_table_web(CodeIndexDatabase *db, PatternList *patterns,
-                                                ContextTypeList *include, ContextTypeList *exclude,
-                                                QueryFilters *filters, FileFilterList *file_filter,
-                                                WithinRangeList *within_ranges, int line_range, int debug) {
-    /* Create temp table with same schema as code_index */
-    const char *create_temp =
-        "CREATE TEMP TABLE IF NOT EXISTS proximity_results AS "
-        "SELECT * FROM code_index LIMIT 0";
-
-    if (sqlite3_exec(db->db, "DROP TABLE IF EXISTS proximity_results", NULL, NULL, NULL) != SQLITE_OK) {
-        fprintf(stderr, "Failed to drop temp table: %s\n", sqlite3_errmsg(db->db));
-        return -1;
-    }
-
-    if (sqlite3_exec(db->db, create_temp, NULL, NULL, NULL) != SQLITE_OK) {
-        fprintf(stderr, "Failed to create temp table: %s\n", sqlite3_errmsg(db->db));
-        return -1;
-    }
-
-    /* Step 1: Build and execute anchor query (first pattern) */
-    SqlQueryBuilder anchor_builder;
-    if (init_sql_builder(&anchor_builder) != 0) {
-        return -1;
-    }
-
-    char *escaped_anchor = sqlite3_mprintf("%q", patterns->patterns[0]);
-    int ret = sql_append(&anchor_builder,
-        "SELECT directory, filename, line FROM code_index WHERE symbol LIKE %s ESCAPE '\\'",
-        escaped_anchor);
-    sqlite3_free(escaped_anchor);
-    if (ret != 0) {
-        free_sql_builder(&anchor_builder);
-        return -1;
-    }
-
-    /* Add common filters to anchor query */
-    if (build_common_filters_web(&anchor_builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
-        free_sql_builder(&anchor_builder);
-        return -1;
-    }
-    if (sql_append(&anchor_builder, " ORDER BY directory, filename, line") != 0) {
-        free_sql_builder(&anchor_builder);
-        return -1;
-    }
-
-    if (debug) {
-        fprintf(stderr, "SQL: [Anchor query] %s\n", anchor_builder.sql);
-    }
-
-    sqlite3_stmt *anchor_stmt;
-    if (sqlite3_prepare_v2(db->db, anchor_builder.sql, -1, &anchor_stmt, NULL) != SQLITE_OK) {
-        fprintf(stderr, "Anchor query failed: %s\n", sqlite3_errmsg(db->db));
-        free_sql_builder(&anchor_builder);
-        return -1;
-    }
-    free_sql_builder(&anchor_builder);
-
-    /* Step 2: For each anchor, find secondaries within range and insert into temp table */
-    SqlQueryBuilder range_builder;
-    if (init_sql_builder(&range_builder) != 0) {
-        sqlite3_finalize(anchor_stmt);
-        return -1;
-    }
-
-    if (sql_append(&range_builder,
-        "INSERT INTO proximity_results "
-        "SELECT * FROM code_index WHERE filename = ? AND directory = ? "
-        "AND line BETWEEN ? AND ? AND (") != 0) {
-        free_sql_builder(&range_builder);
-        sqlite3_finalize(anchor_stmt);
-        return -1;
-    }
-
-    /* Add all secondary patterns */
-    for (int i = 1; i < patterns->count; i++) {
-        if (i > 1) {
-            if (sql_append(&range_builder, " OR ") != 0) {
-                free_sql_builder(&range_builder);
-                sqlite3_finalize(anchor_stmt);
-                return -1;
-            }
-        }
-        char *escaped_pattern = sqlite3_mprintf("%q", patterns->patterns[i]);
-        ret = sql_append(&range_builder, "symbol LIKE %s ESCAPE '\\'", escaped_pattern);
-        sqlite3_free(escaped_pattern);
-        if (ret != 0) {
-            free_sql_builder(&range_builder);
-            sqlite3_finalize(anchor_stmt);
-            return -1;
-        }
-    }
-    if (sql_append(&range_builder, ")") != 0) {
-        free_sql_builder(&range_builder);
-        sqlite3_finalize(anchor_stmt);
-        return -1;
-    }
-
-    /* Add common filters */
-    if (build_common_filters_web(&range_builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
-        free_sql_builder(&range_builder);
-        sqlite3_finalize(anchor_stmt);
-        return -1;
-    }
-
-    if (debug) {
-        fprintf(stderr, "SQL: [Range query template] %s\n", range_builder.sql);
-    }
-
-    int anchor_count = 0;
-    int complete_matches = 0;
-
-    while (sqlite3_step(anchor_stmt) == SQLITE_ROW) {
-        const char *directory = (const char *)sqlite3_column_text(anchor_stmt, 0);
-        const char *filename = (const char *)sqlite3_column_text(anchor_stmt, 1);
-        int anchor_line = sqlite3_column_int(anchor_stmt, 2);
-        anchor_count++;
-
-        /* Calculate range bounds */
-        int min_line = anchor_line - line_range;
-        if (min_line < 1) min_line = 1;
-        int max_line = anchor_line + line_range;
-
-        /* First, check if ALL secondary patterns exist in range */
-        SqlQueryBuilder check_builder;
-        if (init_sql_builder(&check_builder) != 0) {
-            continue;
-        }
-
-        if (sql_append(&check_builder,
-            "SELECT COUNT(DISTINCT symbol) FROM code_index WHERE filename = ? AND directory = ? "
-            "AND line BETWEEN ? AND ? AND (") != 0) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-
-        int check_failed = 0;
-        for (int i = 1; i < patterns->count; i++) {
-            if (i > 1) {
-                if (sql_append(&check_builder, " OR ") != 0) {
-                    check_failed = 1;
-                    break;
-                }
-            }
-            char *escaped_pattern = sqlite3_mprintf("%q", patterns->patterns[i]);
-            ret = sql_append(&check_builder, "symbol LIKE %s ESCAPE '\\'", escaped_pattern);
-            sqlite3_free(escaped_pattern);
-            if (ret != 0) {
-                check_failed = 1;
-                break;
-            }
-        }
-
-        if (check_failed) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-
-        if (sql_append(&check_builder, ")") != 0) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-        if (build_common_filters_web(&check_builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-
-        sqlite3_stmt *check_stmt;
-        if (sqlite3_prepare_v2(db->db, check_builder.sql, -1, &check_stmt, NULL) != SQLITE_OK) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-        free_sql_builder(&check_builder);
-
-        sqlite3_bind_text(check_stmt, 1, filename, -1, SQLITE_STATIC);
-        sqlite3_bind_text(check_stmt, 2, directory, -1, SQLITE_STATIC);
-        sqlite3_bind_int(check_stmt, 3, min_line);
-        sqlite3_bind_int(check_stmt, 4, max_line);
-
-        int distinct_count = 0;
-        if (sqlite3_step(check_stmt) == SQLITE_ROW) {
-            distinct_count = sqlite3_column_int(check_stmt, 0);
-        }
-        sqlite3_finalize(check_stmt);
-
-        /* Only insert if ALL secondary patterns found */
-        if (distinct_count == patterns->count - 1) {
-            complete_matches++;
-
-            /* Insert anchor symbol */
-            SqlQueryBuilder insert_builder;
-            if (init_sql_builder(&insert_builder) != 0) {
-                continue;
-            }
-
-            char *escaped_anchor_insert = sqlite3_mprintf("%q", patterns->patterns[0]);
-            ret = sql_append(&insert_builder,
-                "INSERT INTO proximity_results "
-                "SELECT * FROM code_index WHERE filename = ? AND directory = ? "
-                "AND line = ? AND symbol LIKE %s ESCAPE '\\'", escaped_anchor_insert);
-            sqlite3_free(escaped_anchor_insert);
-            if (ret != 0) {
-                free_sql_builder(&insert_builder);
-                continue;
-            }
-
-            sqlite3_stmt *insert_stmt;
-            if (sqlite3_prepare_v2(db->db, insert_builder.sql, -1, &insert_stmt, NULL) == SQLITE_OK) {
-                sqlite3_bind_text(insert_stmt, 1, filename, -1, SQLITE_STATIC);
-                sqlite3_bind_text(insert_stmt, 2, directory, -1, SQLITE_STATIC);
-                sqlite3_bind_int(insert_stmt, 3, anchor_line);
-                sqlite3_step(insert_stmt);
-                sqlite3_finalize(insert_stmt);
-            }
-            free_sql_builder(&insert_builder);
-
-            /* Insert matching secondaries within range */
-            sqlite3_stmt *range_stmt;
-            if (sqlite3_prepare_v2(db->db, range_builder.sql, -1, &range_stmt, NULL) == SQLITE_OK) {
-                sqlite3_bind_text(range_stmt, 1, filename, -1, SQLITE_STATIC);
-                sqlite3_bind_text(range_stmt, 2, directory, -1, SQLITE_STATIC);
-                sqlite3_bind_int(range_stmt, 3, min_line);
-                sqlite3_bind_int(range_stmt, 4, max_line);
-                sqlite3_step(range_stmt);
-                sqlite3_finalize(range_stmt);
-            }
-        }
-    }
-    sqlite3_finalize(anchor_stmt);
-    free_sql_builder(&range_builder);
-
-    if (debug) {
-        fprintf(stderr, "Proximity search: %d anchors found, %d complete matches\n",
-               anchor_count, complete_matches);
-    }
-
-    return 0;
-}
