@@ -52,10 +52,68 @@ function runQuery(input) {
         return 'Error: ' + buildLines.ERROR + '\r\n';
     }
 
-    var sql = buildLines.SQL;
     var limit = parseInt(buildLines.LIMIT || '25', 10);
-    console.log('[worker] SQL:', sql);
     console.log('[worker] LIMIT:', limit);
+
+    /* TOC mode: different SQL, format, and output pipeline */
+    if (buildLines.MODE === 'toc') {
+        var tocSql = buildLines.TOC_SQL;
+        if (!tocSql) return 'Error: No TOC SQL built.\r\n';
+
+        /* Count breakdown by context type */
+        var contextCounts = '';
+        var countSql = buildLines.TOC_COUNT_SQL;
+        if (countSql) {
+            var t0 = performance.now();
+            try {
+                var countRows = activeDb.selectArrays(countSql);
+                var t1 = performance.now();
+                console.log('[worker] TOC count query:', (t1 - t0).toFixed(2) + 'ms', 'rows:', countRows.length);
+                var parts = [];
+                for (var ci = 0; ci < countRows.length; ci++) {
+                    parts.push(String(countRows[ci][0]) + ':' + String(countRows[ci][1]));
+                }
+                contextCounts = parts.join('\n');
+            } catch (e) {
+                console.error('[worker] TOC count query error:', e);
+                contextCounts = '';
+            }
+        }
+
+        /* Execute TOC SQL */
+        t0 = performance.now();
+        var tocQuery = limit > 0 ? (tocSql + ' LIMIT ' + limit) : tocSql;
+        var tocRows = activeDb.selectArrays(tocQuery);
+        t1 = performance.now();
+        console.log('[worker] TOC query:', (t1 - t0).toFixed(2) + 'ms', 'rows:', tocRows.length);
+
+        /* Count total available (without limit) */
+        var totalAvailable = tocRows.length;
+        if (limit > 0 && tocRows.length >= limit) {
+            try {
+                totalAvailable = expectSingleValue(activeDb,
+                    'SELECT COUNT(*) FROM (' + tocSql + ')');
+            } catch (e) {
+                totalAvailable = tocRows.length;
+            }
+        }
+
+        /* Marshal TOC rows: 6-column TSV (symbol, line, source_location, context, dir, file) */
+        var tsvLines = tocRows.map(function(row) {
+            return row.map(function(v) { return v != null ? String(v) : ''; }).join('\t');
+        });
+        var rowsTsv = tsvLines.join('\n');
+
+        /* Format via WASM */
+        var tocOutput = qiModule.ccall('qi_web_toc_format', 'string',
+            ['string', 'string', 'number', 'number', 'string'],
+            [buildResult, rowsTsv, tocRows.length, totalAvailable, contextCounts]);
+        console.log('[worker] qi_web_toc_format length:', tocOutput.length);
+        return tocOutput;
+    }
+
+    var sql = buildLines.SQL;
+    console.log('[worker] SQL:', sql);
 
     if (!sql) {
         return 'Error: No SQL built for query.\r\n';

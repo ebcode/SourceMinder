@@ -19,6 +19,7 @@
 #include <emscripten.h>
 #include "query-index-web.h"
 #include "shared/sql_builder.h"
+#include "shared-web/toc-web.h"
 
 /* Forward declarations for sqlite3 shim (defined in query-index-web.c, linked together) */
 char *sqlite3_mprintf(const char *fmt, ...);
@@ -224,6 +225,7 @@ typedef struct {
     char *error_msg;
     int error_msg_malloced;  /* 1 if error_msg was strdup'd and must be freed */
     int oom;    /* set when any strdup fails during parsing */
+    int toc_mode;
 } WebCommand;
 
 static void free_col_filter(WebColFilter *f) {
@@ -269,6 +271,7 @@ static void free_command(WebCommand *cmd) {
     cmd->definition = -1;
     cmd->limit = 25;
     cmd->line_range = -1;
+    cmd->toc_mode = 0;
 }
 
 static int is_flag(const char *token) {
@@ -343,6 +346,11 @@ static WebCommand parse_command(const char *input) {
         }
         if (strcmp(t, "--debug") == 0) {
             cmd.debug = 1;
+            i++;
+            continue;
+        }
+        if (strcmp(t, "--toc") == 0) {
+            cmd.toc_mode = 1;
             i++;
             continue;
         }
@@ -550,8 +558,135 @@ char *qi_web_build(const char *command) {
     }
 
     WebCommand cmd = parse_command(command);
+
+    /* In TOC mode patterns are optional symbol filters -- override the
+     * "no patterns" error from parse_command. */
+    if (cmd.toc_mode && cmd.error && cmd.error_msg &&
+        strcmp(cmd.error_msg, "At least one search pattern is required.") == 0) {
+        if (cmd.error_msg_malloced) { free(cmd.error_msg); cmd.error_msg_malloced = 0; }
+        cmd.error_msg = NULL;
+        cmd.error = 0;
+    }
+
     if (cmd.error) {
         wo_printf(&wo, "ERROR|%s", cmd.error_msg);
+        free_command(&cmd);
+        { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
+    }
+
+    /* -- TOC mode: build TOC SQL and return early -- */
+    if (cmd.toc_mode) {
+        if (cmd.file_count == 0) {
+            wo_printf(&wo, "ERROR|--toc requires -f <file_pattern>");
+            free_command(&cmd);
+            { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
+        }
+
+        /* Build file patterns (normalized LIKE patterns) */
+        TocWebFilePattern *toc_fps = malloc(sizeof(TocWebFilePattern) * (size_t)cmd.file_count);
+        if (!toc_fps) {
+            wo_printf(&wo, "ERROR|out of memory");
+            free_command(&cmd);
+            { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
+        }
+        int toc_fp_count = 0;
+        for (int i = 0; i < cmd.file_count; i++) {
+            char *dir = NULL, *file = NULL;
+            if (process_file_pattern_web(cmd.files[i], &dir, &file) == 0 && file) {
+                toc_fps[toc_fp_count].directory = dir;
+                toc_fps[toc_fp_count].filename = file;
+                toc_fp_count++;
+            }
+        }
+
+        /* Build symbol patterns (wildcard-converted) */
+        const char **sym_pats = NULL;
+        int sym_pat_count = 0;
+        int sym_pat_error = 0;
+        if (cmd.pattern_count > 0) {
+            sym_pats = malloc(sizeof(const char *) * (size_t)cmd.pattern_count);
+            if (!sym_pats) {
+                sym_pat_error = 1;
+            } else {
+                for (int i = 0; i < cmd.pattern_count; i++) {
+                    char *conv = malloc(SYMBOL_MAX_LENGTH);
+                    if (!conv) {
+                        sym_pat_error = 1;
+                        break;
+                    }
+                    convert_wildcards_web(cmd.patterns[i], conv, SYMBOL_MAX_LENGTH);
+                    sym_pats[i] = conv;
+                    sym_pat_count++;
+                }
+            }
+            if (sym_pat_error) {
+                for (int i = 0; i < sym_pat_count; i++)
+                    free((void *)sym_pats[i]);
+                free(sym_pats);
+                sym_pats = NULL;
+                sym_pat_count = 0;
+            }
+        }
+        if (sym_pat_error) {
+            for (int i = 0; i < toc_fp_count; i++) {
+                free((void *)toc_fps[i].directory);
+                free((void *)toc_fps[i].filename);
+            }
+            free(toc_fps);
+            wo_printf(&wo, "ERROR|out of memory");
+            free_command(&cmd);
+            { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
+        }
+
+        TocWebConfig config = {
+            .file_patterns       = toc_fps,
+            .file_pattern_count  = toc_fp_count,
+            .symbol_patterns     = (const char **)sym_pats,
+            .symbol_pattern_count = sym_pat_count,
+            .include_contexts    = (const char **)cmd.includes,
+            .include_context_count = cmd.include_count,
+            .limit               = cmd.limit,
+        };
+
+        char *toc_sql = build_toc_web_sql(&config);
+
+        /* Emit build_info */
+        wo_printf(&wo, "MODE|toc\n");
+        wo_printf(&wo, "PATTERNS|");
+        for (int i = 0; i < cmd.pattern_count; i++) {
+            if (i > 0) wo_printf(&wo, " ");
+            wo_printf(&wo, "%s", cmd.patterns[i]);
+        }
+        if (toc_sql) {
+            wo_printf(&wo, "\nTOC_SQL|%s", toc_sql);
+            /* COUNT breakdown SQL */
+            wo_printf(&wo, "\nTOC_COUNT_SQL|SELECT context, COUNT(*) FROM (%s) "
+                             "GROUP BY context", toc_sql);
+            free(toc_sql);
+        } else {
+            wo_printf(&wo, "\nTOC_SQL|");
+            wo_printf(&wo, "\nTOC_COUNT_SQL|");
+        }
+        wo_printf(&wo, "\nLIMIT|%d", cmd.limit);
+        if (cmd.include_count > 0) {
+            wo_printf(&wo, "\nTOC_INCLUDES|");
+            for (int i = 0; i < cmd.include_count; i++) {
+                if (i > 0) wo_printf(&wo, " ");
+                wo_printf(&wo, "%s", cmd.includes[i]);
+            }
+        }
+        wo_printf(&wo, "\nERROR|OK");
+
+        /* Cleanup */
+        for (int i = 0; i < toc_fp_count; i++) {
+            free((void *)toc_fps[i].directory);
+            free((void *)toc_fps[i].filename);
+        }
+        free(toc_fps);
+        if (sym_pats) {
+            for (int i = 0; i < sym_pat_count; i++) free((void *)sym_pats[i]);
+            free(sym_pats);
+        }
         free_command(&cmd);
         { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
     }
@@ -1070,4 +1205,12 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
 EMSCRIPTEN_KEEPALIVE
 void qi_web_free_result(char *ptr) {
     free(ptr);
+}
+
+EMSCRIPTEN_KEEPALIVE
+char *qi_web_toc_format(const char *build_info, const char *rows_tsv,
+                        int total_shown, int total_available,
+                        const char *context_counts) {
+    return format_toc_web(build_info, rows_tsv, total_shown,
+                          total_available, context_counts);
 }

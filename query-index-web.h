@@ -11,6 +11,11 @@
 #define QUERY_INDEX_WEB_H
 
 #include "config.h"
+
+/* config.h may unconditionally #define ENABLE_TYPESCRIPT to 0, overriding the
+ * -D flag passed to emcc.  The web bridge needs scope/namespace columns. */
+#undef ENABLE_TYPESCRIPT
+#define ENABLE_TYPESCRIPT 1
 #include "shared/constants.h"
 #include "shared/sql_builder.h"
 

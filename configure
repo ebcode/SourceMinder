@@ -517,7 +517,7 @@ WEB_SRC = query-index-web.c
 WEB_ENTRY_SRC = qi-web-entry.c
 WEB_DIR = $(BUILD_DIR)/web
 WASM_DIR = wasm
-WEB_SHARED_SRC = shared/sql_builder.c shared/database.c shared/string_utils.c
+WEB_SHARED_SRC = shared/sql_builder.c shared/database.c shared/string_utils.c shared-web/toc-web.c
 
 # Build directory
 BUILD_DIR = build
@@ -694,16 +694,16 @@ tests/run-tests: tests/run-tests.c
 
 # Web/WASM slice compile-only smoke test
 web-smoke: $(WEB_DIR)
-	emcc -I. -Ishared -std=c11 -c -DENABLE_TYPESCRIPT=1 $(WEB_SRC) -o $(WEB_DIR)/query-index-web.o
+	emcc -I. -Ishared -Ishared-web -std=c11 -c -DENABLE_TYPESCRIPT=1 $(WEB_SRC) -o $(WEB_DIR)/query-index-web.o
 
 # Linked web/WASM module: qi SQL builder + output formatter (no sqlite3)
 web: $(WEB_DIR)
-	emcc -I$(WASM_DIR) -I. -Ishared -std=c11 -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE -DENABLE_TYPESCRIPT=1 \
+	emcc -I$(WASM_DIR) -I. -Ishared -Ishared-web -std=c11 -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE -DENABLE_TYPESCRIPT=1 \
 		-O2 \
 		-sMODULARIZE=1 \
 		-sEXPORT_ES6=1 \
 		-sEXPORT_NAME='QiWebModule' \
-		-sEXPORTED_FUNCTIONS='["_qi_web_build","_qi_web_format","_qi_web_free_result","_malloc","_free"]' \
+		-sEXPORTED_FUNCTIONS='["_qi_web_build","_qi_web_format","_qi_web_free_result","_qi_web_toc_format","_malloc","_free"]' \
 		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString","lengthBytesUTF8","stringToUTF8"]' \
 		-sALLOW_MEMORY_GROWTH=1 \
 		-sINITIAL_MEMORY=32MB \
