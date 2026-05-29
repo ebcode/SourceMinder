@@ -29,76 +29,8 @@
 char *sqlite3_mprintf(const char *fmt, ...);
 void sqlite3_free(void *ptr);
 
-/* ---- Output accumulator (same pattern as qi-web-entry.c) ---- */
-
-#define WO_INITIAL_CAP 4096
-#define WO_GROW_FACTOR 2
-
-typedef struct {
-    char *buf;
-    size_t len;
-    size_t cap;
-    int error;
-} WebOutput;
-
-static int wo_init(WebOutput *wo) {
-    wo->cap = WO_INITIAL_CAP;
-    wo->buf = malloc(wo->cap);
-    if (!wo->buf) { wo->error = 1; return -1; }
-    wo->buf[0] = '\0';
-    wo->len = 0;
-    wo->error = 0;
-    return 0;
-}
-
-static int wo_grow(WebOutput *wo, size_t needed) {
-    if (wo->error) return -1;
-    size_t new_cap = wo->cap;
-    while (new_cap < wo->len + needed + 1)
-        new_cap *= WO_GROW_FACTOR;
-    char *nb = realloc(wo->buf, new_cap);
-    if (!nb) { wo->error = 1; return -1; }
-    wo->buf = nb;
-    wo->cap = new_cap;
-    return 0;
-}
-
-static int wo_printf(WebOutput *wo, const char *fmt, ...) {
-    if (wo->error) return -1;
-    va_list ap;
-    va_start(ap, fmt);
-    int needed = vsnprintf(NULL, 0, fmt, ap);
-    va_end(ap);
-    if (needed < 0) { wo->error = 1; return -1; }
-
-    if (wo->len + (size_t)needed + 1 > wo->cap) {
-        if (wo_grow(wo, (size_t)needed) != 0) { wo->error = 1; return -1; }
-    }
-
-    va_start(ap, fmt);
-    vsnprintf(wo->buf + wo->len, wo->cap - wo->len, fmt, ap);
-    va_end(ap);
-    wo->len += (size_t)needed;
-    return 0;
-}
-
-static char *wo_steal(WebOutput *wo) {
-    if (wo->error) {
-        free(wo->buf);
-        wo->buf = NULL;
-        return NULL;
-    }
-    char *result = wo->buf;
-    wo->buf = NULL;
-    return result;
-}
-
-static void wo_free(WebOutput *wo) {
-    free(wo->buf);
-    wo->buf = NULL;
-    wo->len = 0;
-    wo->cap = 0;
-}
+/* Output accumulator shared with qi-web-entry.c and source-render-web.c. */
+#include "web_output.h"
 
 /* Find a line starting with "KEY|" in build_info, return pointer past the '|' */
 static const char *toc_find_build_line(const char *build_info, const char *key) {

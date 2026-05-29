@@ -10,15 +10,28 @@ var statusEl = document.getElementById("status");
 var summaryEl = document.getElementById("summary");
 var terminalContainerEl = document.getElementById("terminal-container");
 var errorEl = document.getElementById("error");
+var projectSelectEl = document.getElementById("project-select");
 
 var term = null;
 var cmdBuffer = "";
 var cursorPos = 0;
 var isExecuting = false;
-var PROMPT = "qi> ";
+var switching = false;   /* a project switch is in flight; keep input gated */
+var PROMPT = "$ ";
 
-/* Command history */
-var history = [];
+/* Project state */
+var projectsById = {};
+var currentProjectId = "";   /* last successfully loaded project; revert target on a failed switch */
+var terminalInstalled = false;
+var sqliteVersion = "";
+
+/* Command history — persisted to localStorage */
+var HISTORY_KEY = 'qi_history';
+var HISTORY_MAX = 500;
+var history = (function() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+    catch (e) { return []; }
+})();
 var historyIndex = -1;
 var savedBuffer = "";
 
@@ -27,6 +40,24 @@ var worker = new Worker("./qi-worker.js", { type: "module" });
 function setStatus(message) {
     statusEl.textContent = message;
 }
+
+function formatBytes(n) {
+    if (n >= 1048576) return (n / 1048576).toFixed(1) + " MB";
+    if (n >= 1024) return (n / 1024).toFixed(0) + " KB";
+    return n + " B";
+}
+
+/* Project dropdown -> ask the worker to switch projects. */
+projectSelectEl.addEventListener("change", function() {
+    var p = projectsById[projectSelectEl.value];
+    if (!p) return;
+    isExecuting = true;            /* block queries until the new DB is ready */
+    switching = true;              /* an in-flight query's output must not re-enable input */
+    projectSelectEl.disabled = true;
+    if (term) termWrite("\r\nSwitching to " + p.name + "...\r\n");
+    setStatus("Loading " + p.name + "...");
+    worker.postMessage({ type: "load-project", project: p });
+});
 
 function showError(message) {
     errorEl.hidden = false;
@@ -97,25 +128,90 @@ worker.onmessage = function(event) {
         setStatus(msg.message);
         break;
 
+    case "projects":
+        console.log("[main] projects:", msg.projects.length);
+        sqliteVersion = msg.version;
+        projectsById = {};
+        projectSelectEl.innerHTML = "";
+        for (var pi = 0; pi < msg.projects.length; pi++) {
+            var proj = msg.projects[pi];
+            projectsById[proj.id] = proj;
+            var opt = document.createElement("option");
+            opt.value = proj.id;
+            opt.textContent = proj.name;
+            projectSelectEl.appendChild(opt);
+        }
+        projectSelectEl.hidden = false;
+        break;
+
+    case "progress":
+        if (msg.total > 0) {
+            var pct = Math.floor((msg.loaded / msg.total) * 100);
+            setStatus("Downloading " +
+                (projectsById[msg.projectId] ? projectsById[msg.projectId].name : "project") +
+                "… " + pct + "% (" + formatBytes(msg.loaded) + " / " + formatBytes(msg.total) + ")");
+        } else {
+            setStatus("Downloading… " + formatBytes(msg.loaded));
+        }
+        break;
+
     case "ready":
-        console.log("[main] ready, version:", msg.version);
+        console.log("[main] ready, project:", msg.projectId);
         renderSummary(msg.summary);
-        installTerminal();
-        setStatus("SQLite WASM is running in-browser with SQLite " + msg.version + ".");
+        isExecuting = false;
+        switching = false;
+        projectSelectEl.disabled = false;
+        if (msg.projectId) { projectSelectEl.value = msg.projectId; currentProjectId = msg.projectId; }
+        if (!terminalInstalled) {
+            terminalInstalled = true;
+            installTerminal();   /* creates the terminal and runs the self-test */
+        } else {
+            /* Project switch: keep the existing terminal, just announce it. */
+            termWrite("\r\nLoaded project: " + msg.projectName + "\r\n");
+            resetPrompt();
+            term.focus();
+        }
+        setStatus("Project: " + (msg.projectName || "") + " — SQLite " + sqliteVersion + " in-browser.");
         break;
 
     case "output":
         console.log("[main] output, length:", msg.text.length, "first 200:", JSON.stringify(msg.text.substring(0, 200)));
         termWrite(msg.text);
-        isExecuting = false;
-        resetPrompt();
+        /* If a project switch is queued behind this query, leave input gated;
+         * the 'ready' handler will clear isExecuting and redraw the prompt. */
+        if (!switching) {
+            isExecuting = false;
+            resetPrompt();
+        }
         break;
 
     case "error":
         console.error("[main] error:", msg.message);
-        termWrite("Error: " + msg.message + "\r\n");
-        isExecuting = false;
-        resetPrompt();
+        if (!terminalInstalled) {
+            /* Startup failure (init / first project load) arrives before the
+             * terminal exists, so termWrite is a no-op -- surface it in the
+             * visible error banner instead, otherwise the page just hangs on its
+             * last status line with no reason shown. */
+            showError(msg.message);
+        } else {
+            termWrite("Error: " + msg.message + "\r\n");
+        }
+        if (msg.phase === "load" || msg.phase === "init") {
+            /* The load/switch itself failed -- recover so the shell stays usable
+             * (otherwise switching/isExecuting/disabled would stick forever, as
+             * only 'ready' clears them and a failed load never reaches 'ready'). */
+            switching = false;
+            isExecuting = false;
+            projectSelectEl.disabled = false;
+            if (currentProjectId) projectSelectEl.value = currentProjectId;  /* undo the failed selection */
+            if (term) resetPrompt();
+        } else if (!switching) {
+            /* Query error, no switch pending -- re-enable input. */
+            isExecuting = false;
+            resetPrompt();
+        }
+        /* else: query error while a switch is queued behind it -- stay gated;
+         * the pending load clears state via 'ready' or its own 'load' error. */
         break;
     }
 };
@@ -190,8 +286,11 @@ function installTerminal() {
                         term.clear();
                         resetPrompt();
                     } else {
-                        if (history.length === 0 || history[history.length - 1] !== cmd)
+                        if (history.length === 0 || history[history.length - 1] !== cmd) {
                             history.push(cmd);
+                            if (history.length > HISTORY_MAX) history.splice(0, history.length - HISTORY_MAX);
+                            try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch (e) { /* quota exceeded */ }
+                        }
                         historyIndex = -1;
                         runTinyQuery(cmd);
                     }
@@ -223,10 +322,13 @@ function installTerminal() {
     termWrite("qi WASM bridge ready. Type a qi command.\r\n");
     resetPrompt();
 
+    /* Auto-focus so the user can type immediately without clicking the terminal. */
+    term.focus();
+
     /* Self-test */
-    var testCmd = "qi % -i call -v -x noise --limit 5";
-    termWrite(testCmd + "\r\n");
-    runTinyQuery(testCmd);
+    //var testCmd = "qi % -i call -v -x noise --limit 5";
+    //termWrite(testCmd + "\r\n");
+    //runTinyQuery(testCmd);
 }
 
 function renderSummary(cards) {

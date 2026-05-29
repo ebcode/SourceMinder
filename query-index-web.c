@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <ctype.h>
 #include <stdarg.h>
 
@@ -577,5 +578,35 @@ int build_query_sql_web(SqlQueryBuilder *builder, PatternList *patterns,
     if (build_query_filters_web(builder, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug) != 0) return -1;
     if (sql_append(builder, " ORDER BY directory, filename, line") != 0) return -1;
     return 0;
+}
+
+/* Maps a context name or abbreviation to its compact uppercase display code.
+ * Used for -i/-x parsing and for formatting the Result breakdown line. */
+const char *map_context_web(const char *token) {
+    struct { const char *alias; const char *code; } map[] = {
+        {"arg","ARG"}, {"argument","ARG"},
+        {"call","CALL"}, {"case","CASE"}, {"class","CLASS"},
+        {"com","COM"}, {"comment","COM"},
+        {"enum","ENUM"},
+        {"exc","EXC"}, {"exception","EXC"},
+        {"exp","EXP"}, {"export","EXP"},
+        {"file","FILE"}, {"filename","FILE"},
+        {"func","FUNC"}, {"function","FUNC"},
+        {"goto","GOTO"},
+        {"iface","IFACE"}, {"interface","IFACE"},
+        {"imp","IMP"}, {"import","IMP"},
+        {"label","LABEL"},
+        {"lam","LAM"}, {"lambda","LAM"},
+        {"ns","NS"}, {"namespace","NS"},
+        {"prop","PROP"}, {"property","PROP"},
+        {"str","STR"}, {"string","STR"},
+        {"trait","TRAIT"}, {"type","TYPE"},
+        {"var","VAR"}, {"variable","VAR"},
+        {NULL,NULL}
+    };
+    for (int i = 0; map[i].alias; i++) {
+        if (strcasecmp(token, map[i].alias) == 0) return map[i].code;
+    }
+    return NULL;
 }
 

@@ -85,6 +85,24 @@
     #terminal-container .xterm {
       padding: 8px;
     }
+
+    .project-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    #project-select {
+      background: #111a33;
+      color: #e6edf7;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font: inherit;
+    }
+
+    #project-select:disabled { opacity: 0.5; }
   </style>
   <link rel="stylesheet" href="./node_modules/xterm/css/xterm.css">
 </head>
@@ -94,6 +112,10 @@
 
     <section class="panel">
       <p id="status" class="status">Loading...</p>
+      <div class="project-bar">
+        <label class="label" for="project-select">Project</label>
+        <select id="project-select" hidden></select>
+      </div>
       <div id="summary" class="grid" hidden></div>
       <div id="query-shell">
         <div id="terminal-container"></div>

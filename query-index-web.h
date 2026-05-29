@@ -118,6 +118,7 @@ int parse_source_location(const char *source_location, int *start_line,
 
 /* -- WEB_SAFE function declarations (exact extractions from query-index.c) -- */
 
+const char *map_context_web(const char *token);
 void convert_wildcards_web(const char *pattern, char *output, size_t output_size);
 int  process_file_pattern_web(const char *input, char **dir_out, char **file_out);
 int  build_common_filters_web(SqlQueryBuilder *builder,

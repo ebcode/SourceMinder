@@ -5,9 +5,11 @@
  * This module builds SQL and formats qi-style output from raw result rows.
  *
  * Exports:
- *   qi_web_build(command)       -> build-info string (SQL, patterns, limit)
+ *   qi_web_build(command)            -> build-info string (SQL, patterns, limit)
  *   qi_web_format(build_info, rows_tsv, total, shown) -> formatted qi output
- *   qi_web_free_result(ptr)     -> free a result string
+ *   qi_web_format_breakdown(tsv)     -> "Result breakdown: ..." + Tip line
+ *   qi_web_format_files(tsv, shown, total) -> file list + "Found N files"
+ *   qi_web_free_result(ptr)          -> free a result string
  */
 
 #include <stdio.h>
@@ -20,85 +22,14 @@
 #include "query-index-web.h"
 #include "shared/sql_builder.h"
 #include "shared-web/toc-web.h"
+#include "shared-web/source-render-web.h"
 
 /* Forward declarations for sqlite3 shim (defined in query-index-web.c, linked together) */
 char *sqlite3_mprintf(const char *fmt, ...);
 void sqlite3_free(void *ptr);
 
-/* -- Output accumulator (replaces printf for web capture) -- */
-
-#define WO_INITIAL_CAP 4096
-#define WO_GROW_FACTOR 2
-
-typedef struct {
-    char *buf;
-    size_t len;
-    size_t cap;
-    int error;
-} WebOutput;
-
-static int wo_init(WebOutput *wo) {
-    wo->cap = WO_INITIAL_CAP;
-    wo->buf = malloc(wo->cap);
-    if (!wo->buf) { wo->error = 1; return -1; }
-    wo->buf[0] = '\0';
-    wo->len = 0;
-    wo->error = 0;
-    return 0;
-}
-
-static int wo_grow(WebOutput *wo, size_t needed) {
-    if (wo->error) return -1;
-    size_t new_cap = wo->cap;
-    while (new_cap < wo->len + needed + 1)
-        new_cap *= WO_GROW_FACTOR;
-    char *nb = realloc(wo->buf, new_cap);
-    if (!nb) { wo->error = 1; return -1; }
-    wo->buf = nb;
-    wo->cap = new_cap;
-    return 0;
-}
-
-static int wo_printf(WebOutput *wo, const char *fmt, ...) {
-    if (wo->error) return -1;
-    va_list ap;
-    va_start(ap, fmt);
-    int needed = vsnprintf(NULL, 0, fmt, ap);
-    va_end(ap);
-    if (needed < 0) { wo->error = 1; return -1; }
-
-    if (wo->len + (size_t)needed + 1 > wo->cap) {
-        if (wo_grow(wo, (size_t)needed) != 0) { wo->error = 1; return -1; }
-    }
-
-    va_start(ap, fmt);
-    vsnprintf(wo->buf + wo->len, wo->cap - wo->len, fmt, ap);
-    va_end(ap);
-    wo->len += (size_t)needed;
-    return 0;
-}
-
-static char *wo_steal(WebOutput *wo) {
-    if (wo->error) {
-        free(wo->buf);
-        wo->buf = NULL;
-        wo->len = 0;
-        wo->cap = 0;
-        return NULL;
-    }
-    char *result = wo->buf;
-    wo->buf = NULL;
-    wo->len = 0;
-    wo->cap = 0;
-    return result;
-}
-
-static void wo_free(WebOutput *wo) {
-    free(wo->buf);
-    wo->buf = NULL;
-    wo->len = 0;
-    wo->cap = 0;
-}
+/* Output accumulator shared with toc-web.c and source-render-web.c. */
+#include "web_output.h"
 
 /* -- Tokenizer (mirrors html/app.js tokenizeCommand) -- */
 
@@ -155,34 +86,6 @@ static void free_tokens(char **tokens, int count) {
 
 /* -- Context alias mapping (mirrors html/app.js CONTEXT_ALIASES) -- */
 
-static const char *map_context(const char *token) {
-    struct { const char *alias; const char *code; } map[] = {
-        {"arg","ARG"}, {"argument","ARG"},
-        {"call","CALL"}, {"case","CASE"}, {"class","CLASS"},
-        {"com","COM"}, {"comment","COM"},
-        {"enum","ENUM"},
-        {"exc","EXC"}, {"exception","EXC"},
-        {"exp","EXP"}, {"export","EXP"},
-        {"file","FILE"}, {"filename","FILE"},
-        {"func","FUNC"}, {"function","FUNC"},
-        {"goto","GOTO"},
-        {"iface","IFACE"}, {"interface","IFACE"},
-        {"imp","IMP"}, {"import","IMP"},
-        {"label","LABEL"},
-        {"lam","LAM"}, {"lambda","LAM"},
-        {"ns","NS"}, {"namespace","NS"},
-        {"prop","PROP"}, {"property","PROP"},
-        {"str","STR"}, {"string","STR"},
-        {"trait","TRAIT"}, {"type","TYPE"},
-        {"var","VAR"}, {"variable","VAR"},
-        {NULL,NULL}
-    };
-    for (int i = 0; map[i].alias; i++) {
-        if (strcasecmp(token, map[i].alias) == 0) return map[i].code;
-    }
-    return NULL;
-}
-
 /* -- Command parser -- */
 
 typedef struct {
@@ -226,6 +129,11 @@ typedef struct {
     int error_msg_malloced;  /* 1 if error_msg was strdup'd and must be freed */
     int oom;    /* set when any strdup fails during parsing */
     int toc_mode;
+    int files_mode;      /* --files: show only unique file paths */
+    int expand;          /* -e/--expand: expand full definitions */
+    int context_before;  /* -B / -C: lines of context before each match */
+    int context_after;   /* -A / -C: lines of context after each match */
+    int raw;             /* --raw: bare source only, suppress all framing */
 } WebCommand;
 
 static void free_col_filter(WebColFilter *f) {
@@ -290,6 +198,31 @@ static void parse_col_flag_values(WebColFilter *cf, char **tokens, int tc, int *
     }
 }
 
+/* Parse the optional NUM after -A/-B/-C: an integer in [0, MAXIMUM_CONTEXT_RANGE],
+ * or DEFAULT_CONTEXT_RANGE when absent (mirrors the native CLI).  Consumes the
+ * number token when present.  On an invalid/out-of-range value, sets the command
+ * error and returns -1. */
+static int parse_context_value(char **tokens, int tc, int *i, WebCommand *cmd) {
+    if (*i + 1 < tc && !is_flag(tokens[*i + 1])) {
+        const char *arg = tokens[*i + 1];
+        int valid = (arg[0] != '\0');
+        for (int ci = 0; arg[ci]; ci++)
+            if (!isdigit((unsigned char)arg[ci])) { valid = 0; break; }
+        if (!valid) {
+            SET_CMD_ERROR(cmd, "context flag requires a non-negative integer (0-100).");
+            return -1;
+        }
+        int val = atoi(arg);
+        if (val > MAXIMUM_CONTEXT_RANGE) {
+            SET_CMD_ERROR(cmd, "context value cannot exceed 100.");
+            return -1;
+        }
+        (*i)++;
+        return val;
+    }
+    return DEFAULT_CONTEXT_RANGE;
+}
+
 static WebCommand parse_command(const char *input) {
     WebCommand cmd;
     memset(&cmd, 0, sizeof(cmd));
@@ -306,7 +239,13 @@ static WebCommand parse_command(const char *input) {
         return cmd;
     }
 
-    int i = (tc > 0 && strcmp(tokens[0], "qi") == 0) ? 1 : 0;
+    /* The leading "qi" is mandatory: the command list mirrors a real qi
+     * invocation, so the first token must name the program. */
+    if (strcmp(tokens[0], "qi") != 0) {
+        SET_CMD_ERROR(&cmd, "Commands must start with 'qi'. Example: qi malloc -f foo.c");
+        goto done;
+    }
+    int i = 1;
 
     while (i < tc) {
         const char *t = tokens[i];
@@ -351,6 +290,11 @@ static WebCommand parse_command(const char *input) {
         }
         if (strcmp(t, "--toc") == 0) {
             cmd.toc_mode = 1;
+            i++;
+            continue;
+        }
+        if (strcmp(t, "--files") == 0) {
+            cmd.files_mode = 1;
             i++;
             continue;
         }
@@ -455,7 +399,7 @@ static WebCommand parse_command(const char *input) {
                             }
                         }
                     } else {
-                        const char *mapped = map_context(val);
+                        const char *mapped = map_context_web(val);
                         if (!mapped) {
                             cmd.error = 1;
                             SET_CMD_ERROR(&cmd, "Unknown context type.");
@@ -506,6 +450,34 @@ static WebCommand parse_command(const char *input) {
         }
         if (strcmp(t, "-d") == 0 || strcmp(t, "--definition") == 0) {
             parse_col_flag_values(&cmd.cf.definition, tokens, tc, &i, &cmd);
+            i++; continue;
+        }
+
+        /* Source-backed flags (-e/-C/-A/-B) and --raw */
+        if (strcmp(t, "-e") == 0 || strcmp(t, "--expand") == 0) {
+            cmd.expand = 1;
+            i++; continue;
+        }
+        if (strcmp(t, "--raw") == 0) {
+            cmd.raw = 1;
+            i++; continue;
+        }
+        if (strcmp(t, "-A") == 0 || strcmp(t, "--after-context") == 0) {
+            int v = parse_context_value(tokens, tc, &i, &cmd);
+            if (cmd.error) goto done;
+            cmd.context_after = v;
+            i++; continue;
+        }
+        if (strcmp(t, "-B") == 0 || strcmp(t, "--before-context") == 0) {
+            int v = parse_context_value(tokens, tc, &i, &cmd);
+            if (cmd.error) goto done;
+            cmd.context_before = v;
+            i++; continue;
+        }
+        if (strcmp(t, "-C") == 0 || strcmp(t, "--context") == 0) {
+            int v = parse_context_value(tokens, tc, &i, &cmd);
+            if (cmd.error) goto done;
+            cmd.context_before = cmd.context_after = v;
             i++; continue;
         }
 
@@ -754,6 +726,32 @@ char *qi_web_build(const char *command) {
     POPULATE_COL_FILTER(filters.is_definition, cmd.cf.definition);
 #undef POPULATE_COL_FILTER
 
+    /* -- Files mode: SELECT DISTINCT directory, filename with same WHERE clause -- */
+    if (cmd.files_mode) {
+        SqlQueryBuilder builder;
+        if (init_sql_builder(&builder) != 0) {
+            wo_printf(&wo, "ERROR|SQL builder init failed");
+            goto cleanup;
+        }
+        if (sql_append(&builder, "SELECT DISTINCT directory, filename FROM code_index WHERE (") != 0 ||
+            build_query_filters_web(&builder, &patterns, &include, &exclude,
+                                    &filters, &file_filter, NULL, cmd.line_range, cmd.debug) != 0 ||
+            sql_append(&builder, " ORDER BY directory, filename") != 0) {
+            wo_printf(&wo, "ERROR|SQL build failed");
+            free_sql_builder(&builder);
+            goto cleanup;
+        }
+        wo_printf(&wo, "MODE|files\nPATTERNS|");
+        for (int i = 0; i < cmd.pattern_count; i++) {
+            if (i > 0) wo_printf(&wo, " ");
+            wo_printf(&wo, "%s", cmd.patterns[i]);
+        }
+        wo_printf(&wo, "\nFILES_SQL|%s", builder.sql);
+        wo_printf(&wo, "\nLIMIT|%d\nERROR|OK", cmd.limit);
+        free_sql_builder(&builder);
+        goto cleanup;
+    }
+
     /* Build SQL */
     SqlQueryBuilder builder;
     if (init_sql_builder(&builder) != 0) {
@@ -792,7 +790,7 @@ char *qi_web_build(const char *command) {
         wo_printf(&wo, "%s", cmd.patterns[i]);
     }
 
-    /* Derive COUNT_SQL from main SQL: SELECT * → SELECT COUNT(*), strip ORDER BY */
+    /* Derive COUNT_SQL and BREAKDOWN_SQL from main SQL: strip ORDER BY, swap SELECT */
     {
         const char *select_star = "SELECT * ";
         const char *star = strstr(builder.sql, select_star);
@@ -802,6 +800,12 @@ char *qi_web_build(const char *command) {
             size_t where_len = (size_t)(order - (builder.sql + after_star));
             wo_printf(&wo, "\nCOUNT_SQL|SELECT COUNT(*) %.*s",
                 (int)where_len, builder.sql + after_star);
+            /* Proximity queries alias the table as "ci"; use qualified column name */
+            int has_alias = (strstr(builder.sql, "code_index ci") != NULL);
+            const char *ctx = has_alias ? "ci.context" : "context";
+            wo_printf(&wo, "\nBREAKDOWN_SQL|SELECT %s, COUNT(*) as cnt %.*s"
+                           "GROUP BY %s ORDER BY cnt DESC",
+                ctx, (int)where_len, builder.sql + after_star, ctx);
         }
     }
 
@@ -811,6 +815,19 @@ char *qi_web_build(const char *command) {
     wo_printf(&wo, "\nCOMPACT|%d", cmd.compact);
     if (cmd.debug)
         wo_printf(&wo, "\nDEBUG|1");
+    /* Source-backed flags: the worker fetches files when NEEDS_SOURCE is set,
+     * and qi_web_format renders -e/-C/-A/-B/--raw from the fetched content.
+     * --raw alone fetches nothing (it only modifies -e/-C/-A/-B rendering). */
+    if (cmd.expand || cmd.context_before > 0 || cmd.context_after > 0)
+        wo_printf(&wo, "\nNEEDS_SOURCE|1");
+    if (cmd.expand)
+        wo_printf(&wo, "\nEXPAND|1");
+    if (cmd.context_before > 0)
+        wo_printf(&wo, "\nCONTEXT_BEFORE|%d", cmd.context_before);
+    if (cmd.context_after > 0)
+        wo_printf(&wo, "\nCONTEXT_AFTER|%d", cmd.context_after);
+    if (cmd.raw)
+        wo_printf(&wo, "\nRAW|1");
     wo_printf(&wo, "\nCOLUMNS|");
     if (cmd.column_count > 0) {
         for (int i = 0; i < cmd.column_count; i++) {
@@ -1049,18 +1066,122 @@ static void parse_patterns(const char *build_info, char *out, size_t out_size) {
     }
 }
 
+/* Parse an integer "KEY|N" line from build_info; returns 0 if absent. */
+static int parse_int_value(const char *build_info, const char *key) {
+    const char *val = find_build_line(build_info, key);
+    return val ? atoi(val) : 0;
+}
+
+/* Build the canonical filepath for a row from its directory + filename fields.
+ * This formula is the lookup key for fetched source, so the JS worker MUST
+ * construct file paths identically (see QI_WEB_FILE_PLAN.md). */
+static void build_row_filepath(const char *dir, const char *file, char *out, size_t n) {
+    if (dir[0] && dir[strlen(dir) - 1] != '/')
+        snprintf(out, n, "%s/%s", dir, file);
+    else
+        snprintf(out, n, "%s%s", dir, file);
+}
+
+/* -- Source blob: path -> file content, parsed from the worker's fetch --
+ *
+ * Wire format (NUL-framed, written straight into a WASM heap buffer by the
+ * worker -- see marshalSources() in qi-worker.js):
+ *     <path>\0<content>\0   (repeated for each present file)
+ *
+ * The buffer is owned by the worker (it _malloc's it and _free's it after the
+ * call); we parse in place, storing pointers INTO the buffer rather than
+ * copying each file's content.  Content is NUL-terminated by the framing, so
+ * the render twins consume it as an ordinary C string with no extra copy.
+ * NUL framing means content carries no embedded NULs -- fine for text source,
+ * same constraint the ccall string boundary imposed before. */
+typedef struct { const char *path; const char *content; } SourceFile;
+typedef struct { SourceFile *files; int count; int last_hit; } SourceMap;
+
+static SourceMap source_map_parse(const char *blob, int blob_len) {
+    SourceMap m = { NULL, 0, 0 };
+    if (!blob || blob_len <= 0) return m;
+
+    const char *end = blob + blob_len;
+    int cap = 8;
+    m.files = malloc((size_t)cap * sizeof(*m.files));
+    if (!m.files) return m;
+
+    const char *p = blob;
+    while (p < end) {
+        const char *path = p;
+        const char *pz = memchr(p, '\0', (size_t)(end - p));
+        if (!pz) break;                                  /* path not terminated */
+
+        const char *content = pz + 1;
+        if (content > end) break;
+        const char *cz = memchr(content, '\0', (size_t)(end - content));
+        if (!cz) break;                                  /* content not terminated */
+
+        if (m.count == cap) {
+            int ncap = cap * 2;
+            SourceFile *nf = realloc(m.files, (size_t)ncap * sizeof(*m.files));
+            if (!nf) break;
+            m.files = nf;
+            cap = ncap;
+        }
+        m.files[m.count].path = path;       /* pointers into the worker's buffer */
+        m.files[m.count].content = content; /* NUL-terminated in place */
+        m.count++;
+
+        p = cz + 1;
+    }
+    return m;
+}
+
+/* Returns the NUL-terminated content for path, or NULL if not present
+ * (e.g. the worker could not fetch it -- the render twins then emit the
+ * same "could not read file" warning the native CLI prints). */
+static const char *source_map_get(SourceMap *m, const char *path) {
+    if (m->count == 0) return NULL;
+    /* Rows arrive grouped by file (ORDER BY directory, filename, line), so the
+     * previous hit is almost always the right file -- check it before scanning
+     * (same idea as toc-web.c's last_idx cache). */
+    if (m->last_hit < m->count && strcmp(m->files[m->last_hit].path, path) == 0)
+        return m->files[m->last_hit].content;
+    for (int i = 0; i < m->count; i++) {
+        if (strcmp(m->files[i].path, path) == 0) {
+            m->last_hit = i;
+            return m->files[i].content;
+        }
+    }
+    return NULL;
+}
+
+static void source_map_free(SourceMap *m) {
+    /* path/content point into the worker-owned heap buffer; only the index
+     * array is ours to free. */
+    free(m->files);
+    m->files = NULL;
+    m->count = 0;
+}
+
 EMSCRIPTEN_KEEPALIVE
 char *qi_web_format(const char *build_info, const char *rows_tsv,
-                    int total, int shown) {
+                    int total, int shown,
+                    const char *sources_blob, int sources_len) {
     WebOutput wo;
     if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
 
     int compact = parse_flag(build_info, "COMPACT");
+    int raw = parse_flag(build_info, "RAW");
+    int needs_source = parse_flag(build_info, "NEEDS_SOURCE");
+    int expand = parse_flag(build_info, "EXPAND");
+    int ctx_before = parse_int_value(build_info, "CONTEXT_BEFORE");
+    int ctx_after = parse_int_value(build_info, "CONTEXT_AFTER");
+
+    SourceMap sources = { NULL, 0, 0 };
+    if (needs_source) sources = source_map_parse(sources_blob, sources_len);
 
     /* Build active column list from COLUMNS| metadata */
     ActiveWebCol active[MAX_WEB_COLS];
     int num_cols = build_active_columns(build_info, compact, active, MAX_WEB_COLS);
     if (num_cols == 0) {
+        source_map_free(&sources);
         wo_free(&wo);
         return strdup("Error: no columns configured.");
     }
@@ -1069,29 +1190,33 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
     char patterns_buf[4096] = "";
     parse_patterns(build_info, patterns_buf, sizeof(patterns_buf));
 
-    if (parse_flag(build_info, "DEBUG")) {
-        const char *p = find_build_line(build_info, "SQL");
-        if (p) {
-            const char *end = strchr(p, '\n');
-            size_t len = end ? (size_t)(end - p) : strlen(p);
-            if (len < 8192) {
-                char sql_buf[8192];
-                memcpy(sql_buf, p, len);
-                sql_buf[len] = '\0';
-                wo_printf(&wo, "SQL: %s\n\n", sql_buf);
+    /* --raw suppresses all non-source framing (header, table, stats). */
+    if (!raw) {
+        if (parse_flag(build_info, "DEBUG")) {
+            const char *p = find_build_line(build_info, "SQL");
+            if (p) {
+                const char *end = strchr(p, '\n');
+                size_t len = end ? (size_t)(end - p) : strlen(p);
+                if (len < 8192) {
+                    char sql_buf[8192];
+                    memcpy(sql_buf, p, len);
+                    sql_buf[len] = '\0';
+                    wo_printf(&wo, "SQL: %s\n\n", sql_buf);
+                }
             }
         }
+        wo_printf(&wo, "Searching for: %s\n\n", patterns_buf);
     }
 
-    wo_printf(&wo, "Searching for: %s\n\n", patterns_buf);
-
     if (!rows_tsv || !rows_tsv[0]) {
-        if (total == 0)
+        if (!raw && total == 0)
             wo_printf(&wo, "No results\n");
+        source_map_free(&sources);
         { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
     }
 
-    /* First pass: compute max column widths from data */
+    /* First pass: compute max column widths from data (table framing only) */
+    if (!raw) {
     {
         char *scan_copy = strdup(rows_tsv);
         if (scan_copy) {
@@ -1131,13 +1256,28 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
         for (int w = 0; w < active[ci].max_width; w++) wo_printf(&wo, "-");
     }
     wo_printf(&wo, "\n");
+    }  /* end if (!raw) table framing */
 
-    /* Second pass: output rows with file grouping */
+    /* Second pass: output rows with file grouping, then any source block */
     {
         char *rows_copy = strdup(rows_tsv);
         if (!rows_copy) {
+            source_map_free(&sources);
             wo_free(&wo);
             return strdup("Error: out of memory.");
+        }
+
+        /* Search patterns to highlight in context output (mutates patterns_buf,
+         * which is no longer needed after the "Searching for:" header). */
+        char *hl_patterns[MAX_PATTERNS];
+        int hl_count = 0;
+        {
+            char *sp2;
+            char *t = strtok_r(patterns_buf, " ", &sp2);
+            while (t && hl_count < MAX_PATTERNS) {
+                hl_patterns[hl_count++] = t;
+                t = strtok_r(NULL, " ", &sp2);
+            }
         }
 
         char current_file[PATH_MAX_LENGTH] = "";
@@ -1151,55 +1291,143 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
             char *fields[TSV_FIELDS] = {NULL};
             parse_one_tsv_line(line_ptr, fields, TSV_FIELDS);
 
-            /* Build filepath from directory (TSV 1) + filename (TSV 2) */
             const char *dir  = fields[1] ? fields[1] : "";
             const char *file = fields[2] ? fields[2] : "";
-            if (dir[0] && dir[strlen(dir)-1] != '/') {
-                char filepath[PATH_MAX_LENGTH];
-                snprintf(filepath, sizeof(filepath), "%s/%s", dir, file);
+            char filepath[PATH_MAX_LENGTH];
+            build_row_filepath(dir, file, filepath, sizeof(filepath));
+
+            if (!raw) {
+                /* File-group header on change */
                 if (strcmp(filepath, current_file) != 0) {
                     if (current_file[0]) wo_printf(&wo, "\n");
                     wo_printf(&wo, "%s:\n", filepath);
                     snprintf(current_file, sizeof(current_file), "%s", filepath);
                 }
-            } else {
-                char filepath_no_slash[PATH_MAX_LENGTH];
-                snprintf(filepath_no_slash, sizeof(filepath_no_slash), "%s%s", dir, file);
-                if (strcmp(filepath_no_slash, current_file) != 0) {
-                    if (current_file[0]) wo_printf(&wo, "\n");
-                    wo_printf(&wo, "%s:\n", filepath_no_slash);
-                    snprintf(current_file, sizeof(current_file), "%s", filepath_no_slash);
+                /* Selected columns */
+                for (int ci = 0; ci < num_cols; ci++) {
+                    if (ci > 0) wo_printf(&wo, " | ");
+                    int ti = active[ci].spec->tsv_index;
+                    const char *val = (ti < TSV_FIELDS && fields[ti]) ? fields[ti] : "";
+                    wo_printf(&wo, "%-*s", active[ci].max_width, val);
                 }
+                wo_printf(&wo, "\n");
             }
 
-            /* Print selected columns */
-            for (int ci = 0; ci < num_cols; ci++) {
-                if (ci > 0) wo_printf(&wo, " | ");
-                int ti = active[ci].spec->tsv_index;
-                const char *val = (ti < TSV_FIELDS && fields[ti]) ? fields[ti] : "";
-                if (active[ci].spec->is_int) {
-                    wo_printf(&wo, "%-*s", active[ci].max_width, val);
-                } else {
-                    wo_printf(&wo, "%-*s", active[ci].max_width, val);
-                }
+            /* Source expansion / context lines.  The twin decides per row what
+             * to render (-e only for definitions, -C/-A/-B otherwise); a missing
+             * file (content == NULL) yields the CLI's "could not read" warning. */
+            if (needs_source) {
+                const char *content = source_map_get(&sources, filepath);
+                int line_no = fields[3] ? atoi(fields[3]) : 0;
+                int is_def  = fields[13] ? atoi(fields[13]) : 0;
+                const char *srcloc = fields[6] ? fields[6] : "";
+                print_expansion_or_context_web(&wo, content, filepath,
+                    line_no, srcloc, is_def, expand, ctx_before, ctx_after,
+                    hl_patterns, hl_count, raw);
             }
-            wo_printf(&wo, "\n");
+
             row_count++;
-
             if (nl) line_ptr = nl + 1;
             else break;
         }
         free(rows_copy);
     }
 
-    wo_printf(&wo, "\nFound %d matches", total);
-    if (total > shown) {
-        wo_printf(&wo, " (showing first %d)", shown);
+    if (!raw) {
+        wo_printf(&wo, "\nFound %d matches", total);
+        if (total > shown) {
+            wo_printf(&wo, " (showing first %d)", shown);
+        }
+        wo_printf(&wo, "\n");
+        wo_printf(&wo, "Tip: Use -i <context> to narrow results\n");
     }
-    wo_printf(&wo, "\n");
-    wo_printf(&wo, "Tip: Use -i <context> to narrow results\n");
 
+    source_map_free(&sources);
     { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
+}
+
+/* Formats the "Result breakdown: COM (N), VAR (N), ..." + Tip line.
+ * context_tsv: newline-separated rows of "context_name\tcount".
+ * Called separately (mirroring the CLI's get_context_summary()) only when
+ * results are truncated; caller decides whether to invoke it. */
+EMSCRIPTEN_KEEPALIVE
+char *qi_web_format_breakdown(const char *context_tsv) {
+    WebOutput wo;
+    if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
+
+    wo_printf(&wo, "Result breakdown: ");
+    int first = 1;
+    const char *p = context_tsv ? context_tsv : "";
+    while (*p) {
+        const char *nl = strchr(p, '\n');
+        size_t row_len = nl ? (size_t)(nl - p) : strlen(p);
+        if (row_len == 0) { p = nl ? nl + 1 : p + strlen(p); continue; }
+
+        const char *tab = memchr(p, '\t', row_len);
+        if (tab) {
+            size_t ctx_len = (size_t)(tab - p);
+            char ctx_name[64];
+            size_t copy_len = ctx_len < sizeof(ctx_name) - 1 ? ctx_len : sizeof(ctx_name) - 1;
+            memcpy(ctx_name, p, copy_len);
+            ctx_name[copy_len] = '\0';
+
+            const char *compact = map_context_web(ctx_name);
+            if (!compact) compact = ctx_name;
+
+            const char *cnt_start = tab + 1;
+            size_t cnt_len = row_len - ctx_len - 1;
+            char cnt_buf[32];
+            size_t cnt_copy = cnt_len < sizeof(cnt_buf) - 1 ? cnt_len : sizeof(cnt_buf) - 1;
+            memcpy(cnt_buf, cnt_start, cnt_copy);
+            cnt_buf[cnt_copy] = '\0';
+
+            if (!first) wo_printf(&wo, ", ");
+            wo_printf(&wo, "%s (%s)", compact, cnt_buf);
+            first = 0;
+        }
+
+        p = nl ? nl + 1 : p + row_len;
+    }
+    wo_printf(&wo, "\nTip: Use -i <context> to narrow results\n");
+
+    { char *r = wo_steal(&wo); return r ? r : strdup("Error: out of memory."); }
+}
+
+/* Formats --files output: one filepath per line, "Found N files" footer.
+ * rows_tsv: newline-separated rows of "directory\tfilename".
+ * total_available: total distinct files (may exceed total_shown if limit hit). */
+EMSCRIPTEN_KEEPALIVE
+char *qi_web_format_files(const char *rows_tsv, int total_shown, int total_available) {
+    WebOutput wo;
+    if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
+
+    const char *p = rows_tsv ? rows_tsv : "";
+    while (*p) {
+        const char *nl = strchr(p, '\n');
+        size_t row_len = nl ? (size_t)(nl - p) : strlen(p);
+        if (row_len > 0) {
+            const char *tab = memchr(p, '\t', row_len);
+            if (tab) {
+                size_t dir_len  = (size_t)(tab - p);
+                size_t file_len = row_len - dir_len - 1;
+                char dir[PATH_MAX_LENGTH]  = "";
+                char file[PATH_MAX_LENGTH] = "";
+                if (dir_len  < sizeof(dir))  { memcpy(dir,  p,       dir_len);  dir[dir_len]   = '\0'; }
+                if (file_len < sizeof(file)) { memcpy(file, tab + 1, file_len); file[file_len] = '\0'; }
+                char filepath[PATH_MAX_LENGTH];
+                build_row_filepath(dir, file, filepath, sizeof(filepath));
+                wo_printf(&wo, "%s\n", filepath);
+            }
+        }
+        p = nl ? nl + 1 : p + row_len;
+    }
+
+    wo_printf(&wo, "\nFound %d files", total_available);
+    if (total_available > total_shown)
+        wo_printf(&wo, " (showing first %d)", total_shown);
+    wo_printf(&wo, "\n");
+
+    { char *r = wo_steal(&wo); return r ? r : strdup("Error: out of memory."); }
 }
 
 EMSCRIPTEN_KEEPALIVE
