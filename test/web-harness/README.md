@@ -26,6 +26,30 @@ The harness reads `html/projects.json` and resolves each project's `dbUrl` and
 `sourceBase` exactly as the browser worker does — so it validates the same DB
 snapshot and source tree the deployed site serves.
 
+## Parity check: native `qi` vs web
+
+`run.mjs` checks that the web bridge *runs*; `parity.mjs` checks that it produces
+*the same bytes* the native CLI does. For a command it runs both:
+
+- **native** — the installed `qi` binary, invoked with `cwd` = the project's
+  local source tree and `--db-file code-index.db` (the per-project native DB the
+  `.browser.db` snapshot is `VACUUM`'d from), so both sides read byte-identical
+  index data and the same source files.
+- **web** — `qi-pipeline.runQuery`, the exact path the browser worker uses.
+
+Both outputs are ANSI-stripped and trailing-whitespace-normalized (symmetric, so
+nothing real is hidden), then diffed line-by-line.
+
+```sh
+make web-parity                                   # canonical suite (--batch)
+node test/web-harness/parity.mjs "qi New -C 3"    # diff one command
+node test/web-harness/parity.mjs --project htop "qi % -i func --toc --limit 0"
+```
+
+Add `-v` to print both outputs in full even on a match. Exit code is non-zero if
+any command diverges. A `DIFF` block prints unified-style rows where `-` is
+native-only and `+` is web-only.
+
 ## How it stays honest
 
 The harness does **not** reimplement the query pipeline. The orchestration lives
@@ -53,6 +77,8 @@ So a passing harness run means the actual code path the browser uses works.
   `{path, content}` records.
 - `run.mjs` — reads `projects.json`, resolves `dbUrl`/`sourceBase`, then runs
   the case list + assertions.
+- `parity.mjs` — diffs native `qi` output against the web bridge for the same
+  command + data (see "Parity check" above).
 - `unit.mjs` — fast unit tests for the pure helpers in `qi-pipeline.js` (e.g.
   `injectWhereClause` placement against nested subqueries / string literals).
   No WASM or DB needed. `make web-test` runs these before the integration suite.

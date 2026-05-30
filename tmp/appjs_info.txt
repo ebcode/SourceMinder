@@ -1,0 +1,320 @@
+bytes 12658 lines 356 nonblank 318
+maxlinelen 130
+1: /* app.js -- xterm.js terminal shell for qi.
+2:  *
+3:  * qi.wasm and sqlite.wasm run in qi-worker.js (web worker) so no query
+4:  * execution blocks the main-thread terminal UI.
+5:  *
+6:  * xterm.js and FitAddon are loaded via <script> tags (UMD bundles).
+7:  */
+9: var statusEl = document.getElementById("status");
+10: var summaryEl = document.getElementById("summary");
+11: var terminalContainerEl = document.getElementById("terminal-container");
+12: var errorEl = document.getElementById("error");
+13: var projectSelectEl = document.getElementById("project-select");
+15: var term = null;
+16: var cmdBuffer = "";
+17: var cursorPos = 0;
+18: var isExecuting = false;
+19: var switching = false;   /* a project switch is in flight; keep input gated */
+20: var PROMPT = "$ ";
+22: /* Project state */
+23: var projectsById = {};
+24: var currentProjectId = "";   /* last successfully loaded project; revert target on a failed switch */
+25: var terminalInstalled = false;
+26: var sqliteVersion = "";
+28: /* Command history — persisted to localStorage */
+29: var HISTORY_KEY = 'qi_history';
+30: var HISTORY_MAX = 500;
+31: var history = (function() {
+32:     try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+33:     catch (e) { return []; }
+34: })();
+35: var historyIndex = -1;
+36: var savedBuffer = "";
+38: var worker = new Worker("./qi-worker.js", { type: "module" });
+40: function setStatus(message) {
+41:     statusEl.textContent = message;
+42: }
+44: function formatBytes(n) {
+45:     if (n >= 1048576) return (n / 1048576).toFixed(1) + " MB";
+46:     if (n >= 1024) return (n / 1024).toFixed(0) + " KB";
+47:     return n + " B";
+48: }
+50: /* Project dropdown -> ask the worker to switch projects. */
+51: projectSelectEl.addEventListener("change", function() {
+52:     var p = projectsById[projectSelectEl.value];
+53:     if (!p) return;
+54:     isExecuting = true;            /* block queries until the new DB is ready */
+55:     switching = true;              /* an in-flight query's output must not re-enable input */
+56:     projectSelectEl.disabled = true;
+57:     if (term) termWrite("\r\nSwitching to " + p.name + "...\r\n");
+58:     setStatus("Loading " + p.name + "...");
+59:     worker.postMessage({ type: "load-project", project: p });
+60: });
+62: function showError(message) {
+63:     errorEl.hidden = false;
+64:     errorEl.textContent = message;
+65:     setStatus("Failed to load browser SQLite test harness.");
+66: }
+68: function termWrite(text) {
+69:     if (term) term.write(text.replace(/\n/g, "\r\n"));
+70: }
+72: /* Redraw the prompt line using VT sequences: clear line, write prompt+buffer,
+73:  * position cursor.  Avoids character-by-character artifacts. */
+74: function redrawPrompt() {
+75:     if (!term) return;
+76:     term.write("\r\x1b[K" + PROMPT + cmdBuffer);
+77:     if (cmdBuffer.length > cursorPos)
+78:         term.write("\r\x1b[" + (PROMPT.length + cursorPos) + "C");
+79: }
+81: /* Called after completing a command (Enter / clear) to reset prompt state. */
+82: function resetPrompt() {
+83:     cmdBuffer = "";
+84:     cursorPos = 0;
+85:     redrawPrompt();
+86: }
+88: function runTinyQuery(input) {
+89:     if (isExecuting) { console.log("[main] runTinyQuery skipped: already executing"); return; }
+90:     isExecuting = true;
+91:     console.log("[main] runTinyQuery posting:", input);
+92:     worker.postMessage({ type: "query", cmd: input });
+93: }
+95: /* History navigation */
+96: function historyUp() {
+97:     if (history.length === 0) return;
+98:     if (historyIndex === -1) savedBuffer = cmdBuffer;
+99:     if (historyIndex < history.length - 1) {
+100:         historyIndex++;
+101:         cmdBuffer = history[history.length - 1 - historyIndex];
+102:         cursorPos = cmdBuffer.length;
+103:         redrawPrompt();
+104:     }
+105: }
+107: function historyDown() {
+108:     if (historyIndex === -1) return;
+109:     if (historyIndex > 0) {
+110:         historyIndex--;
+111:         cmdBuffer = history[history.length - 1 - historyIndex];
+112:     } else {
+113:         historyIndex = -1;
+114:         cmdBuffer = savedBuffer;
+115:         savedBuffer = "";
+116:     }
+117:     cursorPos = cmdBuffer.length;
+118:     redrawPrompt();
+119: }
+121: worker.onmessage = function(event) {
+122:     var msg = event.data;
+123:     console.log("[main] worker msg type:", msg.type);
+125:     switch (msg.type) {
+126:     case "status":
+127:         console.log("[main] status:", msg.message);
+128:         setStatus(msg.message);
+129:         break;
+131:     case "projects":
+132:         console.log("[main] projects:", msg.projects.length);
+133:         sqliteVersion = msg.version;
+134:         projectsById = {};
+135:         projectSelectEl.innerHTML = "";
+136:         for (var pi = 0; pi < msg.projects.length; pi++) {
+137:             var proj = msg.projects[pi];
+138:             projectsById[proj.id] = proj;
+139:             var opt = document.createElement("option");
+140:             opt.value = proj.id;
+141:             opt.textContent = proj.name;
+142:             projectSelectEl.appendChild(opt);
+143:         }
+144:         projectSelectEl.hidden = false;
+145:         break;
+147:     case "progress":
+148:         if (msg.total > 0) {
+149:             var pct = Math.floor((msg.loaded / msg.total) * 100);
+150:             setStatus("Downloading " +
+151:                 (projectsById[msg.projectId] ? projectsById[msg.projectId].name : "project") +
+152:                 "… " + pct + "% (" + formatBytes(msg.loaded) + " / " + formatBytes(msg.total) + ")");
+153:         } else {
+154:             setStatus("Downloading… " + formatBytes(msg.loaded));
+155:         }
+156:         break;
+158:     case "ready":
+159:         console.log("[main] ready, project:", msg.projectId);
+160:         renderSummary(msg.summary);
+161:         isExecuting = false;
+162:         switching = false;
+163:         projectSelectEl.disabled = false;
+164:         if (msg.projectId) { projectSelectEl.value = msg.projectId; currentProjectId = msg.projectId; }
+165:         if (!terminalInstalled) {
+166:             terminalInstalled = true;
+167:             installTerminal();   /* creates the terminal and runs the self-test */
+168:         } else {
+169:             /* Project switch: keep the existing terminal, just announce it. */
+170:             termWrite("\r\nLoaded project: " + msg.projectName + "\r\n");
+171:             resetPrompt();
+172:             term.focus();
+173:         }
+174:         setStatus("Project: " + (msg.projectName || "") + " — SQLite " + sqliteVersion + " in-browser.");
+175:         break;
+177:     case "output":
+178:         console.log("[main] output, length:", msg.text.length, "first 200:", JSON.stringify(msg.text.substring(0, 200)));
+179:         termWrite(msg.text);
+180:         /* If a project switch is queued behind this query, leave input gated;
+181:          * the 'ready' handler will clear isExecuting and redraw the prompt. */
+182:         if (!switching) {
+183:             isExecuting = false;
+184:             resetPrompt();
+185:         }
+186:         break;
+188:     case "error":
+189:         console.error("[main] error:", msg.message);
+190:         if (!terminalInstalled) {
+191:             /* Startup failure (init / first project load) arrives before the
+192:              * terminal exists, so termWrite is a no-op -- surface it in the
+193:              * visible error banner instead, otherwise the page just hangs on its
+194:              * last status line with no reason shown. */
+195:             showError(msg.message);
+196:         } else {
+197:             termWrite("Error: " + msg.message + "\r\n");
+198:         }
+199:         if (msg.phase === "load" || msg.phase === "init") {
+200:             /* The load/switch itself failed -- recover so the shell stays usable
+201:              * (otherwise switching/isExecuting/disabled would stick forever, as
+202:              * only 'ready' clears them and a failed load never reaches 'ready'). */
+203:             switching = false;
+204:             isExecuting = false;
+205:             projectSelectEl.disabled = false;
+206:             if (currentProjectId) projectSelectEl.value = currentProjectId;  /* undo the failed selection */
+207:             if (term) resetPrompt();
+208:         } else if (!switching) {
+209:             /* Query error, no switch pending -- re-enable input. */
+210:             isExecuting = false;
+211:             resetPrompt();
+212:         }
+213:         /* else: query error while a switch is queued behind it -- stay gated;
+214:          * the pending load clears state via 'ready' or its own 'load' error. */
+215:         break;
+216:     }
+217: };
+219: worker.onerror = function(error) {
+220:     showError("Worker error: " + (error.message || String(error)));
+221: };
+223: function installTerminal() {
+224:     var FitAddonCtor = FitAddon.FitAddon || FitAddon;
+225:     term = new Terminal({
+226:         cursorBlink: true,
+227:         fontSize: 14,
+228:         fontFamily: '"SFMono-Regular", Consolas, "Liberation Mono", monospace',
+229:         theme: {
+230:             background: "#0d152b",
+231:             foreground: "#e6edf7",
+232:             cursor: "#9dd4ff",
+233:             selectionBackground: "#2a3f6e",
+234:         },
+235:         cols: 100,
+236:         rows: 30,
+237:     });
+239:     var fitAddon = new FitAddonCtor();
+240:     term.loadAddon(fitAddon);
+241:     term.open(terminalContainerEl);
+243:     /* Intercept arrow keys, Home, End, Delete before xterm processes them.
+244:      * Return false to prevent xterm from emitting terminal escape sequences. */
+245:     term.attachCustomKeyEventHandler(function(event) {
+246:         if (isExecuting || event.type !== "keydown") return true;
+248:         switch (event.key) {
+249:         case "ArrowUp":    historyUp();   return false;
+250:         case "ArrowDown":  historyDown(); return false;
+251:         case "ArrowLeft":
+252:             if (cursorPos > 0) { cursorPos--; redrawPrompt(); }
+253:             return false;
+254:         case "ArrowRight":
+255:             if (cursorPos < cmdBuffer.length) { cursorPos++; redrawPrompt(); }
+256:             return false;
+257:         case "Home":
+258:             cursorPos = 0; redrawPrompt();
+259:             return false;
+260:         case "End":
+261:             cursorPos = cmdBuffer.length; redrawPrompt();
+262:             return false;
+263:         case "Delete":
+264:             if (cursorPos < cmdBuffer.length) {
+265:                 cmdBuffer = cmdBuffer.slice(0, cursorPos) + cmdBuffer.slice(cursorPos + 1);
+266:                 redrawPrompt();
+267:             }
+268:             return false;
+269:         }
+270:         return true; /* let xterm handle all other keys */
+271:     });
+273:     /* Handle keyboard input — printable chars, Backspace, Enter. */
+274:     term.onData(function(data) {
+275:         if (isExecuting) return;
+277:         for (var i = 0; i < data.length; i++) {
+278:             var ch = data[i];
+280:             if (ch === "\r") {
+281:                 /* Enter pressed — submit command */
+282:                 termWrite("\r\n");
+283:                 var cmd = cmdBuffer.trim();
+284:                 if (cmd) {
+285:                     if (cmd === "clear" || cmd === "cls") {
+286:                         term.clear();
+287:                         resetPrompt();
+288:                     } else {
+289:                         if (history.length === 0 || history[history.length - 1] !== cmd) {
+290:                             history.push(cmd);
+291:                             if (history.length > HISTORY_MAX) history.splice(0, history.length - HISTORY_MAX);
+292:                             try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch (e) { /* quota exceeded */ }
+293:                         }
+294:                         historyIndex = -1;
+295:                         runTinyQuery(cmd);
+296:                     }
+297:                 } else {
+298:                     resetPrompt();
+299:                 }
+300:             } else if (ch === "\x7f") {
+301:                 /* Backspace — delete character before cursor */
+302:                 if (cursorPos > 0) {
+303:                     cmdBuffer = cmdBuffer.slice(0, cursorPos - 1) + cmdBuffer.slice(cursorPos);
+304:                     cursorPos--;
+305:                     redrawPrompt();
+306:                 }
+307:             } else if (ch >= " ") {
+308:                 /* Printable character — insert at cursor position */
+309:                 cmdBuffer = cmdBuffer.slice(0, cursorPos) + ch + cmdBuffer.slice(cursorPos);
+310:                 cursorPos++;
+311:                 redrawPrompt();
+312:             }
+313:         }
+314:     });
+316:     /* Fit terminal to container on resize */
+317:     try { fitAddon.fit(); } catch (_) { /* ignore */ }
+318:     window.addEventListener("resize", function() {
+319:         try { fitAddon.fit(); } catch (_) { /* ignore */ }
+320:     });
+322:     termWrite("qi WASM bridge ready. Type a qi command.\r\n");
+323:     resetPrompt();
+325:     /* Auto-focus so the user can type immediately without clicking the terminal. */
+326:     term.focus();
+328:     /* Self-test */
+329:     //var testCmd = "qi % -i call -v -x noise --limit 5";
+330:     //termWrite(testCmd + "\r\n");
+331:     //runTinyQuery(testCmd);
+332: }
+334: function renderSummary(cards) {
+335:     summaryEl.innerHTML = "";
+336:     for (var i = 0; i < cards.length; i++) {
+337:         var node = document.createElement("div");
+338:         node.className = "card";
+339:         node.innerHTML = "<span class=\"label\">" + cards[i].label + "</span><div class=\"value\">" + cards[i].value + "</div>";
+340:         summaryEl.appendChild(node);
+341:     }
+342:     summaryEl.hidden = false;
+343: }
+345: function main() {
+346:     try {
+347:         setStatus("Starting qi worker...");
+348:         worker.postMessage({ type: "init" });
+349:     } catch (error) {
+350:         console.error(error);
+351:         showError(error instanceof Error ? error.stack || error.message : String(error));
+352:     }
+353: }
+355: main();

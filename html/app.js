@@ -35,7 +35,10 @@ var history = (function() {
 var historyIndex = -1;
 var savedBuffer = "";
 
-var worker = new Worker("./qi-worker.js", { type: "module" });
+/* Cache-bust the worker per page load.  The token rides along on the worker
+ * URL's query string; the worker reuses it (self.location.search) to bust its
+ * own dynamic import of qi-pipeline.js. */
+var worker = new Worker("./qi-worker.js?t=" + Date.now(), { type: "module" });
 
 function setStatus(message) {
     statusEl.textContent = message;

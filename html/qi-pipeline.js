@@ -110,7 +110,13 @@ export function injectWhereClause(sqlStr, clause) {
 /* Run one qi command end-to-end and return the formatted output string.
  * `ctx` supplies the WASM module, DB connection, source provider, and logger
  * (see file header). */
-export async function runQuery(ctx, input) {
+export async function runQuery(ctx, input, opts) {
+    opts = opts || {};
+    /* suppressHeader: drop the "Searching for:" header on this run.  Set when
+     * re-running for the no-results partial-match retry, so the header (already
+     * printed by the zero-row pass) is not repeated -- mirrors native's
+     * goto retry_query. */
+    var suppressHeader = !!opts.suppressHeader;
     var qiModule = ctx.qiModule;
     var db = ctx.db;
     /* Logging is gated on ctx.debug: when off, `log` is a no-op AND the
@@ -224,8 +230,8 @@ export async function runQuery(ctx, input) {
         }).join('\n');
 
         return qiModule.ccall('qi_web_format_files', 'string',
-            ['string', 'number', 'number'],
-            [filesTsv, fileRows.length, totalFiles]);
+            ['string', 'string', 'number', 'number'],
+            [buildResult, filesTsv, fileRows.length, totalFiles]);
     }
 
     var sql = buildLines.SQL;
@@ -357,15 +363,18 @@ export async function runQuery(ctx, input) {
     var formatted;
     try {
         formatted = qiModule.ccall('qi_web_format', 'string',
-            ['string', 'string', 'number', 'number', 'number', 'number'],
-            [buildResult, rowsTsv2, total, rows.length, srcPtr, srcLen]);
+            ['string', 'string', 'number', 'number', 'number', 'number', 'number'],
+            [buildResult, rowsTsv2, total, rows.length, srcPtr, srcLen, suppressHeader ? 1 : 0]);
     } finally {
         if (srcPtr) qiModule._free(srcPtr);
     }
     if (debug) log('[pipeline] qi_web_format result (first 300 chars):\n' + formatted.substring(0, 300));
 
-    /* 6. Append breakdown when results are truncated (mirrors CLI get_context_summary). */
-    if (total > rows.length && buildLines.BREAKDOWN_SQL) {
+    /* 6. Append breakdown when results are truncated (mirrors CLI
+     * get_context_summary).  --raw suppresses all non-source output, so skip it
+     * entirely -- native gates the equivalent print_summary_stats behind
+     * `if (!raw)`; the breakdown export also carries the trailing Tip line. */
+    if (total > rows.length && buildLines.BREAKDOWN_SQL && buildLines.RAW !== '1') {
         try {
             /* Same --within scoping as COUNT_SQL: BREAKDOWN_SQL was precomputed
              * before WITHIN post-processing; inject ahead of its GROUP BY. */
@@ -378,5 +387,48 @@ export async function runQuery(ctx, input) {
         }
     }
 
+    /* 7. Zero-results diagnostics + partial-match retry (mirrors query-index.c's
+     * no-match path).  Skipped under --raw, and on a suppressed-header run so the
+     * retry can't recurse.  C decides the wording and whether to retry; JS runs
+     * the filter-free counts and, if asked, re-runs the query wildcarded. */
+    if (total === 0 && buildLines.RAW !== '1' && !suppressHeader) {
+        var nrPatterns = (buildLines.NR_PATTERNS || '').split(' ').filter(Boolean);
+        var countLines = [];
+        for (var pi = 0; pi < nrPatterns.length; pi++) {
+            var exactSql = buildLines['NR_EXACT_' + pi];
+            var wildSql = buildLines['NR_WILD_' + pi];   /* absent if pattern has '%' */
+            var exactCount = 0, wildCount = -1;
+            try { if (exactSql) exactCount = expectSingleValue(db, exactSql); } catch (e) { exactCount = 0; }
+            try { if (wildSql !== undefined) wildCount = expectSingleValue(db, wildSql); } catch (e) { wildCount = -1; }
+            countLines.push(exactCount + '\t' + wildCount);
+        }
+
+        var nrOut = qiModule.ccall('qi_web_format_no_results', 'string',
+            ['string', 'string'], [buildResult, countLines.join('\n')]);
+        var nlPos = nrOut.indexOf('\n');
+        var ctrl = nlPos >= 0 ? nrOut.slice(0, nlPos) : nrOut;
+        formatted += nlPos >= 0 ? nrOut.slice(nlPos + 1) : '';
+
+        /* Control line "RETRY|<idx>": re-run the query with that pattern
+         * wildcarded (NR_RETRY_SQL was built for the single-pattern case), with
+         * the header suppressed so only the partial-match results follow. */
+        var rm = /^RETRY\|(-?\d+)/.exec(ctrl);
+        if (rm && parseInt(rm[1], 10) >= 0 && buildLines.NR_RETRY_SQL) {
+            var retryPattern = nrPatterns[parseInt(rm[1], 10)];
+            formatted += await runQuery(ctx, wildcardPattern(input, retryPattern),
+                                        { suppressHeader: true });
+        }
+    }
+
     return formatted;
+}
+
+/* Wrap the whole-word occurrence of `pattern` in the command string with '*' so
+ * a re-run does a substring (LIKE %pattern%) search -- the JS analogue of native
+ * swapping patterns->patterns[i] for "%X%".  Only reached for plain (no-wildcard)
+ * single patterns, so a word-boundary replace is unambiguous. */
+function wildcardPattern(input, pattern) {
+    if (!pattern) return input;
+    var esc = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return input.replace(new RegExp('(^|\\s)' + esc + '(\\s|$)'), '$1*' + pattern + '*$2');
 }

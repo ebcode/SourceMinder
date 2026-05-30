@@ -343,7 +343,15 @@ static void imp_hash_add(char **slots, const char *key) {
         slots[h] = (char *)key;
 }
 
-/* Print imports (deduped) on one line, preserving first-seen order. */
+static int toc_cmp_import_symbols(const void *a, const void *b) {
+    const TocWebEntry *ea = *(const TocWebEntry *const *)a;
+    const TocWebEntry *eb = *(const TocWebEntry *const *)b;
+    return strcmp(ea->symbol, eb->symbol);
+}
+
+/* Print imports (deduped) on one line, sorted alphabetically by symbol to match
+ * the native CLI (shared/toc.c print_imports).  Dedup stays O(1) via the hash
+ * set; the qsort restores the alphabetical order the first-seen collection lost. */
 static void toc_print_imports(WebOutput *wo, TocWebFile *file) {
     TocWebEntry **imports = malloc(sizeof(TocWebEntry *) * (size_t)file->count);
     if (!imports) return;
@@ -361,6 +369,8 @@ static void toc_print_imports(WebOutput *wo, TocWebFile *file) {
     }
 
     if (import_count == 0) { free(imports); return; }
+
+    qsort(imports, (size_t)import_count, sizeof(TocWebEntry *), toc_cmp_import_symbols);
 
     wo_printf(wo, "IMPORTS: ");
     for (int i = 0; i < import_count; i++) {

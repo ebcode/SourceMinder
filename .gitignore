@@ -39,9 +39,12 @@ token-science
 ai-log
 tmp/cachegrind*
 
-# WASM artifacts (generated)
+# WASM artifacts (generated) -- plain + content-hashed copies and the manifest
 html/qi-web.js
 html/qi-web.wasm
+html/qi-web.*.js
+html/qi-web.*.wasm
+html/asset-manifest.json
 wasm/sqlite3.c
 wasm/sqlite3.h
 

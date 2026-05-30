@@ -126,6 +126,11 @@
 
   <script src="./node_modules/xterm/lib/xterm.js"></script>
   <script src="./node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
-  <script type="module" src="./app.js"></script>
+  <!-- Cache-bust app.js (and, transitively, the worker it spawns) on every
+       load.  A static `src` can't carry a query string without rewriting this
+       file each build, so bootstrap with a dynamic import instead. -->
+  <script type="module">
+    import('./app.js?t=' + Date.now());
+  </script>
 </body>
 </html>

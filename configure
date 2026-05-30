@@ -703,7 +703,7 @@ web: $(WEB_DIR)
 		-sMODULARIZE=1 \
 		-sEXPORT_ES6=1 \
 		-sEXPORT_NAME='QiWebModule' \
-		-sEXPORTED_FUNCTIONS='["_qi_web_build","_qi_web_format","_qi_web_format_breakdown","_qi_web_format_files","_qi_web_free_result","_qi_web_toc_format","_malloc","_free"]' \
+		-sEXPORTED_FUNCTIONS='["_qi_web_build","_qi_web_format","_qi_web_format_breakdown","_qi_web_format_files","_qi_web_format_no_results","_qi_web_free_result","_qi_web_toc_format","_malloc","_free"]' \
 		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString","lengthBytesUTF8","stringToUTF8"]' \
 		-sALLOW_MEMORY_GROWTH=1 \
 		-sINITIAL_MEMORY=32MB \
@@ -717,10 +717,15 @@ web: $(WEB_DIR)
 web-test:
 	node test/web-harness/run.mjs
 
+# Side-by-side parity: diff native `qi` output against the web bridge for the
+# same commands and data.  Run after `make web`.  See test/web-harness/README.md.
+web-parity:
+	node test/web-harness/parity.mjs --batch
+
 $(WEB_DIR):
 	mkdir -p $(WEB_DIR)
 
-.PHONY: all clean install install-data uninstall lint debug test web web-smoke web-test
+.PHONY: all clean install install-data uninstall lint debug test web web-smoke web-test web-parity
 EOF_MAKEFILE
 
 # Substitute variables in Makefile

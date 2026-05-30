@@ -52,7 +52,15 @@
     "dbUrl": "./code-index-Slim.browser.db",
     "sourceBase": "./sources/Slim/",
     "sizeBytes": 4386816
+  },
+  {
+    "id": "flask",
+    "name": "Flask",
+    "version": "1",
+    "language": "python",
+    "dbUrl": "./code-index-flask.browser.db",
+    "sourceBase": "./sources/flask/",
+    "sizeBytes": 7557120
   }
-
 ]
 

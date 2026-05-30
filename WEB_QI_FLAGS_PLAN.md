@@ -2,7 +2,7 @@
 
 ## Current State
 
-The WASM bridge supports a superset of qi flags:
+The WASM bridge supports a subset of qi flags:
 
 | Flag | Status | Notes |
 |------|--------|-------|
@@ -29,12 +29,25 @@ The WASM bridge supports a superset of qi flags:
 | `--toc` | done | no file access needed, pure DB + formatting |
 | arrow-key prompt editing | done | history ring, cursor movement, VT redraw |
 
+| `--files` | done | `SELECT DISTINCT directory, filename` + file-list format |
+| `--raw` | done | suppresses all framing; bare source for copy-paste |
+| `-e` / `--expand` | done | source host bridge (worker fetch + render twin) |
+| `-C` / `-A` / `-B` | done | source host bridge (worker fetch + render twin) |
+| context breakdown | done | JS GROUP BY → `qi_web_format_breakdown` |
+| match highlighting | done | ANSI dark-green background (matches CLI), not a `^^^` marker |
+
 Remaining:
-| `--files` | not done | |
-| `-e` | not done | blocked on source-fetch host bridge |
-| `-C` / `-A` / `-B` | not done | blocked on source-fetch host bridge |
-| context breakdown | not done | JS GROUP BY + format extension |
-| syntax highlight marker | not done | `^^^ N ^^^` in output |
+| Phase 9 parity testing | ongoing | column-width + Tip-line disparities fixed; more queries to diff |
+| `NATIVE_CLI_FIXES_NEEDED.md` | not done | 13 logged native-CLI bugs, separate branch |
+
+**Supporting infrastructure added since this plan was first written:**
+- Multi-project dropdown + per-project `html/sources/<project>/` convention,
+  DB load via Cache Storage with streamed download progress.
+- Headless Node test harness (`make web-test`) sharing the real
+  `html/qi-pipeline.js` so the browser path can't drift from what's tested.
+- Asset cache-busting in `make web`: content-hashed `qi-web.<hash>.{js,wasm}`
+  resolved via `html/asset-manifest.json`, plus per-load `?t` timestamps on
+  `app.js` / `qi-worker.js` / `qi-pipeline.js`.
 
 ## Architecture: Where Each Flag Lives
 
@@ -168,85 +181,112 @@ AND filters (OR within column, AND across columns).
 **Note:** Required `-DENABLE_TYPESCRIPT=1` in the emcc configure flags
 so scope/namespace columns compile into QueryFilters.
 
-## Phase 6: Context Breakdown (Result Breakdown)
+## Phase 6: Context Breakdown (Result Breakdown) ✅ DONE
 
-**What the CLI shows after `Found N matches`:**
+**What the CLI shows after `Found N matches`, only when results are truncated
+(`limit > 0 && total >= limit`):**
 ```
 Result breakdown: COM (16702), ARG (14812), VAR (11370), ...
 Tip: Use -i <context> to narrow results
 ```
 
-**Implementation:**
-1. JS runs a GROUP BY context query against the browser DB.
-2. JS passes the breakdown as a string to `qi_web_format`.
-3. Format appends it after the match count.
+**Implementation (as built — separate export, not a `qi_web_format` parameter):**
+1. C emits `BREAKDOWN_SQL` alongside `COUNT_SQL` in `qi_web_build`.
+2. The worker runs the breakdown GROUP BY **only** when `total > rows.length`
+   (mirrors the CLI's truncated-result condition).
+3. `qi_web_format_breakdown` formats the `Result breakdown:` line plus the
+   `Tip: Use -i <context> to narrow results` line. `map_context_web()` (canonical
+   in `query-index-web.c`) maps full context names to compact codes.
 
-**New format API:** Extend `qi_web_format` to accept an optional context
-breakdown string:
-```
-qi_web_format(build_info, rows_tsv, total, shown, context_breakdown)
-```
+**Note:** `qi_web_format` itself does **not** print the Tip — that lives with the
+breakdown so it appears only on truncation, matching the CLI (the unconditional
+Tip in the format footer was removed during parity work).
 
-**Work:** small — one extra DB query in JS, one extra parameter to format.
-
-## Phase 7: `--files` (Files-Only Output)
+## Phase 7: `--files` (Files-Only Output) ✅ DONE
 
 **What it does:** Shows only distinct files matching filters, not individual symbols.
 
-**Implementation:**
-1. Parser: detect `--files` flag.
-2. `qi_web_build`: generate `SELECT DISTINCT directory, filename FROM code_index WHERE (...) ORDER BY directory, filename` instead of the full row query.
-3. `qi_web_format`: when files-only, format as a simple file list instead of a table.
+**Implementation (as built):**
+1. Parser sets `files_mode`; branch placed after `POPULATE_COL_FILTER` to reuse
+   the built filter structures.
+2. `qi_web_build` emits `MODE|files` + `FILES_SQL|SELECT DISTINCT directory,
+   filename ... ORDER BY directory, filename`.
+3. `qi_web_format_files` formats one filepath per line with a footer; the worker
+   `files` branch mirrors the `toc` branch.
 
-**Work:** small.
+## Phase 8: HOST_BRIDGED Features (Source-Dependent) ✅ DONE
 
-## Phase 8: HOST_BRIDGED Features (Source-Dependent)
+**Flags:** `-e`/`--expand`, `-C N`, `-A N`, `-B N`, `--raw`
 
-**Flags:** `-e`, `-C N`, `-A N`, `-B N`
+**These require source-file content**, which the browser can't read from disk.
+The host bridge was built as a **superset-of-files fetch + render twins** rather
+than the per-request callback originally sketched.
 
-**These require reading source files from disk**, which the browser can't do.
-They need a host bridge:
+### Source Fetch Bridge (as built)
 
-### Source Fetch Bridge Design
+1. **C build:** `qi_web_build` emits `NEEDS_SOURCE` / `EXPAND` / `CONTEXT_BEFORE`
+   / `CONTEXT_AFTER` / `RAW` in build_info when any source flag is present.
+2. **Worker fetch (`SourceCache` in `qi-worker.js`):** for every displayed row's
+   file, fetches the whole file from `html/sources/<project>/` (deduped, session
+   cached, bounded-concurrency pool, 404 → omit). The result is marshaled into
+   the WASM heap as a **NUL-framed blob** (`path\0content\0...`) via `_malloc` +
+   `stringToUTF8` — zero per-file copies on the C side.
+3. **C render (`shared-web/source-render-web.c`):** render *twins* of the CLI
+   functions — `print_lines_range_web` (`-e`), `print_context_lines_web`
+   (`-C/-A/-B`), orchestrated by `print_expansion_or_context_web`. They write to
+   a `WebOutput` buffer instead of `FILE*`; `source_map_parse` stores in-place
+   pointers into the blob. C alone decides per row what to render (`-e` only for
+   definitions); JS just supplies a superset of files, so no parity logic is
+   duplicated in JS.
 
-1. **C side:** Instead of reading files from disk, the C code identifies what
-   file content it needs (path, line range) and places a request.
-2. **JS side:** Fetches the file content (from a static file server or an API)
-   and passes it back to C.
-3. **Format function** uses the fetched content to render context lines or
-   expanded definitions.
+**Key invariant:** the C `build_row_filepath` formula and the worker's
+`buildRowFilepath` must stay identical — that string is the blob lookup key.
 
-### Bridge API Sketch
+**`--raw`:** suppresses all non-source framing (header, table, line numbers,
+stats) so `-e`/`-B`/`-A` output is bare source suitable for copy-paste into an
+Edit `old_string`.
 
-```c
-// C side: places a source request
-typedef struct {
-    char path[PATH_MAX_LENGTH];
-    int start_line;
-    int end_line;
-} SourceRequest;
+**Snapshot-consistency caveat:** the indexed line numbers must match the served
+source. Regenerate the browser DB (`html/sources/browser-snapshot.sh`, which uses
+`VACUUM INTO`) after editing indexed files, or expansions will be off by the drift.
 
-// Called by format function when it encounters -e/-C/-A/-B
-// In CLI: reads from filesystem. In browser: calls back to JS.
-char *qi_web_fetch_source(const char *path, int start, int end);
-```
+## Phase 9: Exact Output Parity (ongoing)
 
-In the JS bridge, `qi_web_fetch_source` would be implemented via a JS callback
-that does `fetch()` against a static file server or source-content API.
+All flags are wired; this is now the active polish phase — side-by-side diffs of
+`qi` CLI output vs browser output, fixing divergences as found.
 
-### Order of Implementation for Host-Bridged Features
+**Disparities found and fixed:**
+- **Empty-column widths:** the web column registry seeded widths from a fixed
+  `default_width` floor, so empty columns stayed wide. Now seeded from header
+  width only, matching the CLI's `max(header, data)` (`update_column_widths`).
+- **Stray Tip line:** `qi_web_format` printed `Tip: Use -i <context> to narrow
+  results` unconditionally; the CLI prints it only with the truncation breakdown.
+  Removed from the format footer (the breakdown path already emits it).
 
-1. `-C N` (context lines) — simplest: fetch N lines before/after each match.
-2. `-A N` / `-B N` — same as `-C` but asymmetric.
-3. `-e` (expand definitions) — fetches the full definition span using
-   `parse_source_location()` to compute start/end.
+### Methodology: differential harness (`make web-parity`)
 
-**Work:** large for the full bridge. Start with `-C N` as proof of concept.
+A new `test/web-harness/parity.mjs` runs a corpus of qi commands through **both**
+paths against the **same DB file** and diffs them. CLI output is source-of-truth.
 
-## Phase 9: Exact Output Parity
+- **Same-index guarantee:** both sides target the identical `.browser.db`
+  snapshot — CLI via `qi <cmd> --db-file html/code-index-<project>.browser.db`,
+  web via `pipeline.runQuery` against the same file. Same bytes ⇒ identical
+  paths/columns/ordering as inputs, so any output diff is a real divergence.
+- **Reference project:** flask (`code-index-flask.browser.db`) to start; expand
+  to other languages later.
+- **Comparison:** ANSI-stripped structural diff (strip color, trailing ws, CRLF).
+  Color parity is a possible later pass.
+- **`--debug` excluded** from the corpus — its `SQL:` text differs by design
+  (web embeds patterns / EXISTS self-joins vs CLI bound params / temp tables).
+- **Gating:** standalone `make web-parity` (skips with a clear message if the
+  `qi` binary isn't built); not folded into the fast `make web-test` smoke test.
+- **Known-divergence allowlist** (`parity-known-diffs.json`): only for genuinely
+  intended differences, each documented. Row-order divergences are bugs to fix,
+  not to allowlist.
+- Shared `normalize.mjs` is reused by `run.mjs` so both harnesses agree on rules.
 
-Once all flags are wired, do a side-by-side comparison of `qi` CLI output
-vs browser output for representative queries:
+Representative queries to diff (full corpus organized by flag category in
+`parity-cases.mjs`):
 
 | Test Query | CLI | Browser |
 |---|---|---|
@@ -266,19 +306,21 @@ vs browser output for representative queries:
 2. **Phase 5: --compact** — trivial
 3. **Column Filter Flags** — `-p`/`-s`/`-ns`/`-m`/`-c`/`-t`/`-d`
 4. **Phase 3-4: --and + --within** — solved with EXISTS self-join + JS-side lookup
-5. **--debug flag** — useful for development
+5. **--debug flag** + gated worker/app.js logging behind a `debug` flag
 6. **--toc** — pure DB + formatting via `shared-web/toc-web.c`, no file access needed
+7. **Phase 6: Context Breakdown** — `qi_web_format_breakdown`, worker-gated on truncation
+8. **Phase 7: --files** — `qi_web_format_files`
+9. **Phase 8: Host Bridge** — `-e`/`-C`/`-A`/`-B`/`--raw` via superset fetch + render twins
+10. **Persist command history to localStorage** — 500-entry cap
+11. **Multi-project dropdown + Node test harness (`make web-test`) + asset cache-busting**
 
 ### Remaining (in recommended order)
 
-6. **Phase 6: Context Breakdown** — small change, big UX improvement
-7. **Phase 7: --files** — small, useful standalone flag
-8. **Strip/gate debug console.log statements** in worker and app.js
-9. **Upgrade xterm.js** from v5.3.0 (deprecated UMD) to `@xterm/xterm`
-10. **Persist command history to localStorage**
-11. **Phase 8: Host Bridge** — blocked on source-fetch architecture
-12. **Phase 9: Parity Testing** — final polish
-13. **Apply NATIVE_CLI_FIXES_NEEDED.md** — 6 bugs in native CLI (separate branch)
+12. **Phase 9: Parity Testing** — ongoing; column-width + Tip-line fixed, more to diff
+13. **Apply NATIVE_CLI_FIXES_NEEDED.md** — 13 bugs in native CLI (separate branch)
+
+(xterm.js upgrade intentionally deferred: ESM-only v6 brings no major win for
+this use, and v7 is imminent — revisit after it lands.)
 
 ## Open Questions
 

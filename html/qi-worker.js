@@ -17,8 +17,13 @@
  */
 
 import sqlite3InitModule from './node_modules/@sqlite.org/sqlite-wasm/dist/index.mjs';
-import QiWebModule from './qi-web.js';
-import { runQuery, expectSingleValue } from './qi-pipeline.js';
+
+/* qi-web.js (+ its .wasm) and qi-pipeline.js are loaded dynamically in init()
+ * for cache-busting: the WASM glue/binary are resolved through the build's
+ * content-hashed asset-manifest.json, and the pipeline is busted with the same
+ * ?t token this worker was loaded under.  Bound here, assigned in init(). */
+var runQuery = null;
+var expectSingleValue = null;
 
 /* Flip to true to surface the pipeline's per-query diagnostics in the worker
  * console.  Off by default so production neither logs nor pays the cost of
@@ -240,8 +245,32 @@ async function loadProject(project) {
 }
 
 async function init() {
+    /* Pipeline: bust with the same ?t token the worker was loaded under so a
+     * fresh worker always pulls the matching qi-pipeline.js. */
+    var pipelineUrl = new URL('./qi-pipeline.js' + self.location.search, self.location.href).href;
+    var pipeline = await import(pipelineUrl);
+    runQuery = pipeline.runQuery;
+    expectSingleValue = pipeline.expectSingleValue;
+
     self.postMessage({ type: 'status', message: 'Initializing qi WASM module...' });
-    qiModule = await QiWebModule();
+    /* WASM glue + binary: resolve content-hashed names from the build manifest,
+     * falling back to the plain names when no manifest is present. */
+    var assets = null;
+    try {
+        var manifestResp = await fetch('./asset-manifest.json', { cache: 'no-store' });
+        if (manifestResp.ok) assets = await manifestResp.json();
+    } catch (e) { /* fall back to plain names below */ }
+    var qiJsName   = assets ? assets.qiWebJs   : 'qi-web.js';
+    var qiWasmName = assets ? assets.qiWebWasm : 'qi-web.wasm';
+    var qiJsUrl   = new URL('./' + qiJsName,   self.location.href).href;
+    var qiWasmUrl = new URL('./' + qiWasmName, self.location.href).href;
+
+    var QiWebModule = (await import(qiJsUrl)).default;
+    qiModule = await QiWebModule({
+        locateFile: function(path) {
+            return path.endsWith('.wasm') ? qiWasmUrl : path;
+        },
+    });
 
     self.postMessage({ type: 'status', message: 'Initializing SQLite WASM runtime...' });
     sqlite3 = await sqlite3InitModule({ print: function() {}, printErr: function() {} });
