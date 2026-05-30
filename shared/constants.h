@@ -53,7 +53,7 @@
 #define WORD_MAX_LENGTH 64
 
 /* Buffer size for cleaned/processed word extraction from comments and strings */
-#define CLEANED_WORD_BUFFER 8192
+#define CLEANED_WORD_BUFFER 16384
 
 
 /* ============================================================================
