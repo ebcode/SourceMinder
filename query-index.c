@@ -2517,14 +2517,17 @@ static void print_context_types(void) {
 
 static void show_help_compact(void) {
     printf("Usage: qi PATTERN [PATTERN...] [OPTIONS]\n");
-    printf("Search indexed code symbols. Example: qi getUserById --def -e\n");
+    printf("Search indexed code symbols.\n");
+    printf("Example: qi getUserById --def -e\n");
+    printf("Note: qi searches identifiers and indexed symbol metadata, not arbitrary text.\n");
     printf("\n");
 
     printf("Quick Start:\n");
     printf("  qi user                       find symbol (exact match)\n");
     printf("  qi user%% -i func var          only functions/variables (starts with user)\n");
     printf("  qi '*user*' -x noise -C 3     skip comments/strings, show 3 lines of context (contains user)\n");
-    printf("  qi getUserById --def -e       show full definition\n");
+    printf("  qi getUserById --def -e       show full definition (LLMs: add --raw flag for Edit anchors)\n");
+    printf("  qi %% -f query-index.c --toc   show file structure\n");
     printf("\n");
 
     printf("Match:\n");
