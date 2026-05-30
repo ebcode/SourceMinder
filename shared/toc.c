@@ -46,7 +46,7 @@ static void print_toc(FileToc *files, int file_count);
 static void print_section(const char *title, TocEntry *entries, int count, const char *context_filter);
 static void print_imports(TocEntry *entries, int count);
 static void cleanup_files(FileToc *files, int file_count);
-static int add_entry_to_file(FileToc **files, int *file_count, const char *filepath,
+static int add_entry_to_file(FileToc **files, int *file_count, int *last_idx, const char *filepath,
                              const char *symbol, int start_line, int end_line, const char *context, int limit_per_file);
 
 /* Build SQL query for TOC */
@@ -57,8 +57,18 @@ static char *build_toc_query(const TocConfig *config) {
     int remaining = sizeof(query);
     int written;
 
+#define TOC_APPEND(...) do { \
+    written = snprintf(pos, remaining, __VA_ARGS__); \
+    if (written < 0 || written >= remaining) { \
+        fprintf(stderr, "Error: TOC query exceeds %zu-byte buffer\n", sizeof(query)); \
+        return NULL; \
+    } \
+    pos += written; \
+    remaining -= written; \
+} while (0)
+
     /* Base query - filter to relevant definition types only */
-    written = snprintf(pos, remaining,
+    TOC_APPEND(
         "SELECT DISTINCT "
         "  full_symbol, "
         "  line, "
@@ -69,61 +79,45 @@ static char *build_toc_query(const TocConfig *config) {
         "FROM code_index "
         "WHERE (is_definition = 1 OR context = 'IMP' OR context = 'FILE') "
         "AND context IN (");
-    pos += written;
-    remaining -= written;
 
     /* Build dynamic context type list from TOC_ALLOWED_CONTEXTS */
     for (int i = 0; TOC_ALLOWED_CONTEXTS[i] != NULL; i++) {
-        written = snprintf(pos, remaining, "'%s'%s",
-                         TOC_ALLOWED_CONTEXTS[i],
-                         TOC_ALLOWED_CONTEXTS[i + 1] != NULL ? ", " : "");
-        pos += written;
-        remaining -= written;
+        TOC_APPEND("'%s'%s",
+                   TOC_ALLOWED_CONTEXTS[i],
+                   TOC_ALLOWED_CONTEXTS[i + 1] != NULL ? ", " : "");
     }
 
-    written = snprintf(pos, remaining, ") ");
-    pos += written;
-    remaining -= written;
+    TOC_APPEND(") ");
 
     /* File pattern filter (required) - support multiple patterns with OR */
     if (config->file_pattern_count > 0) {
-        written = snprintf(pos, remaining, "AND (");
-        pos += written;
-        remaining -= written;
+        TOC_APPEND("AND (");
 
         for (int i = 0; i < config->file_pattern_count; i++) {
             if (config->file_patterns[i].directory != NULL) {
                 /* Has directory part - filter both columns */
-                written = snprintf(pos, remaining,
+                TOC_APPEND(
                     "(directory LIKE '%s' ESCAPE '\\' AND filename LIKE '%s' ESCAPE '\\')",
                     config->file_patterns[i].directory,
                     config->file_patterns[i].filename);
             } else {
                 /* Filename only */
-                written = snprintf(pos, remaining,
+                TOC_APPEND(
                     "filename LIKE '%s' ESCAPE '\\'",
                     config->file_patterns[i].filename);
             }
-            pos += written;
-            remaining -= written;
 
             if (i < config->file_pattern_count - 1) {
-                written = snprintf(pos, remaining, " OR ");
-                pos += written;
-                remaining -= written;
+                TOC_APPEND(" OR ");
             }
         }
 
-        written = snprintf(pos, remaining, ") ");
-        pos += written;
-        remaining -= written;
+        TOC_APPEND(") ");
     }
 
     /* Context filters (if provided) */
     if (config->include_context_count > 0) {
-        written = snprintf(pos, remaining, "AND context IN (");
-        pos += written;
-        remaining -= written;
+        TOC_APPEND("AND context IN (");
 
         for (int i = 0; i < config->include_context_count; i++) {
             /* Convert short form to DB form if needed */
@@ -136,53 +130,51 @@ static char *build_toc_query(const TocConfig *config) {
                 ctx_upper[j + 1] = '\0';
             }
 
-            written = snprintf(pos, remaining, "'%s'%s",
-                             ctx_upper,
-                             i < config->include_context_count - 1 ? ", " : "");
-            pos += written;
-            remaining -= written;
+            TOC_APPEND("'%s'%s",
+                       ctx_upper,
+                       i < config->include_context_count - 1 ? ", " : "");
         }
 
-        written = snprintf(pos, remaining, ") ");
-        pos += written;
-        remaining -= written;
+        TOC_APPEND(") ");
     }
 
     /* Symbol pattern filters (if provided) */
     if (config->symbol_pattern_count > 0) {
-        written = snprintf(pos, remaining, "AND (");
-        pos += written;
-        remaining -= written;
+        TOC_APPEND("AND (");
 
         for (int i = 0; i < config->symbol_pattern_count; i++) {
-            written = snprintf(pos, remaining, "symbol LIKE '%s'%s",
-                             config->symbol_patterns[i],
-                             i < config->symbol_pattern_count - 1 ? " OR " : "");
-            pos += written;
-            remaining -= written;
+            TOC_APPEND("symbol LIKE '%s'%s",
+                       config->symbol_patterns[i],
+                       i < config->symbol_pattern_count - 1 ? " OR " : "");
         }
 
-        written = snprintf(pos, remaining, ") ");
-        pos += written;
-        remaining -= written;
+        TOC_APPEND(") ");
     }
 
     /* Order by file and line */
-    snprintf(pos, remaining, "ORDER BY directory, filename, line");
+    TOC_APPEND("ORDER BY directory, filename, line");
+
+#undef TOC_APPEND
 
     return query;
 }
 
 /* Add entry to appropriate file group
  * Returns: 1 = entry added, 0 = skipped (limit reached), -1 = error */
-static int add_entry_to_file(FileToc **files, int *file_count, const char *filepath,
+static int add_entry_to_file(FileToc **files, int *file_count, int *last_idx, const char *filepath,
                              const char *symbol, int start_line, int end_line, const char *context, int limit_per_file) {
-    /* Find or create file group */
+    /* Find or create file group — check last-matched index first (O(1) common case) */
     FileToc *target_file = NULL;
-    for (int i = 0; i < *file_count; i++) {
-        if (strcmp((*files)[i].filepath, filepath) == 0) {
-            target_file = &(*files)[i];
-            break;
+    if (*last_idx >= 0 && *last_idx < *file_count &&
+        strcmp((*files)[*last_idx].filepath, filepath) == 0) {
+        target_file = &(*files)[*last_idx];
+    } else {
+        for (int i = 0; i < *file_count; i++) {
+            if (strcmp((*files)[i].filepath, filepath) == 0) {
+                target_file = &(*files)[i];
+                *last_idx = i;
+                break;
+            }
         }
     }
 
@@ -195,13 +187,12 @@ static int add_entry_to_file(FileToc **files, int *file_count, const char *filep
         }
         *files = temp;
         target_file = &(*files)[*file_count];
+        memset(target_file, 0, sizeof(*target_file));
         target_file->filepath = try_strdup_ctx(filepath, "Failed to allocate memory for filepath");
         if (!target_file->filepath) {
             return -1;
         }
-        target_file->entries = NULL;
-        target_file->entry_count = 0;
-        target_file->entry_capacity = 0;
+        *last_idx = *file_count;
         (*file_count)++;
     }
 
@@ -277,20 +268,24 @@ static void print_section(const char *title, TocEntry *entries, int count, const
         int dots_needed = 70 - symbol_len - line_len - 3; /* 3 for spaces */
         if (dots_needed < 1) dots_needed = 1;
 
-        printf("  %s ", filtered[i]->symbol);
-        for (int j = 0; j < dots_needed; j++) {
-            printf(".");
-        }
-        printf(" %d\n", filtered[i]->start_line);
+        static const char dots[72] =
+            "........................................................................";
+        printf("  %s %.*s %d\n", filtered[i]->symbol, dots_needed, dots, filtered[i]->start_line);
     }
     printf("\n");
 
     free(filtered);
 }
 
+static int cmp_import_symbols(const void *a, const void *b) {
+    const TocEntry *ea = *(const TocEntry *const *)a;
+    const TocEntry *eb = *(const TocEntry *const *)b;
+    return strcmp(ea->symbol, eb->symbol);
+}
+
 /* Print imports on a single line */
 static void print_imports(TocEntry *entries, int count) {
-    /* Collect import entries */
+    /* Collect unique import entries in sorted order (O(n log n) dedup) */
     TocEntry **imports = malloc(sizeof(TocEntry*) * (size_t)count);
     if (!imports) {
         fprintf(stderr, "Error: Failed to allocate memory for TOC imports\n");
@@ -300,16 +295,18 @@ static void print_imports(TocEntry *entries, int count) {
 
     for (int i = 0; i < count; i++) {
         if (strcmp(entries[i].context, "IMP") == 0) {
-            /* Check for duplicates */
-            int is_duplicate = 0;
-            for (int j = 0; j < import_count; j++) {
-                if (strcmp(imports[j]->symbol, entries[i].symbol) == 0) {
-                    is_duplicate = 1;
-                    break;
+            TocEntry *key_ptr = &entries[i];
+            TocEntry **found = bsearch(&key_ptr, imports, (size_t)import_count,
+                                       sizeof(TocEntry*), cmp_import_symbols);
+            if (!found) {
+                /* Insert in sorted position */
+                int pos = import_count;
+                while (pos > 0 && strcmp(imports[pos - 1]->symbol, entries[i].symbol) > 0) {
+                    imports[pos] = imports[pos - 1];
+                    pos--;
                 }
-            }
-            if (!is_duplicate) {
-                imports[import_count++] = &entries[i];
+                imports[pos] = &entries[i];
+                import_count++;
             }
         }
     }
@@ -382,6 +379,10 @@ int build_toc(const TocConfig *config) {
 
     /* Query 1: Get counts for summary (all matching symbols, ignore limit) */
     char *base_query = build_toc_query(config);
+    if (!base_query) {
+        sqlite3_close(db);
+        return -1;
+    }
     char count_query[9216];
     snprintf(count_query, sizeof(count_query),
              "SELECT context, COUNT(*) FROM (%s) GROUP BY context", base_query);
@@ -430,6 +431,7 @@ int build_toc(const TocConfig *config) {
     /* Collect results grouped by file */
     FileToc *files = NULL;
     int file_count = 0;
+    int last_file_idx = -1;
     int symbols_shown = 0;
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
@@ -442,7 +444,9 @@ int build_toc(const TocConfig *config) {
 
         /* Construct filepath from directory and filename */
         char filepath[PATH_MAX_LENGTH];
-        snprintf(filepath, sizeof(filepath), "%s%s", directory, filename);
+        size_t dir_len = directory ? strlen(directory) : 0;
+        const char *sep = (dir_len > 0 && directory[dir_len - 1] != '/') ? "/" : "";
+        snprintf(filepath, sizeof(filepath), "%s%s%s", directory ? directory : "", sep, filename);
 
         /* Parse source location for end line using existing utility */
         int start_line, start_column, end_line, end_column;
@@ -450,11 +454,11 @@ int build_toc(const TocConfig *config) {
         if (source_loc && strlen(source_loc) > 0 &&
             parse_source_location(source_loc, &start_line, &start_column, &end_line, &end_column) == 0) {
             /* Successfully parsed source location */
-            added = add_entry_to_file(&files, &file_count, filepath,
+            added = add_entry_to_file(&files, &file_count, &last_file_idx, filepath,
                             symbol, start_line, end_line, context, config->limit_per_file);
         } else {
             /* Fallback: use line column for single-line display */
-            added = add_entry_to_file(&files, &file_count, filepath,
+            added = add_entry_to_file(&files, &file_count, &last_file_idx, filepath,
                             symbol, line, line, context, config->limit_per_file);
         }
         if (added < 0) {

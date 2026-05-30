@@ -94,7 +94,7 @@ COLUMN(clue,  TEXT, COL_TYPE_STRING, 8,  "CLUE",      "CLUE",  clue,      c, CLU
        "show clue column (context hints)", \
        "qi user -c")
 COLUMN(type,          TEXT, COL_TYPE_STRING, 20, "TYPE",      "TYPE",  type,      t, SYMBOL_MAX_LENGTH, \
-       "filter by type annotation (great for refactoring)", \
+       "filter by type annotation", \
        "qi '*' -i arg -t 'int *'  (all int* args)")
 
 /* INTEGER columns - use INT_COLUMN macro */

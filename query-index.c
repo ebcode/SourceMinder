@@ -763,14 +763,10 @@ static void print_all_columns_row(RowData *data) {
  * Returns: 0 on success, -1 on allocation failure */
 /* WEB_SAFE: normalizes file-pattern filters without requiring host services. */
 static int process_file_pattern(const char *input, char **dir_out, char **file_out) {
-    /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) first */
-    char converted_input[PATH_MAX_LENGTH];
-    convert_wildcards(input, converted_input, sizeof(converted_input));
-
-    /* Handle shorthand: .c → %.c, .h → %.h, etc. */
-    if ((converted_input[0] == '_' || converted_input[0] == '.') && converted_input[1] != '/' && converted_input[1] != '.') {
-        /* Extension shorthand detected */
-        size_t pattern_len = strlen(converted_input) + 2; /* % + extension + \0 */
+    /* Handle extension shorthand BEFORE wildcard conversion: .c → %.c, .h → %.h, etc.
+     * Must use raw input so '.' stays literal rather than becoming '_' (LIKE wildcard). */
+    if (input[0] == '.' && input[1] != '/' && input[1] != '.') {
+        size_t pattern_len = strlen(input) + 2; /* % + extension + \0 */
         char *expanded = malloc(pattern_len);
         if (!expanded) {
             fprintf(stderr, "Error: Failed to allocate memory for file pattern\n");
@@ -778,11 +774,15 @@ static int process_file_pattern(const char *input, char **dir_out, char **file_o
             *file_out = NULL;
             return -1;
         }
-        snprintf(expanded, pattern_len, "%%%s", converted_input);
+        snprintf(expanded, pattern_len, "%%%s", input);
         *dir_out = NULL;
         *file_out = expanded;
         return 0;
     }
+
+    /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) */
+    char converted_input[PATH_MAX_LENGTH];
+    convert_wildcards(input, converted_input, sizeof(converted_input));
 
     const char *last_slash = strrchr(converted_input, '/');
 
@@ -1031,7 +1031,12 @@ static int build_query_filters(SqlQueryBuilder *builder, PatternList *patterns,
             if (ret != 0) return -1;
         }
 
-        if (sql_append(builder, "))") != 0) return -1;  /* Close symbol filter and WHERE clause */
+        if (sql_append(builder, ")") != 0) return -1;  /* Close symbol filter */
+
+        /* Re-apply metadata filters to outer result rows */
+        if (build_common_filters(builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) return -1;
+
+        if (sql_append(builder, ")") != 0) return -1;  /* Close WHERE clause */
     } else {
         /* Original OR-based query for any-pattern matching */
         for (int i = 0; i < patterns->count; i++) {
@@ -1423,13 +1428,18 @@ static int count_distinct_files(CodeIndexDatabase *db,
         return 0;
     }
 
-    if (sql_append(&builder, "SELECT COUNT(DISTINCT directory || filename) FROM code_index WHERE 1=1") != 0) {
+    if (sql_append(&builder, "SELECT COUNT(*) FROM (SELECT DISTINCT directory, filename FROM code_index WHERE 1=1") != 0) {
         free_sql_builder(&builder);
         return 0;
     }
 
     /* Apply filters (file, context types, extensible columns) but NOT symbol search */
     if (build_common_filters(&builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
+        free_sql_builder(&builder);
+        return 0;
+    }
+
+    if (sql_append(&builder, ")") != 0) {
         free_sql_builder(&builder);
         return 0;
     }
@@ -1747,11 +1757,16 @@ static int get_total_file_count(CodeIndexDatabase *db, PatternList *patterns,
         return 0;
     }
 
-    if (sql_append(&builder, "SELECT COUNT(DISTINCT directory || filename) FROM code_index WHERE (") != 0) {
+    if (sql_append(&builder, "SELECT COUNT(*) FROM (SELECT DISTINCT directory, filename FROM code_index WHERE (") != 0) {
         free_sql_builder(&builder);
         return 0;
     }
     if (build_query_filters(&builder, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug) != 0) {
+        free_sql_builder(&builder);
+        return 0;
+    }
+
+    if (sql_append(&builder, ")") != 0) {
         free_sql_builder(&builder);
         return 0;
     }
@@ -1965,6 +1980,107 @@ static int execute_proximity_to_temp_table(CodeIndexDatabase *db, PatternList *p
         printf("SQL: [Range query template] %s\n", range_builder.sql);
     }
 
+    /* Pre-compile per-pattern EXISTS check statements (fixes #4 wildcard bug, #5 perf) */
+    int num_secondaries = patterns->count - 1;
+    sqlite3_stmt **check_stmts = calloc(num_secondaries, sizeof(sqlite3_stmt *));
+    if (!check_stmts) {
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+
+    int check_build_failed = 0;
+    for (int i = 0; i < num_secondaries; i++) {
+        SqlQueryBuilder check_builder;
+        if (init_sql_builder(&check_builder) != 0) {
+            check_build_failed = 1;
+            break;
+        }
+
+        char *escaped_pattern = sqlite3_mprintf("%q", patterns->patterns[i + 1]);
+        ret = sql_append(&check_builder,
+            "SELECT 1 FROM code_index WHERE filename = ? AND directory = ? "
+            "AND line BETWEEN ? AND ? AND symbol LIKE '%s' ESCAPE '\\' LIMIT 1",
+            escaped_pattern);
+        sqlite3_free(escaped_pattern);
+        if (ret != 0) {
+            free_sql_builder(&check_builder);
+            check_build_failed = 1;
+            break;
+        }
+
+        if (build_common_filters(&check_builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
+            free_sql_builder(&check_builder);
+            check_build_failed = 1;
+            break;
+        }
+
+        if (sqlite3_prepare_v2(db->db, check_builder.sql, -1, &check_stmts[i], NULL) != SQLITE_OK) {
+            free_sql_builder(&check_builder);
+            check_build_failed = 1;
+            break;
+        }
+        free_sql_builder(&check_builder);
+    }
+
+    if (check_build_failed) {
+        for (int i = 0; i < num_secondaries; i++) {
+            if (check_stmts[i]) sqlite3_finalize(check_stmts[i]);
+        }
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+
+    /* Pre-compile anchor insert statement */
+    SqlQueryBuilder insert_builder;
+    if (init_sql_builder(&insert_builder) != 0) {
+        for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+
+    char *escaped_anchor_insert = sqlite3_mprintf("%q", patterns->patterns[0]);
+    ret = sql_append(&insert_builder,
+        "INSERT INTO proximity_results "
+        "SELECT * FROM code_index WHERE filename = ? AND directory = ? "
+        "AND line = ? AND symbol LIKE '%s' ESCAPE '\\'", escaped_anchor_insert);
+    sqlite3_free(escaped_anchor_insert);
+    if (ret != 0) {
+        free_sql_builder(&insert_builder);
+        for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+
+    sqlite3_stmt *insert_stmt;
+    if (sqlite3_prepare_v2(db->db, insert_builder.sql, -1, &insert_stmt, NULL) != SQLITE_OK) {
+        free_sql_builder(&insert_builder);
+        for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+    free_sql_builder(&insert_builder);
+
+    /* Pre-compile range insert statement for secondaries */
+    sqlite3_stmt *range_stmt;
+    if (sqlite3_prepare_v2(db->db, range_builder.sql, -1, &range_stmt, NULL) != SQLITE_OK) {
+        sqlite3_finalize(insert_stmt);
+        for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+        free(check_stmts);
+        sqlite3_finalize(anchor_stmt);
+        free_sql_builder(&range_builder);
+        return -1;
+    }
+    free_sql_builder(&range_builder);
+
     int anchor_count = 0;
     int complete_matches = 0;
 
@@ -1974,118 +2090,50 @@ static int execute_proximity_to_temp_table(CodeIndexDatabase *db, PatternList *p
         int anchor_line = sqlite3_column_int(anchor_stmt, 2);
         anchor_count++;
 
-        /* Calculate range bounds */
         int min_line = anchor_line - line_range;
         if (min_line < 1) min_line = 1;
         int max_line = anchor_line + line_range;
 
-        /* First, check if ALL secondary patterns exist in range */
-        SqlQueryBuilder check_builder;
-        if (init_sql_builder(&check_builder) != 0) {
-            continue;
-        }
+        /* Check that EACH secondary pattern exists in range */
+        int all_found = 1;
+        for (int i = 0; i < num_secondaries; i++) {
+            sqlite3_reset(check_stmts[i]);
+            sqlite3_bind_text(check_stmts[i], 1, filename, -1, SQLITE_STATIC);
+            sqlite3_bind_text(check_stmts[i], 2, directory, -1, SQLITE_STATIC);
+            sqlite3_bind_int(check_stmts[i], 3, min_line);
+            sqlite3_bind_int(check_stmts[i], 4, max_line);
 
-        if (sql_append(&check_builder,
-            "SELECT COUNT(DISTINCT symbol) FROM code_index WHERE filename = ? AND directory = ? "
-            "AND line BETWEEN ? AND ? AND (") != 0) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-
-        int check_failed = 0;
-        for (int i = 1; i < patterns->count; i++) {
-            if (i > 1) {
-                if (sql_append(&check_builder, " OR ") != 0) {
-                    check_failed = 1;
-                    break;
-                }
-            }
-            char *escaped_pattern = sqlite3_mprintf("%q", patterns->patterns[i]);
-            ret = sql_append(&check_builder, "symbol LIKE '%s' ESCAPE '\\'", escaped_pattern);
-            sqlite3_free(escaped_pattern);
-            if (ret != 0) {
-                check_failed = 1;
+            if (sqlite3_step(check_stmts[i]) != SQLITE_ROW) {
+                all_found = 0;
                 break;
             }
         }
 
-        if (check_failed) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-
-        if (sql_append(&check_builder, ")") != 0) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-        if (build_common_filters(&check_builder, include, exclude, filters, file_filter, within_ranges, debug) != 0) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-
-        sqlite3_stmt *check_stmt;
-        if (sqlite3_prepare_v2(db->db, check_builder.sql, -1, &check_stmt, NULL) != SQLITE_OK) {
-            free_sql_builder(&check_builder);
-            continue;
-        }
-        free_sql_builder(&check_builder);
-
-        sqlite3_bind_text(check_stmt, 1, filename, -1, SQLITE_STATIC);
-        sqlite3_bind_text(check_stmt, 2, directory, -1, SQLITE_STATIC);
-        sqlite3_bind_int(check_stmt, 3, min_line);
-        sqlite3_bind_int(check_stmt, 4, max_line);
-
-        int distinct_count = 0;
-        if (sqlite3_step(check_stmt) == SQLITE_ROW) {
-            distinct_count = sqlite3_column_int(check_stmt, 0);
-        }
-        sqlite3_finalize(check_stmt);
-
-        /* Only insert if ALL secondary patterns found */
-        if (distinct_count == patterns->count - 1) {
+        if (all_found) {
             complete_matches++;
 
             /* Insert anchor symbol */
-            SqlQueryBuilder insert_builder;
-            if (init_sql_builder(&insert_builder) != 0) {
-                continue;
-            }
-
-            char *escaped_anchor_insert = sqlite3_mprintf("%q", patterns->patterns[0]);
-            ret = sql_append(&insert_builder,
-                "INSERT INTO proximity_results "
-                "SELECT * FROM code_index WHERE filename = ? AND directory = ? "
-                "AND line = ? AND symbol LIKE '%s' ESCAPE '\\'", escaped_anchor_insert);
-            sqlite3_free(escaped_anchor_insert);
-            if (ret != 0) {
-                free_sql_builder(&insert_builder);
-                continue;
-            }
-
-            sqlite3_stmt *insert_stmt;
-            if (sqlite3_prepare_v2(db->db, insert_builder.sql, -1, &insert_stmt, NULL) == SQLITE_OK) {
-                sqlite3_bind_text(insert_stmt, 1, filename, -1, SQLITE_STATIC);
-                sqlite3_bind_text(insert_stmt, 2, directory, -1, SQLITE_STATIC);
-                sqlite3_bind_int(insert_stmt, 3, anchor_line);
-                sqlite3_step(insert_stmt);
-                sqlite3_finalize(insert_stmt);
-            }
-            free_sql_builder(&insert_builder);
+            sqlite3_reset(insert_stmt);
+            sqlite3_bind_text(insert_stmt, 1, filename, -1, SQLITE_STATIC);
+            sqlite3_bind_text(insert_stmt, 2, directory, -1, SQLITE_STATIC);
+            sqlite3_bind_int(insert_stmt, 3, anchor_line);
+            sqlite3_step(insert_stmt);
 
             /* Insert matching secondaries within range */
-            sqlite3_stmt *range_stmt;
-            if (sqlite3_prepare_v2(db->db, range_builder.sql, -1, &range_stmt, NULL) == SQLITE_OK) {
-                sqlite3_bind_text(range_stmt, 1, filename, -1, SQLITE_STATIC);
-                sqlite3_bind_text(range_stmt, 2, directory, -1, SQLITE_STATIC);
-                sqlite3_bind_int(range_stmt, 3, min_line);
-                sqlite3_bind_int(range_stmt, 4, max_line);
-                sqlite3_step(range_stmt);
-                sqlite3_finalize(range_stmt);
-            }
+            sqlite3_reset(range_stmt);
+            sqlite3_bind_text(range_stmt, 1, filename, -1, SQLITE_STATIC);
+            sqlite3_bind_text(range_stmt, 2, directory, -1, SQLITE_STATIC);
+            sqlite3_bind_int(range_stmt, 3, min_line);
+            sqlite3_bind_int(range_stmt, 4, max_line);
+            sqlite3_step(range_stmt);
         }
     }
+
     sqlite3_finalize(anchor_stmt);
-    free_sql_builder(&range_builder);
+    sqlite3_finalize(insert_stmt);
+    sqlite3_finalize(range_stmt);
+    for (int i = 0; i < num_secondaries; i++) sqlite3_finalize(check_stmts[i]);
+    free(check_stmts);
 
     if (debug) {
         printf("Proximity search: %d anchors found, %d complete matches\n",
@@ -2467,6 +2515,91 @@ static void print_context_types(void) {
     printf("  Special: -x noise expands to -x comment string\n");
 }
 
+static void show_help_compact(void) {
+    printf("Usage: qi PATTERN [PATTERN...] [OPTIONS]\n");
+    printf("Search indexed code symbols. Example: qi getUserById --def -e\n");
+    printf("\n");
+
+    printf("Quick Start:\n");
+    printf("  qi user                       find symbol (exact match)\n");
+    printf("  qi user%% -i func var          only functions/variables (starts with user)\n");
+    printf("  qi '*user*' -x noise -C 3     skip comments/strings, show 3 lines of context (contains user)\n");
+    printf("  qi getUserById --def -e       show full definition\n");
+    printf("\n");
+
+    printf("Match:\n");
+    printf("  -i, --include-context TYPE...  only these contexts\n");
+    printf("  -x, --exclude-context TYPE...  exclude these contexts\n");
+    printf("  -x noise                       exclude comments and strings\n");
+    printf("      --and [RANGE]              require all patterns on same/nearby lines\n");
+    printf("\n");
+
+    printf("Filter:\n");
+    printf("  -f, --file PATTERN...          filter files: database.c, .py, shared/, shared/*.c\n");
+#define COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, max_len, help_desc, help_example) \
+    { \
+        char flag_text[64]; \
+        snprintf(flag_text, sizeof(flag_text), "-%s, --%s PATTERN", #short_flag, #long_flag); \
+        printf("  %-30s %s\n", flag_text, help_desc); \
+    }
+#define INT_COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, help_desc, help_example) \
+    { \
+        char flag_text[64]; \
+        snprintf(flag_text, sizeof(flag_text), "-%s, --%s [0|1]", #short_flag, #long_flag); \
+        printf("  %-30s %s\n", flag_text, help_desc); \
+    }
+#include "shared/column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+    printf("      --def                      definitions only\n");
+    printf("      --usage                    usages only\n");
+    printf("      --lines LINE|START-END     filter line/range\n");
+    printf("  -w, --within SYMBOL...         search inside definitions\n");
+    printf("      --limit NUM                limit matches\n");
+    printf("      --limit-per-file NUM       limit matches per file\n");
+    printf("\n");
+
+    printf("Display:\n");
+    printf("  -e, --expand                   show full definitions\n");
+    printf("  -C, --context NUM              lines before and after\n");
+    printf("  -A, --after-context NUM        lines after\n");
+    printf("  -B, --before-context NUM       lines before\n");
+    printf("      --files                    list matching files only\n");
+    printf("      --toc                      file table of contents; use with -f\n");
+    printf("      --columns COL...           choose columns (supports aliases): line sym ctx");
+#define COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) \
+    { \
+        char lower[32]; \
+        to_lowercase_copy(compact, lower, sizeof(lower)); \
+        printf(" %s", lower); \
+    }
+#define INT_COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) \
+    { \
+        char lower[32]; \
+        to_lowercase_copy(compact, lower, sizeof(lower)); \
+        printf(" %s", lower); \
+    }
+#include "shared/column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+    printf("\n");
+    printf("  -v, --verbose                  all columns\n");
+    printf("      --full                     full column names\n");
+    printf("      --raw                      source only; useful with -e/-A/-B\n");
+    printf("\n");
+
+    printf("Database:\n");
+    printf("      --db-file PATH             database path\n");
+    printf("      --debug                    show SQL\n");
+    printf("\n");
+
+    printf("Types: func class var arg type prop call imp com str file; use --list-types for all.\n");
+    printf("Patterns: exact by default; wildcards: * any, . one char. %% and _ also work.\n");
+    printf("Escape leading flags: qi '\\--help'. Prefer prefix patterns like get* for speed.\n");
+    printf("Config: ~/%s, [qi] section; CLI flags override config.\n", CONFIG_FILENAME);
+    printf("More examples: README.md, docs/C_GUIDE.md, docs/QI_VS_GREP.md\n");
+}
+
 /* HOST_ONLY: CLI entry point depends on argv parsing, filesystem checks, environment, and terminal output. */
 int main(int argc, char *argv[]) {
     int retval = 0;  /* Return value: 0 = success, 1 = error */
@@ -2522,201 +2655,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (argc < 2 || show_help) {
-        printf("Usage: qi PATTERN [PATTERN...] [OPTIONS]\n");
-        printf("Search for code symbols (functions, classes, variables, etc.) in indexed source code.\n");
-        printf("Example: qi getUserById -i func -e\n");
-        printf("\n");
-
-        printf("Quick Start:\n");
-        printf("  qi user                     # Find all uses of 'user'\n");
-        printf("  qi user -i func var         # Only functions or variables\n");
-        printf("  qi user -x noise            # Exclude comments and strings\n");
-        printf("  qi user -f *.py             # Only in .py files\n");
-        printf("  qi user -C 3                # Show code context (like grep -C)\n");
-        printf("  qi user --def               # Only definitions (where 'user' is declared)\n");
-        printf("  qi user --usage             # Only usages (call sites, references)\n");
-        printf("  qi user -d                  # Show D column (1=def, 0=usage) without filtering\n");
-        printf("\n");
-        printf("Tip: Use -x noise to exclude comments and strings (reduces false positives)\n");
-        printf("\n");
-
-        printf("Pattern Selection:\n");
-        printf("  -i, --include-context TYPE...  search only in these contexts (func, var, class, etc.)\n");
-        printf("                                 Multiple types use OR logic: -i func var → functions OR variables\n");
-        printf("  -x, --exclude-context TYPE...  exclude these contexts (comment, string, etc.)\n");
-        printf("                                 Multiple types use OR logic: -x com str → NOT comments OR strings\n");
-        printf("  -x noise                       smart shortcut: exclude comment + string\n");
-        printf("      --and [RANGE]              find patterns within RANGE lines (default: same line)\n");
-        printf("\n");
-        printf("  Note: qi indexes atomic symbols (identifiers, function names, types).\n");
-        printf("        Search for 'symbol', not 'symbol->field' or 'array[i]'.\n");
-        printf("        Example: qi files  (not qi 'files[i]')\n");
-        printf("\n");
-
-        printf("File Selection:\n");
-        printf("  -f, --file PATTERN...          search only files matching pattern\n");
-        printf("\n");
-        printf("  Pattern types:\n");
-        printf("    Filename:      database.py              matches ./shared/database.py\n");
-        printf("    Extension:     .py                      all .py files\n");
-        printf("    Directory:     shared/                  all files in shared/ (partial path)\n");
-        printf("    Directory:     tools/sources/perl/      all files in that exact directory\n");
-        printf("    Wildcard:      shared/*.py              all .py files in shared/\n");
-        printf("\n");
-        printf("  Note: Use * for wildcards (also supports SQL LIKE %% syntax)\n");
-        printf("\n");
-
-        printf("Context Control:\n");
-        printf("  -e, --expand                   show full definition for functions, structs, enums\n");
-        printf("  -C, --context NUM              print NUM lines before and after match (default: 3)\n");
-        printf("  -A, --after-context NUM        print NUM lines after match\n");
-        printf("  -B, --before-context NUM       print NUM lines before match\n");
-        printf("  (Note: -e expands definitions; -C shows context for non-definitions)\n");
-        printf("\n");
-
-        printf("Refinement Filters:\n");
-        printf("  These filters enable surgical precision by querying symbol metadata:\n");
-        printf("\n");
-#define COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, max_len, help_desc, help_example) \
-        printf("  -%s, --%-20s %s\n", #short_flag, #long_flag, help_desc); \
-        printf("%-31s %s\n", "", help_example);
-#define INT_COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, help_desc, help_example) \
-        printf("  -%s, --%-20s %s\n", #short_flag, #long_flag, help_desc); \
-        printf("%-31s %s\n", "", help_example);
-#include "shared/column_schema.def"
-#undef COLUMN
-#undef INT_COLUMN
-        printf("      --def                      show only definitions (alias for -d 1)\n");
-        printf("      --usage                    show only usages (alias for -d 0)\n");
-        printf("      --lines LINE               filter by single line number\n");
-        printf("      --lines START-END          filter by line range (inclusive)\n");
-        printf("  -w, --within SYMBOL [...]      filter by symbol definition (scoped search)\n");
-        printf("                                 qi malloc --within handle_request\n");
-        printf("\n");
-
-        printf("Output Control:\n");
-        printf("      --limit NUM                show only first NUM matches\n");
-        printf("      --limit-per-file NUM       show only first NUM matches per file\n");
-        printf("      --files                    show only unique file paths (like grep -l)\n");
-        printf("      --toc                      show table of contents (requires -f, shows functions, types, imports)\n");
-        printf("      --db-file PATH             database file location (default: code-index.db)\n");
-        printf("      --columns COL...           choose columns (supports aliases): line sym ctx");
-#define COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) \
-        { \
-            char lower[32]; \
-            to_lowercase_copy(compact, lower, sizeof(lower)); \
-            printf(" %s", lower); \
-        }
-#define INT_COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) \
-        { \
-            char lower[32]; \
-            to_lowercase_copy(compact, lower, sizeof(lower)); \
-            printf(" %s", lower); \
-        }
-#include "shared/column_schema.def"
-#undef COLUMN
-#undef INT_COLUMN
-        printf("\n");
-        printf("  -v, --verbose                  show all columns\n");
-        printf("      --full                     use full column names (PARENT vs PAR, CONTEXT vs CTX)\n");
-        printf("      --compact                  use abbreviated column names (default)\n");
-        printf("      --debug                    show SQL queries sent to database\n");
-        printf("      --raw                      suppress all non-source output (headers, line numbers,\n");
-        printf("                                 separators, stats); use with -e or -B/-A for bare source\n");
-        printf("                                 lines suitable for copy-paste into Edit old_string\n");
-        printf("\n");
-
-        print_context_types();
-        printf("\n");
-        printf("  (Use --list-types to see only this list)\n");
-        printf("\n");
-
-        printf("Common Workflows:\n");
-        printf("  Find function definition:\n");
-        printf("    qi getUserById -i func\n");
-        printf("    qi getUserById -i func -e           # show full definition\n");
-        printf("    qi getUserById -i func -C 10        # with code context\n");
-        printf("\n");
-        printf("  Exclude noise (comments/strings):\n");
-        printf("    qi user -x noise                    # smart filter\n");
-        printf("    qi user -x comment string           # explicit\n");
-        printf("\n");
-        printf("  Note: When both -i and -x are used, -i takes precedence.\n");
-        printf("        -i shows ONLY specified contexts; -x shows ALL except specified contexts.\n");
-        printf("        Useful for config files: set -x noise as default, override with -i when needed.\n");
-        printf("\n");
-        printf("  Find by type (refactoring):\n");
-        printf("    qi '*' -i arg -t 'OldType *'        # find old type usage\n");
-        printf("    qi '*' -i arg -t OldType*           # find any variant\n");
-        printf("\n");
-        printf("  Find patterns (multiple symbols together):\n");
-        printf("    qi fprintf stderr --and              # both on same line\n");
-        printf("    qi malloc free --and 10              # within 10 lines of each other\n");
-        printf("\n");
-        printf("  Search specific files:\n");
-        printf("    qi user -f *.py                  # all .py files\n");
-        printf("    qi user -f src/*                 # src directory\n");
-        printf("    qi user -f ./auth/*.ts           # specific path\n");
-        printf("\n");
-
-        printf("Examples:\n");
-        printf("  qi '*' -i func -f file.py           # show all functions in file.py\n");
-        printf("  qi '*' -i class -f src/*            # show all classes in src/\n");
-        printf("  qi user -x noise --limit 20         # find 'user', skip comments/strings\n");
-        printf("\n");
-
-        printf("Scoped Search (--within):\n");
-        printf("  qi fprintf --within main               # Find fprintf only in main function\n");
-        printf("  qi strcmp --within build_common_filters # Find strcmp only in build_common_filters\n");
-        printf("  qi malloc -w handle_request            # Short form: -w\n");
-        printf("  qi %% -w parse_args validate_args       # Multiple symbols (OR logic)\n");
-        printf("  (Searches within function/class/struct definitions)\n");
-        printf("\n");
-
-        printf("Pattern Syntax:\n");
-        printf("  Supports wildcard patterns:\n");
-        printf("    *          wildcard (matches any characters)\n");
-        printf("    .          single character\n");
-        printf("    %%          also works for multi-char (SQL LIKE syntax)\n");
-        printf("    _          also works for single-char (SQL LIKE syntax)\n");
-        printf("\n");
-        printf("  Pattern Performance:\n");
-        printf("    FAST:   test, test*           (can use indexes)\n");
-        printf("    SLOW:   *test, *test*         (requires full table scan)\n");
-        printf("    Tip: Prefer prefix patterns (test*) when possible for better performance.\n");
-        printf("\n");
-        printf("  Examples:\n");
-        printf("    user        exact match (case-insensitive)\n");
-        printf("    *Manager    ends with Manager\n");
-        printf("    get*        starts with get\n");
-        printf("    *user*      contains user\n");
-        printf("    get.ser     matches getUser, setUser (. = single char)\n");
-        printf("\n");
-        printf("  Escaping patterns starting with '-':\n");
-        printf("    qi '\\--flag'    search for --flag (backslash escape)\n");
-        printf("    qi '\\-x'        search for -x\n");
-        printf("    qi '\\\\\\\\test'   search for \\test (four backslashes for one)\n");
-        printf("\n");
-
-        printf("Two-Step Workflow (Recommended):\n");
-        printf("  Step 1 - Discover:  qi auth -x noise --limit 10\n");
-        printf("  Step 2 - Explore:   qi auth -i func -f auth.c -C 5\n");
-        printf("  (Saves tokens by narrowing first, then viewing code)\n");
-        printf("\n");
-
-        printf("Table of Contents:\n");
-        printf("  qi '*' -f query-index.c --toc         # Show all definitions\n");
-        printf("  qi '*' -f c_language.c --toc -i func  # Only functions\n");
-        printf("  qi '*' -f database.c --toc -i imp     # Only imports\n");
-        printf("  qi '*' -f query-index.c --toc -i type # Only types\n");
-        printf("  (Quick overview of file structure with line ranges)\n");
-        printf("\n");
-
-        printf("Configuration:\n");
-        printf("  Config file: ~/%s (CLI flags override config)\n", CONFIG_FILENAME);
-        printf("  Format: [qi] section header, then one flag per line (e.g., '--limit 50' or '-x noise')\n");
-        printf("\n");
-
+        show_help_compact();
         return 0;
     }
 
@@ -2847,28 +2786,28 @@ int main(int argc, char *argv[]) {
         if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) {
             verbose = 1;
         }
-        if (strcmp(argv[i], "--compact") == 0) {
+        else if (strcmp(argv[i], "--compact") == 0) {
             compact = 1;
         }
-        if (strcmp(argv[i], "--full") == 0) {
+        else if (strcmp(argv[i], "--full") == 0) {
             compact = 0;
         }
-        if (strcmp(argv[i], "--debug") == 0) {
+        else if (strcmp(argv[i], "--debug") == 0) {
             debug = 1;
         }
-        if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--expand") == 0) {
+        else if (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "--expand") == 0) {
             expand = 1;
         }
-        if (strcmp(argv[i], "--raw") == 0) {
+        else if (strcmp(argv[i], "--raw") == 0) {
             raw_mode = 1;
         }
-        if (strcmp(argv[i], "--files") == 0) {
+        else if (strcmp(argv[i], "--files") == 0) {
             files_only = 1;
         }
-        if (strcmp(argv[i], "--toc") == 0) {
+        else if (strcmp(argv[i], "--toc") == 0) {
             toc_mode = 1;
         }
-        if ((strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--include-context") == 0)) {
+        else if ((strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--include-context") == 0)) {
             has_include = 1;
             /* Collect all include types until we hit another flag or end */
             while (i + 1 < argc && argv[i + 1][0] != '-') {
@@ -3049,11 +2988,11 @@ int main(int argc, char *argv[]) {
                 i++;
             }
         }
-        if (strcmp(argv[i], "--db-file") == 0 && i + 1 < argc) {
+        else if (strcmp(argv[i], "--db-file") == 0 && i + 1 < argc) {
             db_file = argv[i + 1];
             i++;
         }
-        if (strcmp(argv[i], "--limit") == 0 && i + 1 < argc) {
+        else if (strcmp(argv[i], "--limit") == 0 && i + 1 < argc) {
             char *endptr;
             errno = 0;
             long val = strtol(argv[i + 1], &endptr, 10);
@@ -3066,7 +3005,7 @@ int main(int argc, char *argv[]) {
             limit = (int)val;
             i++;
         }
-        if (strcmp(argv[i], "--limit-per-file") == 0 && i + 1 < argc) {
+        else if (strcmp(argv[i], "--limit-per-file") == 0 && i + 1 < argc) {
             char *endptr;
             errno = 0;
             long val = strtol(argv[i + 1], &endptr, 10);
@@ -3079,7 +3018,7 @@ int main(int argc, char *argv[]) {
             limit_per_file = (int)val;
             i++;
         }
-        if (strcmp(argv[i], "--lines") == 0 && i + 1 < argc) {
+        else if (strcmp(argv[i], "--lines") == 0 && i + 1 < argc) {
             /* Parse line range: "LINE" or "START-END" */
             const char *range_str = argv[i + 1];
             char *dash = strchr(range_str, '-');
@@ -3131,7 +3070,7 @@ int main(int argc, char *argv[]) {
             }
             i++;
         }
-        if (strcmp(argv[i], "--within") == 0 || strcmp(argv[i], "-w") == 0) {
+        else if (strcmp(argv[i], "--within") == 0 || strcmp(argv[i], "-w") == 0) {
             /* Collect all non-flag arguments as within symbols */
             if(debug){
               fprintf(stdout, "DEBUG: WITHIN FLAG PASSED\n");
@@ -3147,8 +3086,7 @@ int main(int argc, char *argv[]) {
                 i++;
             }
         }
-
-        if (strcmp(argv[i], "--and") == 0 || strcmp(argv[i], "--same-line") == 0) {
+        else if (strcmp(argv[i], "--and") == 0 || strcmp(argv[i], "--same-line") == 0) {
             /* Check if next arg is a number (range value) */
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 char *endptr;
@@ -3166,7 +3104,7 @@ int main(int argc, char *argv[]) {
                 line_range = 0;  /* No number provided, default to same line */
             }
         }
-        if (strcmp(argv[i], "-A") == 0) {
+        else if (strcmp(argv[i], "-A") == 0) {
             /* Check if next arg is a number or another flag */
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 char *endptr;
@@ -3189,7 +3127,7 @@ int main(int argc, char *argv[]) {
                 context_after = DEFAULT_CONTEXT_RANGE;
             }
         }
-        if (strcmp(argv[i], "-B") == 0) {
+        else if (strcmp(argv[i], "-B") == 0) {
             /* Check if next arg is a number or another flag */
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 char *endptr;
@@ -3212,7 +3150,7 @@ int main(int argc, char *argv[]) {
                 context_before = DEFAULT_CONTEXT_RANGE;
             }
         }
-        if (strcmp(argv[i], "-C") == 0) {
+        else if (strcmp(argv[i], "-C") == 0) {
             /* Check if next arg is a number or another flag */
             if (i + 1 < argc && argv[i + 1][0] != '-') {
                 char *endptr;
@@ -3234,7 +3172,13 @@ int main(int argc, char *argv[]) {
                 /* No argument provided, use default */
                 context_before = context_after = DEFAULT_CONTEXT_RANGE;
             }
-        }        
+        }
+        else if (argv[i][0] == '-') {
+            fprintf(stderr, "Error: Unrecognized option '%s'\n", argv[i]);
+            fprintf(stderr, "Run 'qi --help' for a list of valid options.\n");
+            retval = 1;
+            goto cleanup;
+        }
     }
 
     /* Validate --and (--same-line) requires 2+ patterns */
