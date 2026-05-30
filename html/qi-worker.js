@@ -234,6 +234,7 @@ async function loadProject(project) {
         type: 'ready',
         projectId: project.id,
         projectName: project.name,
+        projectVersion: project.version,
         summary: summary,
     });
 }

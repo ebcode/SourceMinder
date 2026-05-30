@@ -177,7 +177,7 @@ static void free_command(WebCommand *cmd) {
     free_col_filter(&cmd->cf.definition);
     memset(cmd, 0, sizeof(*cmd));
     cmd->definition = -1;
-    cmd->limit = 25;
+    cmd->limit = 0;  /* 0 = unlimited, matching the native CLI default (limit=0) */
     cmd->line_range = -1;
     cmd->toc_mode = 0;
 }
@@ -227,7 +227,7 @@ static WebCommand parse_command(const char *input) {
     WebCommand cmd;
     memset(&cmd, 0, sizeof(cmd));
     cmd.definition = -1;
-    cmd.limit = 25;
+    cmd.limit = 0;  /* 0 = unlimited, matching the native CLI default (limit=0) */
     cmd.compact = 1;
     cmd.line_range = -1;
 

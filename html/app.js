@@ -47,6 +47,36 @@ function formatBytes(n) {
     return n + " B";
 }
 
+/* Populate the project dropdown: group projects by language into <optgroup>s
+ * (the labeled, in-<select> equivalent of an <hr> separator), languages sorted
+ * alphabetically, and append each project's download size to its label. */
+function renderProjectOptions(projects) {
+    var byLanguage = {};
+    for (var i = 0; i < projects.length; i++) {
+        var proj = projects[i];
+        projectsById[proj.id] = proj;
+        var lang = proj.language || "other";
+        (byLanguage[lang] = byLanguage[lang] || []).push(proj);
+    }
+
+    var langs = Object.keys(byLanguage).sort();
+    for (var li = 0; li < langs.length; li++) {
+        var group = document.createElement("optgroup");
+        group.label = langs[li];
+        var members = byLanguage[langs[li]];
+        for (var mi = 0; mi < members.length; mi++) {
+            var p = members[mi];
+            var opt = document.createElement("option");
+            opt.value = p.id;
+            opt.textContent = p.sizeBytes
+                ? p.name + " (" + formatBytes(p.sizeBytes) + ")"
+                : p.name;
+            group.appendChild(opt);
+        }
+        projectSelectEl.appendChild(group);
+    }
+}
+
 /* Project dropdown -> ask the worker to switch projects. */
 projectSelectEl.addEventListener("change", function() {
     var p = projectsById[projectSelectEl.value];
@@ -133,14 +163,7 @@ worker.onmessage = function(event) {
         sqliteVersion = msg.version;
         projectsById = {};
         projectSelectEl.innerHTML = "";
-        for (var pi = 0; pi < msg.projects.length; pi++) {
-            var proj = msg.projects[pi];
-            projectsById[proj.id] = proj;
-            var opt = document.createElement("option");
-            opt.value = proj.id;
-            opt.textContent = proj.name;
-            projectSelectEl.appendChild(opt);
-        }
+        renderProjectOptions(msg.projects);
         projectSelectEl.hidden = false;
         break;
 
@@ -162,16 +185,24 @@ worker.onmessage = function(event) {
         switching = false;
         projectSelectEl.disabled = false;
         if (msg.projectId) { projectSelectEl.value = msg.projectId; currentProjectId = msg.projectId; }
-        if (!terminalInstalled) {
+        var firstLoad = !terminalInstalled;
+        if (firstLoad) {
             terminalInstalled = true;
-            installTerminal();   /* creates the terminal and runs the self-test */
-        } else {
-            /* Project switch: keep the existing terminal, just announce it. */
-            termWrite("\r\nLoaded project: " + msg.projectName + "\r\n");
-            resetPrompt();
-            term.focus();
+            installTerminal();
         }
+        /* Announce the loaded project (both first load and switch). */
+        termWrite("\r\nLoaded project: " + msg.projectName +
+            (msg.projectVersion ? " (v" + msg.projectVersion + ")" : "") + "\r\n\r\n");
+        resetPrompt();
+        term.focus();
         setStatus("Project: " + (msg.projectName || "") + " — SQLite " + sqliteVersion + " in-browser.");
+        /* Self-test: run an auto-query on first load, after the announce. */
+        if (firstLoad) {
+            //var testCmd = "qi % -i call -v -x noise --limit 5";
+            var testCmd = "qi % -f logger.go --toc";
+            termWrite(testCmd + "\r\n");
+            runTinyQuery(testCmd);
+        }
         break;
 
     case "output":
@@ -243,7 +274,15 @@ function installTerminal() {
     /* Intercept arrow keys, Home, End, Delete before xterm processes them.
      * Return false to prevent xterm from emitting terminal escape sequences. */
     term.attachCustomKeyEventHandler(function(event) {
-        if (isExecuting || event.type !== "keydown") return true;
+        if (event.type !== "keydown") return true;
+
+        /* Make plain PageUp/PageDown scroll the viewport (xterm only scrolls on
+         * Shift+PageUp/Down by default).  Handled before the isExecuting gate so
+         * the user can scroll back through output while a query is streaming. */
+        if (event.key === "PageUp")   { term.scrollPages(-1); return false; }
+        if (event.key === "PageDown") { term.scrollPages(1);  return false; }
+
+        if (isExecuting) return true;
 
         switch (event.key) {
         case "ArrowUp":    historyUp();   return false;
@@ -319,16 +358,12 @@ function installTerminal() {
         try { fitAddon.fit(); } catch (_) { /* ignore */ }
     });
 
-    termWrite("qi WASM bridge ready. Type a qi command.\r\n");
-    resetPrompt();
+    //termWrite("qi WASM bridge ready. Type a qi command.\r\n");
+    /* No prompt drawn here: the 'ready' handler announces the project and draws
+     * the prompt right after, so drawing one now leaves a stray empty '$' line. */
 
     /* Auto-focus so the user can type immediately without clicking the terminal. */
     term.focus();
-
-    /* Self-test */
-    //var testCmd = "qi % -i call -v -x noise --limit 5";
-    //termWrite(testCmd + "\r\n");
-    //runTinyQuery(testCmd);
 }
 
 function renderSummary(cards) {
