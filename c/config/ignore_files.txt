@@ -14,3 +14,5 @@ php/src
 typescript/src/
 tmp/*daemon.c
 tmp
+sqlite3.c
+sqlite3.h

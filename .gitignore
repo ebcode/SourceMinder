@@ -44,3 +44,10 @@ html/qi-web.js
 html/qi-web.wasm
 wasm/sqlite3.c
 wasm/sqlite3.h
+
+# Per-project source trees for browser -e/-C extraction (local/generated;
+# populated by copying/cloning repos in -- see html/sources/README.md).
+# Browser DB snapshots (*.browser.db) are already covered by *.db above.
+html/sources/*
+!html/sources/README.md
+!html/sources/browser-snapshot.sh

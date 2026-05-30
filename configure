@@ -711,10 +711,16 @@ web: $(WEB_DIR)
 		$(WEB_SRC) $(WEB_ENTRY_SRC) $(WEB_SHARED_SRC)
 	cp $(WEB_DIR)/qi-web.js $(WEB_DIR)/qi-web.wasm html/
 
+# Headless end-to-end test of the web bridge: loads the built qi-web.wasm under
+# Node and runs canned qi queries through the shared pipeline (no browser).
+# Run after `make web`.  See test/web-harness/README.md.
+web-test:
+	node test/web-harness/run.mjs
+
 $(WEB_DIR):
 	mkdir -p $(WEB_DIR)
 
-.PHONY: all clean install install-data uninstall lint debug test web web-smoke
+.PHONY: all clean install install-data uninstall lint debug test web web-smoke web-test
 EOF_MAKEFILE
 
 # Substitute variables in Makefile
