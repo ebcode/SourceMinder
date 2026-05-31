@@ -936,10 +936,6 @@ static int build_common_filters(SqlQueryBuilder *builder,
             if (ret != 0) return -1;
         }
         if (sql_append(builder, ")") != 0) return -1;
-    } else {
-        if (debug) {
-            fprintf(stderr, "DEBUG: NOT WITHIN RANGES:\n");
-        }
     }
     /* Add include filter - database now uses compact form */
     if (include && include->count > 0) {
