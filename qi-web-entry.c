@@ -134,6 +134,7 @@ typedef struct {
     int context_before;  /* -B / -C: lines of context before each match */
     int context_after;   /* -A / -C: lines of context after each match */
     int raw;             /* --raw: bare source only, suppress all framing */
+    int limit_per_file; /* --limit-per-file: max matches shown per file */
 } WebCommand;
 
 static void free_col_filter(WebColFilter *f) {
@@ -369,6 +370,29 @@ static WebCommand parse_command(const char *input) {
             /* limit 0 = unlimited, matching the native CLI (which accepts
              * `--limit 0` and rejects only negatives).  Negatives are already
              * rejected above by the digit-only check, so cmd.limit >= 0 here. */
+            i += 2;
+            continue;
+        }
+
+        if (strcmp(t, "--limit-per-file") == 0) {
+            if (i + 1 >= tc) {
+                cmd.error = 1;
+                SET_CMD_ERROR(&cmd, "--limit-per-file requires a number.");
+                goto done;
+            }
+            {
+                const char *arg = tokens[i + 1];
+                int valid = 1;
+                for (int ci = 0; arg[ci]; ci++) {
+                    if (!isdigit((unsigned char)arg[ci])) { valid = 0; break; }
+                }
+                if (!valid || atoi(arg) <= 0) {
+                    cmd.error = 1;
+                    SET_CMD_ERROR(&cmd, "--limit-per-file must be a positive integer.");
+                    goto done;
+                }
+                cmd.limit_per_file = atoi(arg);
+            }
             i += 2;
             continue;
         }
@@ -861,6 +885,8 @@ char *qi_web_build(const char *command) {
     }
 
     wo_printf(&wo, "\nSQL|%s\nLIMIT|%d", builder.sql, cmd.limit);
+    if (cmd.limit_per_file > 0)
+        wo_printf(&wo, "\nLIMIT_PER_FILE|%d", cmd.limit_per_file);
     emit_header_lines(&wo, &include, &exclude, &filters, cmd.definition, cmd.compact);
 
     /* No-results diagnostics (consumed by the pipeline only when the main query
@@ -1321,6 +1347,7 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
     int expand = parse_flag(build_info, "EXPAND");
     int ctx_before = parse_int_value(build_info, "CONTEXT_BEFORE");
     int ctx_after = parse_int_value(build_info, "CONTEXT_AFTER");
+    int limit_per_file = parse_int_value(build_info, "LIMIT_PER_FILE");
 
     SourceMap sources = { NULL, 0, 0 };
     if (needs_source) sources = source_map_parse(sources_blob, sources_len);
@@ -1416,6 +1443,7 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
     }  /* end if (!raw) table framing */
 
     /* Second pass: output rows with file grouping, then any source block */
+    int row_count = 0;  /* rows actually displayed (after per-file filtering) */
     {
         char *rows_copy = strdup(rows_tsv);
         if (!rows_copy) {
@@ -1439,9 +1467,9 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
 
         char current_file[PATH_MAX_LENGTH] = "";
         char *line_ptr = rows_copy;
-        int row_count = 0;
+        int current_file_count = 0;
 
-        while (*line_ptr && row_count < shown) {
+        while (*line_ptr) {
             char *nl = strchr(line_ptr, '\n');
             if (nl) *nl = '\0';
 
@@ -1452,6 +1480,17 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
             const char *file = fields[2] ? fields[2] : "";
             char filepath[PATH_MAX_LENGTH];
             build_row_filepath(dir, file, filepath, sizeof(filepath));
+
+            /* Reset per-file counter when the file changes */
+            if (strcmp(filepath, current_file) != 0)
+                current_file_count = 0;
+
+            /* Skip rows that exceed the per-file display limit */
+            if (limit_per_file > 0 && current_file_count >= limit_per_file) {
+                if (nl) line_ptr = nl + 1;
+                else break;
+                continue;
+            }
 
             if (!raw) {
                 /* File-group header on change */
@@ -1468,6 +1507,10 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
                     wo_printf(&wo, "%-*s", active[ci].max_width, val);
                 }
                 wo_printf(&wo, "\n");
+            } else {
+                /* In raw mode still need to track the current file for the
+                 * per-file counter; filepath is only stored inside !raw above */
+                snprintf(current_file, sizeof(current_file), "%s", filepath);
             }
 
             /* Source expansion / context lines.  The twin decides per row what
@@ -1484,6 +1527,7 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
             }
 
             row_count++;
+            current_file_count++;
             if (nl) line_ptr = nl + 1;
             else break;
         }
@@ -1492,8 +1536,8 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
 
     if (!raw) {
         wo_printf(&wo, "\nFound %d matches", total);
-        if (total > shown) {
-            wo_printf(&wo, " (showing first %d)", shown);
+        if (total > row_count) {
+            wo_printf(&wo, " (showing first %d)", row_count);
         }
         wo_printf(&wo, "\n");
     }
@@ -1607,12 +1651,15 @@ char *qi_web_format_no_results(const char *build_info, const char *counts_tsv) {
             all_matched = 0;
             wo_printf(&body, "Pattern '%s' matched 0 occurrences.", pat[i]);
             if (wild >= 0) {   /* pattern had no '%': partial-match probe applies */
-                if (wild > 0) {
+                if (strlen(pat[i]) < 2) {
+                    wo_printf(&body, " Note: '%s' is too short. Symbols less than 2 characters are not indexed.", pat[i]);
+                } else if (wild > 0) {
                     wo_printf(&body, " Retrying with partial matches for '*%s*':\n\n", pat[i]);
                     retry_idx = i;
                     break;     /* native goto retry_query: stop here, re-run */
+                } else {
+                    wo_printf(&body, " No partial matches found for '*%s*' either.", pat[i]);
                 }
-                wo_printf(&body, " No partial matches found for '*%s*' either.", pat[i]);
             }
             wo_printf(&body, "\n");
         } else if (pat_count > 1) {

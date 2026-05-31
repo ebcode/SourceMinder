@@ -13,9 +13,9 @@
     "name": "SourceMinder",
     "version": "1",
     "language": "c",
-    "dbUrl": "./code-index.browser.db",
+    "dbUrl": "./code-index-sourceminder.browser.db",
     "sourceBase": "./sources/sourceminder/",
-    "sizeBytes": 16248832
+    "sizeBytes": 17424384
   },
   {
     "id": "logrus",

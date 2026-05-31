@@ -56,6 +56,8 @@ var BATCH = [
     "qi % -f % --toc --limit 0",         // TOC mode (-f required; --limit 0 = unlimited)
     "qi % --files --limit 20",           // files-only mode
     "qi zzqzxnomatchzz",                 // zero results: "matched 0 / no partial matches"
+    "qi a",                              // zero results: short pattern (<2 chars), no retry
+    "qi COLUMN -i func --limit-per-file 2 --limit 5",  // per-file display limit (2 per file, spans 3 files)
 ];
 
 function arg(name) {
