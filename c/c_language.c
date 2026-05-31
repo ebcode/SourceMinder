@@ -1098,7 +1098,16 @@ static void extract_field_parent(const char *source_code, TSNode field_expr_node
         }
     }
 
-    /* Default: extract full text of left side */
+    /* Default: extract full text of left side, but only if it fits.
+     * Misparsed C++ (e.g. template syntax read as comparison operators)
+     * can produce a single binary_expression spanning many lines. Such a
+     * "parent" is never a useful symbol, so record no parent rather than
+     * abort the whole indexer via safe_extract_node_text's overflow check. */
+    uint32_t left_len = ts_node_end_byte(left) - ts_node_start_byte(left);
+    if (left_len >= buf_size) {
+        parent_buf[0] = '\0';
+        return;
+    }
     safe_extract_node_text(source_code, left, parent_buf, buf_size, filename);
 }
 
@@ -1117,6 +1126,20 @@ static void visit_expression(
     if (ts_node_is_null(node)) {
         return;
     }
+
+    /* Guard against pathologically deep expression trees (e.g. misparsed C++
+     * templates) that would otherwise overflow the stack via self-recursion.
+     * Tracked as a single balanced enter/exit counter; the function has no
+     * mid-body returns after this point, so the matching depth-- at the end
+     * always runs. */
+    static int depth = 0;
+    if (depth >= MAX_EXPRESSION_DEPTH) {
+        if (g_debug) {
+            debug("[visit_expression] Max recursion depth %d reached; stopping descent", MAX_EXPRESSION_DEPTH);
+        }
+        return;
+    }
+    depth++;
 
     TSSymbol node_sym = ts_node_symbol(node);
     const char *node_type = ts_node_type(node);  /* Only for debug output */
@@ -1452,6 +1475,8 @@ static void visit_expression(
             }
         }
     }
+
+    depth--;
 }
 
 /**

@@ -1,17 +1,27 @@
-SourceMinder Roadmap for 2026
+# SourceMinder Roadmap for 2026
 
-1. Additional Languages: Java (just this one next, others to follow, based on interest)
+1. Additional Languages: Perl, Rust. Perl is mostly there (as of June 2026). Rust needs more testing against real codebases.
 
-2. Add guides for php and typescript
+2. Add guides for php, typescript, perl, and rust
 
 3. Performance: Add multithreading to index files in parallel
 
-4. Alternative Storage: Currently Sqlite only. Consider MySql/Postgres or other backends
+4. Add --rows flag (or similar) to show only results, no help text, tips, or filtering info
 
-5. Add --rows flag (or similar) to show only results, no help text, tips, or filtering info
+5. Json-formatted output.
 
-6. Json-formatted output
+6. Test against larger codebases. (Tested against llvm-project, ~30k files, gives 7.2GB index, slow to query.)
 
-NOT ON THE ROADMAP (... yet ...)
+7. Instrument queries.
 
-1. Call graph functionality (which functions call this function) -- better tools currently available
+8. Automated tests. Gold output snapshots to prevent regressions.
+
+## Not on the roadmap (yet)
+
+1. Alternative Storage: Currently Sqlite only. Consider MySql/Postgres or other backends
+
+
+## Not on the roadmap (ever)
+
+1. Call graph functionality (which functions call this function) -- there are better tools available
+

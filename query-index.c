@@ -1171,6 +1171,21 @@ static void update_column_widths(sqlite3_stmt *stmt, int compact) {
     }
 }
 
+/* Pre-pass that sizes table columns to their content via a separate
+ * MAX(LENGTH(...)) query over the same WHERE as the main query.
+ *
+ * Why a second query instead of measuring the rows we print? The result
+ * printer streams: it steps the main query and emits each row immediately,
+ * so it can serve arbitrarily large outputs (e.g. `qi '*'`, unlimited by
+ * default) without buffering millions of rows in memory. But column widths
+ * must be known before the first row prints. Streaming and size-to-content
+ * are fundamentally two passes; this is the second one.
+ *
+ * The cost is one extra scan of the matched set. With the NOCASE idx_symbol
+ * (see shared/database.c) exact/prefix patterns serve both passes from the
+ * index, so this is cheap for normal queries; only leading-wildcard
+ * (*contains*) patterns pay a full scan twice. Kept deliberately over
+ * buffering to preserve unbounded streaming. */
 static void calculate_column_widths_from_query(CodeIndexDatabase *db, PatternList *patterns,
                                                 ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
                                                 WithinRangeList *within_ranges, int limit, int line_range, int compact, int debug) {
@@ -2291,7 +2306,8 @@ retry_query:
         }
     }
 
-    /* Calculate column widths from query results */
+    /* Size columns before streaming rows: intentional second pass, not a
+     * redundant query. See calculate_column_widths_from_query for rationale. */
     calculate_column_widths_from_query(db, patterns, include, exclude, filters, file_filter, within_ranges, limit, line_range, compact, debug);
 
     char current_file[PATH_MAX_LENGTH] = "";
