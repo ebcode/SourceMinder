@@ -541,12 +541,16 @@ done:
  * here (not in the format function) because this is where the parsed structures
  * live; qi_web_format just echoes the HDR lines via print_hdr_lines().
  *
- * Deferred (need a DB count the JS worker owns, not C): the "Filtering by file:
- * ... (N files)" and "Within symbol(s): ... (N instances)" lines. */
+ * The "Filtering by file:" line needs a distinct-file count the JS worker owns,
+ * so it is emitted as a one-byte sentinel (HDR|\x01) at the right position
+ * (after exclude, before column filters -- matching native order); print_hdr_lines
+ * expands it using FILE_FILTER_COUNT from build_info.
+ *
+ * Still deferred: the "Within symbol(s): ... (N instances)" line. */
 static void emit_header_lines(WebOutput *wo, const ContextTypeList *include,
                               const ContextTypeList *exclude,
                               const QueryFilters *filters, int definition,
-                              int compact) {
+                              int compact, int has_file_filter) {
     if (include->count > 0) {
         wo_printf(wo, "\nHDR|Including context types:");
         for (int j = 0; j < include->count; j++)
@@ -557,6 +561,10 @@ static void emit_header_lines(WebOutput *wo, const ContextTypeList *include,
         for (int j = 0; j < exclude->count; j++)
             wo_printf(wo, " %s", context_to_string(exclude->types[j], compact));
     }
+    /* File-filter sentinel: print_hdr_lines replaces HDR|\x01 with the
+     * "Filtering by file: N file(s) matched" line (+ suggestions when 0). */
+    if (has_file_filter)
+        wo_printf(wo, "\nHDR|\x01");
     /* Extensible column filters, in column_schema.def order -- same X-macro the
      * native CLI uses, so the field name and ordering match exactly. */
 #define COLUMN(name, sql_type, c_type, width, full, compact_name, long_flag, short_flag, ...) \
@@ -579,6 +587,24 @@ static void emit_header_lines(WebOutput *wo, const ContextTypeList *include,
      * X-macro above didn't already cover it. */
     if (definition >= 0 && filters->is_definition.count == 0)
         wo_printf(wo, "\nHDR|Filtering by is_definition: %d", definition);
+}
+
+/* Emit FILE_FILTER_COUNT_SQL: counts distinct (directory, filename) pairs that
+ * match the file/context/column filters but NOT the symbol patterns -- mirroring
+ * native count_distinct_files (query-index.c).  The "Filtering by file: N" header
+ * reports how many files the -f filter spans, independent of the search term. */
+static void emit_file_filter_count_sql(WebOutput *wo, ContextTypeList *include,
+                                       ContextTypeList *exclude, QueryFilters *filters,
+                                       FileFilterList *file_filter, int debug) {
+    SqlQueryBuilder b;
+    if (init_sql_builder(&b) != 0) return;
+    if (sql_append(&b, "SELECT COUNT(*) FROM (SELECT DISTINCT directory, filename "
+                       "FROM code_index WHERE 1=1") == 0 &&
+        build_common_filters_web(&b, include, exclude, filters, file_filter, NULL, debug, "") == 0 &&
+        sql_append(&b, ")") == 0) {
+        wo_printf(wo, "\nFILE_FILTER_COUNT_SQL|%s", b.sql);
+    }
+    free_sql_builder(&b);
 }
 
 /* =================================================================
@@ -643,7 +669,10 @@ char *qi_web_build(const char *command) {
         const char **sym_pats = NULL;
         int sym_pat_count = 0;
         int sym_pat_error = 0;
-        if (cmd.pattern_count > 0) {
+        /* A bare "%" is swallowed silently: `qi % -f x --toc` behaves exactly
+         * like `qi -f x --toc` (no symbol filter), matching native query-index.c
+         * which skips symbol_patterns when patterns[0] == "%". */
+        if (cmd.pattern_count > 0 && strcmp(cmd.patterns[0], "%") != 0) {
             sym_pats = malloc(sizeof(const char *) * (size_t)cmd.pattern_count);
             if (!sym_pats) {
                 sym_pat_error = 1;
@@ -685,6 +714,8 @@ char *qi_web_build(const char *command) {
             .symbol_pattern_count = sym_pat_count,
             .include_contexts    = (const char **)cmd.includes,
             .include_context_count = cmd.include_count,
+            .exclude_contexts    = (const char **)cmd.excludes,
+            .exclude_context_count = cmd.exclude_count,
             .limit               = cmd.limit,
         };
 
@@ -700,8 +731,10 @@ char *qi_web_build(const char *command) {
         if (toc_sql) {
             wo_printf(&wo, "\nTOC_SQL|%s", toc_sql);
             /* COUNT breakdown SQL */
-            wo_printf(&wo, "\nTOC_COUNT_SQL|SELECT context, COUNT(*) FROM (%s) "
-                             "GROUP BY context", toc_sql);
+            wo_printf(&wo, "\nTOC_COUNT_SQL|SELECT context, "
+                             "CASE WHEN context = 'IMP' THEN COUNT(DISTINCT full_symbol) "
+                             "ELSE COUNT(*) END "
+                             "FROM (%s) GROUP BY context", toc_sql);
             free(toc_sql);
         } else {
             wo_printf(&wo, "\nTOC_SQL|");
@@ -715,6 +748,7 @@ char *qi_web_build(const char *command) {
                 wo_printf(&wo, "%s", cmd.includes[i]);
             }
         }
+        if (cmd.debug) wo_printf(&wo, "\nDEBUG|1");
         wo_printf(&wo, "\nERROR|OK");
 
         /* Cleanup */
@@ -821,7 +855,9 @@ char *qi_web_build(const char *command) {
             wo_printf(&wo, "%s", cmd.patterns[i]);
         }
         wo_printf(&wo, "\nFILES_SQL|%s", builder.sql);
-        emit_header_lines(&wo, &include, &exclude, &filters, cmd.definition, cmd.compact);
+        if (file_filter.count > 0)
+            emit_file_filter_count_sql(&wo, &include, &exclude, &filters, &file_filter, cmd.debug);
+        emit_header_lines(&wo, &include, &exclude, &filters, cmd.definition, cmd.compact, file_filter.count > 0);
         wo_printf(&wo, "\nLIMIT|%d\nERROR|OK", cmd.limit);
         free_sql_builder(&builder);
         goto cleanup;
@@ -887,7 +923,9 @@ char *qi_web_build(const char *command) {
     wo_printf(&wo, "\nSQL|%s\nLIMIT|%d", builder.sql, cmd.limit);
     if (cmd.limit_per_file > 0)
         wo_printf(&wo, "\nLIMIT_PER_FILE|%d", cmd.limit_per_file);
-    emit_header_lines(&wo, &include, &exclude, &filters, cmd.definition, cmd.compact);
+    if (file_filter.count > 0)
+        emit_file_filter_count_sql(&wo, &include, &exclude, &filters, &file_filter, cmd.debug);
+    emit_header_lines(&wo, &include, &exclude, &filters, cmd.definition, cmd.compact, file_filter.count > 0);
 
     /* No-results diagnostics (consumed by the pipeline only when the main query
      * returns zero rows -> qi_web_format_no_results).  Mirrors query-index.c:
@@ -1222,6 +1260,8 @@ static void parse_patterns(const char *build_info, char *out, size_t out_size) {
     }
 }
 
+static int parse_int_value(const char *build_info, const char *key);
+
 /* Print every pre-rendered "HDR|<text>" line from build_info, in order, each on
  * its own line.  qi_web_build composes these from the parsed include/exclude
  * context types and column filters (where the structures live), so the format
@@ -1232,8 +1272,26 @@ static void print_hdr_lines(WebOutput *wo, const char *build_info) {
     while (p && *p) {
         const char *nl = strchr(p, '\n');
         size_t len = nl ? (size_t)(nl - p) : strlen(p);
-        if (len > 4 && strncmp(p, "HDR|", 4) == 0)
+        if (len == 5 && strncmp(p, "HDR|\x01", 5) == 0) {
+            /* File-filter sentinel: expand using FILE_FILTER_COUNT (supplied by
+             * the JS worker, which runs FILE_FILTER_COUNT_SQL).  Mirrors native
+             * query-index.c: pluralized count line + suggestions when zero. */
+            int fc = parse_int_value(build_info, "FILE_FILTER_COUNT");
+            char file_word[16];
+            if (fc == 1) snprintf(file_word, sizeof(file_word), "file");
+            else pluralize_common_word("file", file_word, sizeof(file_word));
+            wo_printf(wo, "Filtering by file: %d %s matched\n", fc, file_word);
+            if (fc == 0) {
+                wo_printf(wo, "\nNo files matched. Try:\n");
+                wo_printf(wo, "  -f filename.ext       Match specific filename (e.g., -f database.c)\n");
+                wo_printf(wo, "  -f .ext               Match by extension (e.g., -f .c for all .c files)\n");
+                wo_printf(wo, "  -f dir/               Match all files in directory (e.g., -f shared/)\n");
+                wo_printf(wo, "  -f %%pattern%%          Use %% wildcards (e.g., -f shared/%%.c)\n");
+                wo_printf(wo, "\n");
+            }
+        } else if (len > 4 && strncmp(p, "HDR|", 4) == 0) {
             wo_printf(wo, "%.*s\n", (int)(len - 4), p + 4);
+        }
         if (!nl) break;
         p = nl + 1;
     }
@@ -1384,16 +1442,16 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
                 }
             }
         }
-        /* Leading blank + "Searching for:" then the filter header lines, matching
-         * the native CLI (which prints "\nSearching for:" then context/filter
-         * lines).  The blank before the table is emitted with the table below. */
-        wo_printf(&wo, "\nSearching for: %s\n", patterns_buf);
+        /* "Searching for:" then the filter header lines, matching the native CLI
+         * (no leading blank line -- dropped in the main-branch UX cleanup).  The
+         * blank before the table is emitted with the table below. */
+        wo_printf(&wo, "Searching for: %s\n", patterns_buf);
         print_hdr_lines(&wo, build_info);
     }
 
     if (!rows_tsv || !rows_tsv[0]) {
         if (!raw && total == 0)
-            wo_printf(&wo, "\nNo results\n");
+            wo_printf(&wo, "No results\n");
         source_map_free(&sources);
         { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
     }
@@ -1535,7 +1593,10 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
     }
 
     if (!raw) {
-        wo_printf(&wo, "\nFound %d matches", total);
+        char match_word[16];
+        if (total == 1) snprintf(match_word, sizeof(match_word), "match");
+        else pluralize_common_word("match", match_word, sizeof(match_word));
+        wo_printf(&wo, "\nFound %d %s", total, match_word);
         if (total > row_count) {
             wo_printf(&wo, " (showing first %d)", row_count);
         }
@@ -1633,7 +1694,6 @@ char *qi_web_format_no_results(const char *build_info, const char *counts_tsv) {
 
     int retry_idx = -1;
     int all_matched = 1;
-    wo_printf(&body, "\n");   /* blank line before diagnostics (native) */
 
     const char *cp = counts_tsv ? counts_tsv : "";
     for (int i = 0; i < pat_count; i++) {
@@ -1649,16 +1709,15 @@ char *qi_web_format_no_results(const char *build_info, const char *counts_tsv) {
 
         if (exact == 0) {
             all_matched = 0;
-            wo_printf(&body, "Pattern '%s' matched 0 occurrences.", pat[i]);
             if (wild >= 0) {   /* pattern had no '%': partial-match probe applies */
                 if (strlen(pat[i]) < 2) {
-                    wo_printf(&body, " Note: '%s' is too short. Symbols less than 2 characters are not indexed.", pat[i]);
+                    wo_printf(&body, "'%s' is too short. Symbols less than 2 characters are not indexed.", pat[i]);
                 } else if (wild > 0) {
-                    wo_printf(&body, " Retrying with partial matches for '*%s*':\n\n", pat[i]);
+                    wo_printf(&body, "Retrying with partial matches for '*%s*':\n\n", pat[i]);
                     retry_idx = i;
                     break;     /* native goto retry_query: stop here, re-run */
                 } else {
-                    wo_printf(&body, " No partial matches found for '*%s*' either.", pat[i]);
+                    wo_printf(&body, "No partial matches found for '*%s*' either.", pat[i]);
                 }
             }
             wo_printf(&body, "\n");
@@ -1694,11 +1753,11 @@ char *qi_web_format_files(const char *build_info, const char *rows_tsv,
     WebOutput wo;
     if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
 
-    /* Header: leading blank + "Searching for:" + filter lines, matching native
-     * (main() prints the same header before print_files_only). */
+    /* Header: "Searching for:" + filter lines, matching native (main() prints
+     * the same header before print_files_only -- no leading blank line). */
     char patterns_buf[4096] = "";
     parse_patterns(build_info, patterns_buf, sizeof(patterns_buf));
-    wo_printf(&wo, "\nSearching for: %s\n", patterns_buf);
+    wo_printf(&wo, "Searching for: %s\n", patterns_buf);
     print_hdr_lines(&wo, build_info);
 
     const char *p = rows_tsv ? rows_tsv : "";
@@ -1722,7 +1781,10 @@ char *qi_web_format_files(const char *build_info, const char *rows_tsv,
         p = nl ? nl + 1 : p + row_len;
     }
 
-    wo_printf(&wo, "\nFound %d files", total_available);
+    char file_word[16];
+    if (total_available == 1) snprintf(file_word, sizeof(file_word), "file");
+    else pluralize_common_word("file", file_word, sizeof(file_word));
+    wo_printf(&wo, "\nFound %d %s", total_available, file_word);
     if (total_available > total_shown)
         wo_printf(&wo, " (showing first %d)", total_shown);
     wo_printf(&wo, "\n");

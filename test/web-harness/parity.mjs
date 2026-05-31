@@ -58,6 +58,15 @@ var BATCH = [
     "qi zzqzxnomatchzz",                 // zero results: "matched 0 / no partial matches"
     "qi a",                              // zero results: short pattern (<2 chars), no retry
     "qi COLUMN -i func --limit-per-file 2 --limit 5",  // per-file display limit (2 per file, spans 3 files)
+    "qi hello -i com",                   // single match: "Found 1 match" (singular pluralization)
+    "qi % -f config.h --toc",            // TOC MACROS section + IMP-distinct breakdown count
+    "qi % -f config.h --toc -i macro",   // MACRO is an allowed TOC context (-i)
+    "qi % -f config.h --toc -x macro",   // TOC exclude-context (-x) removes the MACROS section
+    "qi % -f query-index-web.c --toc --debug",  // --toc --debug: prints count + main SQL
+    "qi -f query-index-web.c --toc --debug",    // bare "%" swallowed: identical to the line above
+    "qi malloc -f shared/",              // "Filtering by file: N files matched" (count excludes pattern)
+    "qi % -f yoyo",                      // 0 files matched: suggestion block
+    "qi malloc --files -f shared/",      // file-filter header in files mode
 ];
 
 function arg(name) {

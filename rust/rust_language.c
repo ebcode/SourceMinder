@@ -972,11 +972,11 @@ static void handle_macro_definition(TSNode node, const char *source_code,
     format_source_location(node, location, sizeof(location));
 
     if (filter_should_index(filter, name)) {
-        add_entry(result, name, line, CONTEXT_FUNCTION,
+        add_entry(result, name, line, CONTEXT_MACRO,
                   directory, filename, location,
                   &(ExtColumns){
                       .definition = "1",
-                      .clue = "macro_rules!"
+                      .type = "macro_rules!"
                   });
     }
 }
@@ -991,7 +991,7 @@ static void handle_macro_invocation(TSNode node, const char *source_code,
         if (name[0] && filter_should_index(filter, name)) {
             add_entry(result, name, line, CONTEXT_CALL,
                       directory, filename, NULL,
-                      &(ExtColumns){.clue = "macro!"});
+                      &(ExtColumns){.type = "macro"});
         }
     }
     /* Walk arguments to surface inner identifiers/strings/calls */

@@ -56,6 +56,15 @@ void to_lowercase_copy(const char *src, char *dst, size_t size) {
     dst[i] = '\0';
 }
 
+void pluralize_common_word(const char *word, char *output, size_t output_size) {
+    if (strcmp(word, "match") == 0) {
+        snprintf(output, output_size, "matches");
+        return;
+    }
+
+    snprintf(output, output_size, "%ss", word);
+}
+
 void safe_extract_node_text(const char *source_code, TSNode node, char *buffer,
                             size_t buffer_size, const char *filename) {
     uint32_t start = ts_node_start_byte(node);

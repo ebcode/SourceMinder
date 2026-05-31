@@ -33,6 +33,7 @@ size_t strnlength(const char *s, size_t n);
 void to_upper(char *str);
 void to_lower(char *str);
 void to_lowercase_copy(const char *src, char *dst, size_t size);
+void pluralize_common_word(const char *word, char *output, size_t output_size);
 
 /* Safe tree-sitter node text extraction
  * Extracts text from a tree-sitter node into buffer.

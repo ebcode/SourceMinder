@@ -151,6 +151,21 @@ export async function runQuery(ctx, input, opts) {
     var limit = parseInt(buildLines.LIMIT || '0', 10);   /* 0 = unlimited (matches CLI) */
     log('[pipeline] LIMIT:', limit);
 
+    /* File-filter count for the "Filtering by file: N file(s) matched" header.
+     * The C side emits a FILE_FILTER_COUNT_SQL query + an HDR sentinel; we run
+     * the count here (the worker owns the DB) and append FILE_FILTER_COUNT back
+     * into build_info so print_hdr_lines can expand the sentinel.  (Not set in
+     * TOC mode -- native doesn't print this header for --toc.) */
+    if (buildLines.FILE_FILTER_COUNT_SQL) {
+        var ffCount = 0;
+        try {
+            ffCount = expectSingleValue(db, buildLines.FILE_FILTER_COUNT_SQL);
+        } catch (e) {
+            log('[pipeline] file-filter count query error:', e);
+        }
+        buildResult += '\nFILE_FILTER_COUNT|' + ffCount;
+    }
+
     /* TOC mode: different SQL, format, and output pipeline */
     if (buildLines.MODE === 'toc') {
         var tocSql = buildLines.TOC_SQL;

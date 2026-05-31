@@ -31,12 +31,13 @@ static const char * const TOC_ALLOWED_CONTEXTS[] = {
     "FUNC",
     "ENUM",
     "TYPE",
+    "MACRO",
     "IMP",
     NULL  /* Sentinel */
 };
 
 /* Count of allowed context types (excluding sentinel) */
-#define TOC_ALLOWED_CONTEXT_COUNT 6
+#define TOC_ALLOWED_CONTEXT_COUNT 7
 
 /* File pattern for TOC */
 typedef struct {
@@ -52,8 +53,11 @@ typedef struct {
     int symbol_pattern_count;
     const char **include_contexts;      /* Optional: context filters (func, struct, etc) */
     int include_context_count;
+    const char **exclude_contexts;      /* Optional: excluded context filters */
+    int exclude_context_count;
     int limit;                          /* Optional: limit total symbols (0 = no limit) */
     int limit_per_file;                 /* Optional: limit symbols per file (0 = no limit) */
+    int debug;                          /* Print generated SQL queries */
     const char *db_path;                /* Database path */
 } TocConfig;
 
@@ -61,5 +65,8 @@ typedef struct {
  * Returns 0 on success, -1 on error
  */
 int build_toc(const TocConfig *config);
+
+/* Validate CLI flags that conflict with TOC's structural output mode. */
+int validate_toc_compatible_options(const char **flags, int count);
 
 #endif /* TOC_H */

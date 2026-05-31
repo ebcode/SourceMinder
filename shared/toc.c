@@ -138,6 +138,26 @@ static char *build_toc_query(const TocConfig *config) {
         TOC_APPEND(") ");
     }
 
+    if (config->exclude_context_count > 0) {
+        TOC_APPEND("AND context NOT IN (");
+
+        for (int i = 0; i < config->exclude_context_count; i++) {
+            const char *ctx = config->exclude_contexts[i];
+            char ctx_upper[64];
+
+            for (int j = 0; ctx[j] && j < 63; j++) {
+                ctx_upper[j] = (ctx[j] >= 'a' && ctx[j] <= 'z') ? ctx[j] - 32 : ctx[j];
+                ctx_upper[j + 1] = '\0';
+            }
+
+            TOC_APPEND("'%s'%s",
+                       ctx_upper,
+                       i < config->exclude_context_count - 1 ? ", " : "");
+        }
+
+        TOC_APPEND(") ");
+    }
+
     /* Symbol pattern filters (if provided) */
     if (config->symbol_pattern_count > 0) {
         TOC_APPEND("AND (");
@@ -316,7 +336,7 @@ static void print_imports(TocEntry *entries, int count) {
         return;
     }
 
-    printf("IMPORTS: ");
+    printf("IMPORTS (%d): ", import_count);
     for (int i = 0; i < import_count; i++) {
         printf("%s", imports[i]->symbol);
         if (i < import_count - 1) printf(", ");
@@ -341,11 +361,25 @@ static void print_toc(FileToc *files, int file_count) {
         print_section("FUNCTIONS", file->entries, file->entry_count, "FUNC");
         print_section("ENUMS", file->entries, file->entry_count, "ENUM");
         print_section("TYPES", file->entries, file->entry_count, "TYPE");
+        print_section("MACROS", file->entries, file->entry_count, "MACRO");
 
         if (i < file_count - 1) {
             printf("\n");  /* Blank line between files */
         }
     }
+}
+
+int validate_toc_compatible_options(const char **flags, int count) {
+    if (count == 0) {
+        return 0;
+    }
+
+    fprintf(stderr, "Hint: --toc can only be used with the following flags: -f/--file, -i/--include-context, -x/--exclude-context, --db-file, --debug\n");
+    fprintf(stderr, "Error: --toc does not support: ");
+    for (int i = 0; i < count; i++) {
+        fprintf(stderr, "%s%s", flags[i], i < count - 1 ? ", " : "\n");
+    }
+    return -1;
 }
 
 /* Cleanup allocated memory */
@@ -385,7 +419,13 @@ int build_toc(const TocConfig *config) {
     }
     char count_query[9216];
     snprintf(count_query, sizeof(count_query),
-             "SELECT context, COUNT(*) FROM (%s) GROUP BY context", base_query);
+             "SELECT context, "
+             "CASE WHEN context = 'IMP' THEN COUNT(DISTINCT full_symbol) ELSE COUNT(*) END "
+             "FROM (%s) GROUP BY context", base_query);
+
+    if (config->debug) {
+        printf("SQL: [TOC count query] %s\n", count_query);
+    }
 
     sqlite3_stmt *count_stmt;
     if (sqlite3_prepare_v2(db, count_query, -1, &count_stmt, NULL) != SQLITE_OK) {
@@ -419,6 +459,11 @@ int build_toc(const TocConfig *config) {
         snprintf(limited_query, sizeof(limited_query), "%s LIMIT %d", base_query, config->limit);
     } else {
         strncpy(limited_query, base_query, sizeof(limited_query) - 1);
+        limited_query[sizeof(limited_query) - 1] = '\0';
+    }
+
+    if (config->debug) {
+        printf("SQL: [TOC main query] %s\n", limited_query);
     }
 
     sqlite3_stmt *stmt;
@@ -555,8 +600,20 @@ int build_toc(const TocConfig *config) {
         /* Print limit indicator if we hit the limit or per-file limit reduced results */
         if ((config->limit > 0 && symbols_shown >= config->limit && total_symbols > symbols_shown) ||
             (config->limit_per_file > 0 && total_symbols > symbols_shown)) {
-            printf("\n[Limit reached: %d symbols shown, %d total available]\n",
-                   symbols_shown, total_symbols);
+            char shown_word[16];
+            char total_word[16];
+            if (symbols_shown == 1) {
+                snprintf(shown_word, sizeof(shown_word), "symbol");
+            } else {
+                pluralize_common_word("symbol", shown_word, sizeof(shown_word));
+            }
+            if (total_symbols == 1) {
+                snprintf(total_word, sizeof(total_word), "symbol");
+            } else {
+                pluralize_common_word("symbol", total_word, sizeof(total_word));
+            }
+            printf("\n[Limit reached: %d %s shown, %d %s total available]\n",
+                   symbols_shown, shown_word, total_symbols, total_word);
         }
     }
 

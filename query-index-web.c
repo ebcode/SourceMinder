@@ -29,6 +29,7 @@ static char *strndup(const char *s, size_t n) {
 }
 #endif
 
+
 /* -- sqlite3: use real headers when linking, forward-declare for smoke build -- */
 #ifndef QI_WEB_LINKED
 struct sqlite3;
@@ -597,6 +598,7 @@ const char *map_context_web(const char *token) {
         {"imp","IMP"}, {"import","IMP"},
         {"label","LABEL"},
         {"lam","LAM"}, {"lambda","LAM"},
+        {"macro","MACRO"},
         {"ns","NS"}, {"namespace","NS"},
         {"prop","PROP"}, {"property","PROP"},
         {"str","STR"}, {"string","STR"},

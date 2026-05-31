@@ -34,12 +34,14 @@ typedef struct {
     int symbol_pattern_count;
     const char **include_contexts;      /* Context type names: "FUNC", "CLASS", etc. */
     int include_context_count;
+    const char **exclude_contexts;      /* Context type names to exclude */
+    int exclude_context_count;
     int limit;
 } TocWebConfig;
 
 /* Context types allowed in --toc output */
 static const char * const TOC_ALLOWED_CONTEXTS_WEB[] = {
-    "FILE", "CLASS", "FUNC", "ENUM", "TYPE", "IMP",
+    "FILE", "CLASS", "FUNC", "ENUM", "TYPE", "MACRO", "IMP",
     NULL
 };
 

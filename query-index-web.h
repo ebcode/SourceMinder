@@ -42,7 +42,8 @@ typedef enum {
     CONTEXT_TRAIT,
     CONTEXT_LAMBDA,
     CONTEXT_LABEL,
-    CONTEXT_GOTO
+    CONTEXT_GOTO,
+    CONTEXT_MACRO
 } ContextType;
 
 /* Database wrapper - forward-declared without sqlite3.h for header cleanliness */
@@ -105,6 +106,7 @@ typedef struct {
 /* from shared/string_utils.h */
 void to_upper(char *str);
 void to_lowercase_copy(const char *src, char *dst, size_t size);
+void pluralize_common_word(const char *word, char *output, size_t output_size);
 char *try_strdup_ctx(const char *str, const char *err_msg);
 char *safe_strdup_ctx(const char *str, const char *err_msg);
 

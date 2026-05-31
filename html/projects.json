@@ -11,11 +11,11 @@
   {
     "id": "sourceminder",
     "name": "SourceMinder",
-    "version": "1",
+    "version": "2",
     "language": "c",
     "dbUrl": "./code-index-sourceminder.browser.db",
     "sourceBase": "./sources/sourceminder/",
-    "sizeBytes": 17424384
+    "sizeBytes": 18653184
   },
   {
     "id": "logrus",

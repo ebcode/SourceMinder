@@ -55,8 +55,15 @@ char *build_toc_web_sql(const TocWebConfig *config) {
 
 #define SA(fmt, ...) if (sql_append(&b, fmt, ##__VA_ARGS__) != 0) goto cleanup
 
-    SA("SELECT DISTINCT full_symbol, line, source_location, "
-       "context, directory, filename "
+    /* Column-list spacing mirrors native shared/toc.c build_toc_query exactly
+     * (multi-literal "  col, " -> triple spaces) so --debug SQL is byte-identical. */
+    SA("SELECT DISTINCT "
+       "  full_symbol, "
+       "  line, "
+       "  source_location, "
+       "  context, "
+       "  directory, "
+       "  filename "
        "FROM code_index "
        "WHERE (is_definition = 1 OR context = 'IMP' OR context = 'FILE') "
        "AND context IN (");
@@ -126,6 +133,30 @@ char *build_toc_web_sql(const TocWebConfig *config) {
             if (!escaped) goto cleanup;
             if (sql_append(&b, "%s%s", escaped,
                     i < config->include_context_count - 1 ? ", " : "") != 0) {
+                sqlite3_free(escaped);
+                goto cleanup;
+            }
+            sqlite3_free(escaped);
+        }
+        SA(") ");
+    }
+
+    /* Exclude context filters (mirrors include block, NOT IN) */
+    if (config->exclude_context_count > 0) {
+        SA("AND context NOT IN (");
+        for (int i = 0; i < config->exclude_context_count; i++) {
+            char upper[64];
+            const char *ctx = config->exclude_contexts[i];
+            int j = 0;
+            while (ctx[j] && j < 63) {
+                upper[j] = (char)toupper((unsigned char)ctx[j]);
+                j++;
+            }
+            upper[j] = '\0';
+            char *escaped = sqlite3_mprintf("%q", upper);
+            if (!escaped) goto cleanup;
+            if (sql_append(&b, "%s%s", escaped,
+                    i < config->exclude_context_count - 1 ? ", " : "") != 0) {
                 sqlite3_free(escaped);
                 goto cleanup;
             }
@@ -372,7 +403,7 @@ static void toc_print_imports(WebOutput *wo, TocWebFile *file) {
 
     qsort(imports, (size_t)import_count, sizeof(TocWebEntry *), toc_cmp_import_symbols);
 
-    wo_printf(wo, "IMPORTS: ");
+    wo_printf(wo, "IMPORTS (%d): ", import_count);
     for (int i = 0; i < import_count; i++) {
         wo_printf(wo, "%s", imports[i]->symbol);
         if (i < import_count - 1) wo_printf(wo, ", ");
@@ -387,6 +418,28 @@ char *format_toc_web(const char *build_info, const char *rows_tsv,
                      const char *context_counts) {
     WebOutput wo;
     if (wo_init(&wo) != 0) return NULL;
+
+    /* --debug: print the TOC count SQL then main SQL, matching native
+     * shared/toc.c (printf "[TOC count query]" then "[TOC main query]").
+     * Emitted before the empty-rows check so the SQL shows even when no
+     * definitions match.  Each value runs to the next '\n' in build_info. */
+    {
+        const char *dbg = toc_find_build_line(build_info, "DEBUG");
+        if (dbg && dbg[0] == '1') {
+            const char *cnt = toc_find_build_line(build_info, "TOC_COUNT_SQL");
+            const char *main_sql = toc_find_build_line(build_info, "TOC_SQL");
+            if (cnt) {
+                const char *e = strchr(cnt, '\n');
+                wo_printf(&wo, "SQL: [TOC count query] %.*s\n",
+                          e ? (int)(e - cnt) : (int)strlen(cnt), cnt);
+            }
+            if (main_sql) {
+                const char *e = strchr(main_sql, '\n');
+                wo_printf(&wo, "SQL: [TOC main query] %.*s\n",
+                          e ? (int)(e - main_sql) : (int)strlen(main_sql), main_sql);
+            }
+        }
+    }
 
     if (!rows_tsv || !rows_tsv[0]) {
         wo_printf(&wo, "No definitions found matching the criteria.\n");
@@ -558,11 +611,12 @@ char *format_toc_web(const char *build_info, const char *rows_tsv,
 
         toc_print_imports(&wo, file);
 
-        /* Section order: CLASS, FUNC, ENUM, TYPE */
+        /* Section order: CLASS, FUNC, ENUM, TYPE, MACRO (mirrors shared/toc.c) */
         toc_print_section(&wo, "CLASSES",   file, "CLASS");
         toc_print_section(&wo, "FUNCTIONS", file, "FUNC");
         toc_print_section(&wo, "ENUMS",     file, "ENUM");
         toc_print_section(&wo, "TYPES",     file, "TYPE");
+        toc_print_section(&wo, "MACROS",    file, "MACRO");
 
         if (i < file_count - 1)
             wo_printf(&wo, "\n");
