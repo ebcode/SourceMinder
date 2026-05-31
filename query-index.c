@@ -1863,7 +1863,13 @@ static void print_files_only(CodeIndexDatabase *db, PatternList *patterns,
         actual_total = get_total_file_count(db, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug);
     }
 
-    printf("\nFound %d files", actual_total);
+    char file_word[16];
+    if (actual_total == 1) {
+        snprintf(file_word, sizeof(file_word), "file");
+    } else {
+        pluralize_common_word("file", file_word, sizeof(file_word));
+    }
+    printf("\nFound %d %s", actual_total, file_word);
     if (limit > 0 && total_files >= limit) {
         printf(" (showing first %d)", limit);
     }
@@ -2224,7 +2230,13 @@ static void print_summary_stats(CodeIndexDatabase *db, PatternList *patterns,
         actual_total = get_total_count(db, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug);
     }
 
-    printf("\nFound %d matches", actual_total);
+    char match_word[16];
+    if (actual_total == 1) {
+        snprintf(match_word, sizeof(match_word), "match");
+    } else {
+        pluralize_common_word("match", match_word, sizeof(match_word));
+    }
+    printf("\nFound %d %s", actual_total, match_word);
     if (limit > 0 && total_count >= limit) {
         printf(" (showing first %d)", limit);
     }
@@ -2295,7 +2307,7 @@ retry_query:
     if (first_result != SQLITE_ROW) {
         /* No results found - provide diagnostics */
         sqlite3_finalize(stmt);
-        printf("\nNo results\n");
+        printf("No results\n");
 
         /* Initialize filter to check if patterns are valid symbols */
         SymbolFilter symbol_filter;
@@ -2312,12 +2324,10 @@ retry_query:
 
         /* Check each pattern individually to see which ones matched */
         int all_patterns_matched = 1;
-        printf("\n");
         for (int i = 0; i < patterns->count; i++) {
             int count = count_pattern_matches(db, patterns->patterns[i]);
             if (count == 0) {
                 all_patterns_matched = 0;
-                printf("Pattern '%s' matched 0 occurrences.", patterns->patterns[i]);
                 /* Suggest wildcard if pattern doesn't already have % wildcard AND it's a valid symbol
                  * Note: We don't check for _ since it's a common character in identifiers */
                 if (strchr(patterns->patterns[i], '%') == NULL) {
@@ -2330,32 +2340,32 @@ retry_query:
                                     char wildcard_pattern[SYMBOL_MAX_LENGTH + 3];  /* +2 for %%, +1 for \0 */
                                     snprintf(wildcard_pattern, sizeof(wildcard_pattern), "%%%s%%", patterns->patterns[i]);
                                     int wildcard_count = count_pattern_matches(db, wildcard_pattern);
-                                    if (wildcard_count > 0) {
-                                        printf(" Retrying with partial matches for '*%s*':\n\n", patterns->patterns[i]);
+                                     if (wildcard_count > 0) {
+                                        printf("Retrying with partial matches for '*%s*':\n\n", patterns->patterns[i]);
                                         /* Replace pattern with wildcard version and retry the query */
                                         free(patterns->patterns[i]);
                                         patterns->patterns[i] = safe_strdup_ctx(wildcard_pattern, "Failed to allocate memory for wildcard pattern");
                                         goto retry_query;
                                     } else {
-                                        printf(" No partial matches found for '*%s*' either.", patterns->patterns[i]);
+                                        printf("No partial matches found for '*%s*' either.", patterns->patterns[i]);
                                     }
                                 }
                                 break;
                             case FILTER_REASON_TOO_SHORT:
-                                printf(" Note: '%s' is too short. Symbols less than %d characters are not indexed.",
+                                printf("'%s' is too short. Symbols less than %d characters are not indexed.",
                                        patterns->patterns[i], MIN_SYMBOL_LENGTH);
                                 break;
                             case FILTER_REASON_PURE_NUMBER:
-                                printf(" Note: '%s' is a pure number and is not indexed.", patterns->patterns[i]);
+                                printf("'%s' is a pure number and is not indexed.", patterns->patterns[i]);
                                 break;
                             case FILTER_REASON_STOPWORD:
-                                printf(" Note: '%s' is a stopword and is not indexed.", patterns->patterns[i]);
+                                printf("'%s' is a stopword and is not indexed.", patterns->patterns[i]);
                                 break;
                             case FILTER_REASON_KEYWORD:
-                                printf(" Note: '%s' is a language keyword and is not indexed.", patterns->patterns[i]);
+                                printf("'%s' is a language keyword and is not indexed.", patterns->patterns[i]);
                                 break;
                             case FILTER_REASON_EXCLUSION_PATTERN:
-                                printf(" Note: '%s' matches an exclusion pattern and is not indexed.", patterns->patterns[i]);
+                                printf("'%s' matches an exclusion pattern and is not indexed.", patterns->patterns[i]);
                                 break;
                             default:
                                 /* All enum values covered above */
@@ -3272,6 +3282,7 @@ int main(int argc, char *argv[]) {
             .include_context_count = (has_include ? include.count : 0),
             .limit = limit,
             .limit_per_file = limit_per_file,
+            .debug = debug,
             .db_path = db_file
         };
 
@@ -3398,7 +3409,7 @@ int main(int argc, char *argv[]) {
 
     /* Print header (suppressed in raw mode) */
     if (!raw_mode) {
-        printf("\nSearching for:");
+        printf("Searching for:");
         for (int j = 0; j < patterns.count; j++) {
             printf(" %s", patterns.patterns[j]);
         }
@@ -3418,19 +3429,15 @@ int main(int argc, char *argv[]) {
             printf("\n");
         }
         if (file_filter.count > 0) {
-            printf("Filtering by file:");
-            for (int j = 0; j < file_filter.count; j++) {
-                if (file_filter.patterns[j].directory != NULL) {
-                    /* Directory already has trailing slash */
-                    printf(" %s%s", file_filter.patterns[j].directory, file_filter.patterns[j].filename);
-                } else {
-                    printf(" %s", file_filter.patterns[j].filename);
-                }
-            }
-
             /* Count and display number of files matching the filter */
             int file_count = count_distinct_files(&db, &include, &exclude, &filters, &file_filter, &within_ranges, debug);
-            printf(" (%d files)\n", file_count);
+            char file_word[16];
+            if (file_count == 1) {
+                snprintf(file_word, sizeof(file_word), "file");
+            } else {
+                pluralize_common_word("file", file_word, sizeof(file_word));
+            }
+            printf("Filtering by file: %d %s matched\n", file_count, file_word);
 
             /* Provide suggestions if no files matched */
             if (file_count == 0) {
@@ -3465,11 +3472,23 @@ int main(int argc, char *argv[]) {
 
         /* Print within filter info */
         if (within_filter.count > 0) {
-            printf("Within symbol%s:", within_filter.count > 1 ? "s" : "");
+            char symbol_word[16];
+            if (within_filter.count == 1) {
+                snprintf(symbol_word, sizeof(symbol_word), "symbol");
+            } else {
+                pluralize_common_word("symbol", symbol_word, sizeof(symbol_word));
+            }
+            printf("Within %s:", symbol_word);
             for (int j = 0; j < within_filter.count; j++) {
                 printf(" %s", within_filter.symbols[j]);
             }
-            printf(" (%d instance%s)\n", within_ranges.count, within_ranges.count != 1 ? "s" : "");
+            char instance_word[16];
+            if (within_ranges.count == 1) {
+                snprintf(instance_word, sizeof(instance_word), "instance");
+            } else {
+                pluralize_common_word("instance", instance_word, sizeof(instance_word));
+            }
+            printf(" (%d %s)\n", within_ranges.count, instance_word);
         }
     }
 

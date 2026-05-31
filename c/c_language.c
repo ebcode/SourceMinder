@@ -1996,10 +1996,12 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
     }
     if (node_sym == c_symbols.preproc_ifdef) {
         handle_preproc_ifdef(node, source_code, directory, filename, result, filter, line);
+        process_children(node, source_code, directory, filename, result, filter);
         return;
     }
     if (node_sym == c_symbols.preproc_if || node_sym == c_symbols.preproc_elif || node_sym == c_symbols.preproc_else) {
         handle_preproc_if(node, source_code, directory, filename, result, filter, line);
+        process_children(node, source_code, directory, filename, result, filter);
         return;
     }
     if (node_sym == c_symbols.expression_statement) {

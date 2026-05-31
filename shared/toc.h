@@ -54,6 +54,7 @@ typedef struct {
     int include_context_count;
     int limit;                          /* Optional: limit total symbols (0 = no limit) */
     int limit_per_file;                 /* Optional: limit symbols per file (0 = no limit) */
+    int debug;                          /* Print generated SQL queries */
     const char *db_path;                /* Database path */
 } TocConfig;
 

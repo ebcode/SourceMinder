@@ -316,7 +316,7 @@ static void print_imports(TocEntry *entries, int count) {
         return;
     }
 
-    printf("IMPORTS: ");
+    printf("IMPORTS (%d): ", import_count);
     for (int i = 0; i < import_count; i++) {
         printf("%s", imports[i]->symbol);
         if (i < import_count - 1) printf(", ");
@@ -385,7 +385,13 @@ int build_toc(const TocConfig *config) {
     }
     char count_query[9216];
     snprintf(count_query, sizeof(count_query),
-             "SELECT context, COUNT(*) FROM (%s) GROUP BY context", base_query);
+             "SELECT context, "
+             "CASE WHEN context = 'IMP' THEN COUNT(DISTINCT full_symbol) ELSE COUNT(*) END "
+             "FROM (%s) GROUP BY context", base_query);
+
+    if (config->debug) {
+        printf("SQL: [TOC count query] %s\n", count_query);
+    }
 
     sqlite3_stmt *count_stmt;
     if (sqlite3_prepare_v2(db, count_query, -1, &count_stmt, NULL) != SQLITE_OK) {
@@ -419,6 +425,11 @@ int build_toc(const TocConfig *config) {
         snprintf(limited_query, sizeof(limited_query), "%s LIMIT %d", base_query, config->limit);
     } else {
         strncpy(limited_query, base_query, sizeof(limited_query) - 1);
+        limited_query[sizeof(limited_query) - 1] = '\0';
+    }
+
+    if (config->debug) {
+        printf("SQL: [TOC main query] %s\n", limited_query);
     }
 
     sqlite3_stmt *stmt;
@@ -555,8 +566,20 @@ int build_toc(const TocConfig *config) {
         /* Print limit indicator if we hit the limit or per-file limit reduced results */
         if ((config->limit > 0 && symbols_shown >= config->limit && total_symbols > symbols_shown) ||
             (config->limit_per_file > 0 && total_symbols > symbols_shown)) {
-            printf("\n[Limit reached: %d symbols shown, %d total available]\n",
-                   symbols_shown, total_symbols);
+            char shown_word[16];
+            char total_word[16];
+            if (symbols_shown == 1) {
+                snprintf(shown_word, sizeof(shown_word), "symbol");
+            } else {
+                pluralize_common_word("symbol", shown_word, sizeof(shown_word));
+            }
+            if (total_symbols == 1) {
+                snprintf(total_word, sizeof(total_word), "symbol");
+            } else {
+                pluralize_common_word("symbol", total_word, sizeof(total_word));
+            }
+            printf("\n[Limit reached: %d %s shown, %d %s total available]\n",
+                   symbols_shown, shown_word, total_symbols, total_word);
         }
     }
 
