@@ -138,6 +138,26 @@ static char *build_toc_query(const TocConfig *config) {
         TOC_APPEND(") ");
     }
 
+    if (config->exclude_context_count > 0) {
+        TOC_APPEND("AND context NOT IN (");
+
+        for (int i = 0; i < config->exclude_context_count; i++) {
+            const char *ctx = config->exclude_contexts[i];
+            char ctx_upper[64];
+
+            for (int j = 0; ctx[j] && j < 63; j++) {
+                ctx_upper[j] = (ctx[j] >= 'a' && ctx[j] <= 'z') ? ctx[j] - 32 : ctx[j];
+                ctx_upper[j + 1] = '\0';
+            }
+
+            TOC_APPEND("'%s'%s",
+                       ctx_upper,
+                       i < config->exclude_context_count - 1 ? ", " : "");
+        }
+
+        TOC_APPEND(") ");
+    }
+
     /* Symbol pattern filters (if provided) */
     if (config->symbol_pattern_count > 0) {
         TOC_APPEND("AND (");
@@ -341,11 +361,25 @@ static void print_toc(FileToc *files, int file_count) {
         print_section("FUNCTIONS", file->entries, file->entry_count, "FUNC");
         print_section("ENUMS", file->entries, file->entry_count, "ENUM");
         print_section("TYPES", file->entries, file->entry_count, "TYPE");
+        print_section("MACROS", file->entries, file->entry_count, "MACRO");
 
         if (i < file_count - 1) {
             printf("\n");  /* Blank line between files */
         }
     }
+}
+
+int validate_toc_compatible_options(const char **flags, int count) {
+    if (count == 0) {
+        return 0;
+    }
+
+    fprintf(stderr, "Hint: --toc can only be used with the following flags: -f/--file, -i/--include-context, -x/--exclude-context, --db-file, --debug\n");
+    fprintf(stderr, "Error: --toc does not support: ");
+    for (int i = 0; i < count; i++) {
+        fprintf(stderr, "%s%s", flags[i], i < count - 1 ? ", " : "\n");
+    }
+    return -1;
 }
 
 /* Cleanup allocated memory */

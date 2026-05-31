@@ -37,7 +37,8 @@ typedef enum {
     CONTEXT_TRAIT,
     CONTEXT_LAMBDA,
     CONTEXT_LABEL,
-    CONTEXT_GOTO
+    CONTEXT_GOTO,
+    CONTEXT_MACRO
 } ContextType;
 
 const char *context_to_string(ContextType type, int compact);

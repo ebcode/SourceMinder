@@ -1722,8 +1722,8 @@ static void handle_preproc_def(TSNode node, const char *source_code, const char 
             safe_extract_node_text(source_code, child, symbol, sizeof(symbol), filename);
 
             if (filter_should_index(filter, symbol)) {
-                add_entry(result, symbol, line, CONTEXT_VARIABLE,
-                        directory, filename, NULL, &(ExtColumns){.clue = "macro", .definition = "1"});
+                add_entry(result, symbol, line, CONTEXT_MACRO,
+                        directory, filename, NULL, &(ExtColumns){.type = "object-like", .definition = "1"});
             }
             break;  /* Only index the macro name, not the value */
         }
@@ -1746,8 +1746,8 @@ static void handle_preproc_function_def(TSNode node, const char *source_code, co
             safe_extract_node_text(source_code, child, macro_name, sizeof(macro_name), filename);
 
             if (filter_should_index(filter, macro_name)) {
-                add_entry(result, macro_name, line, CONTEXT_FUNCTION,
-                        directory, filename, NULL, &(ExtColumns){.clue = "macro", .definition = "1"});
+                add_entry(result, macro_name, line, CONTEXT_MACRO,
+                        directory, filename, NULL, &(ExtColumns){.type = "function-like", .definition = "1"});
             }
             break;  /* Found macro name, exit first pass */
         }

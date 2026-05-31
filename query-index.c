@@ -2514,6 +2514,7 @@ static void print_context_types(void) {
     printf("  %-12s %-9s %s\n", "interface", "iface", "Interface definitions");
     printf("  %-12s %-9s %s\n", "label", "-", "Labels (for goto in C)");
     printf("  %-12s %-9s %s\n", "lambda", "lam", "Lambda/arrow functions");
+    printf("  %-12s %-9s %s\n", "macro", "-", "Preprocessor macros");
     printf("  %-12s %-9s %s\n", "namespace", "ns", "Namespace/package declarations");
     printf("  %-12s %-9s %s\n", "property", "prop", "Class/struct fields");
     printf("  %-12s %-9s %s\n", "string", "str", "Words from string literals");
@@ -2606,7 +2607,7 @@ static void show_help_compact(void) {
     printf("      --debug                    show SQL\n");
     printf("\n");
 
-    printf("Types: func class var arg type prop call imp com str file; use --list-types for all.\n");
+    printf("Types: func class macro var arg type prop call imp com str file; use --list-types for all.\n");
     printf("Patterns: exact by default; wildcards: * any, . one char. %% and _ also work.\n");
     printf("Escape leading flags: qi '\\--help'. Prefer prefix patterns like get* for speed.\n");
     printf("Config: ~/%s, [qi] section; CLI flags override config.\n", CONFIG_FILENAME);
@@ -2677,6 +2678,7 @@ int main(int argc, char *argv[]) {
     int limit_per_file = 0;  /* Limit results per file */
     int verbose = 0;
     int compact = 1;  /* Compact mode is now the default */
+    int full = 0;
     int show_all_columns = 0;  /* Special mode for --columns all */
     int has_custom_columns = 0;
     int line_range = -1;  /* Line range for proximity search (-1 = OR mode, 0 = same line, N = within N lines) */
@@ -2687,6 +2689,8 @@ int main(int argc, char *argv[]) {
     int context_after = 0;
     int debug = 0;  /* Debug mode - show SQL queries */
     int raw_mode = 0;  /* Raw mode - suppress all non-source output */
+    int def_only = 0;
+    int usage_only = 0;
     const char *db_file = "code-index.db";  /* Default database location */
     CodeIndexDatabase db = {0};  /* Initialize early so cleanup is safe */
 
@@ -2804,6 +2808,7 @@ int main(int argc, char *argv[]) {
         }
         else if (strcmp(argv[i], "--full") == 0) {
             compact = 0;
+            full = 1;
         }
         else if (strcmp(argv[i], "--debug") == 0) {
             debug = 1;
@@ -2936,6 +2941,7 @@ int main(int argc, char *argv[]) {
 #undef INT_COLUMN
         /* Convenience aliases for is_definition filter */
         else if (strcmp(argv[i], "--def") == 0) {
+            def_only = 1;
             show_columns.is_definition = 1;
             /* --def means show only definitions (is_definition = 1) */
             if (filters.is_definition.count < MAX_CONTEXT_TYPES) {
@@ -2948,6 +2954,7 @@ int main(int argc, char *argv[]) {
             }
         }
         else if (strcmp(argv[i], "--usage") == 0) {
+            usage_only = 1;
             show_columns.is_definition = 1;
             /* --usage means show only usages (is_definition = 0) */
             if (filters.is_definition.count < MAX_CONTEXT_TYPES) {
@@ -3220,6 +3227,43 @@ int main(int argc, char *argv[]) {
             goto cleanup;
         }
 
+        const char *toc_conflicts[32];
+        int toc_conflict_count = 0;
+
+#define ADD_TOC_CONFLICT(flag_name) do { \
+            if (toc_conflict_count < (int)(sizeof(toc_conflicts) / sizeof(toc_conflicts[0]))) { \
+                toc_conflicts[toc_conflict_count++] = (flag_name); \
+            } \
+        } while (0)
+
+        if (limit > 0) ADD_TOC_CONFLICT("--limit");
+        if (limit_per_file > 0) ADD_TOC_CONFLICT("--limit-per-file");
+        if (expand) ADD_TOC_CONFLICT("--expand");
+        if (raw_mode) ADD_TOC_CONFLICT("--raw");
+        if (context_before > 0) ADD_TOC_CONFLICT("--before-context");
+        if (context_after > 0) ADD_TOC_CONFLICT("--after-context");
+        if (files_only) ADD_TOC_CONFLICT("--files");
+        if (has_custom_columns) ADD_TOC_CONFLICT("--columns");
+        if (verbose) ADD_TOC_CONFLICT("--verbose");
+        if (full) ADD_TOC_CONFLICT("--full");
+        if (def_only) ADD_TOC_CONFLICT("--def");
+        if (usage_only) ADD_TOC_CONFLICT("--usage");
+        if (filters.line_start >= 0 || filters.line_end >= 0) ADD_TOC_CONFLICT("--lines");
+        if (within_filter.count > 0) ADD_TOC_CONFLICT("--within");
+#define COLUMN(name, sql_type, c_type, width, full_name, compact_name, long_flag, short_flag, ...) \
+        if (filters.name.count > 0 && strcmp(#long_flag, "definition") != 0) ADD_TOC_CONFLICT("--" #long_flag);
+#define INT_COLUMN(name, sql_type, c_type, width, full_name, compact_name, long_flag, short_flag, ...) \
+        if (filters.name.count > 0 && strcmp(#long_flag, "definition") != 0) ADD_TOC_CONFLICT("--" #long_flag);
+#include "shared/column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+#undef ADD_TOC_CONFLICT
+
+        if (validate_toc_compatible_options(toc_conflicts, toc_conflict_count) != 0) {
+            retval = 1;
+            goto cleanup;
+        }
+
         /* Validate --within flag */
         if (within_filter.count > 0) {
             for (int j = 0; j < within_filter.count; j++) {
@@ -3233,7 +3277,8 @@ int main(int argc, char *argv[]) {
 
         /* Build TOC config */
         const char **symbol_patterns = NULL;
-        const char **context_filters = NULL;
+        const char **include_context_filters = NULL;
+        const char **exclude_context_filters = NULL;
 
         /* Use patterns for symbol filtering if not just "%" */
         if (patterns.count > 0 && strcmp(patterns.patterns[0], "%") != 0) {
@@ -3249,14 +3294,28 @@ int main(int argc, char *argv[]) {
 
         /* Use include contexts if specified */
         if (has_include && include.count > 0) {
-            context_filters = malloc(sizeof(char *) * (size_t)include.count);
-            if (!context_filters) {
+            include_context_filters = malloc(sizeof(char *) * (size_t)include.count);
+            if (!include_context_filters) {
                 fprintf(stderr, "Error: Failed to allocate memory for context filters\n");
                 retval = 1;
         goto cleanup;
             }
             for (int j = 0; j < include.count; j++) {
-                context_filters[j] = context_to_string(include.types[j], 1);  /* Use compact form */
+                include_context_filters[j] = context_to_string(include.types[j], 1);  /* Use compact form */
+            }
+        }
+
+        /* Use exclude contexts if specified */
+        if (has_exclude && exclude.count > 0) {
+            exclude_context_filters = malloc(sizeof(char *) * (size_t)exclude.count);
+            if (!exclude_context_filters) {
+                fprintf(stderr, "Error: Failed to allocate memory for context filters\n");
+                if (include_context_filters) free(include_context_filters);
+                retval = 1;
+        goto cleanup;
+            }
+            for (int j = 0; j < exclude.count; j++) {
+                exclude_context_filters[j] = context_to_string(exclude.types[j], 1);  /* Use compact form */
             }
         }
 
@@ -3264,7 +3323,8 @@ int main(int argc, char *argv[]) {
         TocFilePattern *toc_file_patterns = malloc(sizeof(TocFilePattern) * (size_t)file_filter.count);
         if (!toc_file_patterns) {
             fprintf(stderr, "Error: Failed to allocate memory for TOC file patterns\n");
-            if (context_filters) free(context_filters);
+            if (include_context_filters) free(include_context_filters);
+            if (exclude_context_filters) free(exclude_context_filters);
             retval = 1;
         goto cleanup;
         }
@@ -3278,8 +3338,10 @@ int main(int argc, char *argv[]) {
             .file_pattern_count = file_filter.count,
             .symbol_patterns = symbol_patterns,
             .symbol_pattern_count = (symbol_patterns ? patterns.count : 0),
-            .include_contexts = context_filters,
+            .include_contexts = include_context_filters,
             .include_context_count = (has_include ? include.count : 0),
+            .exclude_contexts = exclude_context_filters,
+            .exclude_context_count = (has_exclude ? exclude.count : 0),
             .limit = limit,
             .limit_per_file = limit_per_file,
             .debug = debug,
@@ -3290,8 +3352,11 @@ int main(int argc, char *argv[]) {
 
         /* Cleanup TOC-specific allocations */
         free(toc_file_patterns);
-        if (context_filters) {
-            free(context_filters);
+        if (include_context_filters) {
+            free(include_context_filters);
+        }
+        if (exclude_context_filters) {
+            free(exclude_context_filters);
         }
 
         /* Set return value and goto cleanup for proper resource cleanup */

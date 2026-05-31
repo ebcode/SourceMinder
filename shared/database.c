@@ -44,6 +44,7 @@ const char *context_to_string(ContextType type, int compact) {
         case CONTEXT_LAMBDA: return compact ? "LAM" : "LAMBDA";
         case CONTEXT_LABEL: return compact ? "LABEL" : "LABEL";
         case CONTEXT_GOTO: return compact ? "GOTO" : "GOTO";
+        case CONTEXT_MACRO: return compact ? "MACRO" : "MACRO";
         default: return compact ? "UNKNOWN" : "UNKNOWN";
     }
 }
@@ -70,6 +71,7 @@ ContextType string_to_context(const char *str) {
     if (strcmp(str, "LAMBDA") == 0 || strcmp(str, "LAM") == 0) return CONTEXT_LAMBDA;
     if (strcmp(str, "LABEL") == 0) return CONTEXT_LABEL;
     if (strcmp(str, "GOTO") == 0) return CONTEXT_GOTO;
+    if (strcmp(str, "MACRO") == 0) return CONTEXT_MACRO;
     return CONTEXT_CLASS; /* default */
 }
 

@@ -43,7 +43,8 @@ typedef enum {
     CONTEXT_TRAIT,
     CONTEXT_LAMBDA,
     CONTEXT_LABEL,
-    CONTEXT_GOTO
+    CONTEXT_GOTO,
+    CONTEXT_MACRO
 } ContextType;
 
 /* Extensible columns for add_entry() - supports OOP and language-specific features
