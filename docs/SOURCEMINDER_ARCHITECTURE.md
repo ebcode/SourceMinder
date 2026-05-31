@@ -29,9 +29,10 @@ Each language has its own indexer (`<language>/<language>_language.c`) that foll
 - C
 - Go
 - PHP
+- Perl (provisional)
 - Python
 - TypeScript
-
+- Rust (provisional)
 ---
 
 ## Core Design Principles
@@ -106,7 +107,7 @@ visit_node(node)
       └─> Call process_children(node, ...) [fallback]
 ```
 
-**Critical Insight:** When a handler is called, `visit_node` returns immediately. The handler MUST explicitly visit its children or they will never be visited.
+**Critical:** When a handler is called, `visit_node` returns immediately. The handler MUST explicitly visit its children or they will never be visited.
 
 ---
 

@@ -1,10 +1,7 @@
 - the code index database is named code-index.db
 - prefer the qi tool to manual sqlite3 queries when testing the index
-- you can use the qi tool to query multiple words by separating them with a space: qi symbol1 symbol2
 - always fix compiler warnings
 - never 'fix later' -- especially compiler warnings
-- when testing the indexers, bundle up individual, targeted commands to more inclusive commands. qi % -v --limit 10 (for example)
-- when running qi % , use: qi % -x noise -- unless specifically searching for symbols in comments or strings
 - ALWAYS ask the user to compile (run make) and re-index
 
 ## Error Handling

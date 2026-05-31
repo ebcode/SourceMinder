@@ -1,6 +1,7 @@
 {
   "name": "sourceminder-html-test",
   "private": true,
+  "type": "module",
   "version": "0.0.0",
   "description": "Minimal browser SQLite/WASM harness for SourceMinder",
   "scripts": {

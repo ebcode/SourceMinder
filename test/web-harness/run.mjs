@@ -98,6 +98,22 @@ var CASES = [
         needsBuild: true,
     },
     {
+        /* --debug shows runnable, labeled SQL (inlined values, not native's '?'
+         * placeholders) at each execution point.  -f shared/ + --limit forces a
+         * file-filter count, a truncated total (breakdown), and a context summary. */
+        name: 'debug emits runnable labeled SQL (qi_web_format --debug)',
+        cmd: "qi malloc -f shared/ --debug --limit 3",
+        expect: [
+            'SQL: [File filter count]',
+            'SQL: [Main query]',
+            'SQL: [Get total count]',
+            'SQL: [Get context summary]',
+            "symbol LIKE 'malloc'",   // inlined value, runnable as-is
+        ],
+        absent: ['LIKE ? ESCAPE'],    // not native's bound-parameter form
+        needsBuild: true,
+    },
+    {
         name: 'source expansion (-e, needs rebuilt ABI)',
         cmd: 'qi qi_web_build -i func -e --limit 1',
         expect: ['char *qi_web_build'],

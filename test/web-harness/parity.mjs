@@ -67,6 +67,10 @@ var BATCH = [
     "qi malloc -f shared/",              // "Filtering by file: N files matched" (count excludes pattern)
     "qi % -f yoyo",                      // 0 files matched: suggestion block
     "qi malloc --files -f shared/",      // file-filter header in files mode
+    "qi % --within lookup_within_definitions --limit 3",  // --within header: singular symbol + singular instance
+    "qi % --within build_query_sql lookup_within_definitions --limit 3",  // --within header: plural symbols + plural instances
+    "qi lookup_within_definitions --full --limit 6",  // --full: full headers (SYMBOL/CONTEXT) + full context names (FUNCTION), incl. overflow
+    "qi % -i func --full --limit 5",  // --full: full context-type header (FUNCTION) + full column headers
 ];
 
 function arg(name) {

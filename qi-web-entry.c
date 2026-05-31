@@ -284,6 +284,14 @@ static WebCommand parse_command(const char *input) {
             i++;
             continue;
         }
+        if (strcmp(t, "--full") == 0) {
+            /* --full turns off compact mode: full column headers (SYMBOL,
+             * CONTEXT) and full context names (FUNCTION).  Mirrors native
+             * query-index.c, which sets compact=0 on --full. */
+            cmd.compact = 0;
+            i++;
+            continue;
+        }
         if (strcmp(t, "--debug") == 0) {
             cmd.debug = 1;
             i++;
@@ -546,11 +554,13 @@ done:
  * (after exclude, before column filters -- matching native order); print_hdr_lines
  * expands it using FILE_FILTER_COUNT from build_info.
  *
- * Still deferred: the "Within symbol(s): ... (N instances)" line. */
+ * The "Within symbol(s): ... (N instances)" line is likewise a sentinel
+ * (HDR|\x02), emitted last (matching native order); print_hdr_lines expands it
+ * using WITHIN_SYMBOLS + WITHIN_COUNT from build_info. */
 static void emit_header_lines(WebOutput *wo, const ContextTypeList *include,
                               const ContextTypeList *exclude,
                               const QueryFilters *filters, int definition,
-                              int compact, int has_file_filter) {
+                              int compact, int has_file_filter, int has_within) {
     if (include->count > 0) {
         wo_printf(wo, "\nHDR|Including context types:");
         for (int j = 0; j < include->count; j++)
@@ -587,6 +597,11 @@ static void emit_header_lines(WebOutput *wo, const ContextTypeList *include,
      * X-macro above didn't already cover it. */
     if (definition >= 0 && filters->is_definition.count == 0)
         wo_printf(wo, "\nHDR|Filtering by is_definition: %d", definition);
+    /* Within sentinel: print_hdr_lines replaces HDR|\x02 with the
+     * "Within symbol(s): ... (N instance(s))" line, expanded from
+     * WITHIN_SYMBOLS + WITHIN_COUNT.  Emitted last, matching native order. */
+    if (has_within)
+        wo_printf(wo, "\nHDR|\x02");
 }
 
 /* Emit FILE_FILTER_COUNT_SQL: counts distinct (directory, filename) pairs that
@@ -857,7 +872,7 @@ char *qi_web_build(const char *command) {
         wo_printf(&wo, "\nFILES_SQL|%s", builder.sql);
         if (file_filter.count > 0)
             emit_file_filter_count_sql(&wo, &include, &exclude, &filters, &file_filter, cmd.debug);
-        emit_header_lines(&wo, &include, &exclude, &filters, cmd.definition, cmd.compact, file_filter.count > 0);
+        emit_header_lines(&wo, &include, &exclude, &filters, cmd.definition, cmd.compact, file_filter.count > 0, cmd.within_count > 0);
         wo_printf(&wo, "\nLIMIT|%d\nERROR|OK", cmd.limit);
         free_sql_builder(&builder);
         goto cleanup;
@@ -925,7 +940,7 @@ char *qi_web_build(const char *command) {
         wo_printf(&wo, "\nLIMIT_PER_FILE|%d", cmd.limit_per_file);
     if (file_filter.count > 0)
         emit_file_filter_count_sql(&wo, &include, &exclude, &filters, &file_filter, cmd.debug);
-    emit_header_lines(&wo, &include, &exclude, &filters, cmd.definition, cmd.compact, file_filter.count > 0);
+    emit_header_lines(&wo, &include, &exclude, &filters, cmd.definition, cmd.compact, file_filter.count > 0, cmd.within_count > 0);
 
     /* No-results diagnostics (consumed by the pipeline only when the main query
      * returns zero rows -> qi_web_format_no_results).  Mirrors query-index.c:
@@ -1289,6 +1304,27 @@ static void print_hdr_lines(WebOutput *wo, const char *build_info) {
                 wo_printf(wo, "  -f %%pattern%%          Use %% wildcards (e.g., -f shared/%%.c)\n");
                 wo_printf(wo, "\n");
             }
+        } else if (len == 5 && strncmp(p, "HDR|\x02", 5) == 0) {
+            /* Within sentinel: expand from WITHIN_SYMBOLS + WITHIN_COUNT.
+             * Mirrors native query-index.c: "Within symbol(s): <syms> (N
+             * instance(s))" with both words pluralized independently. */
+            const char *syms = find_build_line(build_info, "WITHIN_SYMBOLS");
+            const char *send = syms ? strchr(syms, '\n') : NULL;
+            int slen = syms ? (int)(send ? (send - syms) : (int)strlen(syms)) : 0;
+            /* symbol count = whitespace-separated token count in WITHIN_SYMBOLS */
+            int sym_count = 0;
+            for (int k = 0; k < slen; k++) {
+                if (syms[k] != ' ' && (k == 0 || syms[k - 1] == ' ')) sym_count++;
+            }
+            int wc = parse_int_value(build_info, "WITHIN_COUNT");
+            char symbol_word[16];
+            if (sym_count == 1) snprintf(symbol_word, sizeof(symbol_word), "symbol");
+            else pluralize_common_word("symbol", symbol_word, sizeof(symbol_word));
+            char instance_word[16];
+            if (wc == 1) snprintf(instance_word, sizeof(instance_word), "instance");
+            else pluralize_common_word("instance", instance_word, sizeof(instance_word));
+            wo_printf(wo, "Within %s: %.*s (%d %s)\n",
+                      symbol_word, slen, syms ? syms : "", wc, instance_word);
         } else if (len > 4 && strncmp(p, "HDR|", 4) == 0) {
             wo_printf(wo, "%.*s\n", (int)(len - 4), p + 4);
         }
@@ -1391,6 +1427,36 @@ static void source_map_free(SourceMap *m) {
     m->count = 0;
 }
 
+/* Print a labeled, runnable "SQL: [Label] <query>" line from a build_info key,
+ * if that key is present.  Unlike native --debug (which shows the '?'-bound
+ * prepared-statement form), the web shows the actual inlined SQL it executes,
+ * so a user who downloaded the .db can paste each query into sqlite3 and
+ * reproduce exactly what is shown above it.  The pipeline supplies the executed
+ * strings (with LIMIT / --within scope already applied) under DEBUG_* keys. */
+static void print_debug_sql(WebOutput *wo, const char *build_info,
+                            const char *label, const char *key) {
+    const char *p = find_build_line(build_info, key);
+    if (!p) return;
+    const char *end = strchr(p, '\n');
+    int len = (int)(end ? (size_t)(end - p) : strlen(p));
+    wo_printf(wo, "SQL: %s %.*s\n", label, len, p);
+}
+
+/* Expand a stored (compact) context value to its full display name when not in
+ * compact mode -- the twin of native query-index.c display_context().  The DB
+ * stores compact codes (e.g. "FUNC"); --full renders them in full ("FUNCTION").
+ * Returns a static string from context_to_string (safe to keep), or the input
+ * unchanged in compact mode.  Note: column widths are still measured from the
+ * compact value (see build_active_columns + the first-pass scan), so a full
+ * name longer than the column overflows -- exactly as native does. */
+static const char *display_context_web(const char *ctx, int compact) {
+    if (compact || !ctx) return ctx;
+    char upper[CONTEXT_TYPE_MAX_LENGTH];
+    snprintf(upper, sizeof(upper), "%s", ctx);
+    to_upper(upper);
+    return context_to_string(string_to_context(upper), 0);
+}
+
 EMSCRIPTEN_KEEPALIVE
 char *qi_web_format(const char *build_info, const char *rows_tsv,
                     int total, int shown,
@@ -1429,24 +1495,20 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
      * by the first (zero-row) pass -- mirroring native's `goto retry_query`,
      * which re-runs the query without reprinting "Searching for:". */
     if (!raw && !suppress_header) {
-        if (parse_flag(build_info, "DEBUG")) {
-            const char *p = find_build_line(build_info, "SQL");
-            if (p) {
-                const char *end = strchr(p, '\n');
-                size_t len = end ? (size_t)(end - p) : strlen(p);
-                if (len < 8192) {
-                    char sql_buf[8192];
-                    memcpy(sql_buf, p, len);
-                    sql_buf[len] = '\0';
-                    wo_printf(&wo, "SQL: %s\n\n", sql_buf);
-                }
-            }
-        }
         /* "Searching for:" then the filter header lines, matching the native CLI
          * (no leading blank line -- dropped in the main-branch UX cleanup).  The
          * blank before the table is emitted with the table below. */
         wo_printf(&wo, "Searching for: %s\n", patterns_buf);
         print_hdr_lines(&wo, build_info);
+        /* --debug: show the runnable SQL the web executes, labeled and ordered by
+         * execution (scope-resolving lookups first, then the main query).  The
+         * [Get total count] / [Get context summary] queries print later, next to
+         * the totals/breakdown they produce.  See print_debug_sql(). */
+        if (parse_flag(build_info, "DEBUG")) {
+            print_debug_sql(&wo, build_info, "[Within lookup]", "DEBUG_WITHIN_SQL");
+            print_debug_sql(&wo, build_info, "[File filter count]", "DEBUG_FILE_FILTER_SQL");
+            print_debug_sql(&wo, build_info, "[Main query]", "DEBUG_MAIN_SQL");
+        }
     }
 
     if (!rows_tsv || !rows_tsv[0]) {
@@ -1562,6 +1624,11 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
                     if (ci > 0) wo_printf(&wo, " | ");
                     int ti = active[ci].spec->tsv_index;
                     const char *val = (ti < TSV_FIELDS && fields[ti]) ? fields[ti] : "";
+                    /* --full expands the context column value (FUNC -> FUNCTION);
+                     * width was measured from the compact value, so it may
+                     * overflow, matching native display_context behavior. */
+                    if (strcmp(active[ci].spec->name, "context") == 0)
+                        val = display_context_web(val, compact);
                     wo_printf(&wo, "%-*s", active[ci].max_width, val);
                 }
                 wo_printf(&wo, "\n");
@@ -1593,6 +1660,9 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
     }
 
     if (!raw) {
+        /* The total-count query, printed right above the total it produced. */
+        if (parse_flag(build_info, "DEBUG"))
+            print_debug_sql(&wo, build_info, "[Get total count]", "DEBUG_COUNT_SQL");
         char match_word[16];
         if (total == 1) snprintf(match_word, sizeof(match_word), "match");
         else pluralize_common_word("match", match_word, sizeof(match_word));
@@ -1610,12 +1680,16 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
 /* Formats the "Result breakdown: COM (N), VAR (N), ..." + Tip line.
  * context_tsv: newline-separated rows of "context_name\tcount".
  * Called separately (mirroring the CLI's get_context_summary()) only when
- * results are truncated; caller decides whether to invoke it. */
+ * results are truncated; caller decides whether to invoke it.
+ * debug_sql: when non-empty (--debug), the runnable context-summary query, shown
+ * as a "SQL: [Get context summary] ..." line above the breakdown. */
 EMSCRIPTEN_KEEPALIVE
-char *qi_web_format_breakdown(const char *context_tsv) {
+char *qi_web_format_breakdown(const char *context_tsv, const char *debug_sql) {
     WebOutput wo;
     if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
 
+    if (debug_sql && debug_sql[0])
+        wo_printf(&wo, "SQL: [Get context summary] %s\n", debug_sql);
     wo_printf(&wo, "Result breakdown: ");
     int first = 1;
     const char *p = context_tsv ? context_tsv : "";

@@ -11,6 +11,7 @@ var summaryEl = document.getElementById("summary");
 var terminalContainerEl = document.getElementById("terminal-container");
 var errorEl = document.getElementById("error");
 var projectSelectEl = document.getElementById("project-select");
+var projectDownloadEl = document.getElementById("project-download");
 
 var term = null;
 var cmdBuffer = "";
@@ -80,10 +81,27 @@ function renderProjectOptions(projects) {
     }
 }
 
+/* Point the download link at the currently selected project's .db file.  The
+ * `download` attribute is the bare filename so the browser saves it under the
+ * same name rather than the cache-busted URL. */
+function updateDownloadLink() {
+    var p = projectsById[projectSelectEl.value];
+    if (!p || !p.dbUrl) { projectDownloadEl.hidden = true; return; }
+    var filename = p.dbUrl.split("/").pop();
+    var label = "Download " + filename +
+        (p.sizeBytes ? " (" + formatBytes(p.sizeBytes) + ")" : "");
+    projectDownloadEl.href = p.dbUrl;
+    projectDownloadEl.download = filename;
+    projectDownloadEl.title = label;
+    projectDownloadEl.textContent = label;
+    projectDownloadEl.hidden = false;
+}
+
 /* Project dropdown -> ask the worker to switch projects. */
 projectSelectEl.addEventListener("change", function() {
     var p = projectsById[projectSelectEl.value];
     if (!p) return;
+    updateDownloadLink();
     isExecuting = true;            /* block queries until the new DB is ready */
     switching = true;              /* an in-flight query's output must not re-enable input */
     projectSelectEl.disabled = true;
@@ -188,6 +206,7 @@ worker.onmessage = function(event) {
         switching = false;
         projectSelectEl.disabled = false;
         if (msg.projectId) { projectSelectEl.value = msg.projectId; currentProjectId = msg.projectId; }
+        updateDownloadLink();
         var firstLoad = !terminalInstalled;
         if (firstLoad) {
             terminalInstalled = true;
@@ -237,7 +256,7 @@ worker.onmessage = function(event) {
             switching = false;
             isExecuting = false;
             projectSelectEl.disabled = false;
-            if (currentProjectId) projectSelectEl.value = currentProjectId;  /* undo the failed selection */
+            if (currentProjectId) { projectSelectEl.value = currentProjectId; updateDownloadLink(); }  /* undo the failed selection */
             if (term) resetPrompt();
         } else if (!switching) {
             /* Query error, no switch pending -- re-enable input. */

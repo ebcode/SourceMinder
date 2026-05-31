@@ -267,6 +267,11 @@ export async function runQuery(ctx, input, opts) {
         var withinRows = db.selectArrays(withinSql);
         log('[pipeline] within lookup rows:', withinRows.length);
 
+        /* Round-trip the instance count for the "Within symbol(s): ... (N
+         * instances)" header (HDR|\x02 sentinel), mirroring FILE_FILTER_COUNT.
+         * print_hdr_lines reads WITHIN_COUNT from build_info to pluralize. */
+        buildResult += '\nWITHIN_COUNT|' + withinRows.length;
+
         if (withinRows.length === 0) {
             var syms = buildLines.WITHIN_SYMBOLS || '(unknown)';
             return 'Error: No definition found for symbol ' + syms + '\r\n';
@@ -374,6 +379,20 @@ export async function runQuery(ctx, input, opts) {
         log('[pipeline] source files:', files.length, 'heap bytes:', srcLen);
     }
 
+    /* --debug: hand the C formatter the *runnable* SQL we actually executed
+     * (LIMIT and --within scope already applied), so each "SQL: [...]" line can
+     * be pasted into sqlite3 against the downloaded .db to reproduce what is
+     * shown above it.  Gated on the command's --debug (buildLines.DEBUG), NOT
+     * the pipeline's `debug` logger toggle, and kept off otherwise to stay lean. */
+    if (buildLines.DEBUG === '1') {
+        buildResult += '\nDEBUG_MAIN_SQL|' + mainQuery;
+        buildResult += '\nDEBUG_COUNT_SQL|' + mainCountSql;
+        if (buildLines.WITHIN_SQL)
+            buildResult += '\nDEBUG_WITHIN_SQL|' + buildLines.WITHIN_SQL;
+        if (buildLines.FILE_FILTER_COUNT_SQL)
+            buildResult += '\nDEBUG_FILE_FILTER_SQL|' + buildLines.FILE_FILTER_COUNT_SQL;
+    }
+
     /* 5. Format qi output via WASM.  Free the source buffer no matter what. */
     var formatted;
     try {
@@ -393,10 +412,11 @@ export async function runQuery(ctx, input, opts) {
         try {
             /* Same --within scoping as COUNT_SQL: BREAKDOWN_SQL was precomputed
              * before WITHIN post-processing; inject ahead of its GROUP BY. */
-            var bdRows = db.selectArrays(injectWhereClause(buildLines.BREAKDOWN_SQL, withinWhere));
+            var bdSql = injectWhereClause(buildLines.BREAKDOWN_SQL, withinWhere);
+            var bdRows = db.selectArrays(bdSql);
             var bdTsv = bdRows.map(function(r) { return r[0] + '\t' + r[1]; }).join('\n');
             formatted += qiModule.ccall('qi_web_format_breakdown', 'string',
-                ['string'], [bdTsv]);
+                ['string', 'string'], [bdTsv, buildLines.DEBUG === '1' ? bdSql : '']);
         } catch (e) {
             /* breakdown is cosmetic; swallow errors silently */
         }

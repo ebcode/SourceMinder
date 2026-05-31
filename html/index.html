@@ -103,6 +103,14 @@
     }
 
     #project-select:disabled { opacity: 0.5; }
+
+    #project-download {
+      color: #8ab4ff;
+      font: inherit;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+    #project-download:hover { color: #b3ccff; }
   </style>
   <link rel="stylesheet" href="./node_modules/xterm/css/xterm.css">
 </head>
@@ -115,6 +123,7 @@
       <div class="project-bar">
         <label class="label" for="project-select">Project</label>
         <select id="project-select" hidden></select>
+        <a id="project-download" hidden>Download .db</a>
       </div>
       <div id="summary" class="grid" hidden></div>
       <div id="query-shell">
