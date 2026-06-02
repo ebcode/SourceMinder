@@ -12,6 +12,7 @@ var terminalContainerEl = document.getElementById("terminal-container");
 var errorEl = document.getElementById("error");
 var projectSelectEl = document.getElementById("project-select");
 var projectDownloadEl = document.getElementById("project-download");
+var loadStatusEl = document.getElementById("load-status");
 
 var term = null;
 var cmdBuffer = "";
@@ -43,6 +44,10 @@ var worker = new Worker("./qi-worker.js?t=" + Date.now(), { type: "module" });
 
 function setStatus(message) {
     statusEl.textContent = message;
+}
+
+function setLoadStatus(message) {
+    if (loadStatusEl) loadStatusEl.textContent = message;
 }
 
 function formatBytes(n) {
@@ -93,8 +98,10 @@ function updateDownloadLink() {
     projectDownloadEl.href = p.dbUrl;
     projectDownloadEl.download = filename;
     projectDownloadEl.title = label;
-    projectDownloadEl.textContent = label;
+    projectDownloadEl.textContent = filename;
     projectDownloadEl.hidden = false;
+    var sizeEl = document.getElementById("download-size");
+    if (sizeEl) sizeEl.textContent = p.sizeBytes ? " (" + formatBytes(p.sizeBytes) + ")" : "";
 }
 
 /* Project dropdown -> ask the worker to switch projects. */
@@ -107,6 +114,7 @@ projectSelectEl.addEventListener("change", function() {
     projectSelectEl.disabled = true;
     if (term) termWrite("\r\nSwitching to " + p.name + "...\r\n");
     setStatus("Loading " + p.name + "...");
+    setLoadStatus("Loading " + p.name + "...");
     worker.postMessage({ type: "load-project", project: p });
 });
 
@@ -177,6 +185,7 @@ worker.onmessage = function(event) {
     case "status":
         console.log("[main] status:", msg.message);
         setStatus(msg.message);
+        setLoadStatus(msg.message);
         break;
 
     case "projects":
@@ -189,14 +198,17 @@ worker.onmessage = function(event) {
         break;
 
     case "progress":
+        var progressMsg;
         if (msg.total > 0) {
             var pct = Math.floor((msg.loaded / msg.total) * 100);
-            setStatus("Downloading " +
+            progressMsg = "Downloading " +
                 (projectsById[msg.projectId] ? projectsById[msg.projectId].name : "project") +
-                "… " + pct + "% (" + formatBytes(msg.loaded) + " / " + formatBytes(msg.total) + ")");
+                "… " + pct + "% (" + formatBytes(msg.loaded) + " / " + formatBytes(msg.total) + ")";
         } else {
-            setStatus("Downloading… " + formatBytes(msg.loaded));
+            progressMsg = "Downloading… " + formatBytes(msg.loaded);
         }
+        setStatus(progressMsg);
+        setLoadStatus(progressMsg);
         break;
 
     case "ready":
@@ -212,12 +224,15 @@ worker.onmessage = function(event) {
             terminalInstalled = true;
             installTerminal();
         }
-        /* Announce the loaded project (both first load and switch). */
-        termWrite("\r\nLoaded project: " + msg.projectName +
-            (msg.projectVersion ? " (v" + msg.projectVersion + ")" : "") + "\r\n\r\n");
+        /* Announce the loaded project on project switches, not on first load. */
+        if (!firstLoad) {
+            termWrite("\r\nLoaded project: " + msg.projectName +
+                (msg.projectVersion ? " (v" + msg.projectVersion + ")" : "") + "\r\n\r\n");
+        }
         resetPrompt();
         term.focus();
         setStatus("Project: " + (msg.projectName || "") + " — SQLite " + sqliteVersion + " in-browser.");
+        setLoadStatus("");
         /* Self-test: run an auto-query on first load, after the announce. */
         if (firstLoad) {
             //var testCmd = "qi % -i call -v -x noise --limit 5";
@@ -278,7 +293,7 @@ function installTerminal() {
     term = new Terminal({
         cursorBlink: true,
         fontSize: 14,
-        fontFamily: '"SFMono-Regular", Consolas, "Liberation Mono", monospace',
+        fontFamily: '"RecursiveMono", "SFMono-Regular", Consolas, "Liberation Mono", monospace',
         theme: {
             background: "#0d152b",
             foreground: "#e6edf7",
@@ -286,7 +301,7 @@ function installTerminal() {
             selectionBackground: "#2a3f6e",
         },
         cols: 100,
-        rows: 30,
+        rows: 42,
     });
 
     var fitAddon = new FitAddonCtor();

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SourceMinder Design System — Token Spec</title>
+<link rel="stylesheet" href="colors_and_type-sm.css" />
+<link rel="stylesheet" href="./node_modules/xterm/css/xterm.css">
+<style>
+.site-title {
+    font-family: "RecursiveMono";
+    font-size: 24px;
+    font-weight: bold;
+}
+.container {
+    max-width: 1200px;
+    margin:auto auto;
+}
+.paper-grid {
+    padding:24px;
+}
+
+article {
+    font-family: "Geist"
+}
+
+.font-test-1 {
+    font-family: "RecursiveMono";
+}
+
+.font-test-2 {
+    font-family: "RecursiveMonoBold";
+}
+
+.project-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.25em;
+}
+.project-bar select { font-size: inherit; }
+#status, #summary { display: none !important; }
+.download-wrap:has(#project-download[hidden]) { display: none; }
+
+
+.term {
+    padding: 12px;
+    margin: 1em;
+}
+
+</style>
+</head>
+<body>
+<div class="header container">
+<span class="site-title">SourceMinder</span>
+</div>
+
+<div class="main container">
+
+    <div class="frame surface-vellum paper-grid" data-pad="24" style="margin-top:12px;">
+        <article>
+            <p>SourceMinder is a collection of cli tools to aid in source code navigation and understanding.
+                A handful of language-specific indexers (index-c, index-python, index-go, etc), and a unified query engine, query-index (qi).
+            </p>
+            <p>
+                SourceMinder was built with both humans and LLMs in mind. As a "context-aware grep", it helps human programmers avoid 
+                the false positives that come with regular searches. And for LLMs: compact output; flags to orient quickly on
+                codebases; and clean output for Edit/Patch anchors.
+            </p>
+            <p>
+                The main idea is pretty straightforward. In code, the individual symbols take various forms.
+                A symbol might be a function name, or a variable name. Or it might appear in a string or a comment. What if you could 
+                search your codebase with that context as a filter? So instead of "grep user", you could do "grep user --include function"?
+                Or, "grep user --exclude comment"? That's what qi lets you do.
+            </p>            
+        </article>        
+    </div>
+
+<p id="status" class="status">Loading...</p>
+<div class="project-bar">
+  <div class="project-bar-left">
+    <label for="project-select">Project</label>
+    <select id="project-select" hidden></select>
+    <span id="load-status">Loading…</span>
+  </div>
+  <div class="project-bar-right">
+    <span class="download-wrap">Download <a id="project-download" hidden></a><span id="download-size"></span></span>
+  </div>
+</div>
+<div id="summary" hidden></div>
+<div id="terminal-container" class="panel term"></div>
+<p id="error" hidden></p>
+
+</div>
+
+  <script src="./node_modules/xterm/lib/xterm.js"></script>
+  <script src="./node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
+  <!-- Cache-bust app.js (and, transitively, the worker it spawns) on every
+       load.  A static `src` can't carry a query string without rewriting this
+       file each build, so bootstrap with a dynamic import instead. -->
+  <script type="module">
+    import('./app.js?t=' + Date.now());
+  </script>
+</body>
+</html> 
