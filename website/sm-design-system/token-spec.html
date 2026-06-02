@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SourceMinder Design System — Token Spec</title>
+<link rel="stylesheet" href="colors_and_type.css" />
+<style>
+  * { box-sizing: border-box; }
+
+  .spec-root {
+    min-height: 100vh;
+  }
+
+  .spec-shell {
+    width: min(100%, var(--w-wide));
+    margin: 0 auto;
+  }
+
+  .spec-title {
+    max-width: 12ch;
+  }
+
+  .span-full {
+    grid-column: 1 / -1;
+  }
+
+  .spec-section {
+    margin-bottom: 24px;
+  }
+
+  .spec-section-head {
+    border-bottom: var(--border-hair);
+    margin-bottom: 24px;
+  }
+
+  .spec-head-note {
+    max-width: 44ch;
+  }
+
+  .spec-kicker {
+    color: var(--cyan-200);
+  }
+
+  .swatch {
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-bg-muted) 70%, transparent);
+  }
+
+  .swatch-chip {
+    height: 84px;
+    border-bottom: var(--border-hair);
+  }
+
+  .swatch-meta code {
+    width: fit-content;
+  }
+
+  .swatch-meta {
+    padding: 12px;
+  }
+
+  .type-row {
+    border-bottom: var(--border-hair);
+  }
+
+  .type-row:last-child {
+    border-bottom: 0;
+  }
+
+  .spacing-row {
+    align-items: center;
+  }
+
+  .spacing-bar {
+    height: 24px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(90deg, var(--cyan-400), var(--amber-400));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  .surface-card h3 {
+    margin-top: 12px;
+  }
+
+  .surface-card.surface-blueprint,
+  .surface-card.surface-vellum {
+    background-color: transparent;
+  }
+
+  .token-table td:first-child {
+    width: 24%;
+    color: var(--color-fg);
+  }
+
+  .token-table td:nth-child(2) {
+    width: 28%;
+  }
+
+  .paper-preview {
+    color: var(--color-fg);
+  }
+
+  .paper-preview-grid {
+    padding: 24px;
+  }
+
+  .paper-panel {
+    background: #faf4e8;
+    margin: 12px;
+    padding: 12px;
+  }
+
+  .display-specimen {
+    font: var(--t-display-weight) var(--t-display-size)/var(--t-display-lh) var(--t-display-family);
+    letter-spacing: var(--t-display-track);
+    line-height: 96px;
+  }
+
+  @media (max-width: 880px) {
+    [data-cols="spacing-row"],
+    [data-cols="paper-split"] {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="spec-root stack" data-space="0">
+    <div class="spec-shell stack" data-space="0">
+      <header class="spec-header stack" data-space="0">
+        <div class="eyebrow spec-kicker">SourceMinder Design System</div>
+        <h1 class="spec-title">Token Spec Preview</h1>
+        <p class="lead spec-lede measure">This first pass keeps the PluginTeam semantic token structure, but swaps in the Airlock Method palette, the full 4-pixel spacing scale, and the 24-pixel editorial rhythm that gave the landing page its coherence.</p>
+      </header>
+
+      <div class="spec-grid grid" data-cols="12" data-gap="0">
+        <section class="spec-section panel frame pad span-full stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+          <div class="spec-section-head split pad" data-gap="0" data-pad="0">
+            <div class="stack" data-space="0">
+              <div class="eyebrow">Core Palette</div>
+              <h2>Airlock Colors as System Tokens</h2>
+            </div>
+            <p class="caption spec-head-note">Raw hue families stay explicit so semantic roles can map cleanly across product, marketing, and documentation surfaces.</p>
+          </div>
+          <div class="spec-section-body pad" data-pad="0">
+            <div class="swatch-grid grid" data-cols="auto-180" data-gap="24">
+              <article class="swatch panel frame stack" data-space="0"><div class="swatch-chip" style="background:#050b14"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Ink 1</strong><code>--ink-1</code><span class="caption">#050b14</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#0a1322"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Ink 2</strong><code>--ink-2</code><span class="caption">#0a1322</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#0f1c30"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Ink 3</strong><code>--ink-3</code><span class="caption">#0f1c30</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#2b8eb2"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Cyan 500</strong><code>--cyan-500</code><span class="caption">Primary button bg</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#3fb8e5"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Cyan 400</strong><code>--cyan-400</code><span class="caption">Primary stroke and action</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#5bbde3"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Cyan 300</strong><code>--cyan-300</code><span class="caption">Hover and link emphasis</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#155f7c"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Cyan 700</strong><code>--cyan-700</code><span class="caption">Borders and secondary lines</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#e8a33d"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Amber 400</strong><code>--amber-400</code><span class="caption">Highlight and warm callout</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#4fad67"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Pass 400</strong><code>--pass-400</code><span class="caption">Darker green base</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#2e6f42"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Pass 700</strong><code>--pass-700</code><span class="caption">Primary success signal</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#b24452"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Fail 400</strong><code>--fail-400</code><span class="caption">Darker red base</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#74232e"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Fail 700</strong><code>--fail-700</code><span class="caption">Primary danger signal</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:var(--paper-1)"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Paper 1</strong><code>--paper-1</code><span class="caption">Light mode page</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:var(--paper-2)"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Paper 2</strong><code>--paper-2</code><span class="caption">Canonical paper surface</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:var(--paper-3)"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Paper 3</strong><code>--paper-3</code><span class="caption">Higher-contrast paper surface</span></div></article>
+              <article class="swatch frame stack" data-space="0"><div class="swatch-chip" style="background:#182032"></div><div class="swatch-meta stack pad" data-space="0" data-pad="0"><strong>Paper Ink</strong><code>--paper-ink</code><span class="caption">Text on vellum surfaces</span></div></article>
+            </div>
+          </div>
+        </section>
+
+        <section class="spec-section panel frame pad span-full stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+          <div class="spec-section-head split pad" data-gap="0" data-pad="0">
+            <div class="stack" data-space="0">
+              <div class="eyebrow">Semantic Mapping</div>
+              <h2>Product Roles</h2>
+            </div>
+            <p class="caption spec-head-note">The semantic layer is still the contract. Brand hues can evolve later without rewriting component intent.</p>
+          </div>
+          <div class="spec-section-body grid pad" data-cols="auto-240" data-gap="0" data-pad="0">
+            <article class="semantic-card card frame stack pad" data-space="0" data-pad="0" style="background:var(--color-surface)">
+              <h3>Surface + Type</h3>
+              <p><code>--color-bg</code>, <code>--color-surface</code>, <code>--color-fg</code>, and <code>--color-fg-2</code> now resolve to dark blueprint defaults.</p>
+            </article>
+            <article class="semantic-card card frame stack pad" data-space="0" data-pad="0" style="background:var(--color-info-bg)">
+              <h3 style="color:var(--color-info)">Info / Primary</h3>
+              <p><code>--color-primary</code> and <code>--color-info</code> both map to Airlock cyan for consistent action and product emphasis.</p>
+            </article>
+            <article class="semantic-card card frame stack pad" data-space="0" data-pad="0" style="background:var(--color-warning-bg)">
+              <h3 style="color:var(--color-warning)">Warning / Highlight</h3>
+              <p><code>--color-warning</code> and <code>--color-highlight</code> inherit Airlock amber rather than a separate marketing amber family.</p>
+            </article>
+            <article class="semantic-card card frame stack pad" data-space="0" data-pad="0" style="background:var(--color-success-bg)">
+              <h3 style="color:var(--color-success)">Success</h3>
+              <p><code>--color-success</code> now points at <code>--pass-700</code>, with <code>--pass-400</code> available as the lighter companion shade.</p>
+            </article>
+            <article class="semantic-card card frame stack pad" data-space="0" data-pad="0" style="background:var(--color-danger-bg)">
+              <h3 style="color:var(--color-danger)">Danger</h3>
+              <p><code>--color-danger</code> now points at <code>--fail-700</code>, with <code>--fail-400</code> available for the lighter companion red.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="spec-section panel frame pad span-full stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+          <div class="spec-section-head split pad" data-gap="0" data-pad="0">
+            <div class="stack" data-space="0">
+              <div class="eyebrow">Type System</div>
+              <h2>Geist with Airlock Rhythm</h2>
+            </div>
+            <p class="caption spec-head-note">PluginTeam’s Geist foundation stays, but the editorial rhythm now anchors at a 16/24 minimum, with 24/36 and 36/48 carrying the hierarchy upward.</p>
+          </div>
+          <div class="spec-section-body pad" data-pad="0">
+            <div class="type-stack stack" data-space="0">
+              <div class="type-row stack" data-space="0">
+                <div class="eyebrow">Display</div>
+                <div class="type-meta cluster" data-gap="0"><code>60/72</code><span class="caption">Display signal</span></div>
+                <div class="display-specimen">Signal, scale, coherence.</div>
+              </div>
+              <div class="type-row stack" data-space="0">
+                <div class="eyebrow">H1</div>
+                <div class="type-meta cluster" data-gap="0"><code>36/48</code><span class="caption">Primary headline</span></div>
+                <div class="h1">The system should feel designed, not accumulated.</div>
+              </div>
+              <div class="type-row stack" data-space="0">
+                <div class="eyebrow">H2</div>
+                <div class="type-meta cluster" data-gap="0"><code>24/36</code><span class="caption">Section headline</span></div>
+                <div class="h2">Section structure uses the calmer Airlock ladder.</div>
+              </div>
+              <div class="type-row stack" data-space="0">
+                <div class="eyebrow">H3</div>
+                <div class="type-meta cluster" data-gap="0"><code>16/24</code><span class="caption">Key subheads</span></div>
+                <div class="h3">Framed surfaces, stats, and callouts.</div>
+              </div>
+              <div class="type-row stack" data-space="0">
+                <div class="eyebrow">Body</div>
+                <div class="type-meta cluster" data-gap="0"><code>16/24</code><span class="caption">Default prose rhythm</span></div>
+                <p>Body copy defaults to a stricter editorial baseline, because the 24-pixel cadence is one of the strongest organizing traits in the Airlock page.</p>
+              </div>
+              <div class="type-row stack" data-space="0">
+                <div class="eyebrow">Label</div>
+                <div class="type-meta cluster" data-gap="0"><code>16/24 mono</code><span class="caption">Uppercase UI chrome</span></div>
+                <div class="label">Phase 01</div>
+              </div>
+              <div class="type-row stack" data-space="0">
+                <div class="eyebrow">Micro Label</div>
+                <div class="type-meta cluster" data-gap="0"><code>16/24 mono</code><span class="caption">High-tracking metadata</span></div>
+                <div class="micro-label">Navigation</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="spec-section panel frame pad span-full stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+          <div class="spec-section-head split pad" data-gap="0" data-pad="0">
+            <div class="stack" data-space="0">
+              <div class="eyebrow">Spacing</div>
+              <h2>Full Airlock Scale</h2>
+            </div>
+            <p class="caption spec-head-note">The PluginTeam scale was curated; this version restores the full Airlock spacing ladder so layout can breathe in 24-pixel units without inventing one-off gaps.</p>
+          </div>
+          <div class="spec-section-body pad" data-pad="0">
+            <div class="spacing-stack stack" data-space="0">
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-1</code><div class="spacing-bar" style="width:4px"></div><span class="caption">4px</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-2</code><div class="spacing-bar" style="width:8px"></div><span class="caption">8px</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-3</code><div class="spacing-bar" style="width:12px"></div><span class="caption">12px</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-4</code><div class="spacing-bar" style="width:16px"></div><span class="caption">16px</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-5</code><div class="spacing-bar" style="width:20px"></div><span class="caption">20px</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-6</code><div class="spacing-bar" style="width:24px"></div><span class="caption">24px base rhythm</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-8</code><div class="spacing-bar" style="width:32px"></div><span class="caption">32px</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-10</code><div class="spacing-bar" style="width:40px"></div><span class="caption">40px</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-12</code><div class="spacing-bar" style="width:48px"></div><span class="caption">48px section inset</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-16</code><div class="spacing-bar" style="width:64px"></div><span class="caption">64px</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-20</code><div class="spacing-bar" style="width:80px"></div><span class="caption">80px section spacing</span></div>
+              <div class="spacing-row grid" data-cols="spacing-row" data-gap="0"><code>--sp-24</code><div class="spacing-bar" style="width:96px"></div><span class="caption">96px large separation</span></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="spec-section frame pad span-full stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+          <div class="spec-section-head split pad" data-gap="0" data-pad="0">
+            <div class="stack" data-space="0">
+              <div class="eyebrow">Surfaces</div>
+              <h2>Blueprint and Vellum</h2>
+            </div>
+            <p class="caption spec-head-note">Dark blueprint stays canonical, but the paper mode remains first-class for docs, print, and long-form reading.</p>
+          </div>
+          <div class="spec-section-body stack pad" data-space="0" data-pad="0">
+            <div class="surface-grid grid" data-cols="auto-240" data-gap="24">
+              <article class="surface-card card surface-blueprint frame stack pad" data-space="0" data-pad="0">
+                <div class="eyebrow">Canonical Mode</div>
+                <h3>Blueprint Surface</h3>
+                <p>Uses 24px minor grid and 120px major grid to align visual tone with the Airlock layout language.</p>
+              </article>
+              <article class="surface-card card surface-vellum frame stack pad" data-mode="paper" data-space="0" data-pad="0">
+                <div class="eyebrow">Paper Mode</div>
+                <h3>Vellum Surface</h3>
+                <p>Uses paper neutrals plus dotted drafting texture instead of the dark blueprint grid.</p>
+              </article>
+            </div>
+
+            <div class="paper-preview surface-vellum panel frame stack pad" data-mode="paper" data-space="0" data-pad="0" data-radius="lg">
+              <div class="paper-preview-grid grid" data-cols="paper-split" data-gap="0">
+                <div class="stack" data-space="0">
+                  <div class="eyebrow">Light Theme</div>
+                  <h3>Paper mode inherits the same semantic contract.</h3>
+                  <p class="lead">Component code should not need separate “marketing” and “document” color names. It should switch by mode.</p>
+                </div>
+                <div class="paper-panel frame stack pad" data-frame="strong" data-radius="lg" data-space="0" data-pad="0">
+                  <div class="micro-label">Example Surface</div>
+                  <p class="lead">Primary actions shift from cyan to blueprint blue, while warning shifts to warm ochre.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="spec-section panel frame pad span-full stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+          <div class="spec-section-head split pad" data-gap="0" data-pad="0">
+            <div class="stack" data-space="0">
+              <div class="eyebrow">Reference</div>
+              <h2>Key Token Decisions</h2>
+            </div>
+            <p class="caption spec-head-note">This is the contract to build components against before the component gallery starts.</p>
+          </div>
+          <div class="spec-section-body stack pad" data-space="0" data-pad="0">
+            <table class="token-table table table-dark-head">
+              <thead>
+                <tr>
+                  <th>Area</th>
+                  <th>Decision</th>
+                  <th>Why</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Color system</td>
+                  <td><code>PluginTeam semantics + Airlock hues</code></td>
+                  <td>Keeps component APIs stable while shifting the visual language toward the stronger blueprint palette.</td>
+                </tr>
+                <tr>
+                  <td>Spacing</td>
+                  <td><code>Airlock full scale through --sp-24</code></td>
+                  <td>Restores the 24px rhythm and removes the need for improvised spacing values.</td>
+                </tr>
+                <tr>
+                  <td>Typography</td>
+                  <td><code>Geist + Geist Mono</code></td>
+                  <td>Preserves the best existing font foundation while dropping the more stylistically divergent families from SourceMinder.</td>
+                </tr>
+                <tr>
+                  <td>Labels</td>
+                  <td><code>16/24 mono uppercase</code></td>
+                  <td>This is one of the clearest Airlock signatures and should become shared interface chrome.</td>
+                </tr>
+                <tr>
+                  <td>Modes</td>
+                  <td><code>default dark + data-mode="paper"</code></td>
+                  <td>Both modes are tokenized, so future components can adapt without duplicate style sheets.</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="caption spec-note">Next file: <code>component-gallery.html</code> can now validate buttons, nav, cards, terminal surfaces, and section scaffolds against these tokens.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SourceMinder Design System — Component Gallery</title>
+<link rel="stylesheet" href="colors_and_type.css" />
+<style>
+  * { box-sizing: border-box; }
+
+  .gallery-shell {
+    width: min(100%, var(--w-wide));
+    margin: 0 auto;
+  }
+
+  .gallery-title {
+    max-width: 14ch;
+  }
+
+  .gallery-kicker {
+    color: var(--cyan-200);
+  }
+
+  .gallery-kicker-dark {
+    color: var(--cyan-300);
+  }
+
+  .gallery-section {
+    margin-bottom: 24px;
+  }
+
+  .gallery-head {
+    border-bottom: var(--border-hair);
+    margin-bottom: 24px;
+  }
+
+  .gallery-note {
+    max-width: 44ch;
+    color: var(--color-fg-4);
+  }
+
+  .gallery-card {
+    min-height: 0;
+  }
+
+  .gallery-card p:last-child,
+  .gallery-callout p:last-child,
+  .gallery-table-wrap p:last-child {
+    margin-bottom: 0;
+  }
+
+  .gallery-button-row {
+    margin-bottom: 24px;
+  }
+
+  .gallery-button-note {
+    color: var(--color-fg-4);
+  }
+
+  .gallery-button-panel-dark {
+    background: var(--ink-2);
+  }
+
+  .gallery-link-list a {
+    margin-bottom: 12px;
+  }
+
+  .gallery-callout {
+    background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  }
+
+  .gallery-table-wrap {
+    background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  }
+
+  .gallery-stat {
+    color: var(--cyan-400);
+  }
+
+  @media (max-width: 880px) {
+    [data-cols="gallery-links"],
+    [data-cols="gallery-callout"] {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <main class="gallery-shell stack" data-space="0">
+    <header class="stack" data-space="0">
+      <div class="eyebrow gallery-kicker">SourceMinder Design System</div>
+      <h1 class="gallery-title">Component Gallery</h1>
+      <p class="lead measure">This page starts locking the shared interaction and content patterns into reusable components. The first pass covers buttons, cards, links, and tables using the same blueprint and vellum language established in the token spec.</p>
+    </header>
+
+    <section class="gallery-section panel frame pad stack on-light" data-frame="strong" data-radius="lg" data-pad="24" data-space="0" style="background: var(--paper-1);">
+      <div class="gallery-head split" data-gap="0">
+        <div class="stack" data-space="0">
+          <div class="eyebrow">Buttons</div>
+          <h2>Light BG Buttons</h2>
+        </div>
+        <p class="caption gallery-note">Buttons should read as blueprint controls first: mono labels, strong borders, and a clear hierarchy between filled and framed actions.</p>
+      </div>
+
+      <div class="gallery-button-row cluster" data-gap="24">
+        <span class="btn-wrap btn-wrap--primary"><button class="btn primary">See our work &nbsp;-></button></span>
+        <span class="btn-wrap btn-wrap--secondary"><button class="btn secondary">Book a call</button></span>
+        <button class="btn ghost btn-plane-flat">Learn more</button>
+        <span class="btn-wrap btn-wrap--danger"><button class="btn danger">Delete project</button></span>
+      </div>
+
+      <div class="gallery-button-row cluster" data-gap="24">
+        <span class="btn-wrap btn-wrap--pixel"><button class="btn pixel">Start a project &nbsp;-></button></span>
+        <span class="caption gallery-button-note">stationary shadow - larger offset, ink color</span>
+      </div>
+
+      <div class="gallery-button-row cluster" data-gap="24">
+        <span class="btn-wrap btn-wrap--primary"><button class="btn primary sm">Save</button></span>
+        <span class="btn-wrap btn-wrap--secondary"><button class="btn secondary sm">Cancel</button></span>
+        <button class="btn ghost btn-plane-flat sm">+ Add row</button>
+      </div>
+
+      <div class="grid" data-cols="auto-240" data-gap="24">
+        <article class="gallery-card card panel frame stack" data-space="0" data-frame="strong" data-radius="lg">
+          <div class="eyebrow on-dark">Primary</div>
+          <h3>Offset-shadow control</h3>
+          <p>Every button now shares the same settling motion: 2px offset at rest, 1px on hover, zero on active. That keeps the family coherent across variants.</p>
+        </article>
+        <article class="gallery-card card panel frame stack" data-space="0" data-frame="strong" data-radius="lg">
+          <div class="eyebrow on-dark">Variants</div>
+          <h3>Clear hierarchy</h3>
+          <p>Primary uses cyan, secondary uses vellum, ghost stays quiet, danger shifts to breach red, and the pixel CTA gets the larger signature offset.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="gallery-section panel frame pad stack on-dark gallery-button-panel-dark" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+      <div class="gallery-head split" data-gap="0">
+        <div class="stack" data-space="0">
+          <div class="eyebrow gallery-kicker-dark">Buttons</div>
+          <h2>Dark BG Buttons</h2>
+        </div>
+        <p class="caption gallery-note">The same button system should hold together on dark blueprint surfaces without changing markup, only surface context.</p>
+      </div>
+
+      <div class="gallery-button-row cluster" data-gap="24">
+        <span class="btn-wrap btn-wrap--primary"><button class="btn primary">See our work -></button></span>
+        <span class="btn-wrap btn-wrap--secondary"><button class="btn secondary">Book a call</button></span>
+        <button class="btn ghost btn-plane-flat on-dark">Learn more</button>
+        <span class="btn-wrap btn-wrap--danger"><button class="btn danger">Delete project</button></span>
+      </div>
+
+      <div class="gallery-button-row cluster" data-gap="24">
+        <span class="btn-wrap btn-wrap--pixel"><button class="btn pixel">Start a project -></button></span>
+        <span class="caption gallery-button-note">Ghost now shifts through <code>.on-dark</code> to the dark-surface cyan treatment.</span>
+      </div>
+    </section>
+
+    <section class="gallery-section panel frame pad stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+      <div class="gallery-head split" data-gap="0">
+        <div class="stack" data-space="0">
+          <div class="eyebrow gallery-kicker-dark">Cards</div>
+          <h2>Framed Content Blocks</h2>
+        </div>
+        <p class="caption gallery-note">Cards should feel drafted rather than plush: hard edges, explicit frame lines, and enough padding to let the type breathe on the grid.</p>
+      </div>
+
+      <div class="grid" data-cols="auto-240" data-gap="24">
+        <article class="gallery-card card panel frame stack" data-space="0" data-frame="strong" data-radius="lg">
+          <div class="eyebrow gallery-kicker-dark">Signal</div>
+          <h3>System card</h3>
+          <p>Base dark card for docs, product callouts, and marketing comparison blocks.</p>
+          <p class="caption">24px inset, 12px heading rhythm, shared panel surface.</p>
+        </article>
+        <article class="gallery-card card surface-vellum frame stack" data-mode="paper" data-space="0" data-frame="strong" data-radius="lg">
+          <div class="eyebrow">Paper</div>
+          <h3 class="on-dark">Vellum card</h3>
+          <p>Light-mode counterpart for long-form content, docs, and printable explanations.</p>
+          <p class="caption">Same framing language, softer substrate.</p>
+        </article>
+        <article class="gallery-card card panel frame stack" data-space="0" data-frame="strong" data-radius="lg">
+          <div class="eyebrow gallery-kicker-dark">Metric</div>
+          <div class="display-num gallery-stat">24</div>
+          <p>Use display numerics sparingly for counts, checkpoints, or release markers.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="gallery-section panel frame pad stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+      <div class="gallery-head split" data-gap="0">
+        <div class="stack" data-space="0">
+          <div class="eyebrow">Links</div>
+          <h2>Navigational Language</h2>
+        </div>
+        <p class="caption gallery-note">Links should stay precise and understated. The accent color is meaningful, so link styling should never feel ornamental.</p>
+      </div>
+
+      <div class="grid" data-cols="gallery-links" data-gap="24" style="grid-template-columns: 1fr 1fr;">
+        <div class="stack gallery-link-list" data-space="0">
+          <a href="#0">Default inline link</a>
+          <a class="link-quiet" href="#0">Quiet mono link</a>
+          <a href="#0"><code>docs/spec.md</code></a>
+        </div>
+        <div class="gallery-callout card panel frame stack" data-space="0" data-frame="strong" data-radius="lg">
+          <div class="eyebrow">Usage</div>
+          <h3>Choose the quieter link when the surrounding layout is already loud.</h3>
+          <p>Default links are better inside prose. Mono quiet links work better in metadata rows, sidebars, and terminal-adjacent UI.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="gallery-section panel frame pad stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
+      <div class="gallery-head split" data-gap="0">
+        <div class="stack" data-space="0">
+          <div class="eyebrow">Tables</div>
+          <h2>Reference Tables</h2>
+        </div>
+        <p class="caption gallery-note">The dark head treatment is now a shared system pattern: `--ink-1` background with `--cyan-400` foreground for technical headers and reference surfaces.</p>
+      </div>
+
+      <div class="gallery-table-wrap frame pad" data-frame="strong" data-radius="lg" data-pad="24">
+        <table class="table table-dark-head">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Rule</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Button</td>
+              <td><code>12px 24px</code> inset</td>
+              <td>Keeps controls aligned to the 12px rhythm while preserving a confident click target.</td>
+            </tr>
+            <tr>
+              <td>Card</td>
+              <td><code>24px</code> interior padding</td>
+              <td>Enough breathing room for dense content without softening the drafted structure.</td>
+            </tr>
+            <tr>
+              <td>Table head</td>
+              <td><code>--ink-1</code> + <code>--cyan-400</code></td>
+              <td>Creates a reusable technical-header pattern that reads cleanly in dark mode.</td>
+            </tr>
+            <tr>
+              <td>Link</td>
+              <td>Accent only where needed</td>
+              <td>Preserves semantic color meaning across marketing, docs, and product UI.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="caption">This table style is now shared through `colors_and_type.css`, not defined only in the gallery page.</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

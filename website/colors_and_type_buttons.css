@@ -1,0 +1,369 @@
+/* ============================================================
+   PluginTeam Design System — Colors & Type
+   ============================================================
+   Two parallel palettes:
+     1. Logo colors  — bright, as-is, used ONLY inside the
+        pixel logo marks. Do not use for UI.
+     2. UI colors    — muted, slightly darker / desaturated
+        cousins of the logo colors. These are what
+        components, links, marketing pages, etc should use.
+   Each UI color maps to a semantic role. Color is never
+   decoration — it is always meaning.
+============================================================ */
+
+/* Self-hosted brand fonts.
+   Amarna       — display headlines (with true italic).
+   ScienceGothic— body / UI sans (variable: weight, width, slant, contrast).
+   Fira Code    — mono (labels, code, numerics). */
+@font-face {
+  font-family: "Amarna";
+  src: url("fonts/Amarna-VariableFont_wght.ttf") format("truetype-variations"),
+       url("fonts/Amarna-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Amarna";
+  src: url("fonts/Amarna-Italic-VariableFont_wght.ttf") format("truetype-variations"),
+       url("fonts/Amarna-Italic-VariableFont_wght.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Commissioner";
+  src: url("fonts/Commissioner-VariableFont.ttf") format("truetype-variations"),
+       url("fonts/Commissioner-VariableFont.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: oblique -10deg 10deg;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Share Tech";
+  src: url("fonts/ShareTech-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Science Gothic";
+  src: url("fonts/ScienceGothic-VariableFont.ttf") format("truetype-variations"),
+       url("fonts/ScienceGothic-VariableFont.ttf") format("truetype");
+  font-weight: 100 900;
+  font-stretch: 25% 200%;
+  font-style: oblique -15deg 15deg;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fira Code";
+  src: url("fonts/FiraCode-VariableFont_wght.ttf") format("truetype-variations"),
+       url("fonts/FiraCode-VariableFont_wght.ttf") format("truetype");
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ---------- Logo palette (bright — do NOT use for UI) ---------- */
+  --pt-logo-red:    #e8031c;
+  --pt-logo-pink:   #fc0076;
+  --pt-logo-orange: #ff9d00;
+  --pt-logo-amber:  #ffb300;
+  --pt-logo-yellow: #ffdb00;
+  --pt-logo-green:  #00b131;
+  --pt-logo-blue:   #0056ff;
+  --pt-logo-indigo: #001bd2;
+  --pt-logo-purple: #8f00b0;
+
+  /* ---------- UI palette (muted — USE for all components) ----------
+     Each UI hue sits about 12–22% darker and 18–28% less saturated
+     than its logo cousin. They still rhyme with the logo but don't
+     fight text or compete with the pixel mark. */
+  --pt-red:      #b03e4b;  /* error, destructive — dialed toward gray */
+  --pt-red-lo:   #8a2f3a;  /* pressed */
+  --pt-pink:     #a64878;  /* rare accent */
+  --pt-orange:   #b8762a;  /* warning */
+  --pt-amber:    #a67a2e;  /* warm accent, charts */
+  --pt-yellow:   #bfa13a;  /* rare accent */
+  --pt-green:    #447a54;  /* success */
+  --pt-green-lo: #345f40;  /* success pressed */
+  --pt-green-hi: #5a9068;  /* success hover */
+  --pt-blue:     #4665b8;  /* primary, links */
+  --pt-blue-hi:  #5a79c9;  /* link hover, focus ring */
+  --pt-indigo:   #334694;  /* deep accent, pressed primary */
+  --pt-purple:   #6e4480;  /* rare accent */
+  --pt-purple-lo:#553565;  /* rare accent, pressed */
+
+  /* ---------- Soft surface tints (desaturated for backgrounds) ---------- */
+  --pt-yellow-soft: #fffbe6;   /* pale yellow background */
+  --pt-yellow-soft-2: #fff3b8; /* slightly warmer */
+  --pt-blue-soft:   #eaf0ff;   /* link backgrounds, selection */
+  --pt-blue-soft-2: #d6e2ff;
+  --pt-red-soft:    #ffe8ea;
+  --pt-green-soft:  #e4f7e9;
+  --pt-purple-soft: #f5e7f9;   /* very rare */
+
+  /* ---------- Neutrals ---------- */
+  --pt-ink:     #0a0a0b;   /* true black, used for page bg */
+  --pt-ink-2:   #111113;   /* card on black */
+  --pt-ink-3:   #1a1a1d;   /* elevated on black */
+  --pt-ink-4:   #26262a;   /* borders on black */
+
+  --pt-slate-1: #3a3a40;   /* low-contrast text on dark */
+  --pt-slate-2: #6c6c73;
+  --pt-slate-3: #9a9aa1;
+  --pt-slate-4: #c7c7cc;   /* divider */
+  --pt-slate-5: #e4e4e7;   /* soft border on light */
+  --pt-slate-6: #eeeef0;   /* page bg (light) */
+  --pt-slate-7: #f5f5f7;   /* subtle surface */
+  --pt-paper:   #ffffff;   /* card on light */
+
+  /* ---------- Semantic color tokens (use these in components) ---------- */
+  --color-bg:          var(--pt-paper);
+  --color-bg-subtle:   var(--pt-slate-7);
+  --color-bg-muted:    var(--pt-slate-6);
+  --color-surface:     var(--pt-paper);
+  --color-surface-hi:  var(--pt-paper);
+  --color-overlay:     rgba(10, 10, 11, 0.6);
+
+  --color-fg:          var(--pt-ink);      /* primary text */
+  --color-fg-2:        var(--pt-slate-1);  /* secondary text */
+  --color-fg-3:        var(--pt-slate-2);  /* tertiary / captions */
+  --color-fg-4:        var(--pt-slate-3);  /* placeholder / disabled */
+
+  --color-border:      var(--pt-slate-5);
+  --color-border-strong: var(--pt-slate-4);
+  --color-divider:     var(--pt-slate-5);
+
+  --color-link:        var(--pt-blue);
+  --color-link-hover:  var(--pt-blue-hi);
+  --color-link-visited:var(--pt-indigo);
+
+  --color-primary:     var(--pt-blue);
+  --color-primary-hover: var(--pt-blue-hi);
+  --color-primary-pressed: var(--pt-indigo);
+  --color-on-primary:  #ffffff;
+
+  --color-success:     var(--pt-green);
+  --color-success-bg:  var(--pt-green-soft);
+  --color-warning:     var(--pt-orange);
+  --color-warning-bg:  var(--pt-yellow-soft-2);
+  --color-danger:      var(--pt-red);
+  --color-danger-bg:   var(--pt-red-soft);
+  --color-info:        var(--pt-blue);
+  --color-info-bg:     var(--pt-blue-soft);
+
+  /* Selection uses blue-soft for readability */
+  --color-selection-bg: var(--pt-blue-soft-2);
+  --color-selection-fg: var(--pt-indigo);
+
+  /* Dark surface tokens (for the footer gradient + dark sections) */
+  --color-bg-dark:       var(--pt-ink);
+  --color-bg-dark-2:     var(--pt-ink-2);
+  --color-bg-dark-3:     var(--pt-ink-3);
+  --color-fg-dark:       #f4f4f5;
+  --color-fg-dark-2:     #c7c7cc;
+  --color-fg-dark-3:     #9a9aa1;
+  --color-border-dark:   var(--pt-ink-4);
+
+  /* Signature footer gradient: mid-gray (#666) at top → deep ink at bottom. */
+  --gradient-footer: linear-gradient(180deg, #666 0%, #3a3a3d 55%, var(--pt-ink) 100%);
+  /* Subtle banded version for hero backgrounds */
+  --gradient-hero-soft: linear-gradient(180deg, var(--pt-slate-7) 0%, var(--pt-slate-6) 100%);
+
+  /* ---------- Typography ---------- */
+  --font-sans: "Commissioner", ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-display: "Share Tech", "Commissioner", ui-sans-serif, system-ui, sans-serif;
+  --font-accent: "Amarna", ui-serif, Georgia, serif;
+
+  /* Type scale — modular scale 1.2 anchored at 16px */
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-20: 1.25rem;
+  --fs-24: 1.5rem;
+  --fs-28: 1.75rem;
+  --fs-32: 2rem;
+  --fs-40: 2.5rem;
+  --fs-48: 3rem;
+  --fs-56: 3.5rem;
+  --fs-64: 4rem;
+  --fs-72: 4.5rem;
+  --fs-88: 5.5rem;
+
+  --lh-tight:  1.05;
+  --lh-snug:   1.2;
+  --lh-normal: 1.4;
+  --lh-relaxed:1.55;
+
+  --tracking-tight: -0.02em;
+  --tracking-snug:  -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.04em;
+  --tracking-caps:   0.08em;
+
+  /* ---------- Spacing (4px grid) ---------- */
+  /* Curated scale — 4/32/96 dropped to force intentional choices. */
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;  /* base */
+  --sp-6:  24px;
+  --sp-12: 48px;
+  --sp-20: 80px;  /* section */
+
+  /* ---------- Radii ---------- */
+  /* Curated — 4 radii only. */
+  --radius-0:    0px;     /* pixel motif — hard corners */
+  --radius-sm:   6px;     /* inputs, buttons, small cards */
+  --radius-lg:   12px;    /* large cards, modals */
+  --radius-pill: 9999px;  /* pill */
+
+  /* ---------- Borders ---------- */
+  --border-hair: 1px solid var(--color-border);
+  --border-strong: 1px solid var(--color-border-strong);
+  --border-ink: 1px solid var(--pt-ink);
+
+  /* ---------- Shadows (used sparingly — we prefer hairlines) ---------- */
+  /* Curated — hairlines preferred; shadows used sparingly. */
+  --shadow-md: 0 4px 12px rgba(10,10,11,0.08), 0 1px 0 rgba(10,10,11,0.03); /* default card/hover */
+  --shadow-lg: 0 12px 32px rgba(10,10,11,0.10), 0 2px 0 rgba(10,10,11,0.04); /* modal, popover */
+  /* Signature pixel-offset shadow (flat, no blur) */
+  --shadow-pixel-sm: 2px 2px 0 0 var(--pt-ink);
+  --shadow-pixel-md: 4px 4px 0 0 var(--pt-ink); /* signature CTA */
+
+  /* Focus ring */
+  --focus-ring: 0 0 0 3px rgba(0, 86, 255, 0.28);
+
+  /* ---------- Motion ---------- */
+  --ease-out:   cubic-bezier(0.2, 0.6, 0.2, 1);
+  --ease-in-out:cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-step:  steps(4, end);           /* pixel-step easing for the motif */
+  --dur-1: 120ms;
+  --dur-2: 180ms;
+  --dur-3: 240ms;
+  --dur-4: 360ms;
+
+  /* ---------- Container widths ---------- */
+  --w-prose:   68ch;
+  --w-narrow:  720px;
+  --w-mid:     960px;
+  --w-wide:    1200px;
+  --w-max:     1440px;
+}
+
+/* ============================================================
+   Semantic element styles
+   Use these as defaults; components can override where needed.
+   ============================================================ */
+
+html { font-family: var(--font-sans); color: var(--color-fg); background: var(--color-bg); -webkit-text-size-adjust: 100%; }
+body { margin: 0; font-size: var(--fs-16); line-height: var(--lh-relaxed); font-feature-settings: "ss01", "cv11"; }
+
+::selection { background: var(--color-selection-bg); color: var(--color-selection-fg); }
+
+h1, .h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(var(--fs-40), 6vw, var(--fs-72));
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-fg);
+  margin: 0;
+}
+h2, .h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(var(--fs-28), 3.6vw, var(--fs-48));
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+}
+h3, .h3 {
+  font-weight: 600;
+  font-size: var(--fs-24);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--tracking-snug);
+  margin: 0;
+}
+h4, .h4 {
+  font-weight: 600;
+  font-size: var(--fs-20);
+  line-height: var(--lh-snug);
+  margin: 0;
+}
+h5, .h5 {
+  font-weight: 600;
+  font-size: var(--fs-16);
+  margin: 0;
+}
+
+p { margin: 0; line-height: var(--lh-relaxed); color: var(--color-fg); }
+p.lead {
+  font-size: var(--fs-20);
+  line-height: 1.45;
+  color: var(--color-fg-2);
+  letter-spacing: var(--tracking-snug);
+}
+small, .caption {
+  font-size: var(--fs-13);
+  color: var(--color-fg-3);
+  line-height: var(--lh-normal);
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--color-fg-3);
+}
+
+a {
+  color: var(--color-link);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color var(--dur-1) var(--ease-out);
+}
+a:hover { color: var(--color-link-hover); }
+a:focus-visible { outline: none; box-shadow: var(--focus-ring); border-radius: var(--radius-sm); }
+
+code, kbd, samp, pre, .mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  font-feature-settings: "ss02", "ss04";
+}
+code {
+  background: var(--pt-slate-7);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+pre {
+  background: var(--pt-ink);
+  color: var(--color-fg-dark);
+  padding: var(--sp-4);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  line-height: var(--lh-normal);
+}
+pre code { background: transparent; padding: 0; border: 0; color: inherit; }
+
+hr {
+  border: 0;
+  border-top: var(--border-hair);
+  margin: var(--sp-6) 0;
+}
+
+/* Display-size number / stat */
+.display-num {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(var(--fs-56), 9vw, var(--fs-88));
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  font-feature-settings: "tnum", "ss01";
+}
