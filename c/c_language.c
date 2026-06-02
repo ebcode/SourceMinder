@@ -449,7 +449,7 @@ static void handle_function_definition(TSNode node, const char *source_code, con
             char symbol[SYMBOL_MAX_LENGTH];
             char type_str[SYMBOL_MAX_LENGTH];
             char modifier_str[SYMBOL_MAX_LENGTH];
-            char location[128];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             safe_extract_node_text(source_code, func_name_node, symbol, sizeof(symbol), filename);
 
             /* Extract return type from function_definition node (same structure as declaration) */
@@ -620,7 +620,7 @@ static void handle_declaration(TSNode node, const char *source_code, const char 
                     char symbol[SYMBOL_MAX_LENGTH];
                     char type_str[SYMBOL_MAX_LENGTH];
                     char modifier_str[SYMBOL_MAX_LENGTH];
-                    char location[128];
+                    char location[SOURCE_LOCATION_MAX_LENGTH];
                     safe_extract_node_text(source_code, id_node, symbol, sizeof(symbol), filename);
 
                     /* Get the declarator node (identifier or pointer_declarator) for type extraction */
@@ -668,7 +668,7 @@ static void handle_declaration(TSNode node, const char *source_code, const char 
                 char symbol[SYMBOL_MAX_LENGTH];
                 char type_str[SYMBOL_MAX_LENGTH];
                 char modifier_str[SYMBOL_MAX_LENGTH];
-                char location[128];
+                char location[SOURCE_LOCATION_MAX_LENGTH];
                 safe_extract_node_text(source_code, id_node, symbol, sizeof(symbol), filename);
 
                 /* Extract type and modifier information */
@@ -700,7 +700,7 @@ static void handle_declaration(TSNode node, const char *source_code, const char 
                     char symbol[SYMBOL_MAX_LENGTH];
                     char type_str[SYMBOL_MAX_LENGTH];
                     char modifier_str[SYMBOL_MAX_LENGTH];
-                    char location[128];
+                    char location[SOURCE_LOCATION_MAX_LENGTH];
                     safe_extract_node_text(source_code, array_child, symbol, sizeof(symbol), filename);
 
                     /* Extract type and modifier information */
@@ -753,7 +753,7 @@ static void handle_struct_specifier(TSNode node, const char *source_code, const 
         if (child_sym == c_symbols.type_identifier) {
             /* Extract struct name */
             char symbol[SYMBOL_MAX_LENGTH];
-            char location[128];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             safe_extract_node_text(source_code, child, symbol, sizeof(symbol), filename);
 
             if (filter_should_index(filter, symbol)) {
@@ -893,7 +893,7 @@ static void handle_type_definition(TSNode node, const char *source_code, const c
         if (child_sym == c_symbols.type_identifier) {
             /* This is the typedef name */
             char symbol[SYMBOL_MAX_LENGTH];
-            char location[128];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             safe_extract_node_text(source_code, child, symbol, sizeof(symbol), filename);
 
             if (filter_should_index(filter, symbol)) {
@@ -924,7 +924,7 @@ static void handle_enum_specifier(TSNode node, const char *source_code, const ch
         if (child_sym == c_symbols.type_identifier) {
             /* Extract enum name */
             char symbol[SYMBOL_MAX_LENGTH];
-            char location[128];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             safe_extract_node_text(source_code, child, symbol, sizeof(symbol), filename);
 
             if (filter_should_index(filter, symbol)) {

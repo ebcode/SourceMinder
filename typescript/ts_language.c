@@ -1545,7 +1545,7 @@ static void handle_function_declaration(TSNode node, const char *source_code, co
     char symbol[SYMBOL_MAX_LENGTH];
     char modifier[256];
     char type_str[SYMBOL_MAX_LENGTH];
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
 
     /* Top-level functions can only be async (not static) */
     const char *function_modifiers[] = {"async", NULL};
@@ -1595,7 +1595,7 @@ static void handle_method_definition(TSNode node, const char *source_code, const
     char scope[SYMBOL_MAX_LENGTH];
     char modifier[256];
     char type_str[SYMBOL_MAX_LENGTH];
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
 
     if (g_debug) fprintf(stderr, "[DEBUG] handle_method_definition called at line %d\n", line);
 
@@ -1650,7 +1650,7 @@ static void handle_variable_declaration(TSNode node, const char *source_code, co
                                         int line) {
     char symbol[SYMBOL_MAX_LENGTH];
     char type_str[SYMBOL_MAX_LENGTH];
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     TSNode declarator = ts_node_child_by_field_name(node, "declarator", 10);
     if (ts_node_is_null(declarator)) {
         /* Try to find variable_declarator child */
@@ -2021,7 +2021,7 @@ static void handle_arrow_function(TSNode node, const char *source_code, const ch
     if (g_debug) fprintf(stderr, "[DEBUG] handle_arrow_function called at line %d in %s\n", line, filename);
 
     char modifier[256] = "";
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
 
     /* Check for async modifier */
     const char *arrow_modifiers[] = {"async", NULL};
@@ -2061,7 +2061,7 @@ static void handle_function_expression(TSNode node, const char *source_code, con
     if (g_debug) fprintf(stderr, "[DEBUG] handle_function_expression called at line %d in %s\n", line, filename);
 
     char modifier[256] = "";
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
 
     /* Check for async modifier */
     const char *func_expr_modifiers[] = {"async", NULL};

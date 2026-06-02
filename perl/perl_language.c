@@ -326,7 +326,7 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
             if (sib_sym == perl_symbols.func1op_call_expression) {
                 TSNode fn = ts_node_child_by_field_name(sibling, "function", 8);
                 if (!ts_node_is_null(fn)) {
-                    char fn_text[16];
+                    char fn_text[SYMBOL_MAX_LENGTH];
                     safe_extract_node_text(source_code, fn, fn_text, sizeof(fn_text), filename);
                     if (strcmp(fn_text, "shift") == 0) {
                         /* Check whether an explicit non-@_ array was passed */
@@ -364,7 +364,7 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
         !ts_node_is_null(parent) &&
         ts_node_symbol(parent) == perl_symbols.assignment_expression) {
         /* Find the array varname inside this declaration */
-        char export_varname[32] = {0};
+        char export_varname[SYMBOL_MAX_LENGTH] = {0};
         for (uint32_t i = 0; i < child_count; i++) {
             TSNode child = ts_node_child(node, i);
             if (ts_node_symbol(child) != perl_symbols.array) continue;
@@ -473,7 +473,7 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
                 for (uint32_t i = 0; i < gp_count; i++) {
                     TSNode fn = ts_node_child(gp, i);
                     if (ts_node_symbol(fn) != perl_symbols.function) continue;
-                    char fn_name[16];
+                    char fn_name[SYMBOL_MAX_LENGTH];
                     safe_extract_node_text(source_code, fn, fn_name, sizeof(fn_name), filename);
                     if (strcmp(fn_name, "open") == 0) decl_type_override = PERL_TYPE_FILEHANDLE;
                     break;
@@ -585,7 +585,7 @@ static void handle_subroutine_declaration(TSNode node, const char *source_code,
                                           const char *directory, const char *filename,
                                           ParseResult *result, SymbolFilter *filter,
                                           int line) {
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     uint32_t child_count = ts_node_child_count(node);
@@ -609,7 +609,7 @@ static void handle_anonymous_sub(TSNode node, const char *source_code,
                                  const char *directory, const char *filename,
                                  ParseResult *result, SymbolFilter *filter,
                                  int line) {
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     add_entry(result, "<lambda>", line, CONTEXT_LAMBDA,
@@ -630,7 +630,7 @@ static void handle_phaser_statement(TSNode node, const char *source_code,
 
     const char *phaser_name = ts_node_type(keyword);
 
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     add_entry(result, phaser_name, line, CONTEXT_FUNCTION,

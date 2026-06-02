@@ -105,25 +105,44 @@ int db_init(CodeIndexDatabase *db, const char *db_path) {
 #undef COLUMN
 #undef INT_COLUMN
         ");"
-        /* Infrastructure indexes (traditional) */
+        /* Drop any pre-existing BINARY-collated indexes before (re)creating them
+         * with NOCASE. CREATE INDEX IF NOT EXISTS will not update an existing
+         * index whose definition changed, so we must drop first. Safe no-ops on
+         * fresh databases. */
+        "DROP INDEX IF EXISTS idx_filename;"
+        "DROP INDEX IF EXISTS idx_parent_context;"
+#define COLUMN(name, ...) "DROP INDEX IF EXISTS idx_" #name ";"
+#define INT_COLUMN(name, ...) /* skip */
+#include "column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+
+        /* Infrastructure indexes */
         /* NOCASE collation lets case-insensitive `symbol LIKE ?` queries use
          * this index (exact + prefix patterns). With BINARY collation SQLite
          * cannot apply the LIKE optimization and falls back to a full scan. */
         "CREATE INDEX IF NOT EXISTS idx_symbol ON code_index(symbol COLLATE NOCASE);"
-        "CREATE INDEX IF NOT EXISTS idx_directory ON code_index(directory);"
-        "CREATE INDEX IF NOT EXISTS idx_filename ON code_index(filename);"
-        /* Composite indexes for common query patterns  -- these impact db size (+25%) and indexing time, but faster queries (+40%) */
+        "CREATE INDEX IF NOT EXISTS idx_filename ON code_index(filename COLLATE NOCASE);"
+        /* Composite indexes for common query patterns */
         "CREATE INDEX IF NOT EXISTS idx_context_definition ON code_index(context, is_definition);"
-        "CREATE INDEX IF NOT EXISTS idx_file_location ON code_index(directory, filename);"
-        "CREATE INDEX IF NOT EXISTS idx_parent_context ON code_index(parent_symbol, context);"
-        
-        
-        /* X-Macro: Indexes for extensible columns (excluding those in composite indexes) */
-#define COLUMN(name, ...) "CREATE INDEX IF NOT EXISTS idx_" #name " ON code_index(" #name ");"
+        /* Speeds up --and proximity checks: narrows to the line window after file lookup,
+         * avoiding a full per-file scan. SQLite prefers this over (dir,file,symbol,line)
+         * because LIKE is also a range and only one range column is used per index.
+         * Subsumes idx_file_location and idx_directory (directory is leftmost column). */
+        "CREATE INDEX IF NOT EXISTS idx_file_line ON code_index(directory, filename, line);"
+        "CREATE INDEX IF NOT EXISTS idx_parent_context ON code_index(parent_symbol COLLATE NOCASE, context);"
+
+        /* X-Macro: per-column NOCASE indexes so LIKE queries (-p, -m, -s, etc.) use them */
+#define COLUMN(name, ...) "CREATE INDEX IF NOT EXISTS idx_" #name " ON code_index(" #name " COLLATE NOCASE);"
 #define INT_COLUMN(name, ...) /* Skip is_definition - it's in composite index */
 #include "column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+        /* parent_symbol is the leftmost column of idx_parent_context — individual index redundant. */
+        "DROP INDEX IF EXISTS idx_parent_symbol;"
+        /* Clean up indexes removed during consolidation (safe no-ops on new DBs). */
+        "DROP INDEX IF EXISTS idx_file_location;"
+        "DROP INDEX IF EXISTS idx_directory;"
         ;
 
     char *err_msg = NULL;

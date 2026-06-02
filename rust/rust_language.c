@@ -314,7 +314,7 @@ static void handle_function_item(TSNode node, const char *source_code,
         safe_extract_node_text(source_code, ret_node, return_type, sizeof(return_type), filename);
     }
 
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     if (fn_name[0] && filter_should_index(filter, fn_name)) {
@@ -400,7 +400,7 @@ static void handle_struct_item(TSNode node, const char *source_code,
     char attrs[SYMBOL_MAX_LENGTH];
     extract_attributes(node, source_code, attrs, sizeof(attrs), filename);
 
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     if (filter_should_index(filter, name)) {
@@ -466,7 +466,7 @@ static void handle_enum_item(TSNode node, const char *source_code,
     char attrs[SYMBOL_MAX_LENGTH];
     extract_attributes(node, source_code, attrs, sizeof(attrs), filename);
 
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     if (filter_should_index(filter, name)) {
@@ -532,7 +532,7 @@ static void handle_trait_item(TSNode node, const char *source_code,
     char attrs[SYMBOL_MAX_LENGTH];
     extract_attributes(node, source_code, attrs, sizeof(attrs), filename);
 
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     if (filter_should_index(filter, name)) {
@@ -574,7 +574,7 @@ static void handle_impl_item(TSNode node, const char *source_code,
     /* Record the impl block itself as a class-like definition so users can
      * locate "impl X" via qi. Symbol is the target type; clue holds the trait. */
     if (target[0] && filter_should_index(filter, target)) {
-        char location[128];
+        char location[SOURCE_LOCATION_MAX_LENGTH];
         format_source_location(node, location, sizeof(location));
         char clue[SYMBOL_MAX_LENGTH * 2];
         if (trait_name[0]) {
@@ -613,7 +613,7 @@ static void handle_mod_item(TSNode node, const char *source_code,
     char vis[SYMBOL_MAX_LENGTH];
     extract_visibility(node, source_code, vis, sizeof(vis), filename);
 
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     if (filter_should_index(filter, name)) {
@@ -861,7 +861,7 @@ static void handle_function_signature_item(TSNode node, const char *source_code,
         safe_extract_node_text(source_code, ret_node, return_type, sizeof(return_type), filename);
     }
 
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     char vis[SYMBOL_MAX_LENGTH];
@@ -912,7 +912,7 @@ static void handle_const_or_static(TSNode node, const char *source_code,
         safe_extract_node_text(source_code, type_node, type_str, sizeof(type_str), filename);
     }
 
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     if (filter_should_index(filter, name)) {
@@ -968,7 +968,7 @@ static void handle_macro_definition(TSNode node, const char *source_code,
     char name[SYMBOL_MAX_LENGTH];
     safe_extract_node_text(source_code, name_node, name, sizeof(name), filename);
 
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     if (filter_should_index(filter, name)) {
@@ -1084,7 +1084,7 @@ static void handle_call_expression(TSNode node, const char *source_code,
 static void handle_closure_expression(TSNode node, const char *source_code,
                                       const char *directory, const char *filename,
                                       ParseResult *result, SymbolFilter *filter, int line) {
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     add_entry(result, "<closure>", line, CONTEXT_LAMBDA,
