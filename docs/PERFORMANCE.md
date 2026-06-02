@@ -2,10 +2,12 @@
 
 ## Index Size & Performance
 
-**Typical sizes: Project: index.db size, time to index**
-- Small (100 files): ~10MB, ~2s
-- Med   (1K files): ~100MB, ~10s
-- Large (10K files): ~500MB, ~30s
+**Typical sizes (Project files): ~index.db size, time to index (on a relatively nice machine)**
+- Small (100 files): ~10 MB,   ~2s
+- Med   (1K files):  ~100 MB,  ~10s
+- Large (10K files): ~750 MB,  ~45s
+- Giant (30K files): ~7000 MB, ~500s  (tested on llvm-project)
+- Titan (TBD)
 
 **Optimization:**
 - Use `--silent` for large projects

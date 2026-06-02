@@ -106,7 +106,10 @@ int db_init(CodeIndexDatabase *db, const char *db_path) {
 #undef INT_COLUMN
         ");"
         /* Infrastructure indexes (traditional) */
-        "CREATE INDEX IF NOT EXISTS idx_symbol ON code_index(symbol);"
+        /* NOCASE collation lets case-insensitive `symbol LIKE ?` queries use
+         * this index (exact + prefix patterns). With BINARY collation SQLite
+         * cannot apply the LIKE optimization and falls back to a full scan. */
+        "CREATE INDEX IF NOT EXISTS idx_symbol ON code_index(symbol COLLATE NOCASE);"
         "CREATE INDEX IF NOT EXISTS idx_directory ON code_index(directory);"
         "CREATE INDEX IF NOT EXISTS idx_filename ON code_index(filename);"
         /* Composite indexes for common query patterns  -- these impact db size (+25%) and indexing time, but faster queries (+40%) */

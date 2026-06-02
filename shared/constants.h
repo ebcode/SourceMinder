@@ -55,6 +55,13 @@
 /* Buffer size for cleaned/processed word extraction from comments and strings */
 #define CLEANED_WORD_BUFFER 16384
 
+/* Maximum recursion depth when walking nested expression trees. Misparsed code
+ * (e.g. C++ template syntax read as chained comparison operators by the C
+ * grammar) can produce expression trees thousands of nodes deep, overflowing
+ * the stack. Real code rarely nests beyond a few hundred; this bounds the walk
+ * well below the point of stack exhaustion. */
+#define MAX_EXPRESSION_DEPTH 1000
+
 
 /* ============================================================================
  * Path & Filename Limits
@@ -168,8 +175,8 @@
  * Temporary buffers for reading, parsing, and processing text data.
  */
 
-/* Buffer for extracting text from comments and string literals */
-#define COMMENT_TEXT_BUFFER 32768
+/* Buffer for extracting text from comments and string literals -- handles test cases */
+#define COMMENT_TEXT_BUFFER 131072
 
 /* Buffer for constructing SQL queries */
 #define SQL_QUERY_BUFFER 4096
