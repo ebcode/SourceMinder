@@ -899,7 +899,7 @@ static void handle_function_declaration(TSNode node, const char *source_code, co
 
         if (func_name[0] && filter_should_index(filter, func_name)) {
             /* Extract source location for full function definition */
-            char location[128];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             format_source_location(node, location, sizeof(location));
 
             ExtColumns ext = {
@@ -1416,7 +1416,7 @@ static void handle_method_declaration(TSNode node, const char *source_code, cons
 
         if (method_name[0] && filter_should_index(filter, method_name)) {
             /* Extract source location for full method definition */
-            char location[128];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             format_source_location(node, location, sizeof(location));
 
             ExtColumns ext = {
@@ -1587,7 +1587,7 @@ static void handle_var_declaration(TSNode node, const char *source_code, const c
 
                 if (var_name[0] && filter_should_index(filter, var_name)) {
                     /* Extract source location for full variable declaration */
-                    char location[128];
+                    char location[SOURCE_LOCATION_MAX_LENGTH];
                     format_source_location(node, location, sizeof(location));
 
                     ExtColumns ext = {
@@ -1684,7 +1684,7 @@ static void handle_const_declaration(TSNode node, const char *source_code, const
                     }
 
                     /* Extract source location for full const declaration */
-                    char location[128];
+                    char location[SOURCE_LOCATION_MAX_LENGTH];
                     format_source_location(node, location, sizeof(location));
 
                     ExtColumns ext = {
@@ -1861,7 +1861,7 @@ static void handle_short_var_declaration(TSNode node, const char *source_code, c
 
         if (var_name[0] && filter_should_index(filter, var_name)) {
             /* Extract source location for full short variable declaration */
-            char location[128];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             format_source_location(node, location, sizeof(location));
 
             ExtColumns ext = {
@@ -2373,7 +2373,7 @@ static void handle_func_literal(TSNode node, const char *source_code, const char
     get_package(node, source_code, package_buf, sizeof(package_buf), filename);
 
     /* Extract source location (line range) for the full lambda expression */
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     /* Index the lambda expression itself */

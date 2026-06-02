@@ -639,7 +639,7 @@ static void handle_simple_declaration(TSNode node, const char *source_code, cons
                                        const char *filename, ParseResult *result, SymbolFilter *filter,
                                        int line, ContextType context) {
     char namespace_buf[SYMBOL_MAX_LENGTH];
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     get_namespace(node, source_code, namespace_buf, sizeof(namespace_buf), filename);
 
     uint32_t child_count = ts_node_child_count(node);
@@ -962,7 +962,7 @@ static void handle_method_declaration(TSNode node, const char *source_code, cons
 
     if (has_name && filter_should_index(filter, method_name)) {
         /* Extract source location for full method definition */
-        char location[128];
+        char location[SOURCE_LOCATION_MAX_LENGTH];
         format_source_location(node, location, sizeof(location));
 
         add_entry(result, method_name, line, CONTEXT_FUNCTION,
@@ -996,7 +996,7 @@ static void handle_function_definition(TSNode node, const char *source_code, con
         TSNode child = ts_node_child(node, i);
         if (strcmp(ts_node_type(child), "name") == 0) {
             char symbol[SYMBOL_MAX_LENGTH];
-            char location[128];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             safe_extract_node_text(source_code, child, symbol, sizeof(symbol), filename);
             if (filter_should_index(filter, symbol)) {
                 /* Extract source location for full function definition */
@@ -1073,7 +1073,7 @@ static void handle_property_declaration(TSNode node, const char *source_code, co
     char modifier[64];
     char parent_name[SYMBOL_MAX_LENGTH];
     char type_str[SYMBOL_MAX_LENGTH];
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     bool is_static = false;
 
     char namespace_buf[SYMBOL_MAX_LENGTH];
@@ -1132,7 +1132,7 @@ static void handle_const_declaration(TSNode node, const char *source_code, const
                                       int line) {
     char visibility[32] = "";
     char parent_name[SYMBOL_MAX_LENGTH] = "";
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
 
     char namespace_buf[SYMBOL_MAX_LENGTH];
     get_namespace(node, source_code, namespace_buf, sizeof(namespace_buf), filename);
@@ -1825,7 +1825,7 @@ static void handle_anonymous_function(TSNode node, const char *source_code, cons
     get_namespace(node, source_code, namespace_buf, sizeof(namespace_buf), filename);
 
     /* Extract source location (line range) for the full lambda expression */
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     if (g_debug) fprintf(stderr, "[DEBUG] anonymous_function: namespace=%s, location=%s\n", namespace_buf, location);
@@ -1857,7 +1857,7 @@ static void handle_arrow_function(TSNode node, const char *source_code, const ch
     get_namespace(node, source_code, namespace_buf, sizeof(namespace_buf), filename);
 
     /* Extract source location (line range) for the full arrow function */
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     if (g_debug) fprintf(stderr, "[DEBUG] arrow_function: namespace=%s, location=%s\n", namespace_buf, location);

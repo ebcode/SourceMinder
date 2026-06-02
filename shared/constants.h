@@ -80,19 +80,19 @@
 #define FILENAME_MAX_LENGTH 256
 
 /* Maximum length for source location strings (e.g., "10:5-12:20") */
-#define SOURCE_LOCATION_MAX_LENGTH 32
+#define SOURCE_LOCATION_MAX_LENGTH 128
 
 /* Maximum length for access modifiers (e.g., "protected", "private") */
-#define MODIFIER_MAX_LENGTH 16
+#define MODIFIER_MAX_LENGTH 32
 
 /* Maximum length for scope identifiers (e.g., "instance", "static") */
-#define SCOPE_MAX_LENGTH 16
+#define SCOPE_MAX_LENGTH 32
 
 /* Maximum length for clue/context hint strings */
 #define CLUE_MAX_LENGTH 64
 
 /* Maximum length for file extension strings (e.g., ".ts", ".tsx") */
-#define FILE_EXTENSION_MAX_LENGTH 16
+#define FILE_EXTENSION_MAX_LENGTH 32
 
 /* Configuration filename for all indexer tools (placed in $HOME directory) */
 #define CONFIG_FILENAME ".smconfig"

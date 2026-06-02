@@ -328,7 +328,7 @@ static void handle_function_definition(TSNode node, const char *source_code,
     }
 
     /* Extract source location for full function definition */
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     /* Add function to results */
@@ -370,7 +370,7 @@ static void handle_class_definition(TSNode node, const char *source_code,
     extract_decorators(node, source_code, decorators, sizeof(decorators), directory, filename, result, filter);
 
     /* Extract source location for full class definition */
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     /* Extract base class (parent) from argument_list if present */
@@ -436,7 +436,7 @@ static void handle_assignment(TSNode node, const char *source_code,
         }
 
         /* Extract source location for full assignment */
-        char location[128];
+        char location[SOURCE_LOCATION_MAX_LENGTH];
         format_source_location(node, location, sizeof(location));
 
         add_entry(result, var_name, line,
@@ -446,7 +446,7 @@ static void handle_assignment(TSNode node, const char *source_code,
     /* Handle tuple unpacking (a, b = 1, 2) */
     else if (strcmp(left_type, "pattern_list") == 0) {
         /* Extract source location for full assignment */
-        char location[128];
+        char location[SOURCE_LOCATION_MAX_LENGTH];
         format_source_location(node, location, sizeof(location));
 
         /* Extract each identifier from the pattern_list */
@@ -484,7 +484,7 @@ static void handle_assignment(TSNode node, const char *source_code,
             }
 
             /* Extract source location for full assignment */
-            char location[128];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             format_source_location(node, location, sizeof(location));
 
             add_entry(result, attr_name, line,
@@ -1147,7 +1147,7 @@ static void handle_lambda(TSNode node, const char *source_code,
                          ParseResult *result, SymbolFilter *filter,
                          int line) {
     /* Index the lambda expression itself */
-    char location[128];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
     add_entry(result, "<lambda>", line, CONTEXT_LAMBDA,
