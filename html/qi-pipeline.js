@@ -249,6 +249,11 @@ export async function runQuery(ctx, input, opts) {
             [buildResult, filesTsv, fileRows.length, totalFiles]);
     }
 
+    /* Help mode: no DB query; delegate entirely to qi_web_help() */
+    if (buildLines.MODE === 'help') {
+        return qiModule.ccall('qi_web_help', 'string', [], []);
+    }
+
     var sql = buildLines.SQL;
     log('[pipeline] SQL:', sql);
 

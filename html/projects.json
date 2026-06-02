@@ -9,15 +9,6 @@
     "sizeBytes": 716800
   },
   {
-    "id": "sourceminder",
-    "name": "SourceMinder",
-    "version": "2",
-    "language": "c",
-    "dbUrl": "./code-index-sourceminder.browser.db",
-    "sourceBase": "./sources/sourceminder/",
-    "sizeBytes": 18653184
-  },
-  {
     "id": "logrus",
     "name": "logrus",
     "version": "1",

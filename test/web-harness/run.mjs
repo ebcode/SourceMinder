@@ -67,6 +67,13 @@ function stripAnsi(s) {
  * that prove each export ran and wired up correctly. */
 var CASES = [
     {
+        /* --help and -h must return the help text without hitting the DB. */
+        name: '--help returns help text (qi_web_help)',
+        cmd: 'qi --help',
+        expect: ['Usage: qi PATTERN', 'Quick Start:', 'Display:', '--def'],
+        absent: ['Error:', '--db-file'],
+    },
+    {
         name: 'plain query (qi_web_build/qi_web_format)',
         cmd: 'qi qi_web_build -i func --limit 5',
         expect: ['qi_web_build', 'qi-web-entry'],
@@ -85,6 +92,13 @@ var CASES = [
         name: 'toc mode (qi_web_toc_format)',
         cmd: "qi '*' -f qi-web-entry.c --toc",
         expect: ['FUNCTIONS', 'IMPORTS', './qi-web-entry.c'],
+    },
+    {
+        /* --toc with no pattern must work: patterns are optional in TOC mode. */
+        name: 'toc mode, no pattern',
+        cmd: 'qi --toc -f negroni.go',
+        expect: ['negroni.go', 'FUNCTIONS'],
+        absent: ['Error:'],
     },
     {
         name: 'breakdown on truncation (qi_web_format_breakdown)',

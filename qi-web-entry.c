@@ -127,6 +127,7 @@ typedef struct {
     int error;
     char *error_msg;
     int error_msg_malloced;  /* 1 if error_msg was strdup'd and must be freed */
+    int help;   /* --help / -h: show help text */
     int oom;    /* set when any strdup fails during parsing */
     int toc_mode;
     int files_mode;      /* --files: show only unique file paths */
@@ -242,8 +243,8 @@ static WebCommand parse_command(const char *input) {
 
     /* The leading "qi" is mandatory: the command list mirrors a real qi
      * invocation, so the first token must name the program. */
-    if (strcmp(tokens[0], "qi") != 0) {
-        SET_CMD_ERROR(&cmd, "Commands must start with 'qi'. Example: qi malloc -f foo.c");
+    if (strcmp(tokens[0], "qi") != 0 && strcmp(tokens[0], "query-index") != 0) {
+        SET_CMD_ERROR(&cmd, "Commands must start with 'query-index', or 'qi'. Example: qi malloc -f foo.c");
         goto done;
     }
     int i = 1;
@@ -511,6 +512,11 @@ static WebCommand parse_command(const char *input) {
             i++; continue;
         }
 
+        if (strcmp(t, "--help") == 0 || strcmp(t, "-h") == 0) {
+            cmd.help = 1;
+            goto done;
+        }
+
         /* Unknown flag — report error instead of silently ignoring */
         {
             char errbuf[256];
@@ -622,6 +628,102 @@ static void emit_file_filter_count_sql(WebOutput *wo, ContextTypeList *include,
     free_sql_builder(&b);
 }
 
+/* Help text for the browser terminal -- mirrors native show_help_compact()
+ * (query-index.c) but uses wo_printf.  Database flags (--db-file) and the
+ * config-file note are omitted; they are irrelevant in the WASM context. */
+static void show_help_compact_web(WebOutput *wo) {
+    wo_printf(wo, "Usage: qi PATTERN [PATTERN...] [OPTIONS]\n");
+    wo_printf(wo, "Search indexed code symbols.\n");
+    wo_printf(wo, "Example: qi getUserById --def -e\n");
+    wo_printf(wo, "Note: qi searches identifiers and indexed symbol metadata, not arbitrary text.\n");
+    wo_printf(wo, "\n");
+
+    wo_printf(wo, "Quick Start:\n");
+    wo_printf(wo, "  qi user                       find symbol (exact match)\n");
+    wo_printf(wo, "  qi user%% -i func var          only functions/variables (starts with user)\n");
+    wo_printf(wo, "  qi '*user*' -x noise -C 3     skip comments/strings, show 3 lines of context (contains user)\n");
+    wo_printf(wo, "  qi getUserById --def -e       show full definition (LLMs: add --raw flag for Edit anchors)\n");
+    wo_printf(wo, "  qi %% -f query-index.c --toc   show file structure\n");
+    wo_printf(wo, "\n");
+
+    wo_printf(wo, "Match:\n");
+    wo_printf(wo, "  -i, --include-context TYPE...  only these contexts\n");
+    wo_printf(wo, "  -x, --exclude-context TYPE...  exclude these contexts\n");
+    wo_printf(wo, "  -x noise                       exclude comments and strings\n");
+    wo_printf(wo, "      --and [RANGE]              require all patterns on same/nearby lines\n");
+    wo_printf(wo, "\n");
+
+    wo_printf(wo, "Filter:\n");
+    wo_printf(wo, "  -f, --file PATTERN...          filter files: database.c, .py, shared/, shared/*.c\n");
+#define COLUMN(name, sql_type, c_type, width, full, compact_name, long_flag, short_flag, max_len, help_desc, help_example) \
+    { \
+        char flag_text[64]; \
+        snprintf(flag_text, sizeof(flag_text), "-%s, --%s PATTERN", #short_flag, #long_flag); \
+        wo_printf(wo, "  %-30s %s\n", flag_text, help_desc); \
+    }
+#define INT_COLUMN(name, sql_type, c_type, width, full, compact_name, long_flag, short_flag, help_desc, help_example) \
+    { \
+        char flag_text[64]; \
+        snprintf(flag_text, sizeof(flag_text), "-%s, --%s [0|1]", #short_flag, #long_flag); \
+        wo_printf(wo, "  %-30s %s\n", flag_text, help_desc); \
+    }
+#include "shared/column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+    wo_printf(wo, "      --def                      definitions only\n");
+    wo_printf(wo, "      --usage                    usages only\n");
+    wo_printf(wo, "      --lines LINE|START-END     filter line/range\n");
+    wo_printf(wo, "  -w, --within SYMBOL...         search inside definitions\n");
+    wo_printf(wo, "      --limit NUM                limit matches\n");
+    wo_printf(wo, "      --limit-per-file NUM       limit matches per file\n");
+    wo_printf(wo, "\n");
+
+    wo_printf(wo, "Display:\n");
+    wo_printf(wo, "  -e, --expand                   show full definitions\n");
+    wo_printf(wo, "  -C, --context NUM              lines before and after\n");
+    wo_printf(wo, "  -A, --after-context NUM        lines after\n");
+    wo_printf(wo, "  -B, --before-context NUM       lines before\n");
+    wo_printf(wo, "      --files                    list matching files only\n");
+    wo_printf(wo, "      --toc                      file table of contents; use with -f\n");
+    wo_printf(wo, "      --columns COL...           choose columns (supports aliases): line sym ctx");
+#define COLUMN(name, sql_type, c_type, width, full, compact_name, long_flag, short_flag, ...) \
+    { \
+        char lower[32]; \
+        to_lowercase_copy(#compact_name, lower, sizeof(lower)); \
+        wo_printf(wo, " %s", lower); \
+    }
+#define INT_COLUMN(name, sql_type, c_type, width, full, compact_name, long_flag, short_flag, ...) \
+    { \
+        char lower[32]; \
+        to_lowercase_copy(#compact_name, lower, sizeof(lower)); \
+        wo_printf(wo, " %s", lower); \
+    }
+#include "shared/column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+    wo_printf(wo, "\n");
+    wo_printf(wo, "  -v, --verbose                  all columns\n");
+    wo_printf(wo, "      --full                     full column names\n");
+    wo_printf(wo, "      --raw                      source only; useful with -e/-A/-B\n");
+    wo_printf(wo, "\n");
+
+    wo_printf(wo, "      --debug                    show SQL\n");
+    wo_printf(wo, "\n");
+
+    wo_printf(wo, "Types: func class macro var arg type prop call imp com str file; use --list-types for all.\n");
+    wo_printf(wo, "Patterns: exact by default; wildcards: * any, . one char. %% and _ also work.\n");
+    wo_printf(wo, "Escape leading flags: qi '\\--help'. Prefer prefix patterns like get* for speed.\n");
+    wo_printf(wo, "More examples: README.md, docs/C_GUIDE.md, docs/QI_VS_GREP.md\n");
+}
+
+EMSCRIPTEN_KEEPALIVE
+char *qi_web_help(void) {
+    WebOutput wo;
+    if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
+    show_help_compact_web(&wo);
+    { char *r = wo_steal(&wo); return r ? r : strdup("Error: out of memory."); }
+}
+
 /* =================================================================
  * Exported API 1: build SQL from command text
  * Returns: "PATTERNS|p1 p2\nSQL|...\nLIMIT|20\nERROR|OK"
@@ -649,8 +751,23 @@ char *qi_web_build(const char *command) {
         cmd.error = 0;
     }
 
+    /* Help mode needs no patterns -- override the same error. */
+    if (cmd.help && cmd.error && cmd.error_msg &&
+        strcmp(cmd.error_msg, "At least one search pattern is required.") == 0) {
+        if (cmd.error_msg_malloced) { free(cmd.error_msg); cmd.error_msg_malloced = 0; }
+        cmd.error_msg = NULL;
+        cmd.error = 0;
+    }
+
     if (cmd.error) {
         wo_printf(&wo, "ERROR|%s", cmd.error_msg);
+        free_command(&cmd);
+        { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
+    }
+
+    /* Help mode: signal the pipeline to call qi_web_help() -- no DB needed. */
+    if (cmd.help) {
+        wo_printf(&wo, "MODE|help\nERROR|OK");
         free_command(&cmd);
         { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
     }
