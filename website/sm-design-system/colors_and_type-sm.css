@@ -24,14 +24,6 @@
 
 @font-face {
   font-family: "Geist";
-  src: url("./fonts/Geist-SemiBold.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Geist";
   src: url("./fonts/Geist-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
@@ -69,6 +61,25 @@
   font-style: normal;
   font-display: swap;
 }
+
+
+@font-face {
+  font-family: "RecursiveMono";
+  src: url("./fonts/RecursiveMonoLnrSt-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "RecursiveMono";
+  src: url("./fonts/RecursiveMonoLnrSt-Bold.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 
 :root {
   /* ---------- Airlock palette ---------- */
@@ -755,8 +766,7 @@ box-shadow: var(--shadow-huge);
 
 html {
   font-family: var(--font-sans);
-  color: var(--color-fg);
-  background: var(--color-bg);
+  color: var(--color-fg);  
   -webkit-text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -768,13 +778,27 @@ body {
   padding: 24px;
   font-size: var(--fs-16);
   line-height: 24px;
-  background-color: var(--color-bg);
-  background-image: url("grid.png");
+  background-color: var(--paper-1);
+  color: var(--paper-ink);
+}
+
+/*
+body::before {
+  content: '';
+  background-image: url('grid.png');
+  opacity: 0.15;
   background-size: 120px 120px;
   background-position: 0 -24px;
   background-repeat: repeat;
   background-attachment: fixed;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
 }
+*/
 
 ::selection {
   background: var(--color-selection-bg);
@@ -836,8 +860,7 @@ h5,
 
 p {
   margin: 0 0 12px;
-  line-height: var(--t-body-lh);
-  color: var(--color-fg);
+  line-height: var(--t-body-lh);  
 }
 
 p.lead,

@@ -36,6 +36,7 @@
 
   .gallery-note {
     max-width: 44ch;
+    color: var(--color-fg-4);
   }
 
   .gallery-card {
@@ -53,7 +54,7 @@
   }
 
   .gallery-button-note {
-    color: var(--color-fg-3);
+    color: var(--color-fg-4);
   }
 
   .gallery-button-panel-dark {
@@ -102,14 +103,14 @@
       </div>
 
       <div class="gallery-button-row cluster" data-gap="24">
-        <span class="btn-wrap btn-wrap--primary"><button class="btn primary">See our work -></button></span>
+        <span class="btn-wrap btn-wrap--primary"><button class="btn primary">See our work &nbsp;-></button></span>
         <span class="btn-wrap btn-wrap--secondary"><button class="btn secondary">Book a call</button></span>
         <button class="btn ghost btn-plane-flat">Learn more</button>
         <span class="btn-wrap btn-wrap--danger"><button class="btn danger">Delete project</button></span>
       </div>
 
       <div class="gallery-button-row cluster" data-gap="24">
-        <span class="btn-wrap btn-wrap--pixel"><button class="btn pixel">Start a project -></button></span>
+        <span class="btn-wrap btn-wrap--pixel"><button class="btn pixel">Start a project &nbsp;-></button></span>
         <span class="caption gallery-button-note">stationary shadow - larger offset, ink color</span>
       </div>
 
@@ -145,7 +146,7 @@
       <div class="gallery-button-row cluster" data-gap="24">
         <span class="btn-wrap btn-wrap--primary"><button class="btn primary">See our work -></button></span>
         <span class="btn-wrap btn-wrap--secondary"><button class="btn secondary">Book a call</button></span>
-        <button class="btn ghost btn-plane-flat">Learn more</button>
+        <button class="btn ghost btn-plane-flat on-dark">Learn more</button>
         <span class="btn-wrap btn-wrap--danger"><button class="btn danger">Delete project</button></span>
       </div>
 
@@ -158,7 +159,7 @@
     <section class="gallery-section panel frame pad stack" data-frame="strong" data-radius="lg" data-pad="24" data-space="0">
       <div class="gallery-head split" data-gap="0">
         <div class="stack" data-space="0">
-          <div class="eyebrow">Cards</div>
+          <div class="eyebrow gallery-kicker-dark">Cards</div>
           <h2>Framed Content Blocks</h2>
         </div>
         <p class="caption gallery-note">Cards should feel drafted rather than plush: hard edges, explicit frame lines, and enough padding to let the type breathe on the grid.</p>
@@ -166,19 +167,19 @@
 
       <div class="grid" data-cols="auto-240" data-gap="24">
         <article class="gallery-card card panel frame stack" data-space="0" data-frame="strong" data-radius="lg">
-          <div class="eyebrow">Signal</div>
+          <div class="eyebrow gallery-kicker-dark">Signal</div>
           <h3>System card</h3>
           <p>Base dark card for docs, product callouts, and marketing comparison blocks.</p>
           <p class="caption">24px inset, 12px heading rhythm, shared panel surface.</p>
         </article>
         <article class="gallery-card card surface-vellum frame stack" data-mode="paper" data-space="0" data-frame="strong" data-radius="lg">
           <div class="eyebrow">Paper</div>
-          <h3>Vellum card</h3>
+          <h3 class="on-dark">Vellum card</h3>
           <p>Light-mode counterpart for long-form content, docs, and printable explanations.</p>
           <p class="caption">Same framing language, softer substrate.</p>
         </article>
         <article class="gallery-card card panel frame stack" data-space="0" data-frame="strong" data-radius="lg">
-          <div class="eyebrow">Metric</div>
+          <div class="eyebrow gallery-kicker-dark">Metric</div>
           <div class="display-num gallery-stat">24</div>
           <p>Use display numerics sparingly for counts, checkpoints, or release markers.</p>
         </article>
