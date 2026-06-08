@@ -277,11 +277,39 @@ static void run_daemon_delete_smoke_test(void) {
 }
 
 // Run a single test
+// Read optional per-test qi arguments (first line of qi.args), falling back to
+// the default. Lets a test exercise a specific qi mode (e.g. "% --toc") instead
+// of the standard verbose dump.
+static void read_qi_args(const char *args_path, char *buf, size_t buflen, const char *default_args) {
+    FILE *f = fopen(args_path, "r");
+    if (!f) {
+        snprintf(buf, buflen, "%s", default_args);
+        return;
+    }
+    if (!fgets(buf, (int)buflen, f)) {
+        snprintf(buf, buflen, "%s", default_args);
+        fclose(f);
+        return;
+    }
+    fclose(f);
+    // Strip trailing whitespace/newline
+    size_t len = strlen(buf);
+    while (len > 0 && (buf[len - 1] == '\n' || buf[len - 1] == '\r' ||
+                       buf[len - 1] == ' ' || buf[len - 1] == '\t')) {
+        buf[--len] = '\0';
+    }
+    if (len == 0) {
+        snprintf(buf, buflen, "%s", default_args);
+    }
+}
+
 static void run_test(const char *lang_name, const char *test_name, const Language *lang) {
     char fixture_path[MAX_PATH];
     char expected_path[MAX_PATH];
     char actual_path[MAX_PATH];
     char db_path[MAX_PATH];
+    char args_path[MAX_PATH];
+    char qi_args[MAX_CMD];
     char cmd[MAX_CMD];
 
     total++;
@@ -337,9 +365,11 @@ static void run_test(const char *lang_name, const char *test_name, const Languag
         return;
     }
 
-    // Step 2: Query the database
-    n = snprintf(cmd, sizeof(cmd), "./qi %% -v --db-file %s -f %s.%s",
-                 db_path, test_name, lang->extension);
+    // Step 2: Query the database (default "% -v"; a test may override via qi.args)
+    snprintf(args_path, sizeof(args_path), "tests/%s/%s/qi.args", lang_name, test_name);
+    read_qi_args(args_path, qi_args, sizeof(qi_args), "% -v");
+    n = snprintf(cmd, sizeof(cmd), "./qi %s --db-file %s -f %s.%s",
+                 qi_args, db_path, test_name, lang->extension);
     if (n >= (int)sizeof(cmd)) {
         printf("FAIL (command too long)\n");
         failed++;

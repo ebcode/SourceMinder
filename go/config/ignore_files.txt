@@ -1,3 +1,12 @@
 vendor
 node_modules
 dist
+
+tree-sitter-c
+tree-sitter-go
+tree-sitter-perl
+tree-sitter-php
+tree-sitter-python
+tree-sitter-rust
+tree-sitter-typescript
+
