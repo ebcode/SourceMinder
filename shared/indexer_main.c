@@ -723,6 +723,20 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
                     continue;  /* Skip ignored files */
                 }
 
+                /* Check --exclude-dir: DELETED still cleans up stale rows */
+                const char *excl_basename = strrchr(events[i].filepath, '/');
+                excl_basename = excl_basename ? excl_basename + 1 : events[i].filepath;
+                const char *matched_excl = exclude_dirs_match(events[i].filepath, excl_basename, &exclude_dirs);
+                if (matched_excl && events[i].type != FILE_EVENT_DELETED) {
+                    if (!silent) {
+                        const char *verb = (events[i].type == FILE_EVENT_MODIFIED)
+                            ? "Registered change" : "Registered new file";
+                        printf("%s: %s, but not indexed due to --exclude-dir %s\n",
+                               verb, events[i].filepath, matched_excl);
+                    }
+                    continue;
+                }
+
                 if (events[i].type == FILE_EVENT_DELETED) {
                     if (delete_index_entries_for_path(&db, events[i].filepath, cwd) == SQLITE_OK && !silent) {
                         printf("Removed from index: %s\n", events[i].filepath);

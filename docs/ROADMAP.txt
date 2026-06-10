@@ -8,20 +8,19 @@
 
 4. Add --rows flag (or similar) to show only results, no help text, tips, or filtering info
 
-5. Json-formatted output.
+5. Json-formatted output. (LLMs keep suggesting it.)
 
 6. Test against larger codebases. (Tested against llvm-project, ~30k files, gives 7.2GB index, slow to query.)
 
-7. Instrument queries.
+7. Instrument queries (perf).
 
 8. Automated tests. Gold output snapshots to prevent regressions.
 
 ## Not on the roadmap (yet)
 
-1. Alternative Storage: Currently Sqlite only. Consider MySql/Postgres or other backends
-
+1. Alternative Storage: Currently local Sqlite only. Consider MySql/Postgres or other backends, including remote Sqlite (could allow real-time collaboration on the same project).
 
 ## Not on the roadmap (ever)
 
-1. Call graph functionality (which functions call this function) -- there are better tools available
+1. Call graph functionality (which functions call this function, aka: dependency graph) -- there are better tools for this available. Keep this tool simple.
 

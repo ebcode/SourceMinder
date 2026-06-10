@@ -194,8 +194,8 @@ static int pattern_matches(const char *pattern, const char *str, int use_pathnam
     }
 }
 
-static int is_excluded(const char *full_path, const char *dirname, const ExcludeDirs *exclude_dirs) {
-    if (!exclude_dirs) return 0;
+const char *exclude_dirs_match(const char *full_path, const char *basename, const ExcludeDirs *exclude_dirs) {
+    if (!exclude_dirs) return NULL;
 
     for (int i = 0; i < exclude_dirs->count; i++) {
         /* Check if the exclude pattern matches the full path */
@@ -207,15 +207,19 @@ static int is_excluded(const char *full_path, const char *dirname, const Exclude
             /* and is either at the end or followed by '/' or '\0' */
             if ((match == full_path || *(match - 1) == '/') &&
                 (match[pattern_len] == '/' || match[pattern_len] == '\0')) {
-                return 1;
+                return exclude_dirs->dirs[i];
             }
         }
         /* Also check basename for simple exclude patterns */
-        if (strcmp(dirname, exclude_dirs->dirs[i]) == 0) {
-            return 1;
+        if (strcmp(basename, exclude_dirs->dirs[i]) == 0) {
+            return exclude_dirs->dirs[i];
         }
     }
-    return 0;
+    return NULL;
+}
+
+static int is_excluded(const char *full_path, const char *dirname, const ExcludeDirs *exclude_dirs) {
+    return exclude_dirs_match(full_path, dirname, exclude_dirs) != NULL;
 }
 
 int is_path_ignored(const char *full_path, const char *dirname, const WordSet *ignore_dirs) {

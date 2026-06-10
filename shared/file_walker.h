@@ -47,4 +47,7 @@ int find_files(const char *dir_path, FileList *files, const ExcludeDirs *exclude
 /* Check if a path should be ignored based on ignore_dirs patterns */
 int is_path_ignored(const char *full_path, const char *dirname, const WordSet *ignore_dirs);
 
+/* Returns the matched exclude pattern, or NULL if no pattern matches */
+const char *exclude_dirs_match(const char *full_path, const char *basename, const ExcludeDirs *exclude_dirs);
+
 #endif
