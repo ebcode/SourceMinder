@@ -317,7 +317,8 @@ static TSNode find_identifier_in_declarator(TSNode declarator_node) {
 }
 
 static void extract_parameters(TSNode param_list_node, const char *source_code, const char *directory,
-                              const char *filename, ParseResult *result, SymbolFilter *filter, int is_definition) {
+                              const char *filename, ParseResult *result, SymbolFilter *filter, int is_definition,
+                              const char *parent_func) {
     if (ts_node_is_null(param_list_node)) return;
 
     uint32_t child_count = ts_node_child_count(param_list_node);
@@ -394,7 +395,7 @@ static void extract_parameters(TSNode param_list_node, const char *source_code, 
 
                     if (filter_should_index(filter, symbol)) {
                         ExtColumns ext = {
-                            .parent = NULL,
+                            .parent = (parent_func && parent_func[0]) ? parent_func : NULL,
                             .modifier = NULL,
                             .clue = NULL,
                             .type = param_type[0] != '\0' ? param_type : NULL,
@@ -446,6 +447,7 @@ static void handle_function_definition(TSNode node, const char *source_code, con
         uint32_t decl_child_count = ts_node_child_count(child);
         TSNode func_name_node = {0};
         TSNode param_list_node = {0};
+        char symbol[SYMBOL_MAX_LENGTH] = "";
 
         for (uint32_t j = 0; j < decl_child_count; j++) {
             TSNode decl_child = ts_node_child(child, j);
@@ -460,7 +462,6 @@ static void handle_function_definition(TSNode node, const char *source_code, con
 
         /* Extract function name and return type */
         if (!ts_node_is_null(func_name_node)) {
-            char symbol[SYMBOL_MAX_LENGTH];
             char type_str[SYMBOL_MAX_LENGTH];
             char modifier_str[SYMBOL_MAX_LENGTH];
             char location[SOURCE_LOCATION_MAX_LENGTH];
@@ -487,7 +488,7 @@ static void handle_function_definition(TSNode node, const char *source_code, con
 
         /* Extract parameters */
         if (!ts_node_is_null(param_list_node)) {
-            extract_parameters(param_list_node, source_code, directory, filename, result, filter, 1);
+            extract_parameters(param_list_node, source_code, directory, filename, result, filter, 1, symbol);
         }
     }
 

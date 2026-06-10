@@ -1611,6 +1611,29 @@ static void handle_function_declaration(TSNode node, const char *source_code, co
     }
 }
 
+/* Innermost enclosing class or interface name, or "" if file-scope.
+ * Walks ts_node_parent() until class_declaration, abstract_class_declaration,
+ * or interface_declaration; extracts its "name" field. */
+static void extract_enclosing_type(TSNode node, const char *source_code,
+                                   char *out, size_t out_size,
+                                   const char *filename) {
+    out[0] = '\0';
+    TSNode current = ts_node_parent(node);
+    while (!ts_node_is_null(current)) {
+        TSSymbol sym = ts_node_symbol(current);
+        if (sym == ts_symbols.class_declaration ||
+            sym == ts_symbols.abstract_class_declaration ||
+            sym == ts_symbols.interface_declaration) {
+            TSNode name_node = ts_node_child_by_field_name(current, "name", 4);
+            if (!ts_node_is_null(name_node)) {
+                safe_extract_node_text(source_code, name_node, out, out_size, filename);
+            }
+            return;
+        }
+        current = ts_node_parent(current);
+    }
+}
+
 static void handle_method_definition(TSNode node, const char *source_code, const char *directory,
                                      const char *filename, ParseResult *result, SymbolFilter *filter,
                                      int line) {
@@ -1619,8 +1642,11 @@ static void handle_method_definition(TSNode node, const char *source_code, const
     char modifier[256];
     char type_str[SYMBOL_MAX_LENGTH];
     char location[SOURCE_LOCATION_MAX_LENGTH];
+    char enclosing[SYMBOL_MAX_LENGTH];
 
     if (g_debug) fprintf(stderr, "[DEBUG] handle_method_definition called at line %d\n", line);
+
+    extract_enclosing_type(node, source_code, enclosing, sizeof(enclosing), filename);
 
     /* Extract access modifier (public, private, protected) */
     extract_access_modifier(node, source_code, scope, sizeof(scope), filename);
@@ -1654,7 +1680,8 @@ static void handle_method_definition(TSNode node, const char *source_code, const
             format_source_location(node, location, sizeof(location));
 
             add_entry(result, symbol, line, CONTEXT_FUNCTION, directory, filename, location,
-                &(ExtColumns){.scope = scope, .modifier = modifier, .type = type_str[0] ? type_str : NULL, .definition = "1"});
+                &(ExtColumns){.scope = scope, .modifier = modifier, .type = type_str[0] ? type_str : NULL,
+                              .parent = enclosing[0] ? enclosing : NULL, .definition = "1"});
         }
     }
     /* Extract method parameters */
@@ -1720,6 +1747,9 @@ static void handle_property_signature(TSNode node, const char *source_code, cons
     char scope[SYMBOL_MAX_LENGTH];
     char modifier[256];
     char type_str[SYMBOL_MAX_LENGTH];
+    char enclosing[SYMBOL_MAX_LENGTH];
+
+    extract_enclosing_type(node, source_code, enclosing, sizeof(enclosing), filename);
 
     /* Extract access modifier (public, private, protected) */
     extract_access_modifier(node, source_code, scope, sizeof(scope), filename);
@@ -1755,6 +1785,7 @@ static void handle_property_signature(TSNode node, const char *source_code, cons
             add_entry(result, symbol, line, CONTEXT_PROPERTY, directory, filename, location,
                 &(ExtColumns){.scope = scope, .modifier = modifier,
                               .type = type_str[0] ? type_str : NULL,
+                              .parent = enclosing[0] ? enclosing : NULL,
                               .definition = "1"});
         }
     }

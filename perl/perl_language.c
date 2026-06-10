@@ -37,6 +37,9 @@ static int g_debug = 0;
 /* Byte position of a scalar already indexed as filehandle; skipped in visit_node to avoid re-indexing as scalar */
 static uint32_t g_skip_scalar_start = UINT32_MAX;
 
+/* Current package name, set by handle_package_statement, cleared per file */
+static char g_current_package[SYMBOL_MAX_LENGTH] = "";
+
 /* Pre-looked-up node type IDs for fast dispatch */
 static struct {
     /* Variables */
@@ -571,6 +574,7 @@ static void handle_package_statement(TSNode node, const char *source_code,
         if (ts_node_symbol(child) == perl_symbols.package_name) {
             char name[SYMBOL_MAX_LENGTH];
             safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            snprintf(g_current_package, sizeof(g_current_package), "%s", name);
             if (filter_should_index(filter, name)) {
                 add_entry(result, name, line, CONTEXT_NAMESPACE,
                           directory, filename, NULL, &(ExtColumns){.definition = "1"});
@@ -596,7 +600,9 @@ static void handle_subroutine_declaration(TSNode node, const char *source_code,
             safe_extract_node_text(source_code, child, name, sizeof(name), filename);
             if (filter_should_index(filter, name)) {
                 add_entry(result, name, line, CONTEXT_FUNCTION,
-                          directory, filename, location, &(ExtColumns){.definition = "1"});
+                          directory, filename, location,
+                          &(ExtColumns){.definition = "1",
+                                        .namespace = g_current_package[0] ? g_current_package : NULL});
             }
             break;
         }
@@ -1603,6 +1609,9 @@ int parser_parse_file(PerlParser *parser, const char *filepath,
         add_entry(result, filename_no_ext, 1, CONTEXT_FILENAME,
                   directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
     }
+
+    /* Reset per-file state */
+    g_current_package[0] = '\0';
 
     /* Walk the AST */
     TSNode root = ts_tree_root_node(tree);

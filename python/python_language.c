@@ -290,6 +290,24 @@ static void extract_parameters(TSNode parameters_node, const char *source_code,
     }
 }
 
+/* Nearest enclosing class_definition name, or "" if file/function-scope. */
+static void extract_enclosing_class(TSNode node, const char *source_code,
+                                    char *out, size_t out_size,
+                                    const char *filename) {
+    out[0] = '\0';
+    TSNode current = ts_node_parent(node);
+    while (!ts_node_is_null(current)) {
+        if (strcmp(ts_node_type(current), "class_definition") == 0) {
+            TSNode name_node = ts_node_child_by_field_name(current, "name", 4);
+            if (!ts_node_is_null(name_node)) {
+                safe_extract_node_text(source_code, name_node, out, out_size, filename);
+            }
+            return;
+        }
+        current = ts_node_parent(current);
+    }
+}
+
 /* Handle function definition */
 static void handle_function_definition(TSNode node, const char *source_code,
                                       const char *directory, const char *filename,
@@ -331,11 +349,15 @@ static void handle_function_definition(TSNode node, const char *source_code,
     char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
+    char enclosing_class[SYMBOL_MAX_LENGTH];
+    extract_enclosing_class(node, source_code, enclosing_class, sizeof(enclosing_class), filename);
+
     /* Add function to results */
     add_entry(result, function_name, line,
                          CONTEXT_FUNCTION, directory, filename, location,
                          &(ExtColumns){.type = return_type, .definition = "1", .modifier = modifier,
-                                      .clue = decorators[0] ? decorators : NULL});
+                                      .clue = decorators[0] ? decorators : NULL,
+                                      .parent = enclosing_class[0] ? enclosing_class : NULL});
 
     /* Extract parameters */
     TSNode params_node = ts_node_child_by_field_name(node, "parameters", 10);
