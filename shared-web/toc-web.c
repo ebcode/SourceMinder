@@ -302,9 +302,32 @@ static void toc_free_files(TocWebFile *files, int file_count) {
     free(files);
 }
 
+/* Widest section symbol in a file, capped at TOC_ALIGN_MAX_COLUMN, so every
+   section shares one line-number column.  Mirrors compute_align_column in
+   shared/toc.c.  Imports are excluded (printed inline, not in an aligned
+   section). */
+static int toc_compute_align_column(const TocWebFile *file) {
+    static const char *section_contexts[] = {"CLASS", "FUNC", "ENUM", "TYPE", "MACRO"};
+    int max_symbol_len = 0;
+    for (int i = 0; i < file->count; i++) {
+        int in_section = 0;
+        for (size_t s = 0; s < sizeof(section_contexts) / sizeof(section_contexts[0]); s++) {
+            if (strcmp(file->entries[i].context, section_contexts[s]) == 0) {
+                in_section = 1;
+                break;
+            }
+        }
+        if (!in_section) continue;
+        int len = (int)strlen(file->entries[i].symbol);
+        if (len > max_symbol_len) max_symbol_len = len;
+    }
+    return max_symbol_len < TOC_ALIGN_MAX_COLUMN ? max_symbol_len : TOC_ALIGN_MAX_COLUMN;
+}
+
 /* Print a section of TOC entries matching context_filter */
 static void toc_print_section(WebOutput *wo, const char *title,
-                               TocWebFile *file, const char *context_filter) {
+                               TocWebFile *file, const char *context_filter,
+                               int align_column) {
     int count = 0;
     TocWebEntry **filtered = malloc(sizeof(TocWebEntry *) * (size_t)file->count);
     if (!filtered) return;
@@ -317,23 +340,24 @@ static void toc_print_section(WebOutput *wo, const char *title,
 
     qsort(filtered, (size_t)count, sizeof(TocWebEntry *), toc_cmp_by_line);
 
+    /* align_column is computed once per file (toc_compute_align_column) so the
+       line-number column lines up vertically across every section.  Symbols at
+       or below it align with a dot run; wider symbols overflow past it but still
+       get TOC_MIN_DOT_LEADERS dots so the eye always has a leader to follow.
+       Mirrors print_section in shared/toc.c. */
+    char dots[TOC_ALIGN_MAX_COLUMN + TOC_MIN_DOT_LEADERS + 1];
+    memset(dots, '.', sizeof(dots) - 1);
+    dots[sizeof(dots) - 1] = '\0';
+
     wo_printf(wo, "%s (%d):\n", title, count);
     for (int i = 0; i < count; i++) {
-        int name_len = (int)strlen(filtered[i]->symbol);
-        int line_len = snprintf(NULL, 0, "%d", filtered[i]->line);
-        int dots = 70 - name_len - line_len - 3;
-        if (dots < 1) dots = 1;
-
-        /* Emit padding dots via %.*s against a fixed literal.  Clamp to
-         * the literal length so %.*s never reads past the buffer. */
-#define TOC_DOT_PAD "......................................................................"
-#define TOC_DOT_PAD_LEN ((int)(sizeof(TOC_DOT_PAD) - 1))
-        if (dots > TOC_DOT_PAD_LEN) dots = TOC_DOT_PAD_LEN;
+        int symbol_len = (int)strlen(filtered[i]->symbol);
+        int dots_needed = align_column - symbol_len + TOC_MIN_DOT_LEADERS;
+        if (dots_needed < TOC_MIN_DOT_LEADERS) dots_needed = TOC_MIN_DOT_LEADERS;
+        if (dots_needed > (int)sizeof(dots) - 1) dots_needed = (int)sizeof(dots) - 1;
         wo_printf(wo, "  %s %.*s %d\n",
-                  filtered[i]->symbol, dots, TOC_DOT_PAD,
+                  filtered[i]->symbol, dots_needed, dots,
                   filtered[i]->line);
-#undef TOC_DOT_PAD
-#undef TOC_DOT_PAD_LEN
     }
     wo_printf(wo, "\n");
     free(filtered);
@@ -611,12 +635,15 @@ char *format_toc_web(const char *build_info, const char *rows_tsv,
 
         toc_print_imports(&wo, file);
 
+        /* One alignment column for all sections of this file */
+        int align_column = toc_compute_align_column(file);
+
         /* Section order: CLASS, FUNC, ENUM, TYPE, MACRO (mirrors shared/toc.c) */
-        toc_print_section(&wo, "CLASSES",   file, "CLASS");
-        toc_print_section(&wo, "FUNCTIONS", file, "FUNC");
-        toc_print_section(&wo, "ENUMS",     file, "ENUM");
-        toc_print_section(&wo, "TYPES",     file, "TYPE");
-        toc_print_section(&wo, "MACROS",    file, "MACRO");
+        toc_print_section(&wo, "CLASSES",   file, "CLASS", align_column);
+        toc_print_section(&wo, "FUNCTIONS", file, "FUNC", align_column);
+        toc_print_section(&wo, "ENUMS",     file, "ENUM", align_column);
+        toc_print_section(&wo, "TYPES",     file, "TYPE", align_column);
+        toc_print_section(&wo, "MACROS",    file, "MACRO", align_column);
 
         if (i < file_count - 1)
             wo_printf(&wo, "\n");

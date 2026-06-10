@@ -1,0 +1,88 @@
+-- 1. Maintainability (Definition Density per File)
+-- Group by directory AND filename: filename alone merges same-named files
+-- across directories (constants.h-style headers, demo source copies).
+SELECT directory, filename, COUNT(*) AS definition_count
+FROM code_index
+WHERE is_definition = 1
+GROUP BY directory, filename
+ORDER BY definition_count DESC
+LIMIT 5;
+=========
+-- 2. Coupling & Popularity (Fan-in, code references only)
+-- COM/STR rows are words from comments and strings; without excluding them,
+-- every comment mention counts as a "usage" and dominates the ranking.
+SELECT symbol, COUNT(*) AS usage_count
+FROM code_index
+WHERE is_definition = 0
+  AND context NOT IN ('COM', 'STR')
+GROUP BY symbol
+ORDER BY usage_count DESC
+LIMIT 10;
+=========
+-- 3. Encapsulation & Scope (Public/Private Counts - OOP context)
+-- Note: the scope column is populated only on builds configured with OOP
+-- languages; values are stored lowercase. Indexers write '' (not NULL) for
+-- missing parents, so guard both.
+SELECT parent_symbol,
+       SUM(CASE WHEN scope = 'public' THEN 1 ELSE 0 END) AS public_count,
+       SUM(CASE WHEN scope = 'private' THEN 1 ELSE 0 END) AS private_count
+FROM code_index
+WHERE context IN ('FUNC', 'PROP')
+  AND parent_symbol IS NOT NULL AND parent_symbol != ''
+GROUP BY parent_symbol
+HAVING public_count > 5;
+=========
+-- 4. Largest Classes (method definitions per parent)
+-- FUNC rows with a parent are method definitions, so this measures class
+-- size by method count (the index does not record complexity or nesting).
+SELECT parent_symbol, COUNT(*) AS method_count
+FROM code_index
+WHERE context = 'FUNC' AND is_definition = 1
+  AND parent_symbol IS NOT NULL AND parent_symbol != ''
+GROUP BY parent_symbol
+ORDER BY method_count DESC
+LIMIT 5;
+=========
+-- 5. Most-Referenced Parent Symbols (per file)
+-- parent_symbol is the syntactic per-file parent, so grouping must include
+-- the file: a global GROUP BY would merge every unrelated `config`/`result`
+-- variable across the codebase into one bucket.
+SELECT directory, filename, parent_symbol, COUNT(*) AS child_count
+FROM code_index
+WHERE parent_symbol IS NOT NULL AND parent_symbol != ''
+GROUP BY directory, filename, parent_symbol
+ORDER BY child_count DESC
+LIMIT 10;
+=========
+-- 6. Uncategorized Properties (Missing parent_symbol)
+-- Conformance check: the per-language audit (2026-06-09) drove PROP rows to
+-- always carry a parent; rows here are candidate indexer gaps.
+SELECT directory, filename, symbol, line
+FROM code_index
+WHERE context = 'PROP' AND (parent_symbol IS NULL OR parent_symbol = '')
+LIMIT 10;
+=========
+-- 7. Indexer Structural Consistency (Compare language indexer structs)
+-- All seven language modules; absent ones simply return no row.
+SELECT parent_symbol, COUNT(*)
+FROM code_index
+WHERE parent_symbol IN ('c_symbols', 'go_symbols', 'perl_symbols',
+                        'php_symbols', 'python_symbols', 'rust_symbols',
+                        'ts_symbols')
+GROUP BY parent_symbol;
+=========
+-- 8. Type Usage Analysis (Most frequent data types)
+SELECT type, COUNT(*) AS usage_count
+FROM code_index
+WHERE type IS NOT NULL AND type != '' AND context != 'TYPE'
+GROUP BY type
+ORDER BY usage_count DESC
+LIMIT 15;
+=========
+-- 9. Modifier Usage Analysis (Access patterns)
+SELECT modifier, COUNT(*) AS count
+FROM code_index
+WHERE modifier IS NOT NULL AND modifier != ''
+GROUP BY modifier
+ORDER BY count DESC
+LIMIT 10;

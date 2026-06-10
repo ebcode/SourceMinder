@@ -14,7 +14,6 @@
  *   -v / --verbose   print the first chunk of each case's output
  */
 
-import { readFileSync } from 'fs';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { dirname, join } from 'path';
 
@@ -22,6 +21,7 @@ import { loadQiModule } from './load-qi.mjs';
 import { openDb } from './db.mjs';
 import { makeSourceProvider } from './sources.mjs';
 import { runUnitTests } from './unit.mjs';
+import { loadProject, resolveProjectPath, requireDb } from './manifest.mjs';
 
 var HERE = dirname(fileURLToPath(import.meta.url));
 var REPO_ROOT = join(HERE, '..', '..');
@@ -29,30 +29,12 @@ var HTML_DIR = join(REPO_ROOT, 'html');
 
 var VERBOSE = process.argv.includes('-v') || process.argv.includes('--verbose');
 
-/* Optional --project <id>; defaults to the first manifest entry (what the app
- * auto-loads).  Reading the real projects.json keeps the harness honest about
- * dbUrl/sourceBase resolution -- the same fields the browser worker consumes. */
+/* Optional --project <id>; defaults to the first entry of the preferred
+ * manifest (test manifest if present, else html/projects.json -- see
+ * manifest.mjs). */
 function selectedProjectId() {
     var i = process.argv.indexOf('--project');
     return i >= 0 ? process.argv[i + 1] : null;
-}
-
-/* Resolve a manifest URL (relative to html/) to an absolute local path. */
-function resolveFromHtml(url) {
-    return join(HTML_DIR, String(url).replace(/^\.\//, ''));
-}
-
-function loadProject() {
-    var manifest = JSON.parse(readFileSync(join(HTML_DIR, 'projects.json'), 'utf8'));
-    if (!Array.isArray(manifest) || manifest.length === 0) {
-        throw new Error('projects.json is empty or malformed');
-    }
-    var wantId = selectedProjectId();
-    var p = wantId
-        ? manifest.find(function(x) { return x.id === wantId; })
-        : manifest[0];
-    if (!p) throw new Error('no project with id "' + wantId + '" in projects.json');
-    return p;
 }
 
 function stripAnsi(s) {
@@ -96,14 +78,25 @@ var CASES = [
     {
         /* --toc with no pattern must work: patterns are optional in TOC mode. */
         name: 'toc mode, no pattern',
-        cmd: 'qi --toc -f negroni.go',
-        expect: ['negroni.go', 'FUNCTIONS'],
+        cmd: 'qi --toc -f query-index-web.c',
+        expect: ['query-index-web.c', 'FUNCTIONS'],
         absent: ['Error:'],
     },
     {
         name: 'breakdown on truncation (qi_web_format_breakdown)',
         cmd: "qi '*' -i func --limit 3",
         expect: ['Result breakdown:'],
+    },
+    {
+        /* --parent-type resolves the parent symbol to its same-file definition
+         * and matches that definition's declared type.  In sourceminder,
+         * c/index-c.c populates `config`, a VAR of type IndexerConfig, via
+         * designated initializers (config.parser_init = ...). */
+        name: 'parent-type filter (--parent-type)',
+        cmd: "qi '*' -i prop --parent-type IndexerConfig",
+        expect: ['Filtering by parent type: IndexerConfig', 'parser_init', 'index-c.c'],
+        absent: ['Error:'],
+        needsBuild: true,
     },
     {
         name: 'within scope (--within)',
@@ -144,9 +137,10 @@ async function main() {
     process.stdout.write(unit.pass + ' passed, ' + unit.fail + ' failed\n\n');
 
     process.stdout.write('=== integration (wasm + db) ===\n');
-    var project = loadProject();
-    var dbPath = resolveFromHtml(project.dbUrl);
-    var sourceRoot = resolveFromHtml(project.sourceBase);
+    var project = loadProject(selectedProjectId());
+    var dbPath = resolveProjectPath(project, project.dbUrl);
+    var sourceRoot = resolveProjectPath(project, project.sourceBase);
+    requireDb(project, dbPath);
 
     process.stdout.write('Project: ' + project.id + '  (db: ' + project.dbUrl +
         ', sources: ' + project.sourceBase + ')\n');

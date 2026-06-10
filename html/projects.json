@@ -1,5 +1,14 @@
 [
   {
+    "id": "sourceminder",
+    "name": "SourceMinder",
+    "version": "1",
+    "language": "c",
+    "dbUrl": "./code-index-sourceminder.browser.db",
+    "sourceBase": "./sources/sourceminder/",
+    "sizeBytes": 16388096
+  },
+  {
     "id": "negroni",
     "name": "negroni",
     "version": "3.1.1",

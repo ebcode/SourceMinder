@@ -87,6 +87,10 @@ typedef struct {
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+    /* Virtual filter (no backing column): --parent-type resolves
+     * parent_symbol to its same-file definition and matches that
+     * definition's declared type */
+    StringList parent_type;
 } QueryFilters;
 
 typedef struct {

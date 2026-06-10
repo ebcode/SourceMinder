@@ -24,7 +24,6 @@
  * error.  Mirrors run.mjs so it slots into the same `make web` loop.
  */
 
-import { readFileSync } from 'fs';
 import { spawnSync } from 'child_process';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { dirname, join } from 'path';
@@ -32,15 +31,18 @@ import { dirname, join } from 'path';
 import { loadQiModule } from './load-qi.mjs';
 import { openDb } from './db.mjs';
 import { makeSourceProvider } from './sources.mjs';
+import { loadProject, resolveProjectPath, requireDb } from './manifest.mjs';
 
 var HERE = dirname(fileURLToPath(import.meta.url));
 var REPO_ROOT = join(HERE, '..', '..');
 var HTML_DIR = join(REPO_ROOT, 'html');
 
-/* The native DB lives beside the source it indexes (html/sources/<id>/), so
- * running qi from that cwd makes recorded relative paths resolve to real files.
- * This is the per-project native DB the .browser.db snapshot is VACUUM'd from,
- * so native and web read byte-identical index data. */
+/* The native DB the .browser.db snapshot is VACUUM'd from, so native and web
+ * read byte-identical index data.  A project may name it explicitly via
+ * "nativeDb" (the generated test project does); deployment projects default
+ * to code-index.db beside the source they index (html/sources/<id>/), so
+ * running qi from that cwd makes recorded relative paths resolve to real
+ * files. */
 var NATIVE_DB = 'code-index.db';
 
 /* Canonical parity suite -- §8.7 of QI_WEB_FILE_PLAN.md, made project-agnostic
@@ -79,23 +81,6 @@ function arg(name) {
 }
 var VERBOSE = process.argv.includes('-v') || process.argv.includes('--verbose');
 var BATCH_MODE = process.argv.includes('--batch');
-
-function resolveFromHtml(url) {
-    return join(HTML_DIR, String(url).replace(/^\.\//, ''));
-}
-
-function loadProject() {
-    var manifest = JSON.parse(readFileSync(join(HTML_DIR, 'projects.json'), 'utf8'));
-    if (!Array.isArray(manifest) || manifest.length === 0) {
-        throw new Error('projects.json is empty or malformed');
-    }
-    var wantId = arg('--project');
-    var p = wantId
-        ? manifest.find(function(x) { return x.id === wantId; })
-        : manifest[0];
-    if (!p) throw new Error('no project with id "' + wantId + '" in projects.json');
-    return p;
-}
 
 /* The positional command string: the first argv item that is not a known
  * option and not an option's value.  Lets `--project X "qi ..."` work in any
@@ -153,10 +138,10 @@ function normalize(s) {
 /* Run the native qi binary for a command string.  Strips the leading `qi`
  * token (the web side keeps it; runQuery consumes it itself), appends
  * --db-file, and runs from the project source root. */
-function runNative(cmd, sourceRoot) {
+function runNative(cmd, sourceRoot, nativeDbPath) {
     var argv = tokenize(cmd);
     if (argv.length && argv[0] === 'qi') argv = argv.slice(1);
-    argv = argv.concat(['--db-file', NATIVE_DB]);
+    argv = argv.concat(['--db-file', nativeDbPath]);
     var r = spawnSync('qi', argv, {
         cwd: sourceRoot, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024,
     });
@@ -192,9 +177,13 @@ function diffLines(a, b) {
 }
 
 async function main() {
-    var project = loadProject();
-    var sourceRoot = resolveFromHtml(project.sourceBase);
-    var dbPath = resolveFromHtml(project.dbUrl);
+    var project = loadProject(arg('--project'));
+    var sourceRoot = resolveProjectPath(project, project.sourceBase);
+    var dbPath = resolveProjectPath(project, project.dbUrl);
+    var nativeDbPath = project.nativeDb
+        ? resolveProjectPath(project, project.nativeDb)
+        : join(sourceRoot, NATIVE_DB);
+    requireDb(project, dbPath);
 
     var cmds;
     if (BATCH_MODE) {
@@ -232,7 +221,7 @@ async function main() {
         var cmd = cmds[k];
         var nativeOut, webOut, err = null;
         try {
-            nativeOut = runNative(cmd, sourceRoot);
+            nativeOut = runNative(cmd, sourceRoot, nativeDbPath);
             webOut = await pipeline.runQuery(ctx, cmd);
         } catch (e) {
             err = e;

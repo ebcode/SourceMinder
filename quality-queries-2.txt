@@ -1,0 +1,181 @@
+-- Schema migration notes (rewritten 2026-06-09 for the current schema):
+--   context_type        -> context (compact values: FUNC, ARG, VAR, CALL,
+--                          CLASS, IMP, EXP, COM, ...)
+--   FUNCTION_NAME       -> context = 'FUNC' (+ is_definition = 1 for defs)
+--   FUNCTION_ARGUMENT   -> context = 'ARG'
+--   VARIABLE_NAME       -> context = 'VAR'
+--   lowercase_symbol    -> dropped; use symbol COLLATE NOCASE (indexed)
+--   line_number         -> line
+--   filename alone is ambiguous; group/select directory, filename
+-- 1. Functions with the most arguments (potential code smells)
+-- ARG rows carry parent_symbol = the function they belong to.
+-- Caveat: a prototype and its definition each contribute ARG rows, so
+-- header+impl pairs can double-count.
+SELECT directory, filename, parent_symbol AS function_name, COUNT(*) AS arg_count
+FROM code_index
+WHERE context = 'ARG' AND COALESCE(parent_symbol, '') <> ''
+GROUP BY directory, filename, parent_symbol
+ORDER BY arg_count DESC
+LIMIT 15;
+=========
+-- 2. Files with the most function definitions (potential god files)
+SELECT directory, filename, COUNT(*) AS function_count
+FROM code_index
+WHERE context = 'FUNC' AND is_definition = 1
+GROUP BY directory, filename
+ORDER BY function_count DESC
+LIMIT 10;
+=========
+-- 3. Most imported modules (core dependencies)
+SELECT symbol, COUNT(*) AS import_count
+FROM code_index
+WHERE context = 'IMP'
+GROUP BY symbol COLLATE NOCASE
+ORDER BY import_count DESC
+LIMIT 15;
+=========
+-- 4. Functions that are defined but never called (dead-code candidates)
+-- Caveats: address-taken functions (dispatch tables, designated initializers
+-- like .parser_init = c_parser_init), exported entry points, and main() are
+-- false positives -- they are reached without a CALL row on their name.
+SELECT DISTINCT f.directory, f.filename, f.symbol
+FROM code_index f
+WHERE f.context = 'FUNC' AND f.is_definition = 1
+  AND f.symbol <> 'main'
+  AND NOT EXISTS (
+      SELECT 1 FROM code_index c
+      WHERE c.context = 'CALL'
+        AND c.symbol = f.symbol COLLATE NOCASE
+  )
+ORDER BY f.directory, f.filename, f.symbol;
+=========
+-- 5. Variables that shadow function names in the same file (potential confusion)
+-- Scoped to the same file (the original compared across the whole index,
+-- which mostly reports coincidental cross-language name reuse).
+SELECT DISTINCT v.directory, v.filename, v.symbol, v.line
+FROM code_index v
+WHERE v.context = 'VAR'
+  AND EXISTS (
+      SELECT 1 FROM code_index f
+      WHERE f.context = 'FUNC' AND f.is_definition = 1
+        AND f.symbol = v.symbol COLLATE NOCASE
+        AND f.directory = v.directory AND f.filename = v.filename
+  )
+ORDER BY v.directory, v.filename, v.line;
+=========
+-- 6. Most reused variable names (common patterns or code smells?)
+SELECT symbol, COUNT(DISTINCT directory || filename) AS file_count
+FROM code_index
+WHERE context = 'VAR'
+GROUP BY symbol COLLATE NOCASE
+ORDER BY file_count DESC
+LIMIT 15;
+=========
+-- 7. Symbols that appear in the most files (high coupling)
+SELECT symbol, COUNT(DISTINCT directory || filename) AS file_count
+FROM code_index
+WHERE context IN ('CALL', 'VAR', 'CLASS')
+GROUP BY symbol COLLATE NOCASE
+HAVING file_count > 5
+ORDER BY file_count DESC
+LIMIT 20;
+=========
+-- 8. Files that export the most symbols (API surface area)
+SELECT directory, filename, COUNT(*) AS export_count
+FROM code_index
+WHERE context = 'EXP'
+GROUP BY directory, filename
+ORDER BY export_count DESC
+LIMIT 10;
+=========
+-- 9. Comment-word density (documentation quality, rough proxy)
+-- COM rows are individual words extracted from comments (stopwords already
+-- filtered at index time), not comment blocks -- so this measures the share
+-- of indexed tokens that came from comments, not a true comment/code ratio.
+SELECT
+    directory, filename,
+    SUM(CASE WHEN context = 'COM' THEN 1 ELSE 0 END) AS comment_words,
+    COUNT(*) AS total_entries,
+    ROUND(CAST(SUM(CASE WHEN context = 'COM' THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*), 3) AS comment_ratio
+FROM code_index
+GROUP BY directory, filename
+HAVING total_entries > 100
+ORDER BY comment_ratio DESC
+LIMIT 10;
+=========
+-- 10. Most mentioned terms in comments (documentation themes)
+SELECT symbol, COUNT(*) AS mention_count
+FROM code_index
+WHERE context = 'COM'
+GROUP BY symbol COLLATE NOCASE
+ORDER BY mention_count DESC
+LIMIT 50;
+=========
+-- 11. "Hotspot" files: many definitions AND many calls (central files)
+SELECT
+    directory, filename,
+    SUM(CASE WHEN context = 'FUNC' AND is_definition = 1 THEN 1 ELSE 0 END) AS definitions,
+    SUM(CASE WHEN context = 'CALL' THEN 1 ELSE 0 END) AS calls
+FROM code_index
+GROUP BY directory, filename
+HAVING definitions > 5 AND calls > 20
+ORDER BY (definitions + calls) DESC
+LIMIT 10;
+=========
+-- 12. Overly generic names (might indicate unclear abstractions)
+SELECT symbol, COUNT(*) AS usage_count
+FROM code_index
+WHERE symbol COLLATE NOCASE IN ('data', 'info', 'temp', 'tmp', 'result', 'value', 'obj', 'item')
+  AND context IN ('VAR', 'ARG')
+GROUP BY symbol COLLATE NOCASE
+ORDER BY usage_count DESC;
+=========
+-- 13. Stale comment references (documentation drift)
+-- COM rows are words lifted from comments; snake_case words are almost
+-- always identifier references.  Anti-join against definitions: a comment
+-- naming an identifier that is defined nowhere usually means the code was
+-- renamed or deleted after the comment was written.
+-- Noise sources: tree-sitter grammar node names and external API names
+-- mentioned in comments are legitimately undefined here.
+SELECT c.directory, c.filename, c.line, c.symbol
+FROM code_index c
+WHERE c.context = 'COM'
+  AND c.symbol LIKE '%\_%' ESCAPE '\'
+  AND NOT EXISTS (
+      SELECT 1 FROM code_index d
+      WHERE d.is_definition = 1
+        AND d.symbol = c.symbol COLLATE NOCASE)
+ORDER BY c.directory, c.filename, c.line
+LIMIT 25;
+=========
+-- 14. Same-type parameter runs (argument-swap hazard)
+-- A signature with 4+ parameters of one type compiles fine with the
+-- arguments in any order.  ARG rows carry per-parameter types; parameters
+-- of one signature share the definition line, so group by line (C ARG rows
+-- currently have no parent_symbol -- see FIX_PAR_NS.md adjacency) and look
+-- up the nearest preceding FUNC definition for the name.
+SELECT a.directory, a.filename, a.line, a.type, COUNT(*) AS same_type_args,
+       (SELECT f.symbol FROM code_index f
+        WHERE f.context = 'FUNC' AND f.is_definition = 1
+          AND f.directory = a.directory AND f.filename = a.filename
+          AND f.line <= a.line
+        ORDER BY f.line DESC LIMIT 1) AS function_name
+FROM code_index a
+WHERE a.context = 'ARG' AND a.is_definition = 1 AND COALESCE(a.type, '') <> ''
+GROUP BY a.directory, a.filename, a.line, a.type
+HAVING same_type_args >= 4
+ORDER BY same_type_args DESC;
+=========
+-- 15. Mutable module state inventory (hidden coupling)
+-- File-scope mutable state: static, non-const variable definitions, ranked
+-- by how often the same file references them.  High counts mark state that
+-- many functions in the module silently share.
+SELECT v.directory, v.filename, v.symbol, v.type,
+       (SELECT COUNT(*) FROM code_index u
+        WHERE u.symbol = v.symbol COLLATE NOCASE AND u.is_definition = 0
+          AND u.directory = v.directory AND u.filename = v.filename) AS local_refs
+FROM code_index v
+WHERE v.context = 'VAR' AND v.is_definition = 1
+  AND v.modifier LIKE '%static%' AND v.modifier NOT LIKE '%const%'
+ORDER BY local_refs DESC
+LIMIT 15;

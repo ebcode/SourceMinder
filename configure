@@ -709,7 +709,7 @@ web: $(WEB_DIR)
 		-sMODULARIZE=1 \
 		-sEXPORT_ES6=1 \
 		-sEXPORT_NAME='QiWebModule' \
-		-sEXPORTED_FUNCTIONS='["_qi_web_build","_qi_web_format","_qi_web_format_breakdown","_qi_web_format_files","_qi_web_format_no_results","_qi_web_free_result","_qi_web_toc_format","_malloc","_free"]' \
+		-sEXPORTED_FUNCTIONS='["_qi_web_build","_qi_web_format","_qi_web_format_breakdown","_qi_web_format_files","_qi_web_format_no_results","_qi_web_free_result","_qi_web_toc_format","_qi_web_help","_malloc","_free"]' \
 		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString","lengthBytesUTF8","stringToUTF8"]' \
 		-sALLOW_MEMORY_GROWTH=1 \
 		-sINITIAL_MEMORY=32MB \
@@ -728,10 +728,21 @@ web-test:
 web-parity:
 	node test/web-harness/parity.mjs --batch
 
+# Working-tree index for the web test harness (test/web-harness/projects.test.json):
+# index this repo with the local C indexer into build/test/, then snapshot a
+# browser-safe (non-WAL) copy via VACUUM INTO.  --exclude-dir html keeps demo
+# source copies under html/ out of the index.
+test-web-db: ./index-c
+	@mkdir -p build/test
+	@rm -f build/test/code-index.db build/test/code-index.browser.db
+	./index-c . --once --silent --db-file build/test/code-index.db --exclude-dir html
+	sqlite3 build/test/code-index.db "VACUUM INTO 'build/test/code-index.browser.db'"
+	@echo "wrote build/test/code-index.db + build/test/code-index.browser.db"
+
 $(WEB_DIR):
 	mkdir -p $(WEB_DIR)
 
-.PHONY: all clean install install-data uninstall lint debug test tests web web-smoke web-test web-parity
+.PHONY: all clean install install-data uninstall lint debug test tests web web-smoke web-test web-parity test-web-db
 
 # Substitute variables in Makefile
 if [ "$UNAME_S" = "Darwin" ]; then

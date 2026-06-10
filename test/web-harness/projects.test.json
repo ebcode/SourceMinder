@@ -1,0 +1,10 @@
+[
+  {
+    "id": "sourceminder-dev",
+    "name": "SourceMinder (working tree)",
+    "language": "c",
+    "dbUrl": "./build/test/code-index.browser.db",
+    "sourceBase": "./",
+    "nativeDb": "./build/test/code-index.db"
+  }
+]

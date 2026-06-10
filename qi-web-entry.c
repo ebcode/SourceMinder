@@ -102,6 +102,7 @@ typedef struct {
     WebColFilter clue;
     WebColFilter type;
     WebColFilter definition;
+    WebColFilter parent_type;  /* virtual: --parent-type, no backing column */
 } WebColFlags;
 
 typedef struct {
@@ -177,6 +178,7 @@ static void free_command(WebCommand *cmd) {
     free_col_filter(&cmd->cf.clue);
     free_col_filter(&cmd->cf.type);
     free_col_filter(&cmd->cf.definition);
+    free_col_filter(&cmd->cf.parent_type);
     memset(cmd, 0, sizeof(*cmd));
     cmd->definition = -1;
     cmd->limit = 0;  /* 0 = unlimited, matching the native CLI default (limit=0) */
@@ -454,7 +456,8 @@ static WebCommand parse_command(const char *input) {
         }
 
         /* Column filter flags: -p/--parent, -s/--scope, -ns/--namespace,
-         * -m/--modifier, -c/--clue, -t/--type, -d/--definition */
+         * -m/--modifier, -c/--clue, -t/--type, -d/--definition,
+         * --parent-type (virtual) */
         if (strcmp(t, "-p") == 0 || strcmp(t, "--parent") == 0) {
             parse_col_flag_values(&cmd.cf.parent, tokens, tc, &i, &cmd);
             i++; continue;
@@ -481,6 +484,13 @@ static WebCommand parse_command(const char *input) {
         }
         if (strcmp(t, "-d") == 0 || strcmp(t, "--definition") == 0) {
             parse_col_flag_values(&cmd.cf.definition, tokens, tc, &i, &cmd);
+            i++; continue;
+        }
+        if (strcmp(t, "--parent-type") == 0) {
+            parse_col_flag_values(&cmd.cf.parent_type, tokens, tc, &i, &cmd);
+            /* No parent_type column exists; surface the parent column
+             * instead, mirroring native's show_columns.parent_symbol = 1 */
+            cmd.cf.parent.show = 1;
             i++; continue;
         }
 
@@ -598,6 +608,13 @@ static void emit_header_lines(WebOutput *wo, const ContextTypeList *include,
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+    /* Virtual --parent-type filter has no X-macro entry; emit its line
+     * explicitly, matching native's "Filtering by parent type:" wording. */
+    if (filters->parent_type.count > 0) {
+        wo_printf(wo, "\nHDR|Filtering by parent type:");
+        for (int j = 0; j < filters->parent_type.count; j++)
+            wo_printf(wo, " %s", filters->parent_type.values[j]);
+    }
     /* --def/--usage set cmd.definition (and inject the SQL directly) rather than
      * populating filters.is_definition, so emit its line explicitly when the
      * X-macro above didn't already cover it. */
@@ -670,6 +687,7 @@ static void show_help_compact_web(WebOutput *wo) {
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+    wo_printf(wo, "      --parent-type PATTERN...   filter by parent's declared type (resolves parent to its definition)\n");
     wo_printf(wo, "      --def                      definitions only\n");
     wo_printf(wo, "      --usage                    usages only\n");
     wo_printf(wo, "      --lines LINE|START-END     filter line/range\n");
@@ -964,6 +982,7 @@ char *qi_web_build(const char *command) {
     POPULATE_COL_FILTER(filters.clue, cmd.cf.clue);
     POPULATE_COL_FILTER(filters.type, cmd.cf.type);
     POPULATE_COL_FILTER(filters.is_definition, cmd.cf.definition);
+    POPULATE_COL_FILTER(filters.parent_type, cmd.cf.parent_type);
 #undef POPULATE_COL_FILTER
 
     /* -- Files mode: SELECT DISTINCT directory, filename with same WHERE clause -- */
@@ -1075,6 +1094,7 @@ char *qi_web_build(const char *command) {
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+        if (filters.parent_type.count > 0) has_filters = 1;
         if (has_filters) wo_printf(&wo, "\nHAS_FILTERS|1");
 
         wo_printf(&wo, "\nNR_PATTERNS|");

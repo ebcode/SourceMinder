@@ -434,6 +434,33 @@ int build_common_filters_web(SqlQueryBuilder *builder,
 #undef COLUMN
 #undef INT_COLUMN
 
+    /* Virtual filter: --parent-type. Resolve parent_symbol to its
+     * definition in the same file (variable, argument, or struct field)
+     * and match that definition's declared type.  Outer-row references
+     * inside the correlated subquery must be qualified — bare names would
+     * resolve to def — so fall back to the code_index table name when no
+     * alias prefix is in play. */
+    if (filters && filters->parent_type.count > 0) {
+        const char *pt_prefix = (col_prefix && col_prefix[0]) ? col_prefix : "code_index.";
+        if (sql_append(builder,
+            " AND %sparent_symbol <> '' AND EXISTS ("
+            "SELECT 1 FROM code_index def"
+            " WHERE def.symbol = %sparent_symbol"
+            " AND def.directory = %sdirectory"
+            " AND def.filename = %sfilename"
+            " AND def.is_definition = 1"
+            " AND def.context IN ('VAR', 'ARG', 'PROP')"
+            " AND (", pt_prefix, pt_prefix, pt_prefix, pt_prefix) != 0) return -1;
+        for (int i = 0; i < filters->parent_type.count; i++) {
+            char *escaped_value = sqlite3_mprintf("%q", filters->parent_type.values[i]);
+            int ret = sql_append(builder, "%sdef.type LIKE %s ESCAPE '\\'",
+                i > 0 ? " OR " : "", escaped_value);
+            sqlite3_free(escaped_value);
+            if (ret != 0) return -1;
+        }
+        if (sql_append(builder, "))") != 0) return -1;
+    }
+
     return 0;
 }
 
