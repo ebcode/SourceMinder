@@ -4,12 +4,12 @@ bin
 .git
 node_modules
 tree-sitter-c
-tree-sitter-typescript
-tree-sitter-php
 tree-sitter-go
-tree-sitter-python
 tree-sitter-perl
+tree-sitter-php
+tree-sitter-python
 tree-sitter-rust
+tree-sitter-typescript
 c/src
 php/src
 typescript/src/

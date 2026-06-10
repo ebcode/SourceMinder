@@ -43,7 +43,7 @@ typedef struct {
 static char *build_toc_query(const TocConfig *config);
 static int compare_by_line(const void *a, const void *b);
 static void print_toc(FileToc *files, int file_count);
-static void print_section(const char *title, TocEntry *entries, int count, const char *context_filter);
+static void print_section(const char *title, TocEntry *entries, int count, const char *context_filter, int align_column);
 static void print_imports(TocEntry *entries, int count);
 static void cleanup_files(FileToc *files, int file_count);
 static int add_entry_to_file(FileToc **files, int *file_count, int *last_idx, const char *filepath,
@@ -257,7 +257,7 @@ static int compare_by_line(const void *a, const void *b) {
 }
 
 /* Print a section of TOC entries */
-static void print_section(const char *title, TocEntry *entries, int count, const char *context_filter) {
+static void print_section(const char *title, TocEntry *entries, int count, const char *context_filter, int align_column) {
     /* Collect matching entries */
     TocEntry **filtered = malloc(sizeof(TocEntry*) * (size_t)count);
     if (!filtered) {
@@ -280,16 +280,20 @@ static void print_section(const char *title, TocEntry *entries, int count, const
     /* Sort by line number */
     qsort(filtered, (size_t)filtered_count, sizeof(TocEntry*), compare_by_line);
 
+    /* align_column is computed once per file (see compute_align_column) so the
+       line-number column lines up vertically across every section. Symbols at
+       or below it align with a dot run; wider symbols overflow past it but still
+       get TOC_MIN_DOT_LEADERS dots so the eye always has a leader to follow. */
+    char dots[TOC_ALIGN_MAX_COLUMN + TOC_MIN_DOT_LEADERS + 1];
+    memset(dots, '.', sizeof(dots) - 1);
+    dots[sizeof(dots) - 1] = '\0';
+
     printf("%s (%d):\n", title, filtered_count);
     for (int i = 0; i < filtered_count; i++) {
-        /* Calculate padding for dots */
         int symbol_len = (int)strlen(filtered[i]->symbol);
-        int line_len = snprintf(NULL, 0, "%d", filtered[i]->start_line);
-        int dots_needed = 70 - symbol_len - line_len - 3; /* 3 for spaces */
-        if (dots_needed < 1) dots_needed = 1;
-
-        static const char dots[72] =
-            "........................................................................";
+        int dots_needed = align_column - symbol_len + TOC_MIN_DOT_LEADERS;
+        if (dots_needed < TOC_MIN_DOT_LEADERS) dots_needed = TOC_MIN_DOT_LEADERS;
+        if (dots_needed > (int)sizeof(dots) - 1) dots_needed = (int)sizeof(dots) - 1;
         printf("  %s %.*s %d\n", filtered[i]->symbol, dots_needed, dots, filtered[i]->start_line);
     }
     printf("\n");
@@ -346,6 +350,27 @@ static void print_imports(TocEntry *entries, int count) {
     free(imports);
 }
 
+/* Widest section symbol in a file, capped at TOC_ALIGN_MAX_COLUMN, so every
+   section shares one line-number column. Imports are excluded (printed inline,
+   not in an aligned section). */
+static int compute_align_column(TocEntry *entries, int count) {
+    static const char *section_contexts[] = {"CLASS", "FUNC", "ENUM", "TYPE", "MACRO"};
+    int max_symbol_len = 0;
+    for (int i = 0; i < count; i++) {
+        int in_section = 0;
+        for (size_t s = 0; s < sizeof(section_contexts) / sizeof(section_contexts[0]); s++) {
+            if (strcmp(entries[i].context, section_contexts[s]) == 0) {
+                in_section = 1;
+                break;
+            }
+        }
+        if (!in_section) continue;
+        int len = (int)strlen(entries[i].symbol);
+        if (len > max_symbol_len) max_symbol_len = len;
+    }
+    return max_symbol_len < TOC_ALIGN_MAX_COLUMN ? max_symbol_len : TOC_ALIGN_MAX_COLUMN;
+}
+
 /* Print complete TOC */
 static void print_toc(FileToc *files, int file_count) {
     for (int i = 0; i < file_count; i++) {
@@ -356,12 +381,15 @@ static void print_toc(FileToc *files, int file_count) {
         /* Print imports first (special formatting) */
         print_imports(file->entries, file->entry_count);
 
+        /* One alignment column for all sections of this file */
+        int align_column = compute_align_column(file->entries, file->entry_count);
+
         /* Print sections in order */
-        print_section("CLASSES", file->entries, file->entry_count, "CLASS");
-        print_section("FUNCTIONS", file->entries, file->entry_count, "FUNC");
-        print_section("ENUMS", file->entries, file->entry_count, "ENUM");
-        print_section("TYPES", file->entries, file->entry_count, "TYPE");
-        print_section("MACROS", file->entries, file->entry_count, "MACRO");
+        print_section("CLASSES", file->entries, file->entry_count, "CLASS", align_column);
+        print_section("FUNCTIONS", file->entries, file->entry_count, "FUNC", align_column);
+        print_section("ENUMS", file->entries, file->entry_count, "ENUM", align_column);
+        print_section("TYPES", file->entries, file->entry_count, "TYPE", align_column);
+        print_section("MACROS", file->entries, file->entry_count, "MACRO", align_column);
 
         if (i < file_count - 1) {
             printf("\n");  /* Blank line between files */

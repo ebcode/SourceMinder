@@ -3,10 +3,13 @@ dist
 tmp
 benchmark
 tree-sitter-c
-tree-sitter-typescript
 tree-sitter-go
+tree-sitter-perl
 tree-sitter-php
+tree-sitter-python
+tree-sitter-rust
+tree-sitter-typescript
 
-#excalidraw
+#
 harfbuzz-wasm.ts
 woff2-wasm.ts

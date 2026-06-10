@@ -27,7 +27,45 @@ WHERE parent_symbol='this';"
 **How it works:**
 - For `obj.method()` → `method` has parent `obj`
 - For `this.target.getBounds()` → `getBounds` has parent `target` (immediate parent)
+- For designated initializers `Config c = {.name = "x"}` → `name` has parent `c`
 - Direct calls like `foo()` have no parent (empty string)
+
+### Parent Type Filtering (`--parent-type`)
+
+`parent_symbol` always holds the *syntactic* parent (the variable name as written).
+To query by the parent's **declared type** instead — across all instances, regardless
+of what each local variable is named — use `--parent-type`:
+
+```bash
+# All fields initialized on ANY variable of declared type "IndexerConfig" (exact)
+qi % -i prop --parent-type IndexerConfig
+
+# Pointer/qualified declarations ("const IndexerConfig *", "IndexerConfig*")
+# need explicit wildcards -- exactly as they would with -t
+qi % -i prop --parent-type '*IndexerConfig*'
+
+# All function-pointer members invoked through any IndexerConfig
+qi % -i call --parent-type '*IndexerConfig*'
+
+# Which fields of SymbolFilter does the codebase actually touch?
+qi % --parent-type '*SymbolFilter*' --columns sym par ctx
+```
+
+Pattern semantics are identical to `-p`/`-c`/`-t`: exact match by default
+(case-insensitive), `*`/`.` wildcards, multiple values OR together. The only
+difference is which row's column is compared: `-t` matches the row's own
+type annotation, while `--parent-type` matches the type of the *parent's
+definition*.
+
+**How it works:** at query time, `parent_symbol` is resolved to its definition
+(variable, argument, or struct field) in the same file, and that definition's
+`type` column is matched against the pattern. No extra index data is needed —
+it joins metadata the indexer already stores.
+
+**Limitations:** resolution is per-file, so two same-named variables with
+different types in one file can both match; parents that never have a typed
+definition in the same file (e.g., globals declared in another header) won't
+resolve.
 
 ### Scope/Access Modifier Filtering
 

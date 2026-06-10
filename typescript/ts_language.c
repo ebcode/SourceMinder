@@ -472,52 +472,75 @@ static void visit_expression(
             add_entry(result, symbol, line, context, directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
         }
     }
-    /* Handle member expressions like obj.prop - but don't re-index, let specific handlers handle these */
+    /* Handle member expressions like obj.prop. Method calls (obj.method())
+     * never reach here -- handle_call_expression consumes the function
+     * child itself. Index the property with its immediate parent. */
     else if (node_sym == ts_symbols.member_expression) {
         if (g_debug) {
-            debug("[visit_expression] Line %d: Visiting member_expression children", line);
+            debug("[visit_expression] Line %d: Visiting member_expression", line);
         }
-        /* Visit the object part recursively */
         TSNode object = ts_node_child_by_field_name(node, "object", 6);
+        TSNode property = ts_node_child_by_field_name(node, "property", 8);
+
+        /* Extract the immediate parent name from the object side */
+        char parent_symbol[SYMBOL_MAX_LENGTH] = "";
+        int visit_object = 0;
         if (!ts_node_is_null(object)) {
-            visit_expression(object, source_code, directory, filename, result, filter);
+            TSSymbol object_sym = ts_node_symbol(object);
+            if (object_sym == ts_symbols.identifier || object_sym == ts_symbols.this_keyword) {
+                /* Plain receiver: captured as the parent, not indexed again */
+                safe_extract_node_text(source_code, object, parent_symbol, sizeof(parent_symbol), filename);
+            } else if (object_sym == ts_symbols.member_expression) {
+                /* a.b.c: c's parent is b (immediate parent); recurse so
+                 * b gets its own entry with parent a */
+                TSNode parent_prop = ts_node_child_by_field_name(object, "property", 8);
+                if (!ts_node_is_null(parent_prop)) {
+                    safe_extract_node_text(source_code, parent_prop, parent_symbol, sizeof(parent_symbol), filename);
+                }
+                visit_object = 1;
+            } else {
+                /* Complex receiver (call, subscript, ...): no single parent name */
+                visit_object = 1;
+            }
         }
 
-        /* Index the property when in argument context */
+        /* Skip the property when this member expression is the function
+         * being called (greeter.greet()): handle_call_expression already
+         * indexed it as CALL. The receiver handling below still runs to
+         * pick up intermediate links in chained calls. */
+        int is_call_function = 0;
         TSNode parent_node = ts_node_parent(node);
-        if (!ts_node_is_null(parent_node)) {
-            TSSymbol parent_sym = ts_node_symbol(parent_node);
-            if (parent_sym == ts_symbols.arguments) {
-                TSNode property = ts_node_child_by_field_name(node, "property", 8);
-                if (!ts_node_is_null(property)) {
-                    char property_symbol[SYMBOL_MAX_LENGTH];
-                    char parent_symbol[SYMBOL_MAX_LENGTH] = "";
-                    safe_extract_node_text(source_code, property, property_symbol, sizeof(property_symbol), filename);
-
-                    /* Extract parent from object */
-                    if (!ts_node_is_null(object)) {
-                        TSSymbol object_sym = ts_node_symbol(object);
-                        if (object_sym == ts_symbols.identifier || object_sym == ts_symbols.this_keyword) {
-                            safe_extract_node_text(source_code, object, parent_symbol, sizeof(parent_symbol), filename);
-                        } else if (object_sym == ts_symbols.member_expression) {
-                            /* Nested member - get property from parent member expression */
-                            TSNode parent_prop = ts_node_child_by_field_name(object, "property", 8);
-                            if (!ts_node_is_null(parent_prop)) {
-                                safe_extract_node_text(source_code, parent_prop, parent_symbol, sizeof(parent_symbol), filename);
-                            }
-                        }
-                    }
-
-                    if (filter_should_index(filter, property_symbol)) {
-                        if (g_debug) {
-                            debug("[visit_expression] Line %d: Indexing property '%s' as ARG with parent='%s'",
-                                  line, property_symbol, parent_symbol[0] ? parent_symbol : "(none)");
-                        }
-                        add_entry(result, property_symbol, line, CONTEXT_ARGUMENT, directory, filename, NULL,
-                                &(ExtColumns){.parent = parent_symbol[0] ? parent_symbol : NULL, .definition = "0"});
-                    }
-                }
+        if (!ts_node_is_null(parent_node) &&
+            ts_node_symbol(parent_node) == ts_symbols.call_expression) {
+            TSNode fn = ts_node_child_by_field_name(parent_node, "function", 8);
+            if (!ts_node_is_null(fn) && ts_node_eq(fn, node)) {
+                is_call_function = 1;
             }
+        }
+
+        if (!is_call_function && !ts_node_is_null(property)) {
+            char property_symbol[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, property, property_symbol, sizeof(property_symbol), filename);
+
+            if (filter_should_index(filter, property_symbol)) {
+                /* In argument position keep the established ARG context;
+                 * anywhere else this is a property read */
+                ContextType context = CONTEXT_PROPERTY;
+                if (!ts_node_is_null(parent_node) &&
+                    ts_node_symbol(parent_node) == ts_symbols.arguments) {
+                    context = CONTEXT_ARGUMENT;
+                }
+                if (g_debug) {
+                    debug("[visit_expression] Line %d: Indexing property '%s' with parent='%s'",
+                          line, property_symbol, parent_symbol[0] ? parent_symbol : "(none)");
+                }
+                add_entry(result, property_symbol, line, context, directory, filename, NULL,
+                        &(ExtColumns){.parent = parent_symbol[0] ? parent_symbol : NULL, .definition = "0"});
+            }
+        }
+
+        if (visit_object) {
+            visit_expression(object, source_code, directory, filename, result, filter);
         }
     }
     /* Handle call expressions - delegate to visit_node so handler gets called */
@@ -1726,8 +1749,13 @@ static void handle_property_signature(TSNode node, const char *source_code, cons
         }
 
         if (filter_should_index(filter, symbol)) {
-            add_entry(result, symbol, line, CONTEXT_PROPERTY, directory, filename, NULL,
-                &(ExtColumns){.scope = scope, .modifier = modifier, .type = type_str[0] ? type_str : NULL});
+            /* Class fields and interface property signatures are declarations */
+            char location[SOURCE_LOCATION_MAX_LENGTH];
+            format_source_location(node, location, sizeof(location));
+            add_entry(result, symbol, line, CONTEXT_PROPERTY, directory, filename, location,
+                &(ExtColumns){.scope = scope, .modifier = modifier,
+                              .type = type_str[0] ? type_str : NULL,
+                              .definition = "1"});
         }
     }
 
@@ -2191,6 +2219,27 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
             fprintf(stderr, "[DEBUG] visit_node: calling handler for function_expression\n");
         }
         handle_function_expression(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == ts_symbols.member_expression) {
+        /* Property read outside an expression context (variable initializer,
+         * bare statement): route through the expression walker so it gets
+         * indexed as PROP with parent. Direct call arguments are skipped --
+         * handle_call_expression's argument loop already indexes those
+         * with the function name as clue. */
+        int handled_by_call = 0;
+        TSNode parent = ts_node_parent(node);
+        if (!ts_node_is_null(parent) &&
+            ts_node_symbol(parent) == ts_symbols.arguments) {
+            TSNode grandparent = ts_node_parent(parent);
+            if (!ts_node_is_null(grandparent) &&
+                ts_node_symbol(grandparent) == ts_symbols.call_expression) {
+                handled_by_call = 1;
+            }
+        }
+        if (!handled_by_call) {
+            visit_expression(node, source_code, directory, filename, result, filter);
+        }
         return;
     }
 

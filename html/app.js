@@ -6,9 +6,17 @@
  * xterm.js and FitAddon are loaded via <script> tags (UMD bundles).
  */
 
+import { createStateMachine } from './statemachine.js';
+
 var statusEl = document.getElementById("status");
 var summaryEl = document.getElementById("summary");
 var terminalContainerEl = document.getElementById("terminal-container");
+var terminalWrapEl = document.getElementById("terminal-wrap");
+var expandBtnEl = document.getElementById("expand-btn");
+var scrollSlowBtnEl = document.getElementById("scroll-slow-btn");
+var scrollFastBtnEl = document.getElementById("scroll-fast-btn");
+var scrollStopBtnEl = document.getElementById("scroll-stop-btn");
+var scrollLogEl     = document.getElementById("scroll-log");
 var errorEl = document.getElementById("error");
 var projectSelectEl = document.getElementById("project-select");
 var projectDownloadEl = document.getElementById("project-download");
@@ -20,6 +28,98 @@ var cursorPos = 0;
 var isExecuting = false;
 var switching = false;   /* a project switch is in flight; keep input gated */
 var PROMPT = "$ ";
+
+/* Momentum scroll */
+var SCROLL_LINE_PX   = 16;     /* px per terminal line at 14px font / 1.2 line-height */
+var SCROLL_FRICTION  = 0.9;    /* velocity multiplier per 16ms frame */
+var SCROLL_MIN_VEL   = 0.0005; /* px/ms — stop animation below this */
+var _scrollRafId     = null;
+var _scrollVel       = 0;      /* px/ms, positive = scroll toward older content */
+var _scrollAcc       = 0;      /* sub-line accumulator */
+var _scrollLastT     = 0;
+
+function _momentumFrame(now) {
+    var dt = Math.min(now - _scrollLastT, 50); /* clamp if tab was backgrounded */
+    _scrollLastT = now;
+    _scrollVel  *= Math.pow(SCROLL_FRICTION, dt / 16);
+    _scrollAcc  += _scrollVel * dt;
+    var lines = Math.trunc(_scrollAcc / SCROLL_LINE_PX);
+    if (lines !== 0 && term) {
+        term.scrollLines(-lines);
+        _scrollAcc -= lines * SCROLL_LINE_PX;
+    }
+    if (Math.abs(_scrollVel) > SCROLL_MIN_VEL) {
+        _scrollRafId = requestAnimationFrame(_momentumFrame);
+    } else {
+        _scrollRafId = null;
+    }
+}
+
+function startMomentumScroll(velPxMs) {
+    if (_scrollRafId) cancelAnimationFrame(_scrollRafId);
+    _scrollVel  = velPxMs;
+    _scrollAcc  = 0;
+    _scrollLastT = performance.now();
+    _scrollRafId = requestAnimationFrame(_momentumFrame);
+}
+
+function stopMomentumScroll() {
+    if (_scrollRafId) { cancelAnimationFrame(_scrollRafId); _scrollRafId = null; }
+    _scrollVel = 0;
+    _scrollAcc = 0;
+}
+
+function logScrollEvent(msg) {
+    if (!scrollLogEl) return;
+    var p = document.createElement("p");
+    p.textContent = msg;
+    scrollLogEl.insertBefore(p, scrollLogEl.firstChild);
+    while (scrollLogEl.children.length > 8) scrollLogEl.removeChild(scrollLogEl.lastChild);
+}
+
+/* Tuning surface — accessible from browser console as scroll.start(v), scroll.stop(), scroll.set({...}) */
+window.scroll = {
+    start: startMomentumScroll,
+    stop:  stopMomentumScroll,
+    log:   logScrollEvent,
+    set: function(opts) {
+        if (opts.friction  !== undefined) SCROLL_FRICTION  = opts.friction;
+        if (opts.linePx    !== undefined) SCROLL_LINE_PX   = opts.linePx;
+        if (opts.minVel    !== undefined) SCROLL_MIN_VEL   = opts.minVel;
+        if (opts.rawMin    !== undefined) TOUCH_V_RAW_MIN  = opts.rawMin;
+        if (opts.rawMax    !== undefined) TOUCH_V_RAW_MAX  = opts.rawMax;
+        if (opts.curve     !== undefined) TOUCH_V_CURVE    = opts.curve;
+    },
+    get: function() {
+        return { friction: SCROLL_FRICTION, linePx: SCROLL_LINE_PX, minVel: SCROLL_MIN_VEL,
+                 rawMin: TOUCH_V_RAW_MIN, rawMax: TOUCH_V_RAW_MAX, curve: TOUCH_V_CURVE };
+    },
+};
+
+/* Touch velocity normalization */
+var TOUCH_V_RAW_MIN    = 0.1;   /* px/ms — below this, no momentum fires */
+var TOUCH_V_RAW_MAX    = 5.0;   /* px/ms — clamps to TOUCH_V_SCROLL_MAX */
+var TOUCH_V_SCROLL_MIN = 0.5;
+var TOUCH_V_SCROLL_MAX = 112;
+var TOUCH_V_CURVE      = 2;     /* power curve exponent: >1 = convex (gentle low, strong high) */
+
+/* Touch state machine */
+var touch = createStateMachine({
+    idle:      ['pressed', 'post_stop'],
+    pressed:   ['idle', 'swiping'],
+    post_stop: ['idle', 'swiping'],
+    swiping:   ['idle'],
+}, 'idle');
+
+var _touchLastY   = 0;
+var _touchDragAcc = 0;    /* sub-line px accumulator for real-time drag */
+var _touchWindow  = [];   /* rolling [{y, t}] entries covering last ~80ms */
+
+function _normalizeTouchVel(rawPxMs) {
+    if (rawPxMs < TOUCH_V_RAW_MIN) return 0;
+    var t = Math.min((rawPxMs - TOUCH_V_RAW_MIN) / (TOUCH_V_RAW_MAX - TOUCH_V_RAW_MIN), 1);
+    return TOUCH_V_SCROLL_MIN + Math.pow(t, TOUCH_V_CURVE) * (TOUCH_V_SCROLL_MAX - TOUCH_V_SCROLL_MIN);
+}
 
 /* Project state */
 var projectsById = {};
@@ -300,8 +400,8 @@ function installTerminal() {
             cursor: "#9dd4ff",
             selectionBackground: "#2a3f6e",
         },
-        cols: 100,
-        rows: 42,
+        cols: 80,
+        rows: 24,
     });
 
     var fitAddon = new FitAddonCtor();
@@ -318,6 +418,12 @@ function installTerminal() {
          * the user can scroll back through output while a query is streaming. */
         if (event.key === "PageUp")   { term.scrollPages(-1); return false; }
         if (event.key === "PageDown") { term.scrollPages(1);  return false; }
+        if (event.key === "Escape" && terminalWrapEl.classList.contains("fullscreen")) {
+            terminalWrapEl.classList.remove("fullscreen");
+            expandBtnEl.textContent = "Expand";
+            term.resize(80, 24);
+            return false;
+        }
 
         if (isExecuting) return true;
 
@@ -389,10 +495,94 @@ function installTerminal() {
         }
     });
 
-    /* Fit terminal to container on resize */
-    try { fitAddon.fit(); } catch (_) { /* ignore */ }
+    /* Expand button toggles full-viewport mode */
+    expandBtnEl.addEventListener("click", function() {
+        terminalWrapEl.classList.toggle("fullscreen");
+        var isFullscreen = terminalWrapEl.classList.contains("fullscreen");
+        expandBtnEl.textContent = isFullscreen ? "Collapse" : "Expand";
+        if (isFullscreen) {
+            try { fitAddon.fit(); } catch (_) {}
+        } else {
+            term.resize(80, 24);
+        }
+        term.focus();
+    });
+
+    /* Scroll test buttons — simulate momentum from touch gesture velocities */
+    scrollSlowBtnEl.addEventListener("click", function() {
+        startMomentumScroll(0.5);
+        logScrollEvent("simulated slow:  vel=0.5");
+    });
+    scrollFastBtnEl.addEventListener("click", function() {
+        startMomentumScroll(112);
+        logScrollEvent("simulated fast:  vel=112");
+    });
+    scrollStopBtnEl.addEventListener("click", function() {
+        stopMomentumScroll();
+        logScrollEvent("stopped");
+    });
+
+    /* Touch scroll — state machine: idle → pressed|post_stop → swiping → idle */
+    terminalContainerEl.addEventListener("touchstart", function(e) {
+        e.preventDefault();
+        var y = e.touches[0].clientY;
+        if (_scrollRafId !== null) touch.post_stop(); else touch.pressed();
+        stopMomentumScroll();
+        _touchLastY   = y;
+        _touchDragAcc = 0;
+        _touchWindow  = [{ y: y, t: performance.now() }];
+    }, { passive: false });
+
+    terminalContainerEl.addEventListener("touchmove", function(e) {
+        e.preventDefault();
+        var now = performance.now();
+        var y   = e.touches[0].clientY;
+
+        touch.swiping?.();   /* valid from pressed/post_stop; no-op if already swiping */
+
+        if (touch.state === 'swiping') {
+            _touchDragAcc += y - _touchLastY;
+            var lines = Math.trunc(_touchDragAcc / SCROLL_LINE_PX);
+            if (lines !== 0) {
+                term.scrollLines(-lines);
+                _touchDragAcc -= lines * SCROLL_LINE_PX;
+            }
+        }
+
+        _touchLastY = y;
+        _touchWindow.push({ y: y, t: now });
+        while (_touchWindow.length > 1 && now - _touchWindow[0].t > 80) {
+            _touchWindow.shift();
+        }
+    }, { passive: false });
+
+    function _endGesture() {
+        var was = touch.state;
+        touch.idle();
+
+        if (was === 'pressed')   { logScrollEvent("tap → focus"); term.focus(); return; }
+        if (was === 'post_stop') { logScrollEvent("post_stop → idle"); return; }
+
+        /* swiping — compute velocity and fire momentum */
+        if (_touchWindow.length < 2) return;
+        var oldest = _touchWindow[0];
+        var newest = _touchWindow[_touchWindow.length - 1];
+        var dt = newest.t - oldest.t;
+        if (dt < 1) return;
+        var rawVel = Math.abs(newest.y - oldest.y) / dt;
+        var dir    = oldest.y > newest.y ? -1 : 1;
+        var mapped = _normalizeTouchVel(rawVel);
+        logScrollEvent("touch: raw=" + rawVel.toFixed(3) + "  mapped=" + mapped.toFixed(1));
+        if (mapped > 0) startMomentumScroll(mapped * dir);
+    }
+
+    terminalContainerEl.addEventListener("touchend",    _endGesture, { passive: true });
+    terminalContainerEl.addEventListener("touchcancel", _endGesture, { passive: true });
+
     window.addEventListener("resize", function() {
-        try { fitAddon.fit(); } catch (_) { /* ignore */ }
+        if (terminalWrapEl.classList.contains("fullscreen")) {
+            try { fitAddon.fit(); } catch (_) {}
+        }
     });
 
     //termWrite("qi WASM bridge ready. Type a qi command.\r\n");

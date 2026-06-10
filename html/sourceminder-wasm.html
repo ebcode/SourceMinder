@@ -17,7 +17,7 @@
     margin:auto auto;
 }
 .paper-grid {
-    padding:24px;
+    padding:12x;
 }
 
 article {
@@ -36,16 +36,79 @@ article {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 1.25em;
 }
-.project-bar select { font-size: inherit; }
-#status, #summary { display: none !important; }
+#summary { display: none !important; }
 .download-wrap:has(#project-download[hidden]) { display: none; }
 
 
 .term {
     padding: 12px;
-    margin: 1em;
+    margin: 12px auto !important;
+    width: fit-content !important;
+    touch-action: none;
+}
+
+#terminal-controls {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 6px;
+}
+#terminal-controls button {
+    padding: 2px 10px;
+    cursor: pointer;
+    background: transparent;
+    color: inherit;
+    border: 1px solid currentColor;
+    border-radius: 3px;
+    font-family: inherit;
+    font-size: 11px;
+    opacity: 0.5;
+}
+#terminal-controls button:hover { opacity: 1; }
+#terminal-wrap.fullscreen {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 9999;
+    background: #0d152b;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+#terminal-wrap.fullscreen #terminal-container {
+    flex: 1;
+    min-height: 0;
+    width: 100% !important;
+    margin: 0;
+    box-sizing: border-box;
+}
+#terminal-wrap.fullscreen #terminal-controls {
+    flex-shrink: 0;
+    padding: 4px 0;
+}
+#terminal-wrap.fullscreen #terminal-controls button {
+    color: #9dd4ff;
+    border-color: rgba(157,212,255,0.4);
+}
+
+#scroll-log {
+    font-family: monospace;
+    font-size: 11px;
+    margin-top: 6px;
+    opacity: 0.7;
+    min-height: 1em;
+}
+#scroll-log p { margin: 1px 0; }
+
+.layout-cols {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    margin-top: 12px;
+}
+.col-info { flex: 1 1 0; min-width: 0; }
+@media (max-width: 992px) {
+    .layout-cols { flex-direction: column; }
 }
 
 </style>
@@ -56,41 +119,55 @@ article {
 </div>
 
 <div class="main container">
+  <div class="layout-cols">
 
-    <div class="frame surface-vellum paper-grid" data-pad="24" style="margin-top:12px;">
+    <div class="col-info">
+      <div class="frame surface-vellum paper-grid" data-pad="24">
         <article>
             <p>SourceMinder is a collection of cli tools to aid in source code navigation and understanding.
                 A handful of language-specific indexers (index-c, index-python, index-go, etc), and a unified query engine, query-index (qi).
             </p>
             <p>
-                SourceMinder was built with both humans and LLMs in mind. As a "context-aware grep", it helps human programmers avoid 
+                SourceMinder was built with both humans and LLMs in mind. As a "context-aware grep", it helps human programmers avoid
                 the false positives that come with regular searches. And for LLMs: compact output; flags to orient quickly on
                 codebases; and clean output for Edit/Patch anchors.
             </p>
             <p>
                 The main idea is pretty straightforward. In code, the individual symbols take various forms.
-                A symbol might be a function name, or a variable name. Or it might appear in a string or a comment. What if you could 
+                A symbol might be a function name, or a variable name. Or it might appear in a string or a comment. What if you could
                 search your codebase with that context as a filter? So instead of "grep user", you could do "grep user --include function"?
                 Or, "grep user --exclude comment"? That's what qi lets you do.
-            </p>            
-        </article>        
+            </p>
+        </article>
+      </div>
     </div>
 
-<p id="status" class="status">Loading...</p>
-<div class="project-bar">
-  <div class="project-bar-left">
-    <label for="project-select">Project</label>
-    <select id="project-select" hidden></select>
-    <span id="load-status">Loading…</span>
-  </div>
-  <div class="project-bar-right">
-    <span class="download-wrap">Download <a id="project-download" hidden></a><span id="download-size"></span></span>
-  </div>
-</div>
-<div id="summary" hidden></div>
-<div id="terminal-container" class="panel term"></div>
-<p id="error" hidden></p>
+    <div class="col-terminal">
+      <p id="status" class="status">Loading...</p>
+      <div class="project-bar">
+        <div class="project-bar-left">
+          <label for="project-select">Project</label>
+          <select id="project-select" hidden></select>
+        </div>
+        <div class="project-bar-right">
+          <span class="download-wrap">Download <a id="project-download" hidden></a><span id="download-size"></span></span>
+        </div>
+      </div>
+      <div id="summary" hidden></div>
+      <div id="terminal-wrap">
+        <div id="terminal-container" class="term panel"></div>
+        <div id="terminal-controls">
+          <button id="expand-btn">Expand</button>
+          <button id="scroll-slow-btn">↑ Slow</button>
+          <button id="scroll-fast-btn">↑ Fast</button>
+          <button id="scroll-stop-btn">Stop</button>
+        </div>
+        <div id="scroll-log"></div>
+      </div>
+      <p id="error" hidden></p>
+    </div>
 
+  </div>
 </div>
 
   <script src="./node_modules/xterm/lib/xterm.js"></script>

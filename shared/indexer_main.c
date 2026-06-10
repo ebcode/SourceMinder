@@ -522,7 +522,20 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     int total_files_processed = 0;
 
     /* Begin transaction for better performance */
-    db_begin_transaction(&db);
+    if (db_begin_transaction(&db) != SQLITE_OK) {
+        fprintf(stderr,
+                "Aborting: could not begin a database transaction. The database may be\n"
+                "locked or have a stale write-ahead log from an interrupted run. Remove\n"
+                "the leftover '%s-wal' and '%s-shm' files and try again.\n",
+                db_file, db_file);
+        free_parse_result(result);
+        free(result);
+        config->parser_free(parser);
+        filter_free_regex(filter);
+        free(filter);
+        db_close(&db);
+        return 1;
+    }
 
     if (mode == MODE_FILES) {
         /* File mode: index individual files */
@@ -596,7 +609,20 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     }
 
     /* Commit transaction */
-    db_commit_transaction(&db);
+    if (db_commit_transaction(&db) != SQLITE_OK) {
+        fprintf(stderr,
+                "Aborting: failed to commit the index; no data was written. This often\n"
+                "indicates a stale write-ahead log from an interrupted run. Remove the\n"
+                "leftover '%s-wal' and '%s-shm' files and try again.\n",
+                db_file, db_file);
+        free_parse_result(result);
+        free(result);
+        config->parser_free(parser);
+        filter_free_regex(filter);
+        free(filter);
+        db_close(&db);
+        return 1;
+    }
 
     if (!quiet_init && !silent) {
         printf("Indexing complete: %d files processed\n", total_files_processed);

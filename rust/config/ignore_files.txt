@@ -8,3 +8,12 @@ build
 node_modules
 .git
 vendor
+tmp
+
+tree-sitter-c
+tree-sitter-go
+tree-sitter-perl
+tree-sitter-php
+tree-sitter-python
+tree-sitter-rust
+tree-sitter-typescript

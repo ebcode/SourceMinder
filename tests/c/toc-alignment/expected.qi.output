@@ -1,0 +1,22 @@
+Result breakdown: FILE (1), FUNC (5), IMP (1), MACRO (1), TYPE (4)
+
+tests/c/toc-alignment/toc-alignment.c:
+
+IMPORTS (1): <stdio.h>
+
+FUNCTIONS (5):
+  fn ......................................... 18
+  do_one_thing ............................... 21
+  function_name_at_exactly_forty_chars_wid ... 24
+  function_name_that_overflows_the_alignment_column ... 27
+  main ....................................... 38
+
+TYPES (4):
+  Pt ......................................... 30
+  Pt ......................................... 30
+  struct_name_at_exactly_forty_characters_ ... 31
+  struct_name_at_exactly_forty_characters_ ... 31
+
+MACROS (1):
+  MACRO_NAME_OVERFLOWING_THE_ALIGNMENT_COLUMN_LIMIT ... 36
+

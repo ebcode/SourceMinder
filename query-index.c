@@ -98,6 +98,10 @@ typedef struct {
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+    /* Virtual filter (no backing column): --parent-type resolves
+     * parent_symbol to its same-file definition and matches that
+     * definition's declared type */
+    StringList parent_type;
 } QueryFilters;
 
 /* Within filter - stores symbol names for --within flag */
@@ -985,6 +989,29 @@ static int build_common_filters(SqlQueryBuilder *builder,
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+
+    /* Virtual filter: --parent-type. Resolve parent_symbol to its
+     * definition in the same file (variable, argument, or struct field)
+     * and match that definition's declared type. */
+    if (filters && filters->parent_type.count > 0) {
+        if (sql_append(builder,
+            " AND parent_symbol <> '' AND EXISTS ("
+            "SELECT 1 FROM code_index def"
+            " WHERE def.symbol = code_index.parent_symbol"
+            " AND def.directory = code_index.directory"
+            " AND def.filename = code_index.filename"
+            " AND def.is_definition = 1"
+            " AND def.context IN ('VAR', 'ARG', 'PROP')"
+            " AND (") != 0) return -1;
+        for (int i = 0; i < filters->parent_type.count; i++) {
+            char *escaped_value = sqlite3_mprintf("%q", filters->parent_type.values[i]);
+            int ret = sql_append(builder, "%sdef.type LIKE '%s' ESCAPE '\\'",
+                i > 0 ? " OR " : "", escaped_value);
+            sqlite3_free(escaped_value);
+            if (ret != 0) return -1;
+        }
+        if (sql_append(builder, "))") != 0) return -1;
+    }
 
     return 0;
 }
@@ -2577,6 +2604,7 @@ static void show_help_compact(void) {
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+    printf("      --parent-type PATTERN...   filter by parent's declared type (resolves parent to its definition)\n");
     printf("      --def                      definitions only\n");
     printf("      --usage                    usages only\n");
     printf("      --lines LINE|START-END     filter line/range\n");
@@ -2722,6 +2750,7 @@ int main(int argc, char *argv[]) {
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+        .parent_type = { .count = 0 },
     };
 
     /* X-Macro: Initialize show flags for extensible columns */
@@ -2951,6 +2980,22 @@ int main(int argc, char *argv[]) {
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+        /* Virtual filter: --parent-type resolves parent_symbol to its
+         * same-file definition and matches that definition's type */
+        else if (strcmp(argv[i], "--parent-type") == 0) {
+            show_columns.parent_symbol = 1;
+            while (i + 1 < argc && argv[i + 1][0] != '-') {
+                if (filters.parent_type.count < MAX_CONTEXT_TYPES) {
+                    char converted_value[SYMBOL_MAX_LENGTH];
+                    convert_wildcards(argv[i + 1], converted_value, sizeof(converted_value));
+                    filters.parent_type.values[filters.parent_type.count++] = safe_strdup_ctx(converted_value, "Failed to allocate memory for parent-type filter");
+                } else {
+                    fprintf(stderr, "Warning: Maximum filter limit (%d) reached for --parent-type. Ignoring: %s\n",
+                            MAX_CONTEXT_TYPES, argv[i + 1]);
+                }
+                i++;
+            }
+        }
         /* Convenience aliases for is_definition filter */
         else if (strcmp(argv[i], "--def") == 0) {
             def_only = 1;
@@ -3547,6 +3592,15 @@ int main(int argc, char *argv[]) {
 #undef COLUMN
 #undef INT_COLUMN
 
+        /* Print parent-type filter info */
+        if (filters.parent_type.count > 0) {
+            printf("Filtering by parent type:");
+            for (int j = 0; j < filters.parent_type.count; j++) {
+                printf(" %s", filters.parent_type.values[j]);
+            }
+            printf("\n");
+        }
+
         /* Print within filter info */
         if (within_filter.count > 0) {
             char symbol_word[16];
@@ -3625,6 +3679,10 @@ cleanup:
 #include "shared/column_schema.def"
 #undef COLUMN
 #undef INT_COLUMN
+
+    for (int j = 0; j < filters.parent_type.count; j++) {
+        free(filters.parent_type.values[j]);
+    }
 
     /* Free config args if we allocated a new argv */
     if (argv != original_argv) {

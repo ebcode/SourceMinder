@@ -164,6 +164,18 @@
 /* Initial capacity for TOC entry arrays (per file) */
 #define TOC_INITIAL_CAPACITY 16
 
+/* Maximum column the TOC dot leaders align line numbers to. Symbols at or below
+ * this width get a dot run to a shared column (consistent across all sections of
+ * a file, so the line-number column lines up vertically); symbols wider than
+ * this overflow past the column rather than dragging it wide or producing a wall
+ * of dots. Chosen above the longest real-world symbol (~40 chars) while staying
+ * well under SYMBOL_MAX_LENGTH (512). */
+#define TOC_ALIGN_MAX_COLUMN 40
+
+/* Minimum number of dot-leader characters between a symbol and its line number,
+ * applied even to overflow symbols wider than TOC_ALIGN_MAX_COLUMN. */
+#define TOC_MIN_DOT_LEADERS 3
+
 /* Initial capacity for file descriptor arrays in file watcher
  * Set high (1024) since file watchers typically monitor many files */
 #define FILE_WATCHER_INITIAL_CAPACITY 1024

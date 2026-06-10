@@ -37,6 +37,20 @@ extern const TSLanguage *tree_sitter_c(void);
 /* Global debug flag */
 static int g_debug = 0;
 
+/* Parent symbol for the initializer list currently being visited; gives
+ * designated-initializer fields (.name = ...) their parent_symbol (the
+ * declared variable, or the enclosing field for nested lists).
+ * Set by handle_declaration, consumed by visit_expression. */
+static char g_initializer_parent[SYMBOL_MAX_LENGTH] = "";
+
+/* Bounded copy between symbol buffers. strncat-based copies of a
+ * possibly-full equal-sized source buffer trip -Wstringop-truncation. */
+static void copy_symbol(char *dst, size_t dst_size, const char *src) {
+    size_t len = strnlength(src, dst_size - 1);
+    memcpy(dst, src, len);
+    dst[len] = '\0';
+}
+
 /* Symbol lookup table for fast node type comparisons */
 static struct {
     TSSymbol identifier;
@@ -611,6 +625,7 @@ static void handle_declaration(TSNode node, const char *source_code, const char 
             /* init_declarator contains identifier or pointer_declarator */
             uint32_t init_child_count = ts_node_child_count(child);
             TSNode declarator_node = {0};
+            char var_name[SYMBOL_MAX_LENGTH] = "";
 
             for (uint32_t j = 0; j < init_child_count; j++) {
                 TSNode init_child = ts_node_child(child, j);
@@ -622,6 +637,10 @@ static void handle_declaration(TSNode node, const char *source_code, const char 
                     char modifier_str[SYMBOL_MAX_LENGTH];
                     char location[SOURCE_LOCATION_MAX_LENGTH];
                     safe_extract_node_text(source_code, id_node, symbol, sizeof(symbol), filename);
+
+                    /* Remember the variable name: it becomes parent_symbol
+                     * for designated initializer fields ({.name = ...}) */
+                    copy_symbol(var_name, sizeof(var_name), symbol);
 
                     /* Get the declarator node (identifier or pointer_declarator) for type extraction */
                     declarator_node = init_child;
@@ -654,7 +673,16 @@ static void handle_declaration(TSNode node, const char *source_code, const char 
                     /* Next child is the initializer expression */
                     if (j + 1 < init_child_count) {
                         TSNode init_expr = ts_node_child(child, j + 1);
+                        /* Designated initializer fields get the declared
+                         * variable as parent_symbol, mirroring how
+                         * config.name gets parent "config" */
+                        if (ts_node_symbol(init_expr) == c_symbols.initializer_list &&
+                            var_name[0] != '\0') {
+                            copy_symbol(g_initializer_parent,
+                                        sizeof(g_initializer_parent), var_name);
+                        }
                         visit_expression(init_expr, source_code, directory, filename, result, filter);
+                        g_initializer_parent[0] = '\0';
                     }
                     break;
                 }
@@ -1183,13 +1211,34 @@ static void visit_expression(
             }
             /* Field expression function call: obj->func(args) */
             else if (ts_node_symbol(function) == c_symbols.field_expression) {
-                /* First, visit the field expression to index obj->func with parent */
-                visit_expression(function, source_code, directory, filename, result, filter);
+                /* The field is being invoked, not read: index it as a CALL
+                 * with its parent (config->parser_init(...) -> CALL parser_init,
+                 * parent config), not as a PROP like the generic field handler
+                 * would. */
+                char parent[SYMBOL_MAX_LENGTH];
+                extract_field_parent(source_code, function, parent, sizeof(parent), filename);
 
-                /* Extract the method name for argument clues */
                 TSNode field = ts_node_child_by_field_name(function, "field", 5);
                 if (!ts_node_is_null(field)) {
                     safe_extract_node_text(source_code, field, func_name, sizeof(func_name), filename);
+
+                    if (filter_should_index(filter, func_name)) {
+                        /* Use the field's line number, not the call_expression's */
+                        TSPoint field_point = ts_node_start_point(field);
+                        int field_line = (int)(field_point.row + 1);
+                        add_entry(result, func_name, field_line, CONTEXT_CALL,
+                                directory, filename, NULL,
+                                parent[0] != '\0'
+                                    ? &(ExtColumns){.parent = parent}
+                                    : NULL);
+                    }
+                }
+
+                /* Visit only the left side to catch nested field accesses:
+                 * in a->b->method(), b is still indexed as PROP with parent a */
+                TSNode argument = ts_node_child_by_field_name(function, "argument", 8);
+                if (!ts_node_is_null(argument)) {
+                    visit_expression(argument, source_code, directory, filename, result, filter);
                 }
             }
             /* Other complex function expressions */
@@ -1420,6 +1469,7 @@ static void visit_expression(
     else if (node_sym == c_symbols.initializer_pair) {
         /* Designated initializer: .field = value */
         /* Extract field name from field_designator */
+        char field_name[SYMBOL_MAX_LENGTH] = "";
         uint32_t child_count = ts_node_child_count(node);
         for (uint32_t i = 0; i < child_count; i++) {
             TSNode child = ts_node_child(node, i);
@@ -1432,12 +1482,14 @@ static void visit_expression(
                     TSNode designator_child = ts_node_child(child, j);
                     TSSymbol designator_child_sym = ts_node_symbol(designator_child);
                     if (designator_child_sym == c_symbols.field_identifier) {
-                        char field_name[SYMBOL_MAX_LENGTH];
                         safe_extract_node_text(source_code, designator_child, field_name, sizeof(field_name), filename);
 
                         if (filter_should_index(filter, field_name)) {
                             add_entry(result, field_name, line, CONTEXT_PROPERTY,
-                                    directory, filename, NULL, NULL);
+                                    directory, filename, NULL,
+                                    g_initializer_parent[0] != '\0'
+                                        ? &(ExtColumns){.parent = g_initializer_parent}
+                                        : NULL);
                         }
                         break;
                     }
@@ -1445,10 +1497,21 @@ static void visit_expression(
             }
         }
 
-        /* Process the value expression */
+        /* Process the value expression. A nested initializer list
+         * (.limits = {.max = 10}) belongs to this field, so the field
+         * becomes the parent while descending — mirroring how
+         * config.limits.max gets parent "limits" in field expressions. */
         TSNode value = ts_node_child_by_field_name(node, "value", 5);
         if (!ts_node_is_null(value)) {
+            char saved_parent[SYMBOL_MAX_LENGTH];
+            copy_symbol(saved_parent, sizeof(saved_parent), g_initializer_parent);
+            if (field_name[0] != '\0') {
+                copy_symbol(g_initializer_parent,
+                            sizeof(g_initializer_parent), field_name);
+            }
             visit_expression(value, source_code, directory, filename, result, filter);
+            copy_symbol(g_initializer_parent,
+                        sizeof(g_initializer_parent), saved_parent);
         }
     }
     else if (node_sym == c_symbols.update_expression) {
@@ -1733,6 +1796,38 @@ static void handle_case_statement(TSNode node, const char *source_code, const ch
     }
 }
 
+/* Format a source location for a preprocessor directive. tree-sitter
+ * preproc nodes include the trailing newline, so the raw end point lands
+ * on column 0 of the line AFTER the directive; trim the span back so -e
+ * expansion prints only the directive's own lines. */
+static void format_preproc_location(TSNode node, const char *source_code,
+                                    char *buffer, size_t buffer_size) {
+    TSPoint start = ts_node_start_point(node);
+    TSPoint end = ts_node_end_point(node);
+    uint32_t start_byte = ts_node_start_byte(node);
+    uint32_t end_byte = ts_node_end_byte(node);
+
+    /* Trim trailing newline characters from the span */
+    while (end_byte > start_byte && (source_code[end_byte - 1] == '\n' ||
+                                     source_code[end_byte - 1] == '\r')) {
+        if (source_code[end_byte - 1] == '\n' && end.row > start.row) {
+            end.row--;
+        }
+        end_byte--;
+    }
+
+    /* Recompute the end column: distance from the start of its line */
+    uint32_t col = 0;
+    for (uint32_t p = end_byte; p > 0 && source_code[p - 1] != '\n'; p--) {
+        col++;
+    }
+    end.column = col;
+
+    snprintf(buffer, buffer_size, "%u:%u - %u:%u",
+             start.row + 1, start.column,
+             end.row + 1, end.column);
+}
+
 static void handle_preproc_def(TSNode node, const char *source_code, const char *directory,
                                 const char *filename, ParseResult *result, SymbolFilter *filter,
                                 int line) {
@@ -1744,11 +1839,13 @@ static void handle_preproc_def(TSNode node, const char *source_code, const char 
 
         if (child_sym == c_symbols.identifier) {
             char symbol[SYMBOL_MAX_LENGTH];
+            char location[SOURCE_LOCATION_MAX_LENGTH];
             safe_extract_node_text(source_code, child, symbol, sizeof(symbol), filename);
 
             if (filter_should_index(filter, symbol)) {
+                format_preproc_location(node, source_code, location, sizeof(location));
                 add_entry(result, symbol, line, CONTEXT_MACRO,
-                        directory, filename, NULL, &(ExtColumns){.type = "object-like", .definition = "1"});
+                        directory, filename, location, &(ExtColumns){.type = "object-like", .definition = "1"});
             }
             break;  /* Only index the macro name, not the value */
         }
@@ -1771,8 +1868,10 @@ static void handle_preproc_function_def(TSNode node, const char *source_code, co
             safe_extract_node_text(source_code, child, macro_name, sizeof(macro_name), filename);
 
             if (filter_should_index(filter, macro_name)) {
+                char location[SOURCE_LOCATION_MAX_LENGTH];
+                format_preproc_location(node, source_code, location, sizeof(location));
                 add_entry(result, macro_name, line, CONTEXT_MACRO,
-                        directory, filename, NULL, &(ExtColumns){.type = "function-like", .definition = "1"});
+                        directory, filename, location, &(ExtColumns){.type = "function-like", .definition = "1"});
             }
             break;  /* Found macro name, exit first pass */
         }
