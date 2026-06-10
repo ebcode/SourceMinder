@@ -39,11 +39,28 @@ static int g_debug = 0;
  * we descend into impl_item nodes and restore it on exit. */
 static char g_current_impl[SYMBOL_MAX_LENGTH] = "";
 
+/* Parent symbol for the struct literal currently being visited; gives
+ * field initializers (Greeter { label: ... }) their parent_symbol (the
+ * let-bound variable, or the enclosing field for nested literals).
+ * Mirrors the C indexer's designated-initializer handling. */
+static char g_initializer_parent[SYMBOL_MAX_LENGTH] = "";
+
+/* Bounded copy between symbol buffers. strncat-based copies of a
+ * possibly-full equal-sized source buffer trip -Wstringop-truncation. */
+static void copy_symbol(char *dst, size_t dst_size, const char *src) {
+    size_t len = strnlength(src, dst_size - 1);
+    memcpy(dst, src, len);
+    dst[len] = '\0';
+}
+
 /* Forward declarations */
 static void visit_node(TSNode node, const char *source_code, const char *directory,
                        const char *filename, ParseResult *result, SymbolFilter *filter);
 static void process_children(TSNode node, const char *source_code, const char *directory,
                              const char *filename, ParseResult *result, SymbolFilter *filter);
+static void handle_string_literal(TSNode node, const char *source_code,
+                                  const char *directory, const char *filename,
+                                  ParseResult *result, SymbolFilter *filter, int line);
 
 static void process_children(TSNode node, const char *source_code, const char *directory,
                              const char *filename, ParseResult *result, SymbolFilter *filter) {
@@ -752,7 +769,16 @@ static void handle_let_declaration(TSNode node, const char *source_code,
 
     /* Visit value so calls/identifiers inside get indexed */
     if (!ts_node_is_null(value)) {
+        /* Struct-literal fields get the let-bound variable as their
+         * parent_symbol: let greeter = Greeter { label: ... } */
+        if (strcmp(ts_node_type(value), "struct_expression") == 0 &&
+            !ts_node_is_null(pattern) &&
+            strcmp(ts_node_type(pattern), "identifier") == 0) {
+            safe_extract_node_text(source_code, pattern, g_initializer_parent,
+                                   sizeof(g_initializer_parent), filename);
+        }
         visit_node(value, source_code, directory, filename, result, filter);
+        g_initializer_parent[0] = '\0';
     }
 }
 
@@ -981,12 +1007,101 @@ static void handle_macro_definition(TSNode node, const char *source_code,
     }
 }
 
+/* Macro bodies are unparsed token soup: tree-sitter wraps them in a
+ * token_tree of raw tokens rather than expressions. Reconstruct the
+ * common shapes by hand: "recv . field" => PROP with parent recv,
+ * an identifier followed by a (...) token_tree => CALL, any other
+ * identifier => ARG with the macro name as clue. Strings and nested
+ * token_trees recurse. */
+static void index_token_tree(TSNode tree, const char *source_code,
+                             const char *directory, const char *filename,
+                             ParseResult *result, SymbolFilter *filter,
+                             const char *macro_name) {
+    const char *clue = (macro_name && macro_name[0]) ? macro_name : NULL;
+    uint32_t child_count = ts_node_child_count(tree);
+
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode tok = ts_node_child(tree, i);
+        const char *tok_type = ts_node_type(tok);
+        TSPoint tok_point = ts_node_start_point(tok);
+        int tok_line = (int)(tok_point.row + 1);
+
+        if (strcmp(tok_type, "string_literal") == 0 ||
+            strcmp(tok_type, "raw_string_literal") == 0) {
+            handle_string_literal(tok, source_code, directory, filename,
+                                  result, filter, tok_line);
+            continue;
+        }
+        if (strcmp(tok_type, "token_tree") == 0) {
+            index_token_tree(tok, source_code, directory, filename,
+                             result, filter, macro_name);
+            continue;
+        }
+        if (strcmp(tok_type, "identifier") != 0) {
+            continue;
+        }
+
+        /* Receivers and paths ("greeter" in "greeter . label", "String"
+         * in "String :: from") are captured as parent/namespace of the
+         * token they qualify, not indexed separately */
+        if (i + 1 < child_count) {
+            const char *next_type = ts_node_type(ts_node_child(tree, i + 1));
+            if (strcmp(next_type, ".") == 0 || strcmp(next_type, "::") == 0) {
+                continue;
+            }
+        }
+
+        char name[SYMBOL_MAX_LENGTH];
+        safe_extract_node_text(source_code, tok, name, sizeof(name), filename);
+        if (name[0] == '\0' || !filter_should_index(filter, name)) {
+            continue;
+        }
+
+        /* Lookbehind: "recv . name" or "path :: name" */
+        char parent[SYMBOL_MAX_LENGTH] = "";
+        char ns[SYMBOL_MAX_LENGTH] = "";
+        if (i >= 2) {
+            const char *sep_type = ts_node_type(ts_node_child(tree, i - 1));
+            TSNode qual = ts_node_child(tree, i - 2);
+            const char *qual_type = ts_node_type(qual);
+            if (strcmp(qual_type, "identifier") == 0 || strcmp(qual_type, "self") == 0) {
+                if (strcmp(sep_type, ".") == 0) {
+                    safe_extract_node_text(source_code, qual, parent, sizeof(parent), filename);
+                } else if (strcmp(sep_type, "::") == 0) {
+                    safe_extract_node_text(source_code, qual, ns, sizeof(ns), filename);
+                }
+            }
+        }
+
+        /* Lookahead: a (...) token_tree right after means an invocation */
+        int is_call = (i + 1 < child_count &&
+                       strcmp(ts_node_type(ts_node_child(tree, i + 1)), "token_tree") == 0);
+
+        if (is_call) {
+            add_entry(result, name, tok_line, CONTEXT_CALL,
+                      directory, filename, NULL,
+                      &(ExtColumns){.parent = parent[0] ? parent : NULL,
+                                    .namespace = ns[0] ? ns : NULL,
+                                    .clue = clue});
+        } else if (parent[0]) {
+            add_entry(result, name, tok_line, CONTEXT_PROPERTY,
+                      directory, filename, NULL,
+                      &(ExtColumns){.parent = parent, .clue = clue});
+        } else {
+            add_entry(result, name, tok_line, CONTEXT_ARGUMENT,
+                      directory, filename, NULL,
+                      &(ExtColumns){.namespace = ns[0] ? ns : NULL,
+                                    .clue = clue});
+        }
+    }
+}
+
 static void handle_macro_invocation(TSNode node, const char *source_code,
                                     const char *directory, const char *filename,
                                     ParseResult *result, SymbolFilter *filter, int line) {
+    char name[SYMBOL_MAX_LENGTH] = "";
     TSNode macro = ts_node_child_by_field_name(node, "macro", 5);
     if (!ts_node_is_null(macro)) {
-        char name[SYMBOL_MAX_LENGTH];
         safe_extract_node_text(source_code, macro, name, sizeof(name), filename);
         if (name[0] && filter_should_index(filter, name)) {
             add_entry(result, name, line, CONTEXT_CALL,
@@ -994,10 +1109,15 @@ static void handle_macro_invocation(TSNode node, const char *source_code,
                       &(ExtColumns){.type = "macro"});
         }
     }
-    /* Walk arguments to surface inner identifiers/strings/calls */
-    TSNode args = ts_node_child_by_field_name(node, "arguments", 9);
-    if (!ts_node_is_null(args)) {
-        process_children(args, source_code, directory, filename, result, filter);
+    /* The macro payload is an unnamed token_tree child (println!(...)),
+     * not an "arguments" field: walk its tokens */
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (strcmp(ts_node_type(child), "token_tree") == 0) {
+            index_token_tree(child, source_code, directory, filename,
+                             result, filter, name);
+        }
     }
 }
 
@@ -1201,6 +1321,127 @@ static void handle_string_literal(TSNode node, const char *source_code,
 
 /* ---------------- Dispatcher ---------------- */
 
+/* Field read: greeter.label / self.label / a.b.c. Method calls
+ * (greeter.greet()) never reach here -- handle_call_expression consumes
+ * the function child itself. */
+static void handle_field_expression(TSNode node, const char *source_code,
+                                    const char *directory, const char *filename,
+                                    ParseResult *result, SymbolFilter *filter) {
+    TSNode value = ts_node_child_by_field_name(node, "value", 5);
+    TSNode field = ts_node_child_by_field_name(node, "field", 5);
+
+    char parent[SYMBOL_MAX_LENGTH] = "";
+    int visit_value = 0;
+    if (!ts_node_is_null(value)) {
+        const char *value_type = ts_node_type(value);
+        if (strcmp(value_type, "identifier") == 0 || strcmp(value_type, "self") == 0) {
+            safe_extract_node_text(source_code, value, parent, sizeof(parent), filename);
+        } else if (strcmp(value_type, "field_expression") == 0) {
+            /* a.b.c: c's parent is b (immediate parent) */
+            TSNode inner = ts_node_child_by_field_name(value, "field", 5);
+            if (!ts_node_is_null(inner)) {
+                safe_extract_node_text(source_code, inner, parent, sizeof(parent), filename);
+            }
+            visit_value = 1;
+        } else {
+            /* Complex receiver (call, index, ...): no single parent name */
+            visit_value = 1;
+        }
+    }
+
+    if (!ts_node_is_null(field)) {
+        char name[SYMBOL_MAX_LENGTH];
+        safe_extract_node_text(source_code, field, name, sizeof(name), filename);
+        if (name[0] && filter_should_index(filter, name)) {
+            TSPoint field_point = ts_node_start_point(field);
+            add_entry(result, name, (int)(field_point.row + 1), CONTEXT_PROPERTY,
+                      directory, filename, NULL,
+                      &(ExtColumns){.parent = parent[0] ? parent : NULL});
+        }
+    }
+
+    if (visit_value) {
+        visit_node(value, source_code, directory, filename, result, filter);
+    }
+}
+
+/* Struct literal: Greeter { label: value, ..base }. Fields get
+ * g_initializer_parent (the let-bound variable) as parent_symbol,
+ * mirroring the C designated-initializer convention; nested literals
+ * get the enclosing field name. */
+static void handle_struct_expression(TSNode node, const char *source_code,
+                                     const char *directory, const char *filename,
+                                     ParseResult *result, SymbolFilter *filter) {
+    TSNode body = ts_node_child_by_field_name(node, "body", 4);
+    if (ts_node_is_null(body)) {
+        uint32_t n = ts_node_child_count(node);
+        for (uint32_t i = 0; i < n; i++) {
+            TSNode child = ts_node_child(node, i);
+            if (strcmp(ts_node_type(child), "field_initializer_list") == 0) {
+                body = child;
+                break;
+            }
+        }
+    }
+    if (ts_node_is_null(body)) return;
+
+    uint32_t child_count = ts_node_child_count(body);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(body, i);
+        const char *child_type = ts_node_type(child);
+
+        if (strcmp(child_type, "field_initializer") == 0) {
+            char field_name[SYMBOL_MAX_LENGTH] = "";
+            uint32_t part_count = ts_node_child_count(child);
+            for (uint32_t j = 0; j < part_count; j++) {
+                TSNode part = ts_node_child(child, j);
+                if (strcmp(ts_node_type(part), "field_identifier") == 0) {
+                    safe_extract_node_text(source_code, part, field_name, sizeof(field_name), filename);
+                    if (field_name[0] && filter_should_index(filter, field_name)) {
+                        TSPoint fp = ts_node_start_point(part);
+                        add_entry(result, field_name, (int)(fp.row + 1), CONTEXT_PROPERTY,
+                                  directory, filename, NULL,
+                                  &(ExtColumns){.parent = g_initializer_parent[0]
+                                                    ? g_initializer_parent : NULL});
+                    }
+                } else if (ts_node_is_named(part)) {
+                    /* The value expression: nested literals belong to this
+                     * field, so it becomes the parent while descending */
+                    char saved_parent[SYMBOL_MAX_LENGTH];
+                    copy_symbol(saved_parent, sizeof(saved_parent), g_initializer_parent);
+                    if (field_name[0]) {
+                        copy_symbol(g_initializer_parent,
+                                    sizeof(g_initializer_parent), field_name);
+                    }
+                    visit_node(part, source_code, directory, filename, result, filter);
+                    copy_symbol(g_initializer_parent,
+                                sizeof(g_initializer_parent), saved_parent);
+                }
+            }
+        } else if (strcmp(child_type, "shorthand_field_initializer") == 0) {
+            /* Greeter { label }: the identifier is both field and value */
+            uint32_t part_count = ts_node_child_count(child);
+            for (uint32_t j = 0; j < part_count; j++) {
+                TSNode part = ts_node_child(child, j);
+                if (strcmp(ts_node_type(part), "identifier") == 0) {
+                    char field_name[SYMBOL_MAX_LENGTH];
+                    safe_extract_node_text(source_code, part, field_name, sizeof(field_name), filename);
+                    if (field_name[0] && filter_should_index(filter, field_name)) {
+                        TSPoint fp = ts_node_start_point(part);
+                        add_entry(result, field_name, (int)(fp.row + 1), CONTEXT_PROPERTY,
+                                  directory, filename, NULL,
+                                  &(ExtColumns){.parent = g_initializer_parent[0]
+                                                    ? g_initializer_parent : NULL});
+                    }
+                }
+            }
+        } else if (strcmp(child_type, "base_field_initializer") == 0) {
+            /* ..base: visit the base expression */
+            process_children(child, source_code, directory, filename, result, filter);
+        }
+    }
+}
+
 static void visit_node(TSNode node, const char *source_code, const char *directory,
                        const char *filename, ParseResult *result, SymbolFilter *filter) {
     if (ts_node_is_null(node)) return;
@@ -1292,6 +1533,14 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
     }
     if (strcmp(t, "call_expression") == 0) {
         handle_call_expression(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (strcmp(t, "field_expression") == 0) {
+        handle_field_expression(node, source_code, directory, filename, result, filter);
+        return;
+    }
+    if (strcmp(t, "struct_expression") == 0) {
+        handle_struct_expression(node, source_code, directory, filename, result, filter);
         return;
     }
     if (strcmp(t, "closure_expression") == 0) {

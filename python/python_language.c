@@ -745,6 +745,12 @@ static void handle_call(TSNode node, const char *source_code,
                     const char *object_type = ts_node_type(object_node);
                     if (strcmp(object_type, "identifier") == 0) {
                         safe_extract_node_text(source_code, object_node, parent_name, sizeof(parent_name), filename);
+                    } else if (strcmp(object_type, "attribute") == 0) {
+                        /* a.b.method(): the immediate parent is b */
+                        TSNode inner = ts_node_child_by_field_name(object_node, "attribute", 9);
+                        if (!ts_node_is_null(inner)) {
+                            safe_extract_node_text(source_code, inner, parent_name, sizeof(parent_name), filename);
+                        }
                     }
                 }
 
@@ -753,6 +759,13 @@ static void handle_call(TSNode node, const char *source_code,
                                      &(ExtColumns){.parent = parent_name[0] ? parent_name : NULL,
                                                    .modifier = modifier});
             }
+        }
+
+        /* Visit complex receivers so chained reads (a.b.method()) still
+         * index the intermediate attributes */
+        if (!ts_node_is_null(object_node) &&
+            strcmp(ts_node_type(object_node), "identifier") != 0) {
+            visit_expression(object_node, source_code, directory, filename, result, filter);
         }
     } else if (strcmp(func_type, "identifier") == 0) {
         /* Handle simple function call: foo() */
@@ -893,9 +906,45 @@ static void visit_expression(TSNode node, const char *source_code,
         }
     }
     else if (node_sym == python_symbols.attribute) {
-        /* Attribute access: obj.attr - already handled by handle_call for method calls */
+        /* Attribute read: obj.attr. Method calls (obj.method()) never
+         * reach here -- handle_call consumes the function child itself.
+         * Index the attribute as PROP with its immediate parent. */
         TSNode object = ts_node_child_by_field_name(node, "object", 6);
+        TSNode attr = ts_node_child_by_field_name(node, "attribute", 9);
+
+        char parent_name[SYMBOL_MAX_LENGTH] = "";
+        int visit_object = 0;
         if (!ts_node_is_null(object)) {
+            const char *object_type = ts_node_type(object);
+            if (strcmp(object_type, "identifier") == 0) {
+                /* Plain receiver: captured as the parent, not indexed again */
+                safe_extract_node_text(source_code, object, parent_name, sizeof(parent_name), filename);
+            } else if (strcmp(object_type, "attribute") == 0) {
+                /* a.b.c: c's parent is b (immediate parent); recurse so
+                 * b gets its own entry with parent a */
+                TSNode inner = ts_node_child_by_field_name(object, "attribute", 9);
+                if (!ts_node_is_null(inner)) {
+                    safe_extract_node_text(source_code, inner, parent_name, sizeof(parent_name), filename);
+                }
+                visit_object = 1;
+            } else {
+                /* Complex receiver (call, subscript, ...): no single parent name */
+                visit_object = 1;
+            }
+        }
+
+        if (!ts_node_is_null(attr)) {
+            char attr_name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, attr, attr_name, sizeof(attr_name), filename);
+            if (filter_should_index(filter, attr_name)) {
+                TSPoint attr_point = ts_node_start_point(attr);
+                add_entry(result, attr_name, (int)(attr_point.row + 1),
+                          CONTEXT_PROPERTY, directory, filename, NULL,
+                          &(ExtColumns){.parent = parent_name[0] ? parent_name : NULL});
+            }
+        }
+
+        if (visit_object) {
             visit_expression(object, source_code, directory, filename, result, filter);
         }
     }
@@ -1557,6 +1606,13 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
     }
     if (node_sym == python_symbols.comment) {
         handle_comment(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == python_symbols.attribute) {
+        /* Attribute read outside an expression context (assignment RHS,
+         * bare statement): route through the expression walker so it gets
+         * indexed as PROP with parent */
+        visit_expression(node, source_code, directory, filename, result, filter);
         return;
     }
 

@@ -72,6 +72,7 @@ sudo make install       # Install to /usr/local/bin
 | `-x noise` | Exclude comments & strings | `qi user -x noise` |
 | `-f <pattern...>` | Filter by file paths (OR) | `qi user -f .c .h` or `qi user -f src/* lib/*` |
 | `-p <pattern>` | Filter by parent symbol | `qi count -p patterns` finds `patterns->count` |
+| `--parent-type <pattern...>` | Filter by parent's declared type | `qi % -i prop --parent-type IndexerConfig` finds fields of any `IndexerConfig` variable |
 | `-t <pattern>` | Filter by type annotation | `qi '*' -i arg -t 'int *'` finds int pointer args |
 | `-m <pattern>` | Filter by modifier | `qi '*' -i func -m static` finds static functions |
 | `-s <pattern>` | Filter by scope | `qi '*' -s public` finds public members |

@@ -36,6 +36,20 @@ extern const TSLanguage *tree_sitter_go(void);
 /* Global debug flag */
 static int g_debug = 0;
 
+/* Parent symbol for the composite literal currently being visited; gives
+ * keyed-element fields (Greeter{name: ...}) their parent_symbol (the
+ * declared variable, or the enclosing key for nested literals).
+ * Mirrors the C indexer's designated-initializer handling. */
+static char g_initializer_parent[SYMBOL_MAX_LENGTH] = "";
+
+/* Bounded copy between symbol buffers. strncat-based copies of a
+ * possibly-full equal-sized source buffer trip -Wstringop-truncation. */
+static void copy_symbol(char *dst, size_t dst_size, const char *src) {
+    size_t len = strnlength(src, dst_size - 1);
+    memcpy(dst, src, len);
+    dst[len] = '\0';
+}
+
 /* Forward declarations */
 static void visit_node(TSNode node, const char *source_code, const char *directory,
                       const char *filename, ParseResult *result, SymbolFilter *filter);
@@ -131,6 +145,7 @@ static struct {
     TSSymbol binary_expression;
     TSSymbol argument_list;
     TSSymbol literal_value;
+    TSSymbol keyed_element;
 
     /* Handler dispatch nodes */
     TSSymbol package_clause;
@@ -203,6 +218,7 @@ static void init_go_symbols(const TSLanguage *language) {
     go_symbols.expression_list = ts_language_symbol_for_name(language, "expression_list", 15, true);
     go_symbols.unary_expression = ts_language_symbol_for_name(language, "unary_expression", 16, true);
     go_symbols.composite_literal = ts_language_symbol_for_name(language, "composite_literal", 17, true);
+    go_symbols.keyed_element = ts_language_symbol_for_name(language, "keyed_element", 13, true);
     go_symbols.call_expression = ts_language_symbol_for_name(language, "call_expression", 15, true);
     go_symbols.index_expression = ts_language_symbol_for_name(language, "index_expression", 16, true);
     go_symbols.slice_expression = ts_language_symbol_for_name(language, "slice_expression", 16, true);
@@ -1273,7 +1289,8 @@ static void handle_field_declaration(TSNode node, const char *source_code, const
                 .modifier = NULL,
                 .clue = NULL,
                 .namespace = package_buf[0] ? package_buf : NULL,
-                .type = field_type[0] ? field_type : NULL
+                .type = field_type[0] ? field_type : NULL,
+                .definition = "1"
             };
             add_entry(result, field_name, line, CONTEXT_PROPERTY,
                      directory, filename, NULL, &ext);
@@ -1305,7 +1322,8 @@ static void handle_field_declaration(TSNode node, const char *source_code, const
                 .modifier = NULL,
                 .clue = "embedded",
                 .namespace = package_buf[0] ? package_buf : NULL,
-                .type = embedded_type
+                .type = embedded_type,
+                .definition = "1"
             };
             add_entry(result, embedded_name, line, CONTEXT_PROPERTY,
                      directory, filename, NULL, &ext);
@@ -1604,8 +1622,34 @@ static void handle_var_declaration(TSNode node, const char *source_code, const c
                 }
             }
 
+            /* Composite-literal keys get the declared variable as parent:
+             * var g = Greeter{name: ...}. The value may sit directly in
+             * the var_spec or be wrapped in an expression_list. */
+            if (!ts_node_is_null(name_node)) {
+                for (uint32_t j = 0; j < spec_children; j++) {
+                    TSNode spec_child = ts_node_child(child, j);
+                    TSSymbol spec_sym = ts_node_symbol(spec_child);
+                    if (spec_sym == go_symbols.expression_list) {
+                        uint32_t expr_count = ts_node_child_count(spec_child);
+                        for (uint32_t k = 0; k < expr_count; k++) {
+                            if (ts_node_symbol(ts_node_child(spec_child, k)) ==
+                                go_symbols.composite_literal) {
+                                spec_sym = go_symbols.composite_literal;
+                                break;
+                            }
+                        }
+                    }
+                    if (spec_sym == go_symbols.composite_literal) {
+                        safe_extract_node_text(source_code, name_node, g_initializer_parent,
+                                               sizeof(g_initializer_parent), filename);
+                        break;
+                    }
+                }
+            }
+
             /* Process children to index symbols in computed expressions */
             process_children(child, source_code, directory, filename, result, filter);
+            g_initializer_parent[0] = '\0';
         }
     }
 }
@@ -1880,7 +1924,20 @@ static void handle_short_var_declaration(TSNode node, const char *source_code, c
 
     /* Continue processing children (for nested expressions) */
     if (!ts_node_is_null(rhs_list)) {
+        /* Composite-literal keys get the declared variable as parent:
+         * g := Greeter{name: ...} */
+        if (identifier_count == 1) {
+            uint32_t rhs_count = ts_node_child_count(rhs_list);
+            for (uint32_t i = 0; i < rhs_count; i++) {
+                if (ts_node_symbol(ts_node_child(rhs_list, i)) == go_symbols.composite_literal) {
+                    safe_extract_node_text(source_code, identifiers[0], g_initializer_parent,
+                                           sizeof(g_initializer_parent), filename);
+                    break;
+                }
+            }
+        }
         process_children(rhs_list, source_code, directory, filename, result, filter);
+        g_initializer_parent[0] = '\0';
     }
 }
 
@@ -2495,7 +2552,15 @@ static void handle_field_identifier(TSNode node, const char *source_code, const 
             TSNode operand_node = ts_node_child_by_field_name(selector_node, "operand", 7);
             char parent_name[SYMBOL_MAX_LENGTH] = "";
             if (!ts_node_is_null(operand_node)) {
-                safe_extract_node_text(source_code, operand_node, parent_name, sizeof(parent_name), filename);
+                if (ts_node_symbol(operand_node) == go_symbols.selector_expression) {
+                    /* a.b.c: c's immediate parent is b, not "a.b" */
+                    TSNode inner_field = ts_node_child_by_field_name(operand_node, "field", 5);
+                    if (!ts_node_is_null(inner_field)) {
+                        safe_extract_node_text(source_code, inner_field, parent_name, sizeof(parent_name), filename);
+                    }
+                } else {
+                    safe_extract_node_text(source_code, operand_node, parent_name, sizeof(parent_name), filename);
+                }
             }
 
             /* Check if selector_expression is inside an argument_list */
@@ -2539,7 +2604,8 @@ static void handle_field_identifier(TSNode node, const char *source_code, const 
                 }
             }
 
-            /* Default: index as variable with parent */
+            /* Default: a field read (g.name) is a property access, with
+             * the operand as parent -- consistent with the other languages */
             ExtColumns ext = {
                 .parent = parent_name[0] ? parent_name : NULL,
                 .scope = NULL,
@@ -2548,12 +2614,69 @@ static void handle_field_identifier(TSNode node, const char *source_code, const 
                 .namespace = package_buf[0] ? package_buf : NULL,
                 .type = NULL
             };
-            add_entry(result, field_name, line, CONTEXT_VARIABLE, directory, filename, NULL, &ext);
+            add_entry(result, field_name, line, CONTEXT_PROPERTY, directory, filename, NULL, &ext);
         }
     }
 }
 
 /* Visit node function */
+/* Composite-literal key: Greeter{name: "hello"}. The key gets the
+ * variable being initialized as parent_symbol (mirroring the C
+ * designated-initializer convention); nested literals get the
+ * enclosing key as parent. */
+static void handle_keyed_element(TSNode node, const char *source_code, const char *directory,
+                                 const char *filename, ParseResult *result, SymbolFilter *filter) {
+    /* keyed_element: <key literal_element> ":" <value literal_element> */
+    uint32_t child_count = ts_node_child_count(node);
+    if (child_count == 0) return;
+    TSNode key = ts_node_child(node, 0);
+    TSNode value = ts_node_child(node, child_count - 1);
+
+    char key_name[SYMBOL_MAX_LENGTH] = "";
+    if (!ts_node_is_null(key)) {
+        /* Unwrap literal_element to the identifier inside */
+        TSNode key_id = key;
+        if (strcmp(ts_node_type(key_id), "literal_element") == 0 &&
+            ts_node_child_count(key_id) > 0) {
+            key_id = ts_node_child(key_id, 0);
+        }
+        const char *key_type = ts_node_type(key_id);
+        if (strcmp(key_type, "identifier") == 0 ||
+            strcmp(key_type, "field_identifier") == 0) {
+            safe_extract_node_text(source_code, key_id, key_name, sizeof(key_name), filename);
+            if (key_name[0] && filter_should_index(filter, key_name)) {
+                char package_buf[SYMBOL_MAX_LENGTH];
+                get_package(node, source_code, package_buf, sizeof(package_buf), filename);
+                TSPoint key_point = ts_node_start_point(key_id);
+                ExtColumns ext = {
+                    .parent = g_initializer_parent[0] ? g_initializer_parent : NULL,
+                    .scope = NULL,
+                    .modifier = NULL,
+                    .clue = NULL,
+                    .namespace = package_buf[0] ? package_buf : NULL,
+                    .type = NULL
+                };
+                add_entry(result, key_name, (int)(key_point.row + 1), CONTEXT_PROPERTY,
+                          directory, filename, NULL, &ext);
+            }
+        } else {
+            /* Map keys, expressions: not struct fields; visit normally */
+            visit_node(key, source_code, directory, filename, result, filter);
+        }
+    }
+
+    /* Visit the value; nested literals belong to this key */
+    if (!ts_node_is_null(value) && !ts_node_eq(value, key)) {
+        char saved_parent[SYMBOL_MAX_LENGTH];
+        copy_symbol(saved_parent, sizeof(saved_parent), g_initializer_parent);
+        if (key_name[0]) {
+            copy_symbol(g_initializer_parent, sizeof(g_initializer_parent), key_name);
+        }
+        visit_node(value, source_code, directory, filename, result, filter);
+        copy_symbol(g_initializer_parent, sizeof(g_initializer_parent), saved_parent);
+    }
+}
+
 static void visit_node(TSNode node, const char *source_code, const char *directory,
                       const char *filename, ParseResult *result, SymbolFilter *filter) {
     TSSymbol node_sym = ts_node_symbol(node);
@@ -2589,6 +2712,10 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
     }
     if (node_sym == go_symbols.func_literal) {
         handle_func_literal(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (node_sym == go_symbols.keyed_element) {
+        handle_keyed_element(node, source_code, directory, filename, result, filter);
         return;
     }
     if (node_sym == go_symbols.method_declaration) {

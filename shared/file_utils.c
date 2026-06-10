@@ -31,10 +31,27 @@ void get_relative_path(const char *filepath, const char *project_root,
         if (rel[0] == '/') rel++;
     }
 
+    /* Normalize: strip redundant leading "./" segments so the stored path
+     * is canonical no matter how the target was spelled on the command
+     * line ("tmp/x.c", "./tmp/x.c", "/abs/cwd/tmp/x.c" store identical
+     * rows -- and delete the same old rows on re-index). */
+    while (rel[0] == '.' && rel[1] == '/') {
+        rel += 2;
+    }
+
+    /* Paths that escape the project root ("../other/", "/abs/") are stored
+     * verbatim; everything else gets the canonical "./" prefix. */
+    int outside_root = (rel[0] == '/' ||
+                        (rel[0] == '.' && rel[1] == '.' && rel[2] == '/'));
+
     const char *last_slash = strrchr(rel, '/');
     if (last_slash) {
         size_t dir_len = (size_t)(last_slash - rel + 1);
-        snprintf(directory, DIRECTORY_MAX_LENGTH, "%.*s", (int)dir_len, rel);
+        if (outside_root) {
+            snprintf(directory, DIRECTORY_MAX_LENGTH, "%.*s", (int)dir_len, rel);
+        } else {
+            snprintf(directory, DIRECTORY_MAX_LENGTH, "./%.*s", (int)dir_len, rel);
+        }
         snprintf(filename, FILENAME_MAX_LENGTH, "%s", last_slash + 1);
     } else {
         /* Files in current directory get './' prefix */
