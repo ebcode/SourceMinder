@@ -39,6 +39,10 @@ static int g_debug = 0;
  * we descend into impl_item nodes and restore it on exit. */
 static char g_current_impl[SYMBOL_MAX_LENGTH] = "";
 
+/* ABI of the enclosing extern block (e.g. `extern "C"`); applied as the
+ * modifier of the foreign declarations inside it. */
+static char g_extern_abi[SYMBOL_MAX_LENGTH] = "";
+
 /* Parent symbol for the struct literal currently being visited; gives
  * field initializers (Greeter { label: ... }) their parent_symbol (the
  * let-bound variable, or the enclosing field for nested literals).
@@ -151,8 +155,9 @@ static void extract_attributes(TSNode node, const char *source_code,
     for (int i = my_idx - 1; i >= 0; i--) {
         TSNode sib = ts_node_child(parent, (uint32_t)i);
         const char *st = ts_node_type(sib);
-        if (strcmp(st, "attribute_item") != 0 &&
-            strcmp(st, "inner_attribute_item") != 0) {
+        /* Inner attributes (#![...]) belong to the enclosing scope, not to
+         * the item that happens to follow them */
+        if (strcmp(st, "attribute_item") != 0) {
             break;
         }
         /* Inside attribute_item, find the `attribute` child node (not a field) */
@@ -185,6 +190,46 @@ static void extract_attributes(TSNode node, const char *source_code,
         if (w > 0 && (size_t)w < out_size - pos) {
             pos += (size_t)w;
             first = 0;
+        }
+    }
+}
+
+/* #[derive(Debug, Clone)]: each derived trait is a TRAIT usage. The names
+ * sit as plain identifier tokens inside the attribute's token_tree. */
+static void handle_attribute_item(TSNode node, const char *source_code,
+                                  const char *directory, const char *filename,
+                                  ParseResult *result, SymbolFilter *filter) {
+    TSNode attr = {0};
+    uint32_t n = ts_node_child_count(node);
+    for (uint32_t i = 0; i < n; i++) {
+        TSNode c = ts_node_child(node, i);
+        if (strcmp(ts_node_type(c), "attribute") == 0) { attr = c; break; }
+    }
+    if (ts_node_is_null(attr)) return;
+
+    /* Only derive lists name traits; other attribute arguments are config */
+    TSNode path = ts_node_child(attr, 0);
+    if (ts_node_is_null(path) || strcmp(ts_node_type(path), "identifier") != 0) return;
+    char path_str[SYMBOL_MAX_LENGTH];
+    safe_extract_node_text(source_code, path, path_str, sizeof(path_str), filename);
+    if (strcmp(path_str, "derive") != 0) return;
+
+    uint32_t ac = ts_node_child_count(attr);
+    for (uint32_t i = 0; i < ac; i++) {
+        TSNode c = ts_node_child(attr, i);
+        if (strcmp(ts_node_type(c), "token_tree") != 0) continue;
+        uint32_t tc = ts_node_child_count(c);
+        for (uint32_t j = 0; j < tc; j++) {
+            TSNode tok = ts_node_child(c, j);
+            if (strcmp(ts_node_type(tok), "identifier") != 0) continue;
+            char name[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, tok, name, sizeof(name), filename);
+            if (name[0] && filter_should_index(filter, name)) {
+                TSPoint sp = ts_node_start_point(tok);
+                add_entry(result, name, (int)(sp.row + 1), CONTEXT_TRAIT,
+                          directory, filename, NULL,
+                          &(ExtColumns){.clue = "derive"});
+            }
         }
     }
 }
@@ -230,14 +275,101 @@ static void extract_base_type_name(TSNode type_node, const char *source_code,
 /* Walk a pattern node and emit each binding identifier as a CONTEXT_VARIABLE.
  * Skips `_`, constructor names in tuple_struct_pattern/struct_pattern, and
  * descends through wrappers like mut_pattern, reference_pattern, etc. */
+/* Index each trait named in a trait_bounds node as a TRAIT usage:
+ * `T: Eq + std::hash::Hash` yields Eq and Hash (ns std::hash).
+ * Lifetimes and higher-ranked/fn bounds are skipped. */
+static void index_trait_bounds(TSNode bounds, const char *source_code,
+                               const char *directory, const char *filename,
+                               ParseResult *result, SymbolFilter *filter) {
+    if (ts_node_is_null(bounds)) return;
+    uint32_t n = ts_node_child_count(bounds);
+    for (uint32_t i = 0; i < n; i++) {
+        TSNode c = ts_node_child(bounds, i);
+        const char *t = ts_node_type(c);
+        char sym[SYMBOL_MAX_LENGTH] = "";
+        char ns[SYMBOL_MAX_LENGTH] = "";
+
+        if (strcmp(t, "type_identifier") == 0) {
+            safe_extract_node_text(source_code, c, sym, sizeof(sym), filename);
+        } else if (strcmp(t, "scoped_type_identifier") == 0) {
+            TSNode name = ts_node_child_by_field_name(c, "name", 4);
+            TSNode path = ts_node_child_by_field_name(c, "path", 4);
+            if (!ts_node_is_null(name)) {
+                safe_extract_node_text(source_code, name, sym, sizeof(sym), filename);
+            }
+            if (!ts_node_is_null(path)) {
+                safe_extract_node_text(source_code, path, ns, sizeof(ns), filename);
+            }
+        } else if (strcmp(t, "generic_type") == 0) {
+            /* Iterator<Item = &'a str> -> Iterator */
+            extract_base_type_name(c, source_code, sym, sizeof(sym), filename);
+        } else {
+            continue;
+        }
+
+        if (sym[0] && filter_should_index(filter, sym)) {
+            TSPoint sp = ts_node_start_point(c);
+            add_entry(result, sym, (int)(sp.row + 1), CONTEXT_TRAIT,
+                      directory, filename, NULL,
+                      &(ExtColumns){.namespace = ns[0] ? ns : NULL});
+        }
+    }
+}
+
+/* Index the trait bounds attached to an item: supertraits / associated-type
+ * bounds (direct trait_bounds child), inline generic bounds (<T: Clone>),
+ * and where clauses. */
+static void index_generic_constraints(TSNode item, const char *source_code,
+                                      const char *directory, const char *filename,
+                                      ParseResult *result, SymbolFilter *filter) {
+    uint32_t n = ts_node_child_count(item);
+    for (uint32_t i = 0; i < n; i++) {
+        TSNode c = ts_node_child(item, i);
+        const char *t = ts_node_type(c);
+        if (strcmp(t, "trait_bounds") == 0) {
+            index_trait_bounds(c, source_code, directory, filename, result, filter);
+        } else if (strcmp(t, "type_parameters") == 0 ||
+                   strcmp(t, "where_clause") == 0) {
+            /* type_parameter / where_predicate children each may carry bounds */
+            uint32_t m = ts_node_child_count(c);
+            for (uint32_t j = 0; j < m; j++) {
+                TSNode p = ts_node_child(c, j);
+                uint32_t k = ts_node_child_count(p);
+                for (uint32_t q = 0; q < k; q++) {
+                    TSNode b = ts_node_child(p, q);
+                    if (strcmp(ts_node_type(b), "trait_bounds") == 0) {
+                        index_trait_bounds(b, source_code, directory, filename,
+                                           result, filter);
+                    }
+                }
+            }
+        }
+    }
+}
+
+/* True if the node has a direct mutable_specifier child
+ * (let mut x, static mut X, fn f(mut x: T)) */
+static int has_mut_specifier(TSNode node) {
+    uint32_t n = ts_node_child_count(node);
+    for (uint32_t i = 0; i < n; i++) {
+        if (strcmp(ts_node_type(ts_node_child(node, i)), "mutable_specifier") == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static void index_pattern_identifiers(TSNode pattern, const char *source_code,
                                       const char *directory, const char *filename,
                                       ParseResult *result, SymbolFilter *filter,
-                                      int line, const char *type_str) {
+                                      int line, const char *type_str,
+                                      const char *modifier) {
     if (ts_node_is_null(pattern)) return;
     const char *t = ts_node_type(pattern);
 
-    if (strcmp(t, "identifier") == 0) {
+    /* shorthand_field_identifier: `Rect { width, height }` binds width/height */
+    if (strcmp(t, "identifier") == 0 ||
+        strcmp(t, "shorthand_field_identifier") == 0) {
         char name[SYMBOL_MAX_LENGTH];
         safe_extract_node_text(source_code, pattern, name, sizeof(name), filename);
         if (name[0] == '_' && name[1] == '\0') return;
@@ -250,22 +382,38 @@ static void index_pattern_identifiers(TSNode pattern, const char *source_code,
                       directory, filename, NULL,
                       &(ExtColumns){
                           .definition = "1",
-                          .type = (type_str && type_str[0]) ? type_str : NULL
+                          .type = (type_str && type_str[0]) ? type_str : NULL,
+                          .modifier = (modifier && modifier[0]) ? modifier : NULL
                       });
         }
         return;
     }
 
-    /* Scoped paths in patterns are always constructor/constant references
-     * (e.g. `AppError::NotFound`), never bindings. */
+    /* Scoped paths in patterns are constructor/constant references
+     * (e.g. `AppError::NotFound`), never bindings: index them as variant
+     * usages with the path as namespace, like scoped calls. */
     if (strcmp(t, "scoped_identifier") == 0 ||
         strcmp(t, "scoped_type_identifier") == 0) {
+        TSNode name = ts_node_child_by_field_name(pattern, "name", 4);
+        TSNode path = ts_node_child_by_field_name(pattern, "path", 4);
+        char ns[SYMBOL_MAX_LENGTH] = "";
+        if (!ts_node_is_null(path)) {
+            safe_extract_node_text(source_code, path, ns, sizeof(ns), filename);
+        }
+        if (!ts_node_is_null(name)) {
+            char sym[SYMBOL_MAX_LENGTH];
+            safe_extract_node_text(source_code, name, sym, sizeof(sym), filename);
+            if (sym[0] && filter_should_index(filter, sym)) {
+                add_entry(result, sym, line, CONTEXT_ENUM_CASE,
+                          directory, filename, NULL,
+                          &(ExtColumns){.namespace = ns[0] ? ns : NULL});
+            }
+        }
         return;
     }
 
     if (strcmp(t, "tuple_struct_pattern") == 0 ||
         strcmp(t, "struct_pattern") == 0) {
-        /* Skip the constructor (the `type` field). */
         TSNode type_node = ts_node_child_by_field_name(pattern, "type", 4);
         uint32_t n = ts_node_child_count(pattern);
         for (uint32_t i = 0; i < n; i++) {
@@ -273,10 +421,27 @@ static void index_pattern_identifiers(TSNode pattern, const char *source_code,
             if (!ts_node_is_null(type_node) &&
                 ts_node_start_byte(c) == ts_node_start_byte(type_node) &&
                 ts_node_end_byte(c) == ts_node_end_byte(type_node)) {
+                /* The constructor: scoped paths recurse into the handler
+                 * above; bare names (Some(x), Point { .. }) are indexed as
+                 * type usages, matching struct-literal handling. */
+                const char *ct = ts_node_type(c);
+                if (strcmp(ct, "scoped_identifier") == 0 ||
+                    strcmp(ct, "scoped_type_identifier") == 0) {
+                    index_pattern_identifiers(c, source_code, directory, filename,
+                                              result, filter, line, NULL, NULL);
+                } else if (strcmp(ct, "identifier") == 0 ||
+                           strcmp(ct, "type_identifier") == 0) {
+                    char sym[SYMBOL_MAX_LENGTH];
+                    safe_extract_node_text(source_code, c, sym, sizeof(sym), filename);
+                    if (sym[0] && filter_should_index(filter, sym)) {
+                        add_entry(result, sym, line, CONTEXT_CLASS,
+                                  directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+                    }
+                }
                 continue;
             }
             index_pattern_identifiers(c, source_code, directory, filename,
-                                      result, filter, line, NULL);
+                                      result, filter, line, NULL, modifier);
         }
         return;
     }
@@ -288,17 +453,20 @@ static void index_pattern_identifiers(TSNode pattern, const char *source_code,
             bound = ts_node_child_by_field_name(pattern, "name", 4);
         }
         index_pattern_identifiers(bound, source_code, directory, filename,
-                                  result, filter, line, NULL);
+                                  result, filter, line, NULL, modifier);
         return;
     }
 
     /* All other patterns: recurse into children
      * (tuple_pattern, mut_pattern, reference_pattern, ref_pattern,
-     *  captured_pattern, or_pattern, slice_pattern, ...) */
+     *  captured_pattern, or_pattern, slice_pattern, ...);
+     * bindings under a mut_pattern carry the "mut" modifier */
+    if (strcmp(t, "mut_pattern") == 0) modifier = "mut";
     uint32_t n = ts_node_child_count(pattern);
     for (uint32_t i = 0; i < n; i++) {
         index_pattern_identifiers(ts_node_child(pattern, i), source_code,
-                                  directory, filename, result, filter, line, NULL);
+                                  directory, filename, result, filter, line,
+                                  NULL, modifier);
     }
 }
 
@@ -347,6 +515,8 @@ static void handle_function_item(TSNode node, const char *source_code,
                   });
     }
 
+    index_generic_constraints(node, source_code, directory, filename, result, filter);
+
     /* Process type parameters, parameters, return type, body so their inner
      * identifiers/types/calls get indexed too. */
     TSNode type_params = ts_node_child_by_field_name(node, "type_parameters", 15);
@@ -393,7 +563,8 @@ static void handle_parameter(TSNode node, const char *source_code,
         add_entry(result, param_name, line, CONTEXT_ARGUMENT,
                   directory, filename, NULL,
                   &(ExtColumns){
-                      .type = type_str[0] ? type_str : NULL
+                      .type = type_str[0] ? type_str : NULL,
+                      .modifier = has_mut_specifier(node) ? "mut" : NULL
                   });
     }
 
@@ -430,10 +601,16 @@ static void handle_struct_item(TSNode node, const char *source_code,
                   });
     }
 
-    /* Process body fields */
+    index_generic_constraints(node, source_code, directory, filename, result, filter);
+
+    /* Process body fields; they belong to the struct */
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
     if (!ts_node_is_null(body)) {
+        char saved[SYMBOL_MAX_LENGTH];
+        snprintf(saved, sizeof(saved), "%s", g_current_impl);
+        snprintf(g_current_impl, sizeof(g_current_impl), "%s", name);
         process_children(body, source_code, directory, filename, result, filter);
+        snprintf(g_current_impl, sizeof(g_current_impl), "%s", saved);
     }
 }
 
@@ -464,7 +641,8 @@ static void handle_field_declaration(TSNode node, const char *source_code,
                   &(ExtColumns){
                       .definition = "1",
                       .scope = vis[0] ? vis : NULL,
-                      .type = type_str[0] ? type_str : NULL
+                      .type = type_str[0] ? type_str : NULL,
+                      .parent = g_current_impl[0] ? g_current_impl : NULL
                   });
     }
 }
@@ -495,6 +673,8 @@ static void handle_enum_item(TSNode node, const char *source_code,
                       .clue = attrs[0] ? attrs : NULL
                   });
     }
+
+    index_generic_constraints(node, source_code, directory, filename, result, filter);
 
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
     if (!ts_node_is_null(body)) {
@@ -528,10 +708,15 @@ static void handle_enum_variant(TSNode node, const char *source_code,
                   });
     }
 
-    /* Process variant body for nested types/fields */
+    /* Process variant body for nested types/fields; the fields of
+     * `Rect { width, height }` belong to the variant */
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
     if (!ts_node_is_null(body)) {
+        char saved[SYMBOL_MAX_LENGTH];
+        snprintf(saved, sizeof(saved), "%s", g_current_impl);
+        snprintf(g_current_impl, sizeof(g_current_impl), "%s", name);
         process_children(body, source_code, directory, filename, result, filter);
+        snprintf(g_current_impl, sizeof(g_current_impl), "%s", saved);
     }
 }
 
@@ -561,6 +746,8 @@ static void handle_trait_item(TSNode node, const char *source_code,
                       .clue = attrs[0] ? attrs : NULL
                   });
     }
+
+    index_generic_constraints(node, source_code, directory, filename, result, filter);
 
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
     if (!ts_node_is_null(body)) {
@@ -607,6 +794,8 @@ static void handle_impl_item(TSNode node, const char *source_code,
                   });
     }
 
+    index_generic_constraints(node, source_code, directory, filename, result, filter);
+
     /* Descend into body with g_current_impl set to target */
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
     if (!ts_node_is_null(body)) {
@@ -630,6 +819,9 @@ static void handle_mod_item(TSNode node, const char *source_code,
     char vis[SYMBOL_MAX_LENGTH];
     extract_visibility(node, source_code, vis, sizeof(vis), filename);
 
+    char attrs[SYMBOL_MAX_LENGTH];
+    extract_attributes(node, source_code, attrs, sizeof(attrs), filename);
+
     char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
@@ -638,7 +830,8 @@ static void handle_mod_item(TSNode node, const char *source_code,
                   directory, filename, location,
                   &(ExtColumns){
                       .definition = "1",
-                      .modifier = vis[0] ? vis : NULL
+                      .modifier = vis[0] ? vis : NULL,
+                      .clue = attrs[0] ? attrs : NULL
                   });
     }
 
@@ -651,9 +844,25 @@ static void handle_mod_item(TSNode node, const char *source_code,
 /* Recursively walk a use-tree extracting imported identifiers. Each leaf
  * (use_as_clause's alias, scoped_identifier's name, identifier, or
  * use_wildcard) gets indexed as CONTEXT_IMPORT. */
+/* Join an accumulated use-path prefix with a nested path segment: "a", "b::c"
+ * -> "a::b::c". Either side may be empty. */
+static void join_use_path(const char *prefix, const char *path,
+                          char *out, size_t out_size) {
+    if (prefix && prefix[0] && path && path[0]) {
+        snprintf(out, out_size, "%s::%s", prefix, path);
+    } else if (path && path[0]) {
+        snprintf(out, out_size, "%s", path);
+    } else if (prefix && prefix[0]) {
+        snprintf(out, out_size, "%s", prefix);
+    } else {
+        out[0] = '\0';
+    }
+}
+
 static void index_use_tree(TSNode node, const char *source_code,
                            const char *directory, const char *filename,
-                           ParseResult *result, SymbolFilter *filter, int line) {
+                           ParseResult *result, SymbolFilter *filter, int line,
+                           const char *ns_prefix) {
     if (ts_node_is_null(node)) return;
     const char *t = ts_node_type(node);
 
@@ -662,19 +871,24 @@ static void index_use_tree(TSNode node, const char *source_code,
         safe_extract_node_text(source_code, node, name, sizeof(name), filename);
         if (name[0] && filter_should_index(filter, name)) {
             add_entry(result, name, line, CONTEXT_IMPORT,
-                      directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+                      directory, filename, NULL,
+                      &(ExtColumns){
+                          .namespace = (ns_prefix && ns_prefix[0]) ? ns_prefix : NULL
+                      });
         }
         return;
     }
 
     if (strcmp(t, "scoped_identifier") == 0) {
-        /* import the trailing name (and let the path become parent) */
+        /* import the trailing name; accumulated prefix + path is the namespace */
         TSNode name = ts_node_child_by_field_name(node, "name", 4);
         TSNode path = ts_node_child_by_field_name(node, "path", 4);
-        char ns[SYMBOL_MAX_LENGTH] = "";
+        char path_str[SYMBOL_MAX_LENGTH] = "";
         if (!ts_node_is_null(path)) {
-            safe_extract_node_text(source_code, path, ns, sizeof(ns), filename);
+            safe_extract_node_text(source_code, path, path_str, sizeof(path_str), filename);
         }
+        char ns[SYMBOL_MAX_LENGTH];
+        join_use_path(ns_prefix, path_str, ns, sizeof(ns));
         if (!ts_node_is_null(name)) {
             char sym[SYMBOL_MAX_LENGTH];
             safe_extract_node_text(source_code, name, sym, sizeof(sym), filename);
@@ -693,10 +907,12 @@ static void index_use_tree(TSNode node, const char *source_code,
         /* `path::Original as Alias` — index the alias */
         TSNode alias = ts_node_child_by_field_name(node, "alias", 5);
         TSNode path = ts_node_child_by_field_name(node, "path", 4);
-        char ns[SYMBOL_MAX_LENGTH] = "";
+        char path_str[SYMBOL_MAX_LENGTH] = "";
         if (!ts_node_is_null(path)) {
-            safe_extract_node_text(source_code, path, ns, sizeof(ns), filename);
+            safe_extract_node_text(source_code, path, path_str, sizeof(path_str), filename);
         }
+        char ns[SYMBOL_MAX_LENGTH];
+        join_use_path(ns_prefix, path_str, ns, sizeof(ns));
         if (!ts_node_is_null(alias)) {
             char sym[SYMBOL_MAX_LENGTH];
             safe_extract_node_text(source_code, alias, sym, sizeof(sym), filename);
@@ -713,22 +929,25 @@ static void index_use_tree(TSNode node, const char *source_code,
     }
 
     if (strcmp(t, "use_list") == 0 || strcmp(t, "scoped_use_list") == 0) {
-        /* For scoped_use_list, the prefix `path` is the namespace; recurse into list */
+        /* For scoped_use_list, fold the prefix `path` into the namespace and
+         * recurse into the list so every leaf inherits it */
         TSNode list_node = node;
-        char ns[SYMBOL_MAX_LENGTH] = "";
+        char ns[SYMBOL_MAX_LENGTH];
+        join_use_path(ns_prefix, NULL, ns, sizeof(ns));
         if (strcmp(t, "scoped_use_list") == 0) {
             TSNode path = ts_node_child_by_field_name(node, "path", 4);
             if (!ts_node_is_null(path)) {
-                safe_extract_node_text(source_code, path, ns, sizeof(ns), filename);
+                char path_str[SYMBOL_MAX_LENGTH];
+                safe_extract_node_text(source_code, path, path_str, sizeof(path_str), filename);
+                join_use_path(ns_prefix, path_str, ns, sizeof(ns));
             }
             TSNode list = ts_node_child_by_field_name(node, "list", 4);
             if (!ts_node_is_null(list)) list_node = list;
         }
-        (void)ns; /* namespace tracking is handled per-leaf */
         uint32_t n = ts_node_child_count(list_node);
         for (uint32_t i = 0; i < n; i++) {
             index_use_tree(ts_node_child(list_node, i), source_code,
-                           directory, filename, result, filter, line);
+                           directory, filename, result, filter, line, ns);
         }
         return;
     }
@@ -737,7 +956,7 @@ static void index_use_tree(TSNode node, const char *source_code,
     uint32_t n = ts_node_child_count(node);
     for (uint32_t i = 0; i < n; i++) {
         index_use_tree(ts_node_child(node, i), source_code,
-                       directory, filename, result, filter, line);
+                       directory, filename, result, filter, line, ns_prefix);
     }
 }
 
@@ -749,7 +968,7 @@ static void handle_use_declaration(TSNode node, const char *source_code,
         process_children(node, source_code, directory, filename, result, filter);
         return;
     }
-    index_use_tree(arg, source_code, directory, filename, result, filter, line);
+    index_use_tree(arg, source_code, directory, filename, result, filter, line, NULL);
 }
 
 static void handle_let_declaration(TSNode node, const char *source_code,
@@ -765,7 +984,8 @@ static void handle_let_declaration(TSNode node, const char *source_code,
     }
 
     index_pattern_identifiers(pattern, source_code, directory, filename,
-                              result, filter, line, type_str);
+                              result, filter, line, type_str,
+                              has_mut_specifier(node) ? "mut" : NULL);
 
     /* Visit value so calls/identifiers inside get indexed */
     if (!ts_node_is_null(value)) {
@@ -801,7 +1021,7 @@ static void handle_let_condition(TSNode node, const char *source_code,
         else if (seen_eq && ts_node_is_null(value)) value = c;
     }
     index_pattern_identifiers(pattern, source_code, directory, filename,
-                              result, filter, line, NULL);
+                              result, filter, line, NULL, NULL);
     if (!ts_node_is_null(value)) {
         visit_node(value, source_code, directory, filename, result, filter);
     }
@@ -815,7 +1035,7 @@ static void handle_for_expression(TSNode node, const char *source_code,
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
 
     index_pattern_identifiers(pattern, source_code, directory, filename,
-                              result, filter, line, NULL);
+                              result, filter, line, NULL, NULL);
     if (!ts_node_is_null(value)) {
         visit_node(value, source_code, directory, filename, result, filter);
     }
@@ -855,7 +1075,7 @@ static void handle_match_expression(TSNode node, const char *source_code,
                 for (uint32_t k = 0; k < mn; k++) {
                     TSNode mc = ts_node_child(ac, k);
                     index_pattern_identifiers(mc, source_code, directory, filename,
-                                              result, filter, arm_line, NULL);
+                                              result, filter, arm_line, NULL, NULL);
                 }
             } else if (strcmp(act, "=>") != 0 && strcmp(act, ",") != 0) {
                 /* The arm body expression */
@@ -877,6 +1097,10 @@ static void handle_function_signature_item(TSNode node, const char *source_code,
 
     char modifiers[SYMBOL_MAX_LENGTH];
     extract_fn_modifiers(node, source_code, modifiers, sizeof(modifiers), filename);
+    if (!modifiers[0] && g_extern_abi[0]) {
+        /* Declarations in an extern block inherit the block's ABI */
+        snprintf(modifiers, sizeof(modifiers), "%s", g_extern_abi);
+    }
 
     char attrs[SYMBOL_MAX_LENGTH];
     extract_attributes(node, source_code, attrs, sizeof(attrs), filename);
@@ -905,6 +1129,8 @@ static void handle_function_signature_item(TSNode node, const char *source_code,
                       .parent = g_current_impl[0] ? g_current_impl : NULL
                   });
     }
+
+    index_generic_constraints(node, source_code, directory, filename, result, filter);
 
     /* Process parameters so their identifiers/types get indexed */
     TSNode params_node = ts_node_child_by_field_name(node, "parameters", 10);
@@ -941,19 +1167,96 @@ static void handle_const_or_static(TSNode node, const char *source_code,
     char location[SOURCE_LOCATION_MAX_LENGTH];
     format_source_location(node, location, sizeof(location));
 
+    /* static mut COUNTER, plus the ABI when inside an extern block */
+    char mods[SYMBOL_MAX_LENGTH + 8] = "";
+    int is_mut = has_mut_specifier(node);
+    if (g_extern_abi[0] && is_mut) {
+        snprintf(mods, sizeof(mods), "%s mut", g_extern_abi);
+    } else if (g_extern_abi[0]) {
+        snprintf(mods, sizeof(mods), "%s", g_extern_abi);
+    } else if (is_mut) {
+        snprintf(mods, sizeof(mods), "mut");
+    }
+
+    /* Associated consts (direct members of a trait/impl declaration_list)
+     * belong to the enclosing trait/impl; function-local consts do not. */
+    const char *parent = NULL;
+    TSNode enclosing = ts_node_parent(node);
+    if (!ts_node_is_null(enclosing) && g_current_impl[0] &&
+        strcmp(ts_node_type(enclosing), "declaration_list") == 0) {
+        parent = g_current_impl;
+    }
+
     if (filter_should_index(filter, name)) {
         add_entry(result, name, line, CONTEXT_VARIABLE,
                   directory, filename, location,
                   &(ExtColumns){
                       .definition = "1",
                       .scope = vis[0] ? vis : NULL,
-                      .type = type_str[0] ? type_str : NULL
+                      .type = type_str[0] ? type_str : NULL,
+                      .modifier = mods[0] ? mods : NULL,
+                      .parent = parent
                   });
     }
 
     if (!ts_node_is_null(value)) {
         visit_node(value, source_code, directory, filename, result, filter);
     }
+}
+
+static void handle_extern_crate(TSNode node, const char *source_code,
+                                const char *directory, const char *filename,
+                                ParseResult *result, SymbolFilter *filter, int line) {
+    TSNode name = ts_node_child_by_field_name(node, "name", 4);
+    TSNode alias = ts_node_child_by_field_name(node, "alias", 5);
+
+    char name_str[SYMBOL_MAX_LENGTH] = "";
+    if (!ts_node_is_null(name)) {
+        safe_extract_node_text(source_code, name, name_str, sizeof(name_str), filename);
+    }
+
+    if (!ts_node_is_null(alias)) {
+        /* `extern crate foo as bar` — index the alias, like use_as_clause */
+        char sym[SYMBOL_MAX_LENGTH];
+        safe_extract_node_text(source_code, alias, sym, sizeof(sym), filename);
+        if (sym[0] && filter_should_index(filter, sym)) {
+            add_entry(result, sym, line, CONTEXT_IMPORT,
+                      directory, filename, NULL,
+                      &(ExtColumns){
+                          .namespace = name_str[0] ? name_str : NULL,
+                          .clue = "as"
+                      });
+        }
+    } else if (name_str[0] && filter_should_index(filter, name_str)) {
+        add_entry(result, name_str, line, CONTEXT_IMPORT,
+                  directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+    }
+}
+
+static void handle_foreign_mod_item(TSNode node, const char *source_code,
+                                    const char *directory, const char *filename,
+                                    ParseResult *result, SymbolFilter *filter) {
+    /* extern "C" { ... }: remember the ABI so the declarations inside get it
+     * as their modifier. The extern_modifier is consumed here, not descended
+     * into, so its ABI string never leaks into the index as a string literal. */
+    char saved[SYMBOL_MAX_LENGTH];
+    snprintf(saved, sizeof(saved), "%s", g_extern_abi);
+
+    uint32_t n = ts_node_child_count(node);
+    for (uint32_t i = 0; i < n; i++) {
+        TSNode c = ts_node_child(node, i);
+        if (strcmp(ts_node_type(c), "extern_modifier") == 0) {
+            safe_extract_node_text(source_code, c, g_extern_abi,
+                                   sizeof(g_extern_abi), filename);
+            break;
+        }
+    }
+
+    TSNode body = ts_node_child_by_field_name(node, "body", 4);
+    if (!ts_node_is_null(body)) {
+        process_children(body, source_code, directory, filename, result, filter);
+    }
+    snprintf(g_extern_abi, sizeof(g_extern_abi), "%s", saved);
 }
 
 static void handle_type_item(TSNode node, const char *source_code,
@@ -980,9 +1283,13 @@ static void handle_type_item(TSNode node, const char *source_code,
                   &(ExtColumns){
                       .definition = "1",
                       .scope = vis[0] ? vis : NULL,
-                      .type = type_str[0] ? type_str : NULL
+                      .type = type_str[0] ? type_str : NULL,
+                      .parent = g_current_impl[0] ? g_current_impl : NULL
                   });
     }
+
+    /* Associated-type bounds: type Iter<'a>: Iterator<...> */
+    index_generic_constraints(node, source_code, directory, filename, result, filter);
 }
 
 static void handle_macro_definition(TSNode node, const char *source_code,
@@ -1121,6 +1428,47 @@ static void handle_macro_invocation(TSNode node, const char *source_code,
     }
 }
 
+/* Derive the nearest single-symbol parent name from a method/field receiver:
+ * identifier/self -> its text; a.b -> "b"; a.b() / a.b::<T>() -> "b";
+ * path::f() -> "f". Returns 1 if a name was written to out. */
+static int extract_receiver_parent(TSNode value, const char *source_code,
+                                   const char *filename, char *out, size_t out_size) {
+    out[0] = '\0';
+    if (ts_node_is_null(value)) return 0;
+    const char *vt = ts_node_type(value);
+    if (strcmp(vt, "identifier") == 0 || strcmp(vt, "self") == 0) {
+        safe_extract_node_text(source_code, value, out, out_size, filename);
+    } else if (strcmp(vt, "field_expression") == 0) {
+        TSNode inner = ts_node_child_by_field_name(value, "field", 5);
+        if (!ts_node_is_null(inner)) {
+            safe_extract_node_text(source_code, inner, out, out_size, filename);
+        }
+    } else if (strcmp(vt, "call_expression") == 0) {
+        TSNode fn = ts_node_child_by_field_name(value, "function", 8);
+        if (!ts_node_is_null(fn) && strcmp(ts_node_type(fn), "generic_function") == 0) {
+            TSNode inner = ts_node_child_by_field_name(fn, "function", 8);
+            if (!ts_node_is_null(inner)) fn = inner;
+        }
+        if (!ts_node_is_null(fn)) {
+            const char *ft = ts_node_type(fn);
+            if (strcmp(ft, "identifier") == 0) {
+                safe_extract_node_text(source_code, fn, out, out_size, filename);
+            } else if (strcmp(ft, "field_expression") == 0) {
+                TSNode f = ts_node_child_by_field_name(fn, "field", 5);
+                if (!ts_node_is_null(f)) {
+                    safe_extract_node_text(source_code, f, out, out_size, filename);
+                }
+            } else if (strcmp(ft, "scoped_identifier") == 0) {
+                TSNode n = ts_node_child_by_field_name(fn, "name", 4);
+                if (!ts_node_is_null(n)) {
+                    safe_extract_node_text(source_code, n, out, out_size, filename);
+                }
+            }
+        }
+    }
+    return out[0] != '\0';
+}
+
 static void handle_call_expression(TSNode node, const char *source_code,
                                    const char *directory, const char *filename,
                                    ParseResult *result, SymbolFilter *filter, int line) {
@@ -1136,6 +1484,15 @@ static void handle_call_expression(TSNode node, const char *source_code,
     TSNode fn = ts_node_child_by_field_name(node, "function", 8);
     if (!ts_node_is_null(fn)) {
         const char *ft = ts_node_type(fn);
+        /* Turbofish (foo::<T>(), obj.method::<T>()): the callee is wrapped in
+         * a generic_function node; unwrap to the real identifier/field/path. */
+        if (strcmp(ft, "generic_function") == 0) {
+            TSNode inner = ts_node_child_by_field_name(fn, "function", 8);
+            if (!ts_node_is_null(inner)) {
+                fn = inner;
+                ft = ts_node_type(fn);
+            }
+        }
         if (strcmp(ft, "identifier") == 0) {
             char name[SYMBOL_MAX_LENGTH];
             safe_extract_node_text(source_code, fn, name, sizeof(name), filename);
@@ -1148,11 +1505,8 @@ static void handle_call_expression(TSNode node, const char *source_code,
             /* obj.method() */
             TSNode field = ts_node_child_by_field_name(fn, "field", 5);
             TSNode value = ts_node_child_by_field_name(fn, "value", 5);
-            char par[SYMBOL_MAX_LENGTH] = "";
-            if (!ts_node_is_null(value) &&
-                strcmp(ts_node_type(value), "identifier") == 0) {
-                safe_extract_node_text(source_code, value, par, sizeof(par), filename);
-            }
+            char par[SYMBOL_MAX_LENGTH];
+            extract_receiver_parent(value, source_code, filename, par, sizeof(par));
             if (!ts_node_is_null(field)) {
                 char name[SYMBOL_MAX_LENGTH];
                 safe_extract_node_text(source_code, field, name, sizeof(name), filename);
@@ -1305,7 +1659,13 @@ static void handle_string_literal(TSNode node, const char *source_code,
                         if (wlen < sizeof(word)) {
                             snprintf(word, sizeof(word), "%.*s", (int)wlen, word_start);
                             filter_clean_string_symbol(word, cleaned, sizeof(cleaned));
-                            if (cleaned[0] && filter_should_index(filter, cleaned)) {
+                            /* Skip punctuation-only fragments, e.g. ":?" left
+                             * over from format specs like "{:?}" */
+                            int has_alnum = 0;
+                            for (const char *q = cleaned; *q; q++) {
+                                if (isalnum((unsigned char)*q)) { has_alnum = 1; break; }
+                            }
+                            if (has_alnum && filter_should_index(filter, cleaned)) {
                                 add_entry(result, cleaned, line, CONTEXT_STRING,
                                           directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
                             }
@@ -1330,21 +1690,12 @@ static void handle_field_expression(TSNode node, const char *source_code,
     TSNode value = ts_node_child_by_field_name(node, "value", 5);
     TSNode field = ts_node_child_by_field_name(node, "field", 5);
 
-    char parent[SYMBOL_MAX_LENGTH] = "";
+    char parent[SYMBOL_MAX_LENGTH];
+    extract_receiver_parent(value, source_code, filename, parent, sizeof(parent));
     int visit_value = 0;
     if (!ts_node_is_null(value)) {
         const char *value_type = ts_node_type(value);
-        if (strcmp(value_type, "identifier") == 0 || strcmp(value_type, "self") == 0) {
-            safe_extract_node_text(source_code, value, parent, sizeof(parent), filename);
-        } else if (strcmp(value_type, "field_expression") == 0) {
-            /* a.b.c: c's parent is b (immediate parent) */
-            TSNode inner = ts_node_child_by_field_name(value, "field", 5);
-            if (!ts_node_is_null(inner)) {
-                safe_extract_node_text(source_code, inner, parent, sizeof(parent), filename);
-            }
-            visit_value = 1;
-        } else {
-            /* Complex receiver (call, index, ...): no single parent name */
+        if (strcmp(value_type, "identifier") != 0 && strcmp(value_type, "self") != 0) {
             visit_value = 1;
         }
     }
@@ -1372,6 +1723,29 @@ static void handle_field_expression(TSNode node, const char *source_code,
 static void handle_struct_expression(TSNode node, const char *source_code,
                                      const char *directory, const char *filename,
                                      ParseResult *result, SymbolFilter *filter) {
+    /* The literal names its type: index it as a usage, and keep the name
+     * around as the fields' fallback parent */
+    TSNode name_node = ts_node_child_by_field_name(node, "name", 4);
+    char type_name[SYMBOL_MAX_LENGTH] = "";
+    if (!ts_node_is_null(name_node)) {
+        extract_base_type_name(name_node, source_code, type_name, sizeof(type_name), filename);
+        if (type_name[0] && filter_should_index(filter, type_name)) {
+            char ns[SYMBOL_MAX_LENGTH] = "";
+            const char *nt = ts_node_type(name_node);
+            if (strcmp(nt, "scoped_type_identifier") == 0 ||
+                strcmp(nt, "scoped_identifier") == 0) {
+                TSNode path = ts_node_child_by_field_name(name_node, "path", 4);
+                if (!ts_node_is_null(path)) {
+                    safe_extract_node_text(source_code, path, ns, sizeof(ns), filename);
+                }
+            }
+            TSPoint np = ts_node_start_point(name_node);
+            add_entry(result, type_name, (int)(np.row + 1), CONTEXT_CLASS,
+                      directory, filename, NULL,
+                      &(ExtColumns){.namespace = ns[0] ? ns : NULL});
+        }
+    }
+
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
     if (ts_node_is_null(body)) {
         uint32_t n = ts_node_child_count(node);
@@ -1384,6 +1758,16 @@ static void handle_struct_expression(TSNode node, const char *source_code,
         }
     }
     if (ts_node_is_null(body)) return;
+
+    /* Fields' parent: the let-bound variable or enclosing field if one is
+     * active (matches the C indexer's designated-initializer handling);
+     * otherwise the literal's own type name, which Rust syntax always
+     * provides: Person { name, age } */
+    char outer_parent[SYMBOL_MAX_LENGTH];
+    copy_symbol(outer_parent, sizeof(outer_parent), g_initializer_parent);
+    if (!g_initializer_parent[0] && type_name[0]) {
+        copy_symbol(g_initializer_parent, sizeof(g_initializer_parent), type_name);
+    }
 
     uint32_t child_count = ts_node_child_count(body);
     for (uint32_t i = 0; i < child_count; i++) {
@@ -1440,6 +1824,8 @@ static void handle_struct_expression(TSNode node, const char *source_code,
             process_children(child, source_code, directory, filename, result, filter);
         }
     }
+
+    copy_symbol(g_initializer_parent, sizeof(g_initializer_parent), outer_parent);
 }
 
 static void visit_node(TSNode node, const char *source_code, const char *directory,
@@ -1503,6 +1889,14 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
         handle_mod_item(node, source_code, directory, filename, result, filter, line);
         return;
     }
+    if (strcmp(t, "extern_crate_declaration") == 0) {
+        handle_extern_crate(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
+    if (strcmp(t, "foreign_mod_item") == 0) {
+        handle_foreign_mod_item(node, source_code, directory, filename, result, filter);
+        return;
+    }
     if (strcmp(t, "use_declaration") == 0) {
         handle_use_declaration(node, source_code, directory, filename, result, filter, line);
         return;
@@ -1519,7 +1913,7 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
         handle_const_or_static(node, source_code, directory, filename, result, filter, line, CONTEXT_VARIABLE);
         return;
     }
-    if (strcmp(t, "type_item") == 0) {
+    if (strcmp(t, "type_item") == 0 || strcmp(t, "associated_type") == 0) {
         handle_type_item(node, source_code, directory, filename, result, filter, line);
         return;
     }
@@ -1559,8 +1953,14 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
         handle_string_literal(node, source_code, directory, filename, result, filter, line);
         return;
     }
-    /* Skip attribute_item content - already harvested via extract_attributes */
-    if (strcmp(t, "attribute_item") == 0 || strcmp(t, "inner_attribute_item") == 0) {
+    /* Attribute names are harvested into clues via extract_attributes;
+     * derive lists additionally yield trait usages. Inner attributes
+     * (#![...]) cannot carry derives. */
+    if (strcmp(t, "attribute_item") == 0) {
+        handle_attribute_item(node, source_code, directory, filename, result, filter);
+        return;
+    }
+    if (strcmp(t, "inner_attribute_item") == 0) {
         return;
     }
 
