@@ -1,5 +1,16 @@
 `qi` Context Preservation Experiment Plan
 
+> **Implementation note:** This document describes the methodological rationale
+> for the experiment. The concrete implementation uses **SWE-bench Verified**
+> (20 multi-file instances) with mini-swe-agent inside the official SWE-bench
+> Docker images, rather than the self-hosted SourceMinder feature-task approach
+> described below. The SWE-bench Verified pivot was made because: (1) it provides
+> standardized, reproducible tasks with known solutions and Docker images, (2) the
+> 2–6 file edits exercise qi's cross-file navigation advantage, and (3) SWE-bench
+> evaluation is the community standard for coding-agent experiments. The study
+> design (two arms, repeated runs, randomization, preregistration) carries over
+> intact. See `PREREGISTRATION.md` for the frozen experimental protocol.
+
 Purpose
 - Produce publication-grade empirical evidence about whether `qi` preserves LLM context window relative to standard shell-based code exploration.
 - Measure token consumption directly, not by proxy.

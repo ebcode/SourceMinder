@@ -1,0 +1,10 @@
+{
+  "arm": "treatment",
+  "instance_id": "matplotlib__matplotlib-25479",
+  "run_id": "4",
+  "started_at": "2026-06-17T07:22:20.573279+00:00",
+  "finished_at": "2026-06-17T07:29:07.675227+00:00",
+  "exit_code": 0,
+  "status": "completed",
+  "traj_written": true
+}

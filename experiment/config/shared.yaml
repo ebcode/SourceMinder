@@ -1,0 +1,12 @@
+# Shared overrides for both arms.
+# Applied after swebench.yaml, before arm-specific configs.
+
+agent:
+  step_limit: 100
+
+model:
+  model_name: "deepseek/deepseek-v4-flash"
+  cost_limit: 0
+
+environment:
+  timeout: 60

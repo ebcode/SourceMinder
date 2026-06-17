@@ -1,0 +1,19 @@
+# Control arm config overrides.
+# Same short instance_template as treatment, but WITHOUT the qi instruction.
+# Shared settings (step_limit, model, timeout) are in shared.yaml.
+
+agent:
+  instance_template: |
+    <pr_description>
+    {{task}}
+    </pr_description>
+
+    <instructions>
+    Fix the issue above by editing source files in /testbed.
+    Do NOT modify test files.
+
+    When done, submit your changes as a git patch:
+    1. `git diff -- <your-files> > patch.txt`
+    2. Verify: `cat patch.txt`
+    3. Submit: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt`
+    </instructions>

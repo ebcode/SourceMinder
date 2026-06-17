@@ -1,0 +1,24 @@
+# 20 randomly sampled SWE-bench Verified instances with 2-6 file edits (seed=42)
+# Generated: 2026-06-16T16:21:12
+# Columns: instance_id repo base_commit n_files
+
+astropy__astropy-14369 astropy/astropy fa4e8d1cd279acf9b24560813c8652494ccd5922 2
+astropy__astropy-8707 astropy/astropy a85a0747c54bac75e9c3b2fe436b105ea029d6cf 2
+django__django-10554 django/django 14d026cccb144c6877294ba4cd4e03ebf0842498 2
+django__django-11333 django/django 55b68de643b5c2d5f0a8ea7587ab3b2966021ccc 2
+django__django-12741 django/django 537d422942b53bc0a2b6a51968f379c0de07793c 2
+django__django-13121 django/django ec5aa2161d8015a3fe57dcbbfe14200cd18f0a16 4
+django__django-13344 django/django e39e727ded673e74016b5d3658d23cbe20234d11 3
+django__django-15629 django/django 694cf458f16b8d340a3195244196980b2dec34fd 4
+django__django-16032 django/django 0c3981eb5094419fe200eb46c71b5376a2266166 2
+django__django-16315 django/django 7d5329852f19c6ae78c6f6f3d3e41835377bf295 2
+django__django-16560 django/django 51c9bb7cd16081133af4f0ab6d06572660309730 2
+django__django-16938 django/django 1136aa5005f0ae70fea12796b7e37d6f027b9263 2
+matplotlib__matplotlib-14623 matplotlib/matplotlib d65c9ca20ddf81ef91199e6d819f9d3506ef477c 3
+matplotlib__matplotlib-25479 matplotlib/matplotlib 7fdf772201e4c9bafbc16dfac23b5472d6a53fa2 2
+pydata__xarray-6938 pydata/xarray c4e40d991c28be51de9ac560ce895ac7f9b14924 2
+pylint-dev__pylint-4661 pylint-dev/pylint 1d1619ef913b99b06647d2030bddff4800abdf63 2
+sphinx-doc__sphinx-7590 sphinx-doc/sphinx 2e506c5ab457cba743bb47eb5b8c8eb9dd51d23d 3
+sphinx-doc__sphinx-8120 sphinx-doc/sphinx 795747bdb6b8fb7d717d5bbfc2c3316869e66a73 2
+sympy__sympy-13877 sympy/sympy 1659712001810f5fc563a443949f8e3bb38af4bd 2
+sympy__sympy-22080 sympy/sympy 3f8c8c2377cb8e0daaf8073e8d03ac7d87580813 2

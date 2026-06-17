@@ -1,0 +1,10 @@
+{
+  "arm": "control",
+  "instance_id": "matplotlib__matplotlib-14623",
+  "run_id": "7",
+  "started_at": "2026-06-17T06:35:37.072559+00:00",
+  "finished_at": "2026-06-17T06:38:02.403266+00:00",
+  "exit_code": 0,
+  "status": "completed",
+  "traj_written": true
+}

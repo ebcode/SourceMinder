@@ -38,3 +38,4 @@ tmp/*
 token-science
 ai-log
 tmp/cachegrind*
+__pycache__

@@ -1,0 +1,10 @@
+{
+  "arm": "treatment",
+  "instance_id": "django__django-13121",
+  "run_id": "6",
+  "started_at": "2026-06-17T09:19:35.282399+00:00",
+  "finished_at": "2026-06-17T09:27:28.780886+00:00",
+  "exit_code": 0,
+  "status": "completed",
+  "traj_written": true
+}

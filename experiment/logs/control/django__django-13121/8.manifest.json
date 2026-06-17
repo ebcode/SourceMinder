@@ -1,0 +1,10 @@
+{
+  "arm": "control",
+  "instance_id": "django__django-13121",
+  "run_id": "8",
+  "started_at": "2026-06-17T10:47:16.881619+00:00",
+  "finished_at": "2026-06-17T10:54:48.866210+00:00",
+  "exit_code": 0,
+  "status": "completed",
+  "traj_written": true
+}
