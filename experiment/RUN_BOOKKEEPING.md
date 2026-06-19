@@ -22,6 +22,7 @@ Every run attempt is recorded in two places by separate processes:
   "arm": "treatment",
   "instance_id": "django__django-10554",
   "run_id": "1",
+  "model_name": "deepseek/deepseek-v4-flash",
   "started_at": "2026-06-17T00:00:00+00:00",
   "finished_at": "2026-06-17T00:12:34+00:00",
   "exit_code": 0,
@@ -44,6 +45,7 @@ writing a trajectory. The ledger is append-only (small atomic writes under
 
 ```json
 {"arm": "control", "instance_id": "django__django-10554", "rep": 1,
+ "model_name": "deepseek/deepseek-v4-flash",
  "started_at": "...", "finished_at": "...", "returncode": 0,
  "traj_written": true, "exit_status": "Submitted", "ok": true}
 ```

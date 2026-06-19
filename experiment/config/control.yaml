@@ -15,5 +15,5 @@ agent:
     When done, submit your changes as a git patch:
     1. `git diff -- <your-files> > patch.txt`
     2. Verify: `cat patch.txt`
-    3. Submit: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt`
+    3. Submit (BOTH parts, single command): `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt`
     </instructions>

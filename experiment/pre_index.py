@@ -17,34 +17,21 @@ Options:
 """
 
 import argparse
-import os
 import subprocess
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).parent.parent.resolve()
-EXPERIMENT_DIR = REPO_ROOT / "experiment"
-DBS_DIR = EXPERIMENT_DIR / "dbs"
+sys.path.insert(0, str(Path(__file__).resolve().parents[0]))  # -> experiment/
+from lib import paths
+from lib.instances import parse_instance_ids
+from lib.naming import image_of
+
+REPO_ROOT = paths.REPO_ROOT
+EXPERIMENT_DIR = paths.EXPERIMENT_DIR
+DBS_DIR = paths.DBS_DIR
 INDEX_SCRIPT = EXPERIMENT_DIR / "index_instance.sh"
-
-
-def parse_instance_ids(path: Path):
-    instances = []
-    with open(path) as f:
-        for line in f:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            parts = line.split()
-            if len(parts) >= 1:
-                instances.append(parts[0])
-    return instances
-
-
-def instance_to_image(instance_id: str) -> str:
-    return f"swebench/sweb.eval.x86_64.{instance_id.replace('__', '_1776_')}:latest"
 
 
 def is_done(instance_id):
@@ -103,7 +90,7 @@ def run_instance(instance_id, dry_run=False):
     return result.returncode == 0
 
 
-def main():
+def main() -> int:
     default_instances = EXPERIMENT_DIR / "verified_instance_ids.txt"
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--instances-file", type=Path, default=default_instances, metavar="FILE",
@@ -116,17 +103,17 @@ def main():
 
     if not args.instances_file.exists():
         print(f"ERROR: {args.instances_file} not found", file=sys.stderr)
-        sys.exit(1)
+        return 1
 
     if not INDEX_SCRIPT.exists():
         print(f"ERROR: {INDEX_SCRIPT} not found", file=sys.stderr)
-        sys.exit(1)
+        return 1
 
     instances = parse_instance_ids(args.instances_file)
     if args.only:
         if args.only not in instances:
             print(f"ERROR: {args.only!r} not in {args.instances_file.name}", file=sys.stderr)
-            sys.exit(1)
+            return 1
         instances = [args.only]
 
     DBS_DIR.mkdir(exist_ok=True)
@@ -136,14 +123,14 @@ def main():
     print(f"Instances: {len(instances)} total, {done_count} already done, {len(todo)} to index")
 
     if args.pull:
-        images = [instance_to_image(iid) for iid in instances]
+        images = [image_of(iid) for iid in instances]
         print(f"\nPulling {len(images)} Docker image(s)...")
         for image in images:
             pull_image(image, dry_run=args.dry_run)
 
     if not todo:
         print("Nothing to do.")
-        return
+        return 0
 
     print(f"\nIndexing {len(todo)} instance(s) with {args.workers} worker(s)...")
 
@@ -166,9 +153,8 @@ def main():
                     print(f"  [{completed}/{len(todo)} done]")
 
     print(f"\nFinished: {successes}/{len(todo)} succeeded")
-    if successes < len(todo):
-        sys.exit(1)
+    return 1 if successes < len(todo) else 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

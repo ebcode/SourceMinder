@@ -10,9 +10,10 @@ Primary metrics (per PREREGISTRATION.md §7.1):
   - peak_prompt_tokens   max prompt_tokens in any single turn (context pressure)
   - total_tool_output    approximate tokens of tool output shown to the model
 
-Trajectory layout handled (both are accepted):
-  logs/<arm>/<instance>/<run_id>.traj.json      (run_experiment.py)
-  logs/<instance>_<arm>.traj.json               (legacy compare.sh)
+Trajectory layout handled (all are accepted):
+  logs/<model>/<arm>/<instance>/<run_id>.traj.json   (run_experiment.py)
+  logs/<arm>/<instance>/<run_id>.traj.json           (legacy, no model dir)
+  logs/<instance>_<arm>.traj.json                    (legacy compare.sh)
 
 Usage:
   python3 experiment/analysis/analyze_trajectories.py \
@@ -23,36 +24,18 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import re
 import statistics
 import sys
-import time
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # -> experiment/
+from lib import cmds, paths
+from lib.trajmeta import ARMS, infer_path_meta, batch_of, n_files_of, patch_files_of
 
 # Tool-output tokens are not API-counted. The DeepSeek tokenizer is the exact
 # answer (PREREGISTRATION Open Q4); until that is wired in we approximate at
 # ~4 chars/token, which is adequate for the pilot's descriptive stats.
 CHARS_PER_TOKEN = 4.0
-
-ARMS = ("control", "treatment")
-QI_RE = re.compile(r"(^|[\s;|&(])qi(\s|$)")
-GREP_RE = re.compile(r"(^|[\s;|&(])(grep|rg|ag|ack)(\s|$)")
-READ_RE = re.compile(r"(^|[\s;|&(])(cat|sed|head|tail|less|more)(\s|$)")
-
-
-def infer_arm_instance(path: Path) -> tuple[str, str]:
-    """Derive (arm, instance_id) from the path, preferring directory layout."""
-    parts = path.parts
-    arm = next((p for p in parts if p in ARMS), "")
-    # nested layout: .../<arm>/<instance>/<run_id>.traj.json
-    if arm and path.parent.parent.name == arm:
-        return arm, path.parent.name
-    # flat layout: <instance>_<arm>.traj.json
-    stem = path.name.replace(".traj.json", "")
-    for a in ARMS:
-        if stem.endswith("_" + a):
-            return a, stem[: -(len(a) + 1)]
-    return arm, stem
 
 
 def analyze_one(path: Path) -> dict | None:
@@ -64,7 +47,7 @@ def analyze_one(path: Path) -> dict | None:
 
     messages = data.get("messages", [])
     info = data.get("info", {})
-    arm, instance = infer_arm_instance(path)
+    model, batch, arm, instance = infer_path_meta(path)
 
     prompt_toks: list[int] = []
     completion_toks: list[int] = []
@@ -84,9 +67,10 @@ def analyze_one(path: Path) -> dict | None:
                 cached_toks += (u.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
             for action in extra.get("actions") or []:
                 cmd = action.get("command", "") if isinstance(action, dict) else ""
-                qi_n += len(QI_RE.findall(cmd))
-                grep_n += len(GREP_RE.findall(cmd))
-                read_n += len(READ_RE.findall(cmd))
+                dq, dg, dr = cmds.count_tools(cmd)
+                qi_n += dq
+                grep_n += dg
+                read_n += dr
 
     # Approximate tool-output tokens from the observation (role == "tool") msgs.
     tool_chars = sum(
@@ -97,10 +81,15 @@ def analyze_one(path: Path) -> dict | None:
         print(f"WARNING: no usage data in {path}", file=sys.stderr)
         return None
 
+    submission = (info.get("submission") or "").strip()
     return {
+        "batch_id": batch or batch_of(path),
         "run_id": path.name.replace(".traj.json", ""),
+        "model": model,
         "instance_id": instance,
         "arm": arm,
+        "n_files": n_files_of(path),
+        "patch_files": patch_files_of(submission),
         "exit_status": info.get("exit_status", ""),
         "turn_count": len(prompt_toks),
         "total_input_tokens": sum(prompt_toks),
@@ -112,41 +101,50 @@ def analyze_one(path: Path) -> dict | None:
         "qi_invocations": qi_n,
         "grep_invocations": grep_n,
         "file_read_invocations": read_n,
-        "submitted": bool(info.get("submission")),
+        "submitted": bool(submission),
         "source": str(path),
     }
 
 
 def summarize(rows: list[dict]) -> None:
     metrics = ("total_input_tokens", "peak_prompt_tokens", "tool_output_tokens_approx")
-    print("\n=== Summary by arm ===")
-    for arm in ARMS:
-        arm_rows = [r for r in rows if r["arm"] == arm]
-        if not arm_rows:
-            continue
-        print(f"\n[{arm}] n={len(arm_rows)} runs")
-        for m in metrics:
-            vals = [r[m] for r in arm_rows]
-            med = statistics.median(vals)
-            print(f"  {m:28s} median={med:>10,.0f}  min={min(vals):>9,}  max={max(vals):>9,}")
-        qi = sum(r["qi_invocations"] for r in arm_rows)
-        grep = sum(r["grep_invocations"] for r in arm_rows)
-        print(f"  {'qi / grep invocations':28s} {qi} / {grep}")
+    # Group by model: arms are only comparable within the same model.
+    models = sorted({r["model"] for r in rows})
+    for model in models:
+        model_rows = [r for r in rows if r["model"] == model]
+        label = model or "(unknown model)"
+        print(f"\n=== Summary by arm: {label} ===")
+        for arm in ARMS:
+            arm_rows = [r for r in model_rows if r["arm"] == arm]
+            if not arm_rows:
+                continue
+            print(f"\n[{arm}] n={len(arm_rows)} runs")
+            for m in metrics:
+                vals = [r[m] for r in arm_rows]
+                med = statistics.median(vals)
+                print(f"  {m:28s} median={med:>10,.0f}  min={min(vals):>9,}  max={max(vals):>9,}")
+            qi = sum(r["qi_invocations"] for r in arm_rows)
+            grep = sum(r["grep_invocations"] for r in arm_rows)
+            print(f"  {'qi / grep invocations':28s} {qi} / {grep}")
 
-    ctrl = {r["peak_prompt_tokens"] for r in rows if r["arm"] == "control"}
-    treat = {r["peak_prompt_tokens"] for r in rows if r["arm"] == "treatment"}
-    if ctrl and treat:
-        cm = statistics.median([r["peak_prompt_tokens"] for r in rows if r["arm"] == "control"])
-        tm = statistics.median([r["peak_prompt_tokens"] for r in rows if r["arm"] == "treatment"])
-        if cm:
-            print(f"\n  median peak prompt tokens: treatment vs control = {(tm - cm) / cm:+.1%}")
+        ctrl = [r["peak_prompt_tokens"] for r in model_rows if r["arm"] == "control"]
+        treat = [r["peak_prompt_tokens"] for r in model_rows if r["arm"] == "treatment"]
+        if ctrl and treat:
+            cm = statistics.median(ctrl)
+            tm = statistics.median(treat)
+            if cm:
+                print(f"\n  median peak prompt tokens: treatment vs control = {(tm - cm) / cm:+.1%}")
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--logs", default="experiment/logs", help="directory of *.traj.json files")
+    ap.add_argument("--logs", type=Path, default=paths.LOGS_DIR,
+                    help=f"directory of *.traj.json files (default: {paths.LOGS_DIR})")
     ap.add_argument("--dir", type=Path, default=None,
-                    help="Analysis output directory (default: analysis/<timestamp>/)")
+                    help="Analysis output directory (default: results/runs/<timestamp>/)")
+    ap.add_argument("--batch", default=None, metavar="BATCH_ID",
+                    help="Filter to trajectories whose manifest batch_id matches; "
+                         "also sets the output directory to results/runs/<batch>/")
     args = ap.parse_args()
 
     logs_dir = Path(args.logs)
@@ -154,7 +152,7 @@ def main() -> int:
         print(f"ERROR: not a directory: {logs_dir}", file=sys.stderr)
         return 1
 
-    out_dir = args.dir or Path(f"experiment/analysis/{time.strftime('%Y%m%d_%H%M%S')}")
+    out_dir = args.dir or paths.new_run_dir(batch_id=args.batch or "")
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "runs.csv"
 
@@ -164,6 +162,8 @@ def main() -> int:
         return 1
 
     rows = [r for r in (analyze_one(p) for p in traj_files) if r]
+    if args.batch:
+        rows = [r for r in rows if r.get("batch_id") == args.batch]
     if not rows:
         print("No analyzable runs found.", file=sys.stderr)
         return 1

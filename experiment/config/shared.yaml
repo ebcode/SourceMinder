@@ -2,7 +2,7 @@
 # Applied after swebench.yaml, before arm-specific configs.
 
 agent:
-  step_limit: 100
+  step_limit: 125
 
 model:
   model_name: "deepseek/deepseek-v4-flash"

@@ -1,20 +1,27 @@
+# API keys / secrets: sourced at launch, never committed.
+.env
+.env.*
+
 # Python venv for mini-swe-agent + swebench
 .venv/
-
+tmp/
 
 __pycache__/
-# SWE-bench harness report files (run_evaluation writes <model>.<run_id>.json to cwd)
-*.qiexp_*.json
 
-# SWE-bench harness per-instance evaluation logs (scratch; not trajectories)
+# SWE-bench harness scratch: report files (<model>.<run_id>.json) and per-instance
+# run_evaluation logs. evaluate_patches.py redirects the harness cwd here, so all
+# of it lands under results/reports/ -- regenerable, never committed.
+results/reports/
+# Belt-and-suspenders: catch harness reports wherever they land.
+*.qiexp_*.json
 logs/run_evaluation/
 
 # Note: code-index DBs (dbs/*.db) are already covered by the root .gitignore (*.db).
-# Analysis outputs (analysis/*.csv) are intentionally NOT ignored — they are the
+# Run outputs (results/runs/*.csv) are intentionally NOT ignored — they are the
 # experiment's results; commit them when you want to record a pilot/confirmatory run.
 
-# Eval results DB (analysis/eval_results.db, written by eval_db.py): the .db is
+# Eval results DB (results/eval_results.db, written by eval_db.py): the .db is
 # covered by the root *.db ignore, and results are committed via the exported
-# analysis/*.csv. Ignore the transient WAL sidecars.
+# results/runs/*/eval_results.csv. Ignore the transient WAL sidecars.
 eval_results.db-wal
 eval_results.db-shm

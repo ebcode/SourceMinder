@@ -18,16 +18,23 @@ pipeline produced, so downstream joins are unchanged.
 from __future__ import annotations
 
 import csv
+import os
 import sqlite3
+import sys
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # -> experiment/
+from lib import paths
+
 # Shared store across analysis runs; rows are namespaced by run_tag.
-DEFAULT_DB = Path("experiment/analysis/eval_results.db")
+DEFAULT_DB = paths.EVAL_DB
 
 # Columns mirrored into eval_results.csv (the join surface merge_results.py uses).
-CSV_COLUMNS = ["arm", "instance_id", "rep", "exit_status",
+CSV_COLUMNS = ["batch_id", "n_files", "patch_files",
+               "model", "arm", "instance_id", "rep", "exit_status",
                "has_patch", "outcome", "resolved"]
 
 
@@ -38,6 +45,7 @@ class EvalResult:
     ``resolved`` is *derived* from ``outcome`` (never passed in), so the stored
     boolean can't drift out of step with the categorical outcome.
     """
+    model: str
     arm: str
     instance_id: str
     rep: str
@@ -45,6 +53,9 @@ class EvalResult:
     has_patch: bool
     outcome: str  # resolved | unresolved | error | empty_patch | incomplete
     dataset: str
+    batch_id: str = ""
+    n_files: int | None = None
+    patch_files: int | None = None
 
     @property
     def resolved(self) -> bool:
@@ -69,23 +80,62 @@ def connect(db_path: Path = DEFAULT_DB) -> sqlite3.Connection:
 
 
 def init_schema(conn: sqlite3.Connection) -> None:
+    # ``model`` is part of the identity: the same (arm, instance_id, rep) is
+    # evaluated independently per model, so it must be in the primary key or a
+    # second model's rows would overwrite the first's.
+    cols = [r[1] for r in conn.execute("PRAGMA table_info(eval_results)").fetchall()]
+    legacy = bool(cols) and "model" not in cols
+    if legacy:
+        # Rebuild the table to put ``model`` in the PK (ALTER can't change a PK).
+        # Old rows predate the per-model layout; keep them (model='') rather than
+        # silently dropping, and warn so they can be re-evaluated.
+        conn.execute("ALTER TABLE eval_results RENAME TO eval_results_legacy")
+
     conn.execute(
         """
         CREATE TABLE IF NOT EXISTS eval_results (
             run_tag     TEXT NOT NULL,
+            batch_id    TEXT NOT NULL DEFAULT '',
+            model       TEXT NOT NULL,
             arm         TEXT NOT NULL,
             instance_id TEXT NOT NULL,
             rep         TEXT NOT NULL,
+            n_files     INTEGER,
+            patch_files INTEGER,
             exit_status TEXT,
             has_patch   INTEGER,
             outcome     TEXT,
             resolved    INTEGER,
             dataset     TEXT,
             updated_at  TEXT,
-            PRIMARY KEY (run_tag, arm, instance_id, rep)
+            PRIMARY KEY (run_tag, model, arm, instance_id, rep)
         )
         """
     )
+    # Additive column migrations — safe on every connect (no-op when present).
+    for col, defn in [
+        ("batch_id",    "TEXT NOT NULL DEFAULT ''"),
+        ("n_files",     "INTEGER"),
+        ("patch_files", "INTEGER"),
+    ]:
+        if col not in cols:
+            conn.execute(f"ALTER TABLE eval_results ADD COLUMN {col} {defn}")
+    if legacy:
+        conn.execute(
+            """
+            INSERT INTO eval_results
+              (run_tag, model, arm, instance_id, rep, exit_status,
+               has_patch, outcome, resolved, dataset, updated_at)
+            SELECT run_tag, '', arm, instance_id, rep, exit_status,
+                   has_patch, outcome, resolved, dataset, updated_at
+            FROM eval_results_legacy
+            """
+        )
+        n = conn.execute("SELECT COUNT(*) FROM eval_results_legacy").fetchone()[0]
+        conn.execute("DROP TABLE eval_results_legacy")
+        print(f"eval_db: migrated {n} legacy row(s) to model='' "
+              "(pre-dating per-model logs; re-evaluate to assign a model).",
+              file=sys.stderr)
     conn.commit()
 
 
@@ -94,12 +144,14 @@ def upsert(conn: sqlite3.Connection, run_tag: str, r: EvalResult) -> None:
     conn.execute(
         """
         INSERT OR REPLACE INTO eval_results
-          (run_tag, arm, instance_id, rep, exit_status, has_patch,
-           outcome, resolved, dataset, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          (run_tag, batch_id, model, arm, instance_id, rep, n_files, patch_files,
+           exit_status, has_patch, outcome, resolved, dataset, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (run_tag, r.arm, r.instance_id, r.rep, r.exit_status, int(r.has_patch),
-         r.outcome, int(r.resolved), r.dataset, time.strftime("%Y-%m-%d %H:%M:%S")),
+        (run_tag, r.batch_id, r.model, r.arm, r.instance_id, r.rep,
+         r.n_files, r.patch_files,
+         r.exit_status, int(r.has_patch), r.outcome, int(r.resolved),
+         r.dataset, time.strftime("%Y-%m-%d %H:%M:%S")),
     )
     conn.commit()
 
@@ -109,20 +161,37 @@ def export_csv(conn: sqlite3.Connection, csv_path: Path, run_tag: str) -> int:
 
     Returns the number of data rows written. Safe to call repeatedly (e.g.
     after every group) so a crashed eval still leaves a usable CSV.
+
+    The write is atomic and concurrency-safe on its own: each call renders to a
+    unique temp file in the target directory and ``os.replace``s it over
+    ``csv_path``. The DB is the source of truth, so every snapshot is complete;
+    the atomic rename means a reader never sees a half-written file and two
+    concurrent exporters (parallel ``--workers``) can't interleave into one
+    handle -- the last rename simply wins with a valid full snapshot. Callers
+    need no external lock.
     """
     rows = conn.execute(
         """
-        SELECT arm, instance_id, rep, exit_status, has_patch, outcome, resolved
+        SELECT batch_id, n_files, patch_files,
+               model, arm, instance_id, rep, exit_status, has_patch, outcome, resolved
         FROM eval_results WHERE run_tag = ?
-        ORDER BY arm, rep, instance_id
+        ORDER BY model, arm, rep, instance_id
         """,
         (run_tag,),
     ).fetchall()
     csv_path.parent.mkdir(parents=True, exist_ok=True)
-    with csv_path.open("w", newline="") as fh:
-        writer = csv.writer(fh)
-        writer.writerow(CSV_COLUMNS)
-        writer.writerows(rows)
+    fd, tmp = tempfile.mkstemp(
+        dir=str(csv_path.parent), prefix=".eval_results.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", newline="") as fh:
+            writer = csv.writer(fh)
+            writer.writerow(CSV_COLUMNS)
+            writer.writerows(rows)
+        os.replace(tmp, csv_path)
+    except BaseException:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
+        raise
     return len(rows)
 
 

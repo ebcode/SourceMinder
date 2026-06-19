@@ -45,12 +45,17 @@ All are computed per-arm with per-instance disaggregation where noted.
 
 ### 1.4 Inferential (Exploratory)
 
+The unit of analysis is the **instance**, not the run — the 20 instances are
+independent, the 400 runs are not (10 correlated reps per arm per instance).
+Every inferential test therefore operates on per-instance summaries, never on
+pooled runs. (See §4.4.)
+
 | Test | Metric | Notes |
 |------|--------|-------|
-| Mann-Whitney U (two-sided) | peak_prompt_tokens, total_input_tokens, tool_output_tokens_approx | Ranks-based, doesn't assume normality |
-| Two-proportion z-test | task_success | Fisher's exact for small N |
-| Bootstrap 95% CI for median difference | All three token metrics | 10,000 resamples, percentile method |
-| Bootstrap 95% CI for median ratio | All three token metrics | Treatment / control |
+| Wilcoxon signed-rank (two-sided) | peak_prompt_tokens, total_input_tokens, tool_output_tokens_approx | **Primary token test.** Paired on the 20 per-instance median differences (treatment − control). Replaces a pooled Mann-Whitney U, which would treat 400 correlated runs as independent. |
+| Bootstrap 95% CI for median difference | All three token metrics | **Primary effect size.** Clustered: resample the 20 instances, recompute the difference of pooled medians. 10,000 resamples, percentile method. Raw difference is the lead statistic. |
+| Bootstrap 95% CI for median ratio | All three token metrics | Secondary framing (treatment / control). Tokens are strictly positive so the ratio is well-defined; report it as derived from the difference, not as the headline. |
+| Two-proportion comparison | task_success | Clustered bootstrap on the per-instance success rates (resample instances), or McNemar/paired framing on instance success counts. A plain two-proportion z-test would ignore the same clustering the token tests respect — do not use it as the headline. Label descriptive at pilot N. |
 
 ## 2. Grouping and Aggregation Levels
 
@@ -89,7 +94,8 @@ navigation should be strongest.
 "Does the treatment arm consume fewer tokens?"
 
 Primary metrics: `total_input_tokens`, `peak_prompt_tokens`, `tool_output_tokens_approx`.
-Compared globally and per-instance with Mann-Whitney U and bootstrap CIs.
+Compared with the paired Wilcoxon signed-rank test (on per-instance median
+differences) and clustered bootstrap CIs (§1.4).
 
 ### 3.2 Success Rate Lens
 
@@ -124,13 +130,21 @@ are thinking-mode overhead that doesn't appear in visible output. If treatment
 has higher reasoning tokens, it may indicate the qi instruction adds cognitive
 overhead.
 
-### 3.6 Success-Adjusted Lens
+### 3.6 Successful-Runs Lens (Descriptive Only)
 
-"After controlling for success, does the token effect persist?"
+"Among runs that actually resolved the issue, how do the token costs compare?"
 
-Filter to `task_success = 1` runs only. A treatment run that succeeds may have
-higher token counts simply because successful runs do more work. This lens
-isolates exploration efficiency from success bias.
+Filter to `task_success = 1` runs and report token descriptives by arm.
+
+**This is descriptive, not an adjustment.** Filtering on `task_success` conditions
+on a *post-treatment outcome* (a collider): treatment can change both the success
+rate and which runs succeed, so the successful-only subgroup is not a fair
+like-for-like comparison and can *introduce* bias rather than remove it. It does
+not "control for" the success confound. The real defense against that confound is
+the paired within-instance design (§2.2, §4.1), not outcome-filtering. Report this
+lens as a descriptive sidebar, clearly labeled, and never as the primary effect.
+At pilot N it is often near-empty (e.g. a handful of successes per arm) — annotate
+the subgroup sizes on every chart.
 
 ### 3.7 Censorship-Aware Lens
 
@@ -149,9 +163,12 @@ arm hits the limit significantly more often, comparisons are biased.
 A successful run (agent finds and fixes the bug) naturally does more work: more
 exploration, more edits, more turns. If treatment has a higher success rate, its
 median tokens may be higher *because it succeeds more often*, not because qi is
-inefficient. The success-adjusted lens (§3.6) and per-protocol analysis
-addresses this partially. The safest interpretation: "among comparable outcomes,
-treatment uses [more/less] tokens."
+inefficient. The real defense is the **paired within-instance design** (§2.2):
+compare arms instance-by-instance, where the same task difficulty is held fixed.
+The successful-runs lens (§3.6) is a descriptive sidebar only — filtering on
+`task_success` conditions on a post-treatment collider and does *not* adjust for
+this confound. The safest interpretation: "for the same instance, treatment uses
+[more/less] tokens."
 
 ### 4.2 Turn Budget Censorship
 
@@ -207,6 +224,14 @@ separately from the primary ITT analysis.
 All charts assume `runs_with_success.csv` as input. Implementation priority
 from 1 (headline) to 3 (supplementary).
 
+**Build Priority 1 first.** The pilot's job is variance and effect-size
+estimation to power the confirmatory study, so the minimal useful deliverable is
+the summary table (#25), the two bootstrap-CI plots (#23/#24), the per-instance
+forest plot (#8), and the Priority-1 distribution/success charts. Defer
+Priority-2/3 charts until the data justifies them — at current scale (2
+instances, treatment unevaluated) most of the 25 charts would render near-empty.
+Charts are **PNG** for the pilot (switch to SVG/PDF only at publication).
+
 ### 5.1 Token Metrics — Global Distributions (Priority 1)
 
 | # | Chart | Variables | Description |
@@ -242,7 +267,7 @@ from 1 (headline) to 3 (supplementary).
 | 14 | **Scatter** | `qi_invocations` vs `peak_prompt_tokens`, color = `task_success` | Treatment only: does more qi correlate with fewer tokens? |
 | 15 | **Scatter** | `grep_invocations` vs `peak_prompt_tokens`, color = `arm` | Both arms: does grep-heavy exploration drive up context? |
 
-### 5.5 Success-Adjusted (Priority 2)
+### 5.5 Successful-Runs (Descriptive, Priority 2)
 
 | # | Chart | Variables | Description |
 |---|-------|-----------|-------------|
@@ -275,13 +300,13 @@ from 1 (headline) to 3 (supplementary).
 
 | # | Output | Description |
 |---|--------|-------------|
-| 25 | **Text table** | Per-metric median (both arms), raw difference, ratio, Mann-Whitney U statistic + p-value, bootstrap 95% CI for median difference. Printed to stdout. |
+| 25 | **Text table** | Per-metric median (both arms), raw difference (lead), ratio (derived), paired Wilcoxon signed-rank statistic + p-value, clustered bootstrap 95% CI for median difference. Printed to stdout. |
 
 ## 6. Implementation Notes
 
 ### 6.1 Dependencies
 
-- `scipy.stats` — `mannwhitneyu`, `bootstrap` (Python 3.8+)
+- `scipy.stats` — `wilcoxon`, `bootstrap` (Python 3.8+)
 - `numpy` — arrays, percentiles
 - `matplotlib` — all charts
 - `pandas` — read CSV, groupby, aggregation
@@ -292,9 +317,30 @@ from 1 (headline) to 3 (supplementary).
 For global statistics, resample **instances** (not individual runs) to preserve
 the within-instance correlation structure. Each bootstrap iteration: resample 20
 instances with replacement, pool their 10 control + 10 treatment runs, compute
-the statistic. 10,000 iterations.
+the statistic. 10,000 iterations. This applies to **both** the token-difference
+CIs *and* the success-rate comparison (§1.4) — success is clustered within
+instance just like tokens, so its CI must be clustered too. The paired Wilcoxon
+signed-rank (§1.4) operates on the 20 per-instance median differences directly
+and needs no resampling.
 
-### 6.3 Output Organization
+### 6.3 Derived `repo` Column
+
+Add `repo = instance_id.split("__", 1)[0]` as a derived column at load time
+(e.g. `astropy__astropy-14369` → `astropy`). Drives the per-repo grouping (§2.3)
+without requiring any change to the upstream CSVs.
+
+### 6.3a `model` Is a Grouping Dimension
+
+`runs_with_success.csv` now carries a `model` column (logs are stored under
+`logs/<model>/<arm>/...`; `analyze_trajectories.py` and `evaluate_patches.py`
+derive it from the path, and it is part of the eval-DB primary key and the
+merge join key). Arms are only comparable **within** a model. Default to the
+single model present in the CSV; if more than one is present, group by `model`
+first (separate summary tables / chart sets per model) and never pool runs
+across models. The paired within-instance design (§2.2) is per `(model,
+instance)`.
+
+### 6.4 Output Organization
 
 ```
 analysis/<timestamp>/
@@ -317,31 +363,33 @@ analysis/<timestamp>/
 └── stats.json                  # machine-readable stats for downstream use
 ```
 
-### 6.4 CLI
+### 6.5 CLI
 
 ```bash
 python3 experiment/analysis/analyze_stats.py \
     --dir experiment/analysis/session-01 \
-    --charts-dir experiment/analysis/session-01/charts \
     --bootstrap-iters 10000
 ```
 
-### 6.5 Graceful Degradation
+Charts default to `<dir>/charts/`; `stats_summary.txt` and `stats.json` go in
+`<dir>/`. No separate `--charts-dir` — it's derived from `--dir`.
 
-If `scipy` is not installed, skip inferential tests (Mann-Whitney, bootstrap
-CIs) and print a warning. Descriptive statistics and charts should still work.
-If `matplotlib` is not installed, skip charts but produce the text summary.
-Neither should be a hard dependency.
+### 6.6 Graceful Degradation
 
-## 7. Open Questions
+If `scipy` is not installed, skip inferential tests (Wilcoxon signed-rank,
+bootstrap CIs) and print a warning. Descriptive statistics and charts should
+still work. If `matplotlib` is not installed, skip charts but produce the text
+summary. Neither should be a hard dependency.
 
-1. **Per-repo grouping** — The repo isn't directly in the CSV but is derivable
-   from `instance_id` (everything before the first `__`). Worth adding as a
-   derived column?
-2. **Chart format** — PNG vs SVG? SVG scales better for publications. PDF for
-   LaTeX inclusion?
-3. **Single script vs. notebook** — A script is reproducible and CI-friendly.
-   A notebook is interactive for exploration. The plan assumes a script.
-4. **Success-adjusted analysis** — How to handle the "treatment succeeds more
-   → longer runs → more tokens" confound beyond filtering to successful-only?
-   Propensity score matching on turn count? Probably overkill for the pilot.
+## 7. Resolved Decisions
+
+1. **Per-repo grouping — YES.** Derive `repo = instance_id.split("__", 1)[0]`
+   as a column at load time (§6.3). Drives the per-repo lens (§2.3).
+2. **Chart format — PNG for the pilot.** Switch to SVG/PDF only at publication.
+3. **Script, not notebook.** Reproducible and CI-friendly, matches the rest of
+   the pipeline. Closed.
+4. **Confound handling — paired within-instance design, not outcome-filtering.**
+   The success confound is addressed by comparing arms instance-by-instance
+   (§2.2, §4.1), where task difficulty is held fixed. The successful-runs lens
+   (§3.6) is a descriptive sidebar only. No propensity matching — it would itself
+   condition on a post-treatment variable and is overkill for the pilot.
