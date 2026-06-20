@@ -50,8 +50,8 @@ from pathlib import Path
 import numpy as np
 from scipy import stats as scipy_stats
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # -> analysis/ (siblings)
-import analyze_stats as A  # the single source of every per-instance computation
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # -> experiment/
+from analysis import analyze_stats as A  # the single source of every per-instance computation
 
 
 # --------------------------------------------------------------------------- #
@@ -248,7 +248,8 @@ def _fmt_pct(x) -> str:
 
 
 def write_summary(models: list[str], effects: dict, correlation: dict,
-                  parity: dict, mechanism: dict, pct_table: dict, fh) -> None:
+                  parity: dict, mechanism: dict, pct_table: dict, fh,
+                  n_instances: int = 0) -> None:
     def w(line=""):
         fh.write(line + "\n")
 
@@ -259,7 +260,7 @@ def write_summary(models: list[str], effects: dict, correlation: dict,
     w(f"Models ({len(models)}): " + ", ".join(models))
     w()
     w("REPLICATION, not meta-analysis: k=2 models cannot estimate between-study")
-    w("heterogeneity. Everything below is descriptive / exploratory at pilot N.")
+    w("heterogeneity. Everything below is descriptive / exploratory.")
     w("Cross-model quantities are RATIOS or %CHANGE -- raw token counts are not")
     w("comparable across tokenizers and are never compared here.")
     w()
@@ -304,7 +305,7 @@ def write_summary(models: list[str], effects: dict, correlation: dict,
     for metric, tab in pct_table.items():
         w(f"\n  [{metric}]  ({tab['n_agree']}/{tab['n_complete']} instances agree on direction)")
         w(f"    {'instance':28} {'n_files':>7} " +
-          " ".join(f"{m.split('--')[0][:14]:>15}" for m in models) + "  agree")
+          " ".join(f"{m.split('--')[-1][:14]:>15}" for m in models) + "  agree")
         for r in tab["rows"]:
             cells = " ".join(f"{_fmt_pct(r['pct_change'][m]):>15}" for m in models)
             nf = "" if r["n_files"] is None else str(int(r["n_files"]))
@@ -344,7 +345,8 @@ def write_summary(models: list[str], effects: dict, correlation: dict,
     w("\n--- Caveats ---")
     w("  * Replication at k=2 models -- no meta-analysis / random-effects pooling.")
     w("  * Cross-model comparisons use effects (ratios/%); raw tokens never crossed.")
-    w("  * Pilot N=5 instances -> all p-values exploratory; interaction underpowered.")
+    n_str = str(n_instances) if n_instances else "?"
+    w(f"  * N={n_str} instances per model; model x arm interaction underpowered at any k=2.")
     w("  * Asymmetric censoring (LimitsExceeded) biases token ratios; read with")
     w("    per-model censoring rates from analyze_stats.py alongside.")
     w("  * %change conditions on each instance being run in both arms of a model;")
@@ -579,9 +581,11 @@ def main() -> int:
     mechanism = mechanism_summary(rows_by_model)
     pct_table = per_instance_pct_table(effects, models)
 
+    n_instances = len(A._instances(rows))
     summary_path = out_dir / "model_comparison_summary.txt"
     with summary_path.open("w") as fh:
-        write_summary(models, effects, correlation, parity, mechanism, pct_table, fh)
+        write_summary(models, effects, correlation, parity, mechanism, pct_table, fh,
+                      n_instances=n_instances)
     print(f"Wrote {summary_path}")
 
     payload = {

@@ -69,7 +69,7 @@ and no error message. Possible causes:
 
 Check process liveness:
 ```bash
-ps aux --forest | grep run_pilot
+ps aux --forest | grep run_one
 ps aux | grep mini-extra
 ```
 
@@ -117,7 +117,7 @@ find experiment/logs/treatment -name '*.traj.json' | wc -l
 
 ```bash
 # See the process tree
-ps aux --forest | grep -E 'run_experiment|mini-extra|run_pilot'
+ps aux --forest | grep -E 'run_experiment|mini-extra|run_one'
 
 # Docker containers
 docker ps --filter name=mini --format 'table {{.Names}}\t{{.RunningFor}}\t{{.Status}}'

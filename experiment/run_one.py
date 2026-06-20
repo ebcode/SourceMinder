@@ -3,10 +3,10 @@
 Run one arm of the qi context preservation experiment on a single SWE-bench instance.
 
 Usage:
-    python3 experiment/run_pilot.py --arm control   --instance django__django-11099
-    python3 experiment/run_pilot.py --arm treatment --instance django__django-11099
-    python3 experiment/run_pilot.py --arm treatment --instance django__django-11099 --run-id 7
-    python3 experiment/run_pilot.py --arm control   --instance django__django-11099 --model anthropic/claude-haiku-4-5-20251001
+    python3 experiment/run_one.py --arm control   --instance django__django-11099
+    python3 experiment/run_one.py --arm treatment --instance django__django-11099
+    python3 experiment/run_one.py --arm treatment --instance django__django-11099 --run-id 7
+    python3 experiment/run_one.py --arm control   --instance django__django-11099 --model anthropic/claude-haiku-4-5-20251001
 
 The script handles:
   - treatment arm: injects the correct per-instance DB path into run_args (since
@@ -45,9 +45,12 @@ MINI_EXTRA = VENV_BIN / "mini-extra"
 DBS_DIR = paths.DBS_DIR
 LOGS_DIR = paths.LOGS_DIR
 QI_STATIC = REPO_ROOT / "build" / "qi-static"
-CONTROL_CONFIG = paths.CONFIG_DIR / "control.yaml"
-TREATMENT_CONFIG = paths.CONFIG_DIR / "treatment.yaml"
 SHARED_CONFIG = paths.CONFIG_DIR / "shared.yaml"
+
+
+def _arm_config(arm: str) -> Path:
+    """Resolve an arm name to its YAML config file by convention."""
+    return paths.CONFIG_DIR / f"{arm}.yaml"
 
 COST_LIMIT = 5.0   # per-run safety ceiling in dollars
 
@@ -56,7 +59,7 @@ def check_prerequisites(arm: str, instance_id: str, model: str) -> None:
     errors = []
     if not MINI_EXTRA.exists():
         errors.append(f"mini-extra not found at {MINI_EXTRA} — activate or install the venv")
-    if arm == "treatment":
+    if arm != "control":  # any non-control arm gets qi + DB
         if not QI_STATIC.exists():
             errors.append(f"qi-static not found at {QI_STATIC} — run: bash experiment/build_qi_static.sh")
         db = DBS_DIR / f"{instance_id}.db"
@@ -165,7 +168,8 @@ def run_instance(arm: str, instance_id: str, run_id: str, subset: str,
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         if arm == "control":
-            configs = ["-c", "swebench.yaml", "-c", str(SHARED_CONFIG), "-c", str(CONTROL_CONFIG)]
+            configs = ["-c", "swebench.yaml", "-c", str(SHARED_CONFIG),
+                       "-c", str(_arm_config(arm))]
         else:
             # In dry-run, point at the source DB instead of copying it (no I/O,
             # no API): the printed command still shows the real mount target.
@@ -173,7 +177,7 @@ def run_instance(arm: str, instance_id: str, run_id: str, subset: str,
                        else prepare_db_copy(instance_id, tmp_dir))
             per_instance_cfg = make_treatment_config(instance_id, tmp_dir, db_path=db_copy)
             configs = ["-c", "swebench.yaml", "-c", str(SHARED_CONFIG),
-                       "-c", str(TREATMENT_CONFIG), "-c", per_instance_cfg]
+                       "-c", str(_arm_config(arm)), "-c", per_instance_cfg]
 
         cmd = [
             str(MINI_EXTRA), "swebench-single",
@@ -236,8 +240,8 @@ def run_instance(arm: str, instance_id: str, run_id: str, subset: str,
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--arm", required=True, choices=["control", "treatment"],
-                        help="Experimental arm to run")
+    parser.add_argument("--arm", required=True,
+                        help="Experimental arm (any string; config/<arm>.yaml must exist)")
     parser.add_argument("--instance", required=True, metavar="INSTANCE_ID",
                         help="SWE-bench instance ID (e.g. django__django-11099)")
     parser.add_argument("--model", default=DEFAULT_MODEL, metavar="MODEL",

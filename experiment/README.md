@@ -26,7 +26,7 @@ experiment/
 ├── verified_docker_images.txt # 70 multi-file Verified instances + image names
 ├── index_instance.sh          # Index one instance's /testbed via its Docker image
 ├── pre_index.py               # Batch: pull images + index a whole instance list
-├── run_pilot.py               # Run a single arm/instance/rep
+├── run_one.py               # Run a single arm/instance/rep
 ├── run_experiment.py          # Orchestrate both arms × N reps, randomized
 ├── compare.sh                 # [legacy] single-instance A/B via current.db symlink
 ├── config/
@@ -64,7 +64,7 @@ Docker volume mounts in `treatment.yaml`'s `environment.run_args`:
 1. **qi binary** — the statically linked `build/qi-static` is mounted at
    `/usr/local/bin/qi` (no shared-library dependencies).
 2. **code-index.db** — pre-built per instance under `experiment/dbs/`, mounted
-   at `/testbed/code-index.db`. `run_pilot.py` generates a per-instance temp
+   at `/testbed/code-index.db`. `run_one.py` generates a per-instance temp
    YAML that points the mount at the correct DB.
 
 > Note: `env_startup_command` (copy-at-startup) is **broken** in mini-swe-agent

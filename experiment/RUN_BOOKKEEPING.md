@@ -9,12 +9,12 @@ Every run attempt is recorded in two places by separate processes:
 
 | Layer | Written by | File | Survives child crash? |
 |-------|-----------|------|-----------------------|
-| **Manifest** | `run_pilot.py` (child) | `logs/<arm>/<instance>/<rep>.manifest.json` | Yes, once `started` is written |
+| **Manifest** | `run_one.py` (child) | `logs/<arm>/<instance>/<rep>.manifest.json` | Yes, once `started` is written |
 | **Ledger** | `run_experiment.py` (parent) | `logs/run_ledger.jsonl` | Yes — parent lives longer than child |
 
 ### Manifest (child-side)
 
-`run_pilot.py` writes the manifest *before* the subprocess starts (`status:
+`run_one.py` writes the manifest *before* the subprocess starts (`status:
 "started"`) and again after it returns (`status: "completed"` or `"failed"`).
 
 ```json

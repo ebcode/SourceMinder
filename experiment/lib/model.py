@@ -1,6 +1,6 @@
 """The model under test and its filesystem-safe directory slug.
 
-``run_experiment.py`` and ``run_pilot.py`` both carried a literal ``MODEL`` plus
+``run_experiment.py`` and ``run_one.py`` both carried a literal ``MODEL`` plus
 the ``replace("/", "--")`` slug; the orchestrator's default had to be kept in
 sync with the child's by hand. This is the single source.
 """

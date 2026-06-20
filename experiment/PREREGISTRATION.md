@@ -199,7 +199,7 @@ run_args:
   - "<repo>/experiment/dbs/<instance_id>.db:/testbed/code-index.db"
 ```
 
-`run_pilot.py` generates a per-instance temporary YAML that substitutes the
+`run_one.py` generates a per-instance temporary YAML that substitutes the
 correct DB path, because a static config cannot express a per-instance path in a
 list value. The DB mount is **read-write** (not `:ro`): SQLite needs a writable
 WAL/lock file even for read-only queries, and the container is ephemeral.
@@ -284,7 +284,7 @@ file — it is added by the join below.)
 recorded in two places independent of whether it produced a `.traj.json`:
 
 - **Per-run manifest** `logs/<arm>/<instance>/<rep>.manifest.json` — written by
-  `run_pilot.py`: `status` `started` → `completed`/`failed`, with `exit_code`,
+  `run_one.py`: `status` `started` → `completed`/`failed`, with `exit_code`,
   `traj_written`, `started_at`/`finished_at`. This is the resume source of truth
   (`status: started` with no finish = a crashed/orphaned run, re-run on resume).
 - **Append-only ledger** `logs/run_ledger.jsonl` — written by `run_experiment.py`

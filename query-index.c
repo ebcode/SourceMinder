@@ -220,7 +220,7 @@ static int scan_cli_flags(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--columns") == 0) flags |= FLAG_COLUMNS;
         else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) flags |= FLAG_VERBOSE;
-        else if (strcmp(argv[i], "--limit") == 0) flags |= FLAG_LIMIT;
+        else if (strcmp(argv[i], "--limit") == 0 || strcmp(argv[i], "-l") == 0) flags |= FLAG_LIMIT;
         else if (strcmp(argv[i], "--files") == 0) flags |= FLAG_FILES_ONLY;
         else if (strcmp(argv[i], "--db-file") == 0) flags |= FLAG_DB_FILE;
         else if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--include-context") == 0) flags |= FLAG_INCLUDE;
@@ -247,7 +247,7 @@ static int scan_cli_flags(int argc, char *argv[]) {
 static int should_skip_config_line(const char *line, int cli_flags) {
     if ((cli_flags & FLAG_COLUMNS) && strstr(line, "--columns") == line) return 1;
     if ((cli_flags & FLAG_VERBOSE) && (strstr(line, "-v") == line || strstr(line, "--verbose") == line)) return 1;
-    if ((cli_flags & FLAG_LIMIT) && strstr(line, "--limit") == line) return 1;
+    if ((cli_flags & FLAG_LIMIT) && (strstr(line, "--limit") == line || strstr(line, "-l") == line)) return 1;
     if ((cli_flags & FLAG_FILES_ONLY) && strstr(line, "--files") == line) return 1;
     if ((cli_flags & FLAG_DB_FILE) && strstr(line, "--db-file") == line) return 1;
     if ((cli_flags & FLAG_INCLUDE) && (strstr(line, "-i") == line || strstr(line, "--include-context") == line)) return 1;
@@ -2609,8 +2609,8 @@ static void show_help_compact(void) {
     printf("      --usage                    usages only\n");
     printf("      --lines LINE|START-END     filter line/range\n");
     printf("  -w, --within SYMBOL...         search inside definitions\n");
-    printf("      --limit NUM                limit matches\n");
-    printf("      --limit-per-file NUM       limit matches per file\n");
+    printf("  -l, --limit NUM                limit matches\n");
+    printf("  -lpf, --limit-per-file NUM     limit matches per file\n");
     printf("\n");
 
     printf("Display:\n");
@@ -3069,7 +3069,7 @@ int main(int argc, char *argv[]) {
             db_file = argv[i + 1];
             i++;
         }
-        else if (strcmp(argv[i], "--limit") == 0 && i + 1 < argc) {
+        else if ((strcmp(argv[i], "--limit") == 0 || strcmp(argv[i], "-l") == 0) && i + 1 < argc) {
             char *endptr;
             errno = 0;
             long val = strtol(argv[i + 1], &endptr, 10);
@@ -3082,7 +3082,7 @@ int main(int argc, char *argv[]) {
             limit = (int)val;
             i++;
         }
-        else if (strcmp(argv[i], "--limit-per-file") == 0 && i + 1 < argc) {
+        else if ((strcmp(argv[i], "--limit-per-file") == 0 || strcmp(argv[i], "-lpf") == 0) && i + 1 < argc) {
             char *endptr;
             errno = 0;
             long val = strtol(argv[i + 1], &endptr, 10);

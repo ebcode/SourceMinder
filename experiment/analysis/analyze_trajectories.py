@@ -30,7 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # -> experiment/
 from lib import cmds, paths
-from lib.trajmeta import ARMS, infer_path_meta, batch_of, n_files_of, patch_files_of
+from lib.trajmeta import infer_path_meta, batch_of, n_files_of, patch_files_of
 
 # Tool-output tokens are not API-counted. The DeepSeek tokenizer is the exact
 # answer (PREREGISTRATION Open Q4); until that is wired in we approximate at
@@ -95,6 +95,7 @@ def analyze_one(path: Path) -> dict | None:
         "total_input_tokens": sum(prompt_toks),
         "peak_prompt_tokens": max(prompt_toks),
         "total_completion_tokens": sum(completion_toks),
+        "total_tokens": sum(prompt_toks) + sum(completion_toks),
         "total_reasoning_tokens": reasoning_toks,
         "total_cached_tokens": cached_toks,
         "tool_output_tokens_approx": round(tool_chars / CHARS_PER_TOKEN),
@@ -108,13 +109,13 @@ def analyze_one(path: Path) -> dict | None:
 
 def summarize(rows: list[dict]) -> None:
     metrics = ("total_input_tokens", "peak_prompt_tokens", "tool_output_tokens_approx")
-    # Group by model: arms are only comparable within the same model.
     models = sorted({r["model"] for r in rows})
     for model in models:
         model_rows = [r for r in rows if r["model"] == model]
         label = model or "(unknown model)"
         print(f"\n=== Summary by arm: {label} ===")
-        for arm in ARMS:
+        arms = sorted({r["arm"] for r in model_rows if r["arm"]})
+        for arm in arms:
             arm_rows = [r for r in model_rows if r["arm"] == arm]
             if not arm_rows:
                 continue

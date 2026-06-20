@@ -61,7 +61,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # -> experiment/
 from lib import instances, paths
 from lib.trajmeta import infer_path_meta, rep_of, batch_of, n_files_of, patch_files_of
 
-import eval_db
+from analysis import eval_db
 
 # subset -> HuggingFace dataset name the swebench harness loads.
 DATASETS = {
@@ -202,8 +202,8 @@ def main() -> int:
                          "concurrent containers ~= workers * max-workers. Writes go "
                          "to the WAL DB so concurrent groups don't clobber "
                          "(default: 1, fully sequential)")
-    ap.add_argument("--timeout", type=int, default=1800,
-                    help="Per-instance test timeout in seconds (default: 1800)")
+    ap.add_argument("--timeout", type=int, default=300,
+                    help="Per-instance test timeout in seconds (default: 300)")
     ap.add_argument("--dry-run", action="store_true",
                     help="Print the prediction plan without invoking Docker")
     ap.add_argument("--instance-id", type=str, default=None,

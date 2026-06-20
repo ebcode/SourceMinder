@@ -1,0 +1,13 @@
+# 5 balanced SWE-bench Verified instances with 2-6 file edits (seed=1200)
+# Generated: 2026-06-18T01:13:31
+# Repo-balanced draw from data/pool.csv (sample_pool.py --n 5 --seed 1200)
+# Frozen manifest: results/samples/sample_20260618_011331_seed1200.json
+# Pool: princeton-nlp/SWE-bench_Verified @ c104f840cc67f8b6eec6f759ebc8b2693d585d4a (70 instances, sha256 08ca011bc0e33480...)
+# Columns: instance_id repo n_files
+# File-count spread: 2,2,2,3,5
+
+django__django-11532 django/django 5
+pydata__xarray-3305 pydata/xarray 2
+pytest-dev__pytest-8399 pytest-dev/pytest 2
+sphinx-doc__sphinx-10673 sphinx-doc/sphinx 3
+sympy__sympy-22080 sympy/sympy 2

@@ -40,7 +40,7 @@ from lib.model import MODEL, api_key_var, model_dir, normalize_model
 REPO_ROOT = paths.REPO_ROOT
 EXPERIMENT_DIR = paths.EXPERIMENT_DIR
 LOGS_DIR = paths.LOGS_DIR
-RUN_PILOT = EXPERIMENT_DIR / "run_pilot.py"
+RUN_PILOT = EXPERIMENT_DIR / "run_one.py"
 VENV_PYTHON = EXPERIMENT_DIR / ".venv" / "bin" / "python3"
 
 # Append-only ledger of every run attempt (one JSON object per line). The
@@ -289,7 +289,7 @@ def main() -> int:
                         help=f"Model id (slash or dir-slug form); default: {MODEL}")
     parser.add_argument("--runs", "--reps", type=int, default=10, dest="runs", metavar="N",
                         help="Repetitions per instance per arm (default: 10)")
-    parser.add_argument("--arms", nargs="+", choices=["control", "treatment"],
+    parser.add_argument("--arms", nargs="+",
                         default=["control", "treatment"],
                         help="Arms to run (default: both)")
     parser.add_argument("--workers", type=int, default=1, metavar="N",
@@ -337,6 +337,18 @@ def main() -> int:
                 n_files_map[toks[0]] = toks[2]
     else:
         instances = [args.instance_id]
+
+    # Fail fast on unknown arms: each arm needs a config/<arm>.yaml. This also
+    # catches comma-separated --arms (a single bogus "a,b" arm) since choices=[]
+    # was dropped to allow arbitrary arm names.
+    missing = [a for a in args.arms if not (paths.CONFIG_DIR / f"{a}.yaml").exists()]
+    if missing:
+        print(f"Error: no config file for arm(s): {', '.join(missing)}", file=sys.stderr)
+        print(f"  Expected: {paths.CONFIG_DIR}/<arm>.yaml", file=sys.stderr)
+        if any("," in a for a in missing):
+            print("  Note: --arms is space-separated, not comma-separated "
+                  "(e.g. --arms treatment new-treatment).", file=sys.stderr)
+        return 1
 
     all_runs = build_runs(instances, args.arms, args.runs)
 

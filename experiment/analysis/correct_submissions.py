@@ -33,8 +33,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # -> experiment/
 from lib import paths
 from lib.trajmeta import infer_path_meta, rep_of
 
-import eval_db
-from evaluate_patches import DATASETS, evaluate_group
+from analysis import eval_db
+from analysis.evaluate_patches import DATASETS, evaluate_group
 
 
 def _flatten(content) -> str:

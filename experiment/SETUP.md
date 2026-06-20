@@ -54,12 +54,8 @@ bash experiment/build_qi_static.sh
 # → build/qi-static (~3MB, fully static)
 
 # Build the static Python indexer
-gcc -O2 -Wall -o build/index-python-static \
-    python/index-python.o $(ls shared/*.o) \
-    /usr/lib/x86_64-linux-gnu/libsqlite3.a \
-    /usr/local/lib/libtree-sitter.a \
-    -lm -lpthread -ldl -static
-# → build/index-python-static (~600KB)
+bash experiment/build_index_python_static.sh
+# → build/index-python-static (~3.5MB, fully static)
 ```
 
 Verify the static binaries:
@@ -126,12 +122,12 @@ Before launching the full experiment, verify the pipeline works end-to-end:
 export DEEPSEEK_API_KEY="sk-..."
 
 # Control arm (no qi)
-python3 experiment/run_pilot.py \
+python3 experiment/run_one.py \
     --arm control \
     --instance django__django-10554
 
 # Treatment arm (qi available)
-python3 experiment/run_pilot.py \
+python3 experiment/run_one.py \
     --arm treatment \
     --instance django__django-10554
 ```
@@ -198,7 +194,7 @@ both arms), or override on the command line:
 
 ```bash
 # Override via -c (applied over the config file)
-python3 experiment/run_pilot.py \
+python3 experiment/run_one.py \
     --arm control --instance django__django-10554 \
     -c experiment/config/shared.yaml \
     -c experiment/config/control.yaml \
@@ -300,7 +296,7 @@ When switching providers:
    in `usage.completion_tokens` but not in visible output. Factor this into
    token-efficiency comparisons across providers.
 
-3. **Cost tracking.** Adjust `--cost-limit` (in dollars) in `run_pilot.py`
+3. **Cost tracking.** Adjust `--cost-limit` (in dollars) in `run_one.py`
    to match the provider's pricing. The default `0.5` per run is conservative
    for DeepSeek but may be too low for Anthropic Opus or Gemini 2.5 Pro.
 
@@ -351,7 +347,7 @@ experiment/
 ├── build_qi_static.sh              # Build static qi binary
 ├── index_instance.sh               # Index a single instance via Docker
 ├── pre_index.py                    # Batch index orchestrator
-├── run_pilot.py                    # Single arm/instance/rep runner
+├── run_one.py                    # Single arm/instance/rep runner
 ├── run_experiment.py               # Full experiment orchestrator
 ├── compare.sh                      # [legacy] single-instance A/B via current.db symlink
 ├── analysis/

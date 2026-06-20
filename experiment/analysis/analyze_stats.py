@@ -72,15 +72,15 @@ try:
 except ImportError:  # the one soft dependency -- charts skip, text/json don't
     plt = None
 
-ARMS = ("control", "treatment")
+ARMS: tuple[str, ...] = ("control", "treatment")  # default; overwritten from CSV data
 
 # Primary token metrics (PLAN §1.4) -- the inferential tests run on these three.
-TOKEN_METRICS = ("peak_prompt_tokens", "total_input_tokens", "tool_output_tokens_approx")
+TOKEN_METRICS = ("peak_prompt_tokens", "total_input_tokens", "total_tokens", "tool_output_tokens_approx")
 # Everything that gets a descriptive block (PLAN §1.1).
 DESCRIPTIVE_METRICS = (
     "total_input_tokens", "peak_prompt_tokens", "tool_output_tokens_approx",
     "turn_count", "total_completion_tokens", "total_reasoning_tokens",
-    "total_cached_tokens",
+    "total_cached_tokens", "total_tokens",
 )
 MECHANISM_METRICS = ("qi_invocations", "grep_invocations", "file_read_invocations")
 
@@ -388,10 +388,10 @@ def clustered_bootstrap_diff(rows: list[Row], metric: str, iters: int,
         buckets[inst] = {arm: fvals(_arm(sub, arm), metric) for arm in ARMS}
 
     def pooled_diff_ratio(sample_insts) -> tuple[float, float]:
-        ctrl = np.concatenate([buckets[i]["control"] for i in sample_insts]) \
-            if len(sample_insts) else np.array([])
-        treat = np.concatenate([buckets[i]["treatment"] for i in sample_insts]) \
-            if len(sample_insts) else np.array([])
+        ctrl = np.concatenate([buckets[i].get("control", np.array([]))
+                               for i in sample_insts])
+        treat = np.concatenate([buckets[i].get("treatment", np.array([]))
+                                for i in sample_insts])
         if ctrl.size == 0 or treat.size == 0:
             return (np.nan, np.nan)
         mc, mt = np.median(ctrl), np.median(treat)
@@ -462,8 +462,8 @@ def clustered_bootstrap_success(rows: list[Row], iters: int,
                for inst in instances}
 
     def pooled_diff(sample_insts) -> float:
-        ctrl = np.concatenate([buckets[i]["control"] for i in sample_insts])
-        treat = np.concatenate([buckets[i]["treatment"] for i in sample_insts])
+        ctrl = np.concatenate([buckets[i].get("control", np.array([])) for i in sample_insts])
+        treat = np.concatenate([buckets[i].get("treatment", np.array([])) for i in sample_insts])
         if ctrl.size == 0 or treat.size == 0:
             return np.nan
         return float(treat.mean() - ctrl.mean())
@@ -485,9 +485,76 @@ def clustered_bootstrap_success(rows: list[Row], iters: int,
 # --------------------------------------------------------------------------- #
 # Per-model analysis
 # --------------------------------------------------------------------------- #
+def split_rep_calibration(rows: list[Row], metric: str) -> dict | None:
+    """Within-control split-rep null calibration.
+
+    Control reps are sorted by run_id and split into two halves (first half →
+    'a', remainder → 'b'). The null diff (median_b − median_a) should be near
+    zero. Comparing its magnitude and Wilcoxon distribution to the actual
+    treatment diff shows whether the treatment effect exceeds within-condition
+    run-to-run noise on a per-instance basis.
+
+    Requires at least 2 control reps per instance; instances with fewer are
+    skipped and noted in the output.
+    """
+    if not has_metric(rows, metric):
+        return None
+    nfm = _nfiles_map(rows)
+    per_inst = []
+    skipped = []
+    for inst in _instances(rows):
+        ctrl = sorted(_arm(_inst(rows, inst), "control"),
+                      key=lambda r: str(r.get("run_id") or ""))
+        if len(ctrl) < 2:
+            skipped.append(inst)
+            continue
+        n_a = max(1, len(ctrl) // 2)
+        va = fvals(ctrl[:n_a], metric)
+        vb = fvals(ctrl[n_a:], metric)
+        if va.size == 0 or vb.size == 0:
+            skipped.append(inst)
+            continue
+        ma, mb = float(np.median(va)), float(np.median(vb))
+        null_diff = mb - ma
+        null_pct = 100.0 * null_diff / ma if ma else None
+        # treatment diff for the same instance
+        ctrl_all = fvals(_arm(_inst(rows, inst), "control"), metric)
+        trt_all = fvals(_arm(_inst(rows, inst), "treatment"), metric)
+        if ctrl_all.size and trt_all.size:
+            mc, mt = float(np.median(ctrl_all)), float(np.median(trt_all))
+            trt_diff = mt - mc
+            trt_pct = 100.0 * trt_diff / mc if mc else None
+        else:
+            trt_diff = trt_pct = None
+        per_inst.append({
+            "instance_id": inst,
+            "n_files": nfm.get(inst),
+            "n_a": n_a, "n_b": len(ctrl) - n_a,
+            "null_diff": null_diff, "null_pct": null_pct,
+            "trt_diff": trt_diff, "trt_pct": trt_pct,
+            "null_exceeds_trt": (abs(null_diff) > abs(trt_diff)
+                                 if trt_diff is not None else None),
+        })
+    if not per_inst:
+        return None
+    null_diffs = np.array([r["null_diff"] for r in per_inst], dtype=float)
+    trt_diffs = np.array([r["trt_diff"] for r in per_inst
+                          if r["trt_diff"] is not None], dtype=float)
+    n_null_gt_trt = sum(1 for r in per_inst if r["null_exceeds_trt"])
+    return {
+        "per_instance": per_inst,
+        "skipped": skipped,
+        "null_wilcoxon": paired_wilcoxon(null_diffs),
+        "null_median_diff": float(np.median(null_diffs)),
+        "trt_median_diff": float(np.median(trt_diffs)) if trt_diffs.size else None,
+        "n_null_exceeds_trt": n_null_gt_trt,
+        "n_instances": len(per_inst),
+    }
+
+
 def analyse_model(rows: list[Row], iters: int, rng: np.random.Generator) -> dict:
     """Full statistics block for one model's runs."""
-    out: dict = {"n_runs": len(rows), "arms": {}, "censoring": {}}
+    out: dict = {"n_runs": len(rows), "n_instances": len(_instances(rows)), "arms": {}, "censoring": {}}
     has_exit = any("exit_status" in r for r in rows)
 
     # Descriptives per arm
@@ -553,6 +620,12 @@ def analyse_model(rows: list[Row], iters: int, rng: np.random.Generator) -> dict
         }
         out["size_interaction"][m] = size_interaction(rows, m)
 
+    # Split-rep calibration: null check using within-control rep splits
+    out["split_rep_calibration"] = {
+        m: split_rep_calibration(rows, m)
+        for m in TOKEN_METRICS if has_metric(rows, m)
+    }
+
     # Success comparison (clustered)
     out["success_comparison"] = clustered_bootstrap_success(rows, iters, rng)
     out["per_instance_success"] = per_instance_success(rows)
@@ -584,8 +657,13 @@ def write_summary(model: str, stats: dict, fh) -> None:
     p("=" * 78)
     p(f"MODEL: {label}    (n={stats['n_runs']} runs)")
     p("=" * 78)
-    p("\nPILOT -- p-values are EXPLORATORY (underpowered); the headline is the")
-    p("effect size (raw median difference) with its clustered bootstrap CI.\n")
+    n_inst = stats.get("n_instances", 0)
+    if n_inst < 10:
+        p("\nPILOT -- p-values are EXPLORATORY (underpowered); the headline is the")
+        p("effect size (raw median difference) with its clustered bootstrap CI.\n")
+    else:
+        p(f"\nN={n_inst} instances -- Wilcoxon p-values are interpretable at this sample")
+        p("size; headline is the effect size with its clustered bootstrap CI.\n")
 
     # --- Descriptives ---
     for arm in ARMS:
@@ -649,6 +727,47 @@ def write_summary(model: str, stats: dict, fh) -> None:
         if note:
             p(f"      └ Wilcoxon note: {note}")
     p("")
+
+    # --- Split-rep calibration ---
+    src = stats.get("split_rep_calibration", {})
+    if src:
+        p("--- Split-rep calibration (null check) ---")
+        p("    Control reps split by run order (first half=a, rest=b); null diff")
+        p("    = median(b) - median(a) within control. Should be near zero.")
+        p("    If |null| approaches |treatment|, the effect is within noise.")
+        p("    Null Wilcoxon p should be large (H0: null diff = 0).\n")
+        for m in TOKEN_METRICS:
+            block = src.get(m)
+            if not block:
+                continue
+            nw = block["null_wilcoxon"]
+            wp_s = f"{nw['pvalue']:.4f}" if nw["pvalue"] is not None else "n/a"
+            null_med = block["null_median_diff"]
+            trt_med = block["trt_median_diff"]
+            ratio_s = (f"{abs(trt_med/null_med):.2f}x" if null_med and trt_med
+                       else "n/a")
+            n_gt = block["n_null_exceeds_trt"]
+            n_tot = block["n_instances"]
+            p(f"  [{m}]")
+            p(f"    null Wilcoxon p={wp_s}  "
+              f"null median Δ={_fmt(null_med)}  trt median Δ={_fmt(trt_med)}  "
+              f"(|trt|/|null|={ratio_s})")
+            p(f"    instances where |null diff| > |trt diff|: {n_gt}/{n_tot}")
+            p(f"    {'instance':18s} {'nf':>3s} {'n_a/b':>6s} "
+              f"{'null%':>8s} {'trt%':>8s}  flag")
+            for r in sorted(block["per_instance"],
+                            key=lambda x: (x["n_files"] is None, x["n_files"] or 0)):
+                nf_s = "n/a" if r["n_files"] is None else str(int(r["n_files"]))
+                ab_s = f"{r['n_a']}/{r['n_b']}"
+                np_s = "n/a" if r["null_pct"] is None else f"{r['null_pct']:+.1f}%"
+                tp_s = "n/a" if r["trt_pct"] is None else f"{r['trt_pct']:+.1f}%"
+                flag = "!" if r["null_exceeds_trt"] else " "
+                p(f"    {r['instance_id'].split('__')[-1]:18s} {nf_s:>3s} "
+                  f"{ab_s:>6s} {np_s:>8s} {tp_s:>8s}  {flag}")
+            if block["skipped"]:
+                p(f"    skipped (<2 control reps): "
+                  f"{', '.join(i.split('__')[-1] for i in block['skipped'])}")
+            p("")
 
     # --- Size interaction (PLAN §2.3): does saving scale with n_files? ---
     si = stats.get("size_interaction", {})
@@ -717,7 +836,10 @@ def write_summary(model: str, stats: dict, fh) -> None:
     # --- Caveats (PLAN §4) ---
     p("--- Caveats (read these alongside the numbers) ---")
     p("  * Unit of analysis is the INSTANCE; reps within an instance are correlated.")
-    p("  * Pilot N is small -> p-values are exploratory, not confirmatory.")
+    if n_inst < 10:
+        p("  * Pilot N is small -> p-values are exploratory, not confirmatory.")
+    else:
+        p(f"  * N={n_inst} instances -> Wilcoxon p-values interpretable; bootstrap CIs are the primary summary.")
     p("  * Success confounds token counts: prefer the paired within-instance view.")
     p("  * LimitsExceeded runs are right-censored (see censoring rates above).")
     p("  * tool_output_tokens_approx is ~4 chars/token, descriptive only.")
@@ -737,6 +859,10 @@ def make_charts(rows: list[Row], stats: dict, charts_dir: Path) -> list[str]:
     charts_dir.mkdir(parents=True, exist_ok=True)
     written: list[str] = []
     colors = {"control": "#b0b0b0", "treatment": "#2a7fb8"}
+    _palette = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#a65628"]
+    for i, a in enumerate(ARMS):
+        if a not in colors:
+            colors[a] = _palette[i % len(_palette)]
 
     def arm_vals(metric):
         return [fvals(_arm(rows, a), metric) for a in ARMS]
@@ -829,9 +955,12 @@ def make_charts(rows: list[Row], stats: dict, charts_dir: Path) -> list[str]:
         ax.errorbar(diffs, y, xerr=xerr, fmt="o", color="#2a7fb8",
                     ecolor="#9ecae1", elinewidth=2, capsize=4, zorder=3)
         ax.axvline(0, color="k", lw=0.8)
-        labels = [f"{r['instance_id'].split('__')[-1]} ({r['n_control']}/{r['n_treatment']})"
-                  for r in order]
-        ax.set_yticks(y, labels)
+        labels = []
+        for r in order:
+            name = r['instance_id'].split('__')[-1]
+            nf = f"\nn_files={int(r['n_files'])}" if r.get('n_files') is not None else ""
+            labels.append(f"{name} ({r['n_control']}/{r['n_treatment']}){nf}")
+        ax.set_yticks(y, labels, fontsize=8)
         ax.set_xlabel("median peak_prompt diff (treatment - control)")
         ax.set_title("Per-instance effect with within-instance 95% CI\n"
                      "(negative = treatment saves; label = nC/nT reps)")
@@ -844,7 +973,14 @@ def make_charts(rows: list[Row], stats: dict, charts_dir: Path) -> list[str]:
         # one pim per metric, indexed by instance for O(1) lookup
         pims = {m: {r["instance_id"]: r for r in per_instance_medians(rows, m)}
                 for m in metrics_present}
-        insts = sorted(set.intersection(*[set(pm) for pm in pims.values()]))
+        nf_map = {r["instance_id"]: r.get("n_files") for r in rows}
+        # sort: n_files ascending (small at top in imshow), then alpha descending
+        # within same n_files (z at top, a at bottom). Stable double-sort achieves this.
+        insts_set = set.intersection(*[set(pm) for pm in pims.values()])
+        # sort by short name descending first (z at top), then n_files ascending
+        # (stable double-sort: second key wins; first key breaks ties within second)
+        insts = sorted(insts_set, key=lambda i: i.split("__")[-1], reverse=True)
+        insts = sorted(insts, key=lambda i: nf_map.get(i) or 0)
         ratios, labels = [], []
         for inst in insts:
             row = []
@@ -853,13 +989,15 @@ def make_charts(rows: list[Row], stats: dict, charts_dir: Path) -> list[str]:
                 c, t = rr["control"], rr["treatment"]
                 row.append(t / c if c else np.nan)
             ratios.append(row)
-            labels.append(inst.split("__")[-1])
+            nf = nf_map.get(inst)
+            nf_str = f"\nn_files={int(nf)}" if nf is not None else ""
+            labels.append(inst.split("__")[-1] + nf_str)
         if ratios:
             arr = np.array(ratios)
-            fig, ax = plt.subplots(figsize=(1.6 * len(metrics_present) + 2, 0.5 * len(labels) + 2))
+            fig, ax = plt.subplots(figsize=(1.6 * len(metrics_present) + 2, 0.7 * len(labels) + 2))
             im = ax.imshow(arr, cmap="RdYlGn_r", vmin=0.5, vmax=1.5, aspect="auto")
             ax.set_xticks(range(len(metrics_present)), metrics_present, rotation=30, ha="right")
-            ax.set_yticks(range(len(labels)), labels)
+            ax.set_yticks(range(len(labels)), labels, fontsize=8)
             for i in range(arr.shape[0]):
                 for j in range(arr.shape[1]):
                     if not np.isnan(arr[i, j]):
@@ -950,8 +1088,8 @@ def make_charts(rows: list[Row], stats: dict, charts_dir: Path) -> list[str]:
         boot = []
         for _ in range(2000):
             pick = rng.choice(instances, size=n, replace=True)
-            c = np.concatenate([buckets[i]["control"] for i in pick])
-            t = np.concatenate([buckets[i]["treatment"] for i in pick])
+            c = np.concatenate([buckets[i].get("control", np.array([])) for i in pick])
+            t = np.concatenate([buckets[i].get("treatment", np.array([])) for i in pick])
             if c.size and t.size:
                 boot.append(np.median(t) - np.median(c))
         if not boot:
@@ -978,30 +1116,28 @@ def make_charts(rows: list[Row], stats: dict, charts_dir: Path) -> list[str]:
     panels = [m for m in TOKEN_METRICS if si.get(m) and
               any(r["n_files"] is not None and r["pct_change"] is not None
                   for r in si[m]["per_instance"])]
-    if panels:
-        fig, axes = plt.subplots(1, len(panels), figsize=(4.5 * len(panels), 4),
-                                 squeeze=False)
-        for ax, m in zip(axes[0], panels):
-            block = si[m]
-            pts = [(r["n_files"], r["pct_change"], r["instance_id"].split("__")[-1])
-                   for r in block["per_instance"]
-                   if r["n_files"] is not None and r["pct_change"] is not None]
-            xs = [x for x, _, _ in pts]; ys = [y for _, y, _ in pts]
-            ax.axhline(0, color="k", lw=0.8)
-            ax.scatter(xs, ys, color="#2a7fb8", zorder=3)
-            for x, y, lbl in pts:
-                ax.annotate(lbl, (x, y), fontsize=7, xytext=(4, 2),
-                            textcoords="offset points")
-            sp = block["spearman"]
-            sub = (f"Spearman rho={sp['rho']:+.2f} (p={sp['pvalue']:.2f})"
-                   if sp["rho"] is not None else (sp.get("note") or ""))
-            ax.set_title(f"{m}\n{sub}", fontsize=9)
-            ax.set_xlabel("n_files (gold patch)")
-            ax.set_ylabel("% change (neg = qi saves)")
-            ax.xaxis.set_major_locator(MaxNLocator(integer=True))  # n_files is integer-valued
-        fig.suptitle("Token saving vs instance size", fontsize=11)
-        _save(fig, charts_dir / "26_size_vs_savings.png")
-        written.append("26_size_vs_savings.png")
+    for m in panels:
+        block = si[m]
+        pts = [(r["n_files"], r["pct_change"], r["instance_id"].split("__")[-1])
+               for r in block["per_instance"]
+               if r["n_files"] is not None and r["pct_change"] is not None]
+        xs = [x for x, _, _ in pts]; ys = [y for _, y, _ in pts]
+        fig, ax = plt.subplots(figsize=(5, 4))
+        ax.axhline(0, color="k", lw=0.8)
+        ax.scatter(xs, ys, color="#2a7fb8", zorder=3)
+        for x, y, lbl in pts:
+            ax.annotate(lbl, (x, y), fontsize=7, xytext=(4, 2),
+                        textcoords="offset points")
+        sp = block["spearman"]
+        sub = (f"Spearman rho={sp['rho']:+.2f} (p={sp['pvalue']:.2f})"
+               if sp["rho"] is not None else (sp.get("note") or ""))
+        ax.set_title(f"Token saving vs instance size\n{m} — {sub}", fontsize=9)
+        ax.set_xlabel("n_files (gold patch)")
+        ax.set_ylabel("% change (neg = qi saves)")
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        fname = f"26_size_vs_savings_{m}.png"
+        _save(fig, charts_dir / fname)
+        written.append(fname)
 
     return written
 
@@ -1089,6 +1225,12 @@ def main() -> int:
     n_files_map = load_n_files(args.pool)
     rows = load(csv_path, n_files_map)
     print(f"Loaded {len(rows)} runs from {csv_path}")
+    # Discover arms from the data so arbitrary arm names (e.g. prompt variants)
+    # are handled without a hardcoded allow-list.
+    global ARMS
+    discovered = sorted({r["arm"] for r in rows if r.get("arm")})
+    if discovered:
+        ARMS = tuple(discovered)
     if n_files_map:
         matched = len({r["instance_id"] for r in rows
                        if not (isinstance(r["n_files"], float) and math.isnan(r["n_files"]))})

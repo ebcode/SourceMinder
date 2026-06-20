@@ -10,8 +10,9 @@
 #      Pull one:
 #        docker pull swebench/sweb.eval.x86_64.django_1776_django-11099:latest
 #   2. Build static binaries:
-#        ./configure --enable-all && make && bash experiment/build_qi_static.sh
-#        gcc -O2 -Wall -o build/index-python-static python/index-python.o ... -static
+#        ./configure --enable-all && make
+#        bash experiment/build_qi_static.sh
+#        bash experiment/build_index_python_static.sh
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"

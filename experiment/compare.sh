@@ -12,12 +12,12 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 # [LEGACY/RETIRED] This was the original single-instance A/B runner (Lite era,
 # current.db-symlink delivery). It is superseded by run_experiment.py /
-# run_pilot.py + the analysis/ pipeline. Kept for reference only.
+# run_one.py + the analysis/ pipeline. Kept for reference only.
 # Set COMPARE_SH_FORCE=1 to run it anyway.
 # -----------------------------------------------------------------------------
 if [[ "${COMPARE_SH_FORCE:-0}" != "1" ]]; then
     echo "compare.sh is retired. Use:" >&2
-    echo "  python3 experiment/run_pilot.py --arm <control|treatment> --instance <id>" >&2
+    echo "  python3 experiment/run_one.py --arm <control|treatment> --instance <id>" >&2
     echo "  python3 experiment/run_experiment.py --instances-file experiment/verified_instance_ids.txt --reps N" >&2
     echo "(set COMPARE_SH_FORCE=1 to override.)" >&2
     exit 2

@@ -12,7 +12,7 @@
 # one venv here. Note: `swebench` pulls in `datasets`, which requires `pandas`
 # transitively -- analyze_stats.py itself uses only numpy/scipy/matplotlib.
 
-# --- Agent runs (run_pilot.py / run_experiment.py invoke the `mini-extra` CLI) ---
+# --- Agent runs (run_one.py / run_experiment.py invoke the `mini-extra` CLI) ---
 mini-swe-agent==2.4.1
 litellm==1.89.1
 
