@@ -97,21 +97,34 @@ def prepare_db_copy(instance_id: str, tmp_dir: str) -> str:
 
 
 def make_treatment_config(instance_id: str, tmp_dir: str,
-                          db_path: str | None = None) -> str:
-    """Write a per-instance treatment config that mounts the correct DB."""
+                          db_path: str | None = None, arm: str = "treatment") -> str:
+    """Write a per-instance treatment config that mounts the correct DB.
+
+    If config/<arm>.smconfig exists, it is mounted into the container's
+    ~/.smconfig so an arm can force qi defaults (e.g. -q) for every call the
+    agent makes, without depending on the prompt to request them.
+    """
     if db_path is None:
         db_path = str(DBS_DIR / f"{instance_id}.db")
-    config_text = textwrap.dedent(f"""\
-        # Auto-generated per-instance treatment config — do not commit.
-        # Extends experiment/config/treatment.yaml with the correct DB path.
-        environment:
-          run_args:
-            - "--rm"
-            - "-v"
-            - "{QI_STATIC}:/usr/local/bin/qi:ro"
-            - "-v"
-            - "{db_path}:/testbed/code-index.db"
-    """)
+    run_args = [
+        "--rm",
+        "-v", f"{QI_STATIC}:/usr/local/bin/qi:ro",
+        "-v", f"{db_path}:/testbed/code-index.db",
+    ]
+    smconfig = _arm_config(arm).with_suffix(".smconfig")
+    if smconfig.exists():
+        # Pin HOME so qi reliably finds the mounted config regardless of the
+        # base image's default, then mount the per-arm qi defaults there.
+        run_args += ["-e", "HOME=/root",
+                     "-v", f"{smconfig}:/root/.smconfig:ro"]
+    args_yaml = "\n".join(f'    - "{a}"' for a in run_args)
+    config_text = (
+        "# Auto-generated per-instance treatment config — do not commit.\n"
+        f"# Extends experiment/config/{arm}.yaml with the correct DB path.\n"
+        "environment:\n"
+        "  run_args:\n"
+        f"{args_yaml}\n"
+    )
     path = os.path.join(tmp_dir, f"treatment_{instance_id}.yaml")
     with open(path, "w") as f:
         f.write(config_text)
@@ -175,7 +188,7 @@ def run_instance(arm: str, instance_id: str, run_id: str, subset: str,
             # no API): the printed command still shows the real mount target.
             db_copy = (str(DBS_DIR / f"{instance_id}.db") if dry_run
                        else prepare_db_copy(instance_id, tmp_dir))
-            per_instance_cfg = make_treatment_config(instance_id, tmp_dir, db_path=db_copy)
+            per_instance_cfg = make_treatment_config(instance_id, tmp_dir, db_path=db_copy, arm=arm)
             configs = ["-c", "swebench.yaml", "-c", str(SHARED_CONFIG),
                        "-c", str(_arm_config(arm)), "-c", per_instance_cfg]
 

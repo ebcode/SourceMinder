@@ -1,10 +1,18 @@
-# Hybrid arm: stay-in-qi base + new-treatment's token discipline.
-# stay-in-qi.yaml had the best adherence (highest qi adoption, lowest dead-query
-# rate) but the HIGHEST peak-prompt tokens of the four arms -- its "use qi a lot
-# / stay in it" guidance inflated context. This keeps stay-in-qi's workflow and
-# discipline but bakes in new-treatment's token levers: -x noise by default and a
-# hard -l / -lpf cap on EVERY search, plus stricter limits on -e/-v expansion.
-# Goal: keep the adherence, cut the context cost.
+# Surgical — minimal-change anti-abandonment variant.
+# Hypothesis: the current treatment.yaml has the right structure, but the
+# STAY IN QI section is too weak ("Don't drop back", parenthetical hedging)
+# and appears too late (section 6 of 9). A minimal fix — strengthen the
+# language to "NEVER", drop the hedging, move it before the workflow —
+# may be enough for Flash.
+#
+# Changes from treatment.yaml (only 3 diffs):
+#   1. Remove "(but keep it capped)" parenthetical — weaken -> strengthen
+#   2. "Don't drop back to grep after the first hit" -> "NEVER drop back to
+#      grep. If qi genuinely cannot find something, fall back to grep to get
+#      unblocked, then IMMEDIATELY return to qi."
+#   3. Move the STAY IN QI block from position 6 to position 2
+#      (right after the opener, before the workflow)
+# Everything else verbatim.
 
 agent:
   instance_template: |
@@ -20,6 +28,14 @@ agent:
     Think of it as a symbol-aware grep you COMPOSE with other tools: it
     understands symbols (functions, types, variables, callers) rather than raw
     text, and it chains and pipes like any unix filter.
+
+    STAY IN QI:
+    After you locate the code, keep using qi to understand it -- `qi <sym>
+    --usage -l 10` for callers, `qi '*' --within <func>` for a function's
+    internals. NEVER drop back to grep. If qi genuinely cannot find something,
+    fall back to grep to get unblocked, then IMMEDIATELY return to qi.
+
+    Start the session by running: qi --list-types
 
     THE WORKFLOW (overview -> locate -> understand) -- every search is capped
     and noise-free:
@@ -47,14 +63,6 @@ agent:
     isn't there OR your filters are too tight. Loosen ONE filter -- don't switch
     to grep, go broader in qi.
 
-    STAY IN QI:
-    If you cannot find something with qi, try grep to get unblocked, then return to qi.
-
-    KEEP OUTPUT SMALL:
-    Prefer `--toc`, `-l N`, and `-i` to keep results compact. Reach for `-e`
-    (expand full body) or `-v` (all columns) only on a SINGLE symbol you have
-    already located -- expanding a class can dump a whole file.
-
     COMPOSE -- qi IS A UNIX FILTER (chain and pipe in ONE command):
     Each shell turn re-sends the whole session, so a turn is expensive. Gather in
     batches, not one query per turn.
@@ -71,10 +79,6 @@ agent:
     Put the search pattern FIRST, then flags -- `-f` greedily consumes every
     following filename, so `qi -f file.py symbol` wrongly treats `symbol` as a
     filename.
-
-    Cap Every Search: *ALWAYS* add `-l N`. And *ALWAYS* add `-x noise` unless you're specifically searching for symbols inside comments and strings.
-
-    Start the session by running: qi --help
 
     When done, submit your changes as a git patch:
     1. `git diff -- <your-files> > patch.txt`

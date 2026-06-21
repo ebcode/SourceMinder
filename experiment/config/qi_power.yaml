@@ -1,0 +1,64 @@
+# qi power
+agent:
+  instance_template: |
+    <pr_description>
+    {{task}}
+    </pr_description>
+
+    <instructions>
+    Fix the issue above by editing source files in /testbed.
+    Do NOT modify test files.
+
+    IMPORTANT! Use qi (query-index) -- a code search tool -- to understand the code in this project.
+
+    Think of qi as a 'code-aware grep' for coming up-to-speed quickly on an unfamiliar codebase.    
+    
+    Your qi searches are already tuned for you: every query runs capped at 20
+    results and skips comments and strings, so output stays small. You do NOT
+    need to type `-l` or `-x noise` yourself.
+
+    THE WORKFLOW (overview -> locate -> understand)
+    and noise-free:
+    1. `qi -f <file> --toc`            — a file's functions and types at a glance
+    2. `qi <symbol>`                   — find a symbol (broad)
+    3. `qi <symbol> -i func -e`        — expand ONE specific definition (DON'T expand classes!)
+    4. `qi <symbol> --usage`           — callers
+
+    STAY IN QI:
+    If you cannot find something with qi, try grep to get unblocked, then return to qi on your next turn.
+
+    KEEP OUTPUT SMALL:
+    Prefer `--toc`, `-l N`, and `-i` to keep results compact. Reach for `-e`
+    (expand full body) or `-v` (all columns) only on a SINGLE symbol you have
+    already located -- expanding a class can dump a whole file.
+
+    COMPOSE -- qi IS A UNIX FILTER (chain and pipe in ONE command):
+    Each shell turn re-sends the whole session, so a turn is expensive. Gather in
+    batches, not one query per turn.
+    - Batch independent lookups for a symbol you've located into a single command:
+      `qi % -f utils.py --toc;  qi parse_config -i func -e | head -40;  qi parse_config --usage -l 10`
+    - Pipe to cap or count instead of running another turn:
+      `qi '*handler*' -x noise | head -30`      `qi parse -x noise | wc -l`
+    - One rich action beats three small turns. Only split when your NEXT query
+      depends on what you just saw (find a symbol, THEN inspect its caller).
+
+    NOTE -- one non-standard quirk: qi takes MULTIPLE values per argument:
+    `qi user session token`        — user OR session OR token (OR logic)
+    `qi malloc -f *.c *.h`         — across all .c OR .h files
+    Put the search pattern FIRST, then flags -- `-f` greedily consumes every
+    following filename, so `qi -f file.py symbol` wrongly treats `symbol` as a
+    filename.
+
+    Remember: grep is a fallback for finding multi-word strings. Return to using qi for symbolic (atomic) search.
+
+    Cap Every Search: *ALWAYS* add `-l N`. And *ALWAYS* add `-x noise` unless you're specifically searching for symbols inside comments and strings.
+
+    To get a feel for qi's output, and to see the raw SQL queries, start your session by running:
+
+    qi % -i class -l 10 --debug
+
+    When done, submit your changes as a git patch:
+    1. `git diff -- <your-files> > patch.txt`
+    2. Verify: `cat patch.txt`
+    3. Submit (BOTH parts, single command): `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt`
+    </instructions>

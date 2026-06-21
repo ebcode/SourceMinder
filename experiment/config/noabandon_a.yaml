@@ -1,10 +1,14 @@
-# Hybrid arm: stay-in-qi base + new-treatment's token discipline.
-# stay-in-qi.yaml had the best adherence (highest qi adoption, lowest dead-query
-# rate) but the HIGHEST peak-prompt tokens of the four arms -- its "use qi a lot
-# / stay in it" guidance inflated context. This keeps stay-in-qi's workflow and
-# discipline but bakes in new-treatment's token levers: -x noise by default and a
-# hard -l / -lpf cap on EVERY search, plus stricter limits on -e/-v expansion.
-# Goal: keep the adherence, cut the context cost.
+# Hard Rule Up Front — anti-abandonment variant.
+# Hypothesis: Flash ignores the anti-abandonment rule in treatment.yaml because
+# it's buried at line 52, after 5 other sections. By moving an absolute "NEVER"
+# directive to the FIRST instruction and repeating it at the end, Flash will
+# keep qi active past the first grep encounter.
+#
+# Changes from treatment.yaml:
+#   1. "NEVER" rule moved to position 1 (immediately after basic instructions)
+#   2. Rule uses short, punchy, absolute language
+#   3. Rule repeated as a closing reminder before the git-patch submit block
+#   4. Workflow and details kept from treatment.yaml but demoted to position 2+
 
 agent:
   instance_template: |
@@ -16,10 +20,18 @@ agent:
     Fix the issue above by editing source files in /testbed.
     Do NOT modify test files.
 
-    Use qi -- a code-index tool -- instead of grep for code navigation.
-    Think of it as a symbol-aware grep you COMPOSE with other tools: it
-    understands symbols (functions, types, variables, callers) rather than raw
-    text, and it chains and pipes like any unix filter.
+    THE ONE RULE YOU MUST FOLLOW:
+
+    NEVER abandon qi. Once you start using qi, keep using it for the ENTIRE
+    session — every code search, every symbol lookup, every caller trace. qi
+    is a code-index tool that understands symbols (functions, types,
+    variables, callers) rather than raw text.
+
+    grep is ONLY allowed when qi genuinely returns nothing. If that happens,
+    use grep to get unblocked, then IMMEDIATELY return to qi. If you catch
+    yourself reaching for grep when qi could do the job, stop and use qi instead.
+
+    Start the session by running: qi --list-types
 
     THE WORKFLOW (overview -> locate -> understand) -- every search is capped
     and noise-free:
@@ -29,7 +41,7 @@ agent:
     3. `qi <symbol> -i func -e`        — expand ONE specific definition
     4. `qi <symbol> --usage -l 10`     — callers, capped
 
-    CAP EVERY SEARCH -- this is what keeps context small:
+    CAP EVERY SEARCH — this is what keeps context small:
     - Add `-x noise` to almost every query (skips comments & strings).
     - Add `-l N` (e.g. `-l 10`) to every search so a broad pattern can't dump
       hundreds of lines. To sample across files: `-lpf 3 -l 15` (3 per file).
@@ -46,14 +58,6 @@ agent:
     qi already retried it as `*pattern*`, so an empty result means the symbol
     isn't there OR your filters are too tight. Loosen ONE filter -- don't switch
     to grep, go broader in qi.
-
-    STAY IN QI:
-    If you cannot find something with qi, try grep to get unblocked, then return to qi.
-
-    KEEP OUTPUT SMALL:
-    Prefer `--toc`, `-l N`, and `-i` to keep results compact. Reach for `-e`
-    (expand full body) or `-v` (all columns) only on a SINGLE symbol you have
-    already located -- expanding a class can dump a whole file.
 
     COMPOSE -- qi IS A UNIX FILTER (chain and pipe in ONE command):
     Each shell turn re-sends the whole session, so a turn is expensive. Gather in
@@ -72,9 +76,8 @@ agent:
     following filename, so `qi -f file.py symbol` wrongly treats `symbol` as a
     filename.
 
-    Cap Every Search: *ALWAYS* add `-l N`. And *ALWAYS* add `-x noise` unless you're specifically searching for symbols inside comments and strings.
-
-    Start the session by running: qi --help
+    REMEMBER: NEVER abandon qi. If you used grep to get unblocked, return to qi
+    on your very next command. Stay in qi for the whole session.
 
     When done, submit your changes as a git patch:
     1. `git diff -- <your-files> > patch.txt`

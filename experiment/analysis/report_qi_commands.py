@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -235,6 +236,21 @@ def output_by_type(by_arm: dict[str, list[dict]], p) -> None:
         p(f"  {kind:10s}" + "".join(f"{c:>{w}}" for c in cells))
 
 
+def _qi_never_after_grep(rows: list[dict]) -> tuple[int, int]:
+    """Runs where qi is *never* used after the first grep command (count, total)."""
+    count = 0
+    total = 0
+    for grp in _run_groups(rows).values():
+        total += 1
+        grep_turns = [g["turn_idx"] for g in grp if g["tool"] == "grep"]
+        if not grep_turns:
+            continue
+        first_grep = min(grep_turns)
+        if not any(g["tool"] == "qi" and g["turn_idx"] > first_grep for g in grp):
+            count += 1
+    return count, total
+
+
 def abandonment(by_arm: dict[str, list[dict]], p) -> None:
     p(f"\n{'=' * 70}\nTOOL TIMING -- onset & abandonment (turns ranked 1..T per run)\n{'=' * 70}")
     p("  first/last turn = ordinal of the first/last qi (or grep/sed) command;")
@@ -284,6 +300,12 @@ def abandonment(by_arm: dict[str, list[dict]], p) -> None:
          lambda a: f"{_median(gs_s[a][2]):.0%}" if gs_s[a][2] else "n/a")
     line("grep/sed: runs never using it", lambda a: f"{gs_s[a][4]}/{gs_s[a][5]}")
 
+    grep_kills = {a: _qi_never_after_grep(by_arm[a]) for a in arms}
+    line("qi never-after-first-grep",
+         lambda a: (f"{grep_kills[a][0]}/{grep_kills[a][1]} "
+                    f"({grep_kills[a][0]/grep_kills[a][1]:.0%})"
+                    if grep_kills[a][1] else "n/a"))
+
 
 def qi_dynamics(by_arm: dict[str, list[dict]], p) -> None:
     """Consecutive-qi streaks and qi intensity across session thirds."""
@@ -331,6 +353,85 @@ def qi_dynamics(by_arm: dict[str, list[dict]], p) -> None:
             qic, trn = intensity[a]
             cells.append(_fmt(qic[idx] / trn[idx], 2) if trn[idx] else "n/a")
         p(f"  {label:34s}" + "".join(f"{c:>{w}}" for c in cells))
+
+
+# --- Composability: batching (chained commands per action) and piping --------
+# The composability prompt teaches bundling related lookups into ONE shell
+# action ("qi a; qi b; qi c") and piping qi output through head/wc/grep to trim.
+# Both cut round-trips, the dominant driver of total_input. Chaining lives INSIDE
+# the command string (one action row), so it must be measured by splitting.
+_CMD_SEP = re.compile(r"&&|\|\||;")          # command separators (NOT a single |)
+_QI_SEG = re.compile(r"^\s*qi\b")            # a sub-command that invokes qi
+_PIPE_FILTER = re.compile(r"\|\s*(head|tail|wc|grep|sort|uniq|sed|awk)\b")
+
+
+def _subcmds(command: str) -> list[str]:
+    """Split one shell action into chained sub-commands on ; && || (heuristic:
+    does not parse quotes; qi commands rarely embed these separators)."""
+    return [s.strip() for s in _CMD_SEP.split(command or "") if s.strip()]
+
+
+def _qi_subcmds(command: str) -> list[str]:
+    return [s for s in _subcmds(command) if _QI_SEG.match(s)]
+
+
+def _chained(rows: list[dict]) -> list[int]:
+    """Sub-commands per action, across all actions (batching)."""
+    return [len(_subcmds(r["command"])) for r in rows]
+
+
+def _qi_per_turn(rows: list[dict]) -> list[int]:
+    """qi-call count per (instance, run, turn); only turns with >=1 qi call."""
+    counts: dict = {}
+    for r in rows:
+        n = len(_qi_subcmds(r["command"]))
+        if n:
+            key = (r["instance"], r["run_id"], r["turn_idx"])
+            counts[key] = counts.get(key, 0) + n
+    return list(counts.values())
+
+
+def _qi_pipe_rate(rows: list[dict]):
+    """Fraction of qi invocations piped into a filter; None if no qi calls."""
+    total = sum(len(_qi_subcmds(r["command"])) for r in rows)
+    if not total:
+        return None
+    piped = sum(1 for r in rows for s in _qi_subcmds(r["command"])
+                if _PIPE_FILTER.search(s))
+    return piped / total
+
+
+def _batch_per_run(rows: list[dict], nruns: int):
+    """Turns with >1 qi call, normalized per run; None if no runs."""
+    if not nruns:
+        return None
+    return sum(1 for c in _qi_per_turn(rows) if c > 1) / nruns
+
+
+def composability(by_arm: dict[str, list[dict]], p) -> None:
+    p(f"\n{'=' * 70}\nCOMPOSABILITY -- batching & piping (fewer round-trips)\n{'=' * 70}")
+    p("  batching = sub-commands chained into one action (split on ; && ||);")
+    p("  qi calls counted per sub-command so 'qi a; qi b' = 2. piping = qi")
+    p("  output filtered through head/wc/grep/etc.\n")
+    arms = list(by_arm)
+    w = _acol(arms)
+    p(f"  {'metric':34s}" + "".join(f"{a:>{w}}" for a in arms))
+
+    def line(label, fn):
+        p(f"  {label:34s}" + "".join(f"{fn(by_arm[a]):>{w}}" for a in arms))
+
+    line("mean sub-cmds / action",
+         lambda rs: _fmt(statistics.mean(_chained(rs)), 2) if rs else "n/a")
+    line("median sub-cmds / action",
+         lambda rs: _fmt(_median(_chained(rs)), 1))
+    line("% qi calls piped to filter",
+         lambda rs: f"{_qi_pipe_rate(rs):.0%}" if _qi_pipe_rate(rs) is not None else "n/a")
+    line("turns with >1 qi call / run",
+         lambda rs: _fmt(_batch_per_run(rs, len(_run_groups(rs))), 1)
+                    if _run_groups(rs) else "n/a")
+    line("% qi-turns with >1 qi call",
+         lambda rs: (f"{sum(1 for c in _qi_per_turn(rs) if c > 1)/len(_qi_per_turn(rs)):.0%}"
+                     if _qi_per_turn(rs) else "n/a"))
 
 
 # Precision flags that scope a grep (file-type or word-boundary), separating a
@@ -407,6 +508,19 @@ def cross_model(rows: list[dict], p) -> None:
         ("limit-flag adoption (% qi)",
          lambda rs: (f"{sum(1 for r in qi(rs) if r['qi_limit'] or r['qi_limit_per_file'])/len(qi(rs)):.0%}"
                      if qi(rs) else "n/a")),
+        ("mean sub-cmds / action",
+         lambda rs: _fmt(statistics.mean(_chained(rs)), 2) if rs else "n/a"),
+        ("% qi calls piped to filter",
+         lambda rs: f"{_qi_pipe_rate(rs):.0%}" if _qi_pipe_rate(rs) is not None else "n/a"),
+        ("turns with >1 qi call / run",
+         lambda rs: _fmt(_batch_per_run(rs, nruns(rs)), 1) if nruns(rs) else "n/a"),
+        ("% qi-turns with >1 qi call",
+         lambda rs: (f"{sum(1 for c in _qi_per_turn(rs) if c > 1)/len(_qi_per_turn(rs)):.0%}"
+                     if _qi_per_turn(rs) else "n/a")),
+        ("qi never-after-first-grep",
+         lambda rs: (f"{grep_kills[0]}/{grep_kills[1]} "
+                     f"({grep_kills[0]/grep_kills[1]:.0%})"
+                     if (grep_kills := _qi_never_after_grep(rs))[1] else "n/a")),
     ]
 
     def sub(model, arm):
@@ -432,6 +546,7 @@ def report_block(rows: list[dict], p) -> None:
     output_by_type(by_arm, p)
     abandonment(by_arm, p)
     qi_dynamics(by_arm, p)
+    composability(by_arm, p)
     grep_sophistication(by_arm, p)
 
 

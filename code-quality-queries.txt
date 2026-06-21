@@ -1,0 +1,68 @@
+-- 1. Maintainability (Function/Symbol Density)
+SELECT filename, COUNT(*) AS definition_count
+FROM code_index
+WHERE is_definition = 1
+GROUP BY filename
+ORDER BY definition_count DESC
+LIMIT 5;
+=========
+-- 2. Coupling & Popularity (Fan-in)
+SELECT symbol, COUNT(*) AS usage_count
+FROM code_index
+WHERE is_definition = 0
+GROUP BY symbol
+ORDER BY usage_count DESC
+LIMIT 10;
+=========
+-- 3. Encapsulation & Scope (Public/Private Counts - OOP context)
+SELECT parent_symbol,
+       SUM(CASE WHEN scope = 'public' THEN 1 ELSE 0 END) AS public_count,
+       SUM(CASE WHEN scope = 'private' THEN 1 ELSE 0 END) AS private_count
+FROM code_index
+WHERE context IN ('FUNC', 'PROP') AND parent_symbol IS NOT NULL
+GROUP BY parent_symbol
+HAVING public_count > 5;
+=========
+-- 4. Complexity & Nesting
+SELECT parent_symbol, COUNT(*) AS member_count
+FROM code_index
+WHERE context = 'FUNC' AND parent_symbol IS NOT NULL
+GROUP BY parent_symbol
+ORDER BY member_count DESC
+LIMIT 5;
+=========
+-- 5. Structural Hierarchy Depth (by child symbol count)
+SELECT parent_symbol, COUNT(*) as child_count
+FROM code_index
+WHERE parent_symbol IS NOT NULL AND parent_symbol != ''
+GROUP BY parent_symbol
+ORDER BY child_count DESC
+LIMIT 10;
+=========
+-- 6. Uncategorized Properties (Missing parent_symbol)
+SELECT filename, symbol, line
+FROM code_index
+WHERE context = 'PROP' AND (parent_symbol IS NULL OR parent_symbol = '')
+LIMIT 10;
+=========
+-- 7. Indexer Structural Consistency (Compare language indexer structs)
+SELECT parent_symbol, COUNT(*)
+FROM code_index
+WHERE parent_symbol IN ('c_symbols', 'ts_symbols', 'perl_symbols', 'go_symbols', 'php_symbols')
+GROUP BY parent_symbol;
+=========
+-- 8. Type Usage Analysis (Most frequent data types)
+SELECT type, COUNT(*) AS usage_count
+FROM code_index
+WHERE type IS NOT NULL AND type != '' AND context != 'TYPE'
+GROUP BY type
+ORDER BY usage_count DESC
+LIMIT 15;
+=========
+-- 9. Modifier Usage Analysis (Access patterns)
+SELECT modifier, COUNT(*) AS count
+FROM code_index
+WHERE modifier IS NOT NULL AND modifier != ''
+GROUP BY modifier
+ORDER BY count DESC
+LIMIT 10;

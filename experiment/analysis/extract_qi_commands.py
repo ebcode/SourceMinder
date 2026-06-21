@@ -64,8 +64,24 @@ _RC_RE = re.compile(r"<returncode>(-?\d+)</returncode>")
 # qi prints "Found N matches" on a hit and "No results" on a miss. Captured for
 # the zero-result rate (a qi call that found nothing = the model searched for a
 # symbol that doesn't exist). Empty for non-search qi (e.g. --toc) and errors.
+# Under -q (quiet) the "Found N matches" footer is dropped, so a hit shows only
+# the result table; detect those by counting data rows ("<lineno> | ..."), qi's
+# per-match row format. "No results" still prints under -q, so misses are
+# unambiguous in both modes.
 _FOUND_RE = re.compile(r"Found (\d+) match")
-_NORESULT_RE = re.compile(r"\bNo results\b")
+# A true miss prints a zero verdict. "No results" is the legacy wording (older
+# trajectories); "0 matches" is the current verdict; the filtered-miss branch
+# suppresses the verdict and is recognized by "excluded by filters" instead.
+_NORESULT_RE = re.compile(r"No results|\b0 matches\b|excluded by")
+_QI_ROW_RE = re.compile(r"^\s*\d+\s*\|", re.M)
+# A true miss (qi_results==0) comes in flavors. "excluded by filters" => the
+# symbol exists but the agent's -f/-i/-x filters removed every match (a
+# self-inflicted, prompt-actionable miss); "No partial matches" => genuinely
+# absent (not even a wildcard hit); "not indexed" => qi declined to index it
+# (e.g. a pure number). Used to split the zero-result rate by cause.
+_FILTER_MISS_RE = re.compile(r"excluded by")
+_ABSENT_RE = re.compile(r"No partial matches found")
+_NOTIDX_RE = re.compile(r"is not indexed")
 
 
 def _tokens(cmd: str) -> list[str]:
@@ -100,13 +116,38 @@ def _returncode(output: str) -> int | None:
 
 
 def _qi_result_count(output: str) -> int | None:
-    """qi match count: N from 'Found N matches', 0 from 'No results', else None."""
+    """qi match count: N from 'Found N matches'; under -q (footer dropped) the
+    number of result table rows; 0 from 'No results'; else None (non-search
+    output such as --toc/--expand, help text, or errors).
+
+    Table rows are counted BEFORE 'No results' is checked: an exact-match miss
+    that qi auto-retries with wildcards prints 'No results' AND then a result
+    table ('Retrying with partial matches for X: ...'). Those are hits (the
+    agent got rows), not zero-result misses."""
     m = _FOUND_RE.search(output)
     if m:
         return int(m.group(1))
+    rows = len(_QI_ROW_RE.findall(output))
+    if rows:
+        return rows
     if _NORESULT_RE.search(output):
         return 0
     return None
+
+
+def _qi_miss_kind(output: str, count: int | None) -> str:
+    """Why a true miss (count==0) found nothing: 'filtered' (excluded by the
+    agent's own filters), 'absent' (no such symbol, not even a partial),
+    'not_indexed' (qi declined it), or 'other'. Empty for hits/non-searches."""
+    if count != 0:
+        return ""
+    if _FILTER_MISS_RE.search(output):
+        return "filtered"
+    if _ABSENT_RE.search(output):
+        return "absent"
+    if _NOTIDX_RE.search(output):
+        return "not_indexed"
+    return "other"
 
 
 def rows_for(path: Path) -> list[dict]:
@@ -158,6 +199,7 @@ def rows_for(path: Path) -> list[dict]:
                 "is_error": "" if rc is None else int(rc != 0),
                 "qi_pure": int(_qi_pure(command)),
                 "qi_results": res if res is not None else "",
+                "qi_miss_kind": _qi_miss_kind(output, res) if tool == "qi" else "",
             }
             for col, flags in QI_FLAGS.items():
                 row[col] = int(bool(tokset & flags)) if tool == "qi" else ""
@@ -203,7 +245,7 @@ def main() -> int:
     fields = ["arm", "instance", "run_id", "model", "batch_id", "turn_idx",
               "cmd_idx", "tool", "command", "output_chars",
               "output_tokens_approx", "returncode", "is_error", "qi_pure",
-              "qi_results", *QI_FLAG_COLS]
+              "qi_results", "qi_miss_kind", *QI_FLAG_COLS]
     with out_path.open("w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
         writer.writeheader()

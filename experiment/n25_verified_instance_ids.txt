@@ -1,0 +1,34 @@
+# 25 large-file-biased SWE-bench Verified instances (seed=0, strategy=large-biased)
+# Generated: 20260620_130130
+# Manifest: /home/eli/projects/awesome/SourceMinder/experiment/results/samples/sample_20260620_130130_seed0_largebiased.json
+# Sampler: scripts/sample_pool_large_biased.py (descending n_files round-robin, repo-balanced within bucket)
+# Pool: data/pool.csv (100 instances; 70 orig 2-6 file + 29 nf=1 + sympy-13091 nf=21, added 20260620)
+# Dataset: princeton-nlp/SWE-bench_Verified @ c104f840cc67f8b6eec6f759ebc8b2693d585d4a
+# n_files spread: 21:1, 6:1, 5:1, 4:6, 3:6, 2:5, 1:5  (15/25 have n_files>2)
+# Reuse: 15/18 images shared with n18_verified_instance_ids.txt (10 new pulls; max overlap for this sampler/N)
+# n18 images NOT reused (all nf=2): pytest-dev__pytest-5840, pytest-dev__pytest-8399, scikit-learn__scikit-learn-25102
+astropy__astropy-13398 astropy/astropy 4
+astropy__astropy-14369 astropy/astropy 2
+django__django-11138 django/django 4
+django__django-11532 django/django 5
+django__django-13121 django/django 4
+django__django-16263 django/django 4
+matplotlib__matplotlib-14623 matplotlib/matplotlib 3
+matplotlib__matplotlib-25775 matplotlib/matplotlib 3
+mwaskom__seaborn-3069 mwaskom/seaborn 1
+mwaskom__seaborn-3187 mwaskom/seaborn 2
+pallets__flask-5014 pallets/flask 1
+psf__requests-5414 psf/requests 1
+psf__requests-6028 psf/requests 1
+pydata__xarray-3095 pydata/xarray 2
+pydata__xarray-3993 pydata/xarray 2
+pylint-dev__pylint-4551 pylint-dev/pylint 4
+pylint-dev__pylint-6386 pylint-dev/pylint 4
+pylint-dev__pylint-8898 pylint-dev/pylint 3
+pytest-dev__pytest-7205 pytest-dev/pytest 1
+scikit-learn__scikit-learn-12682 scikit-learn/scikit 2
+sphinx-doc__sphinx-7590 sphinx-doc/sphinx 3
+sphinx-doc__sphinx-9461 sphinx-doc/sphinx 3
+sympy__sympy-13091 sympy/sympy 21
+sympy__sympy-14248 sympy/sympy 3
+sympy__sympy-16597 sympy/sympy 6

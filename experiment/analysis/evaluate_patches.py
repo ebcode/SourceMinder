@@ -89,6 +89,11 @@ def collect_runs(logs: Path, instance_ids: set[str] | None = None) -> list[dict]
         if instance_ids is not None and instance not in instance_ids:
             continue
         patch = (info.get("submission") or "").strip()
+        # Unified diffs must end in a newline; .strip() removes the trailing
+        # one, which makes git apply / GNU patch reject any patch whose final
+        # line is the last line of the target file ("malformed patch").
+        if patch:
+            patch += "\n"
         runs.append(
             {
                 "model": model,

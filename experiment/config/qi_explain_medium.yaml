@@ -1,0 +1,102 @@
+# qi Internals — Medium explanation.
+# Hypothesis: showing the agent the full column schema and the exact mapping
+# from CLI flags to SQL WHERE clauses will let it construct more precise
+# queries and understand *exactly* why a query returned nothing.
+#
+# Medium level: full schema columns, context type enum, flag→column mapping.
+# The agent can now think in terms of the table rather than guessing at flags.
+
+agent:
+  instance_template: |
+    <pr_description>
+    {{task}}
+    </pr_description>
+
+    <instructions>
+    Fix the issue above by editing source files in /testbed.
+    Do NOT modify test files.
+
+    UNDERSTAND YOUR TOOL — qi is a SQL query wrapper over a pre-built SQLite
+    database. Every symbol in the codebase has been parsed and stored.
+
+    The database has ONE table: `code_index`
+
+    Columns:
+      symbol          -- the identifier name (e.g. "getUserById")
+      directory       -- directory path
+      filename        -- filename
+      line            -- line number
+      context         -- symbol type: FUNC, VAR, CLASS, ARG, IMPORT, CALL,
+                          COMMENT, STRING, TYPE, INTERFACE, ENUM, PROPERTY,
+                          EXCEPTION, NAMESPACE, EXPORT, LAMBDA, MACRO, ...
+      full_symbol     -- fully qualified name
+      parent_symbol   -- parent in a member chain (e.g. "obj" for obj.method)
+      scope           -- visibility (public, private, protected)
+      namespace       -- language namespace
+      modifier        -- static, const, inline, etc.
+      type            -- declared type annotation
+      is_definition   -- 1 = definition site, 0 = usage site
+      clue            -- context hint text
+
+    Every qi flag is a WHERE clause on one of those columns:
+
+      qi <pattern>       →  symbol LIKE '%pattern%' (GLOB for * wildcards)
+      -i func var        →  context IN ('FUNC','VAR')
+      -x noise           →  context NOT IN ('COMMENT','STRING')
+      -x TYPE...         →  context NOT IN (TYPE,...)
+      -f file.py         →  filename LIKE '%file.py'
+      -p parent          →  parent_symbol LIKE '%parent%'
+      -s public          →  scope = 'public'
+      -m static          →  modifier = 'static'
+      -ns MyApp          →  namespace LIKE '%MyApp%'
+      -t 'int *'         →  type LIKE '%int *%'
+      --def / -d 1       →  is_definition = 1
+      --usage            →  is_definition = 0
+      -l 10              →  LIMIT 10
+      -lpf 3             →  LIMIT 3 rows PER FILE
+      -e                 →  verbose output (more columns displayed)
+
+    Because qi queries a database, not raw text:
+    - It finds structure grep CANNOT: function calls (`qi f -i call`),
+      member access (`qi count -p patterns`), typed variables
+      (`qi '*' -t 'int' -i var`).
+    - It is deterministic. Same query = same results, ordered file→line.
+    - It ONLY finds indexed symbols. Comments, strings, and unindexed
+      content are NOT rows in the table (use -x noise to exclude them).
+      If you truly need raw text search — and only as a last resort — use
+      grep, then IMMEDIATELY return to qi.
+
+    NEVER abandon qi. grep is failure recovery, not an alternative.
+
+    Start the session by running: qi --help
+
+    THE WORKFLOW (overview -> locate -> understand):
+    1. `qi '*' -f <file> --toc`       -- a file's functions and types
+    2. `qi <symbol> -x noise -l 10`   -- find a symbol (broad, capped)
+    3. `qi <symbol> -i func -e`       -- expand ONE specific definition
+    4. `qi <symbol> --usage -l 10`    -- every caller
+
+    START BROAD, THEN NARROW BY ONE WHERE CLAUSE AT A TIME.
+    Each flag adds an AND to the SQL query — it can only REDUCE results.
+    Run `qi <symbol> -x noise -l 10` first. Add ONE more filter at a time.
+    Stacking several filters is like writing WHERE a AND b AND c AND d
+    on a query you haven't tested — it almost always returns zero rows.
+
+    IF A QUERY RETURNS NOTHING:
+    qi already retried your pattern as `*pattern*` (symbol LIKE '%pattern%'),
+    so an empty result means either no row matches your symbol at all, OR
+    your WHERE clause is too restrictive. Loosen ONE filter. Do NOT switch
+    to grep — relax the query and re-run it in qi.
+
+    CAP EVERY SEARCH:
+    - Add `-x noise` to almost every query.
+    - Add `-l N` so a broad LIKE can't return thousands of rows.
+    - Use `-e` ONLY on a single symbol you've already located.
+
+    REMEMBER: NEVER abandon qi. grep is failure recovery only.
+
+    When done, submit your changes as a git patch:
+    1. `git diff -- <your-files> > patch.txt`
+    2. Verify: `cat patch.txt`
+    3. Submit (BOTH parts, single command): `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt`
+    </instructions>

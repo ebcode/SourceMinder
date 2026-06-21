@@ -1,0 +1,6 @@
+# qi defaults for the treatment_compose arm. Mounted into the container's
+# ~/.smconfig by run_one.make_treatment_config, so every qi call the agent runs
+# is quiet (no banner/footer chrome) without the agent having to pass -q.
+# CLI flags still override these; lines are prepended to argv.
+[qi]
+-q

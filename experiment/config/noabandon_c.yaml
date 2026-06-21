@@ -1,10 +1,19 @@
-# Hybrid arm: stay-in-qi base + new-treatment's token discipline.
-# stay-in-qi.yaml had the best adherence (highest qi adoption, lowest dead-query
-# rate) but the HIGHEST peak-prompt tokens of the four arms -- its "use qi a lot
-# / stay in it" guidance inflated context. This keeps stay-in-qi's workflow and
-# discipline but bakes in new-treatment's token levers: -x noise by default and a
-# hard -l / -lpf cap on EVERY search, plus stricter limits on -e/-v expansion.
-# Goal: keep the adherence, cut the context cost.
+# Grep as Last Resort — anti-abandonment variant.
+# Hypothesis: treatment.yaml presents grep as a legitimate fallback ("If qi
+# genuinely cannot find something, fall back to grep to get unblocked"), which
+# Flash interprets as permission to switch tools. By reframing grep as a FAILURE
+# MODE — something you use only when qi has demonstrably failed, and you MUST
+# return to qi immediately — Flash will treat grep as an exception rather than
+# an alternative.
+#
+# Changes from treatment.yaml:
+#   1. grep is not introduced as a fallback tool — it's introduced as "grep is
+#      failure recovery"
+#   2. "Don't drop back to grep after the first hit" replaced with "If you use
+#      grep, something went wrong. Immediately return to qi."
+#   3. The "IF A QUERY RETURNS NOTHING" section is rewritten: grep is the LAST
+#      resort after relaxing filters, not the first alternative
+#   4. Every mention of grep is preceded by a cost/risk statement
 
 agent:
   instance_template: |
@@ -16,10 +25,17 @@ agent:
     Fix the issue above by editing source files in /testbed.
     Do NOT modify test files.
 
-    Use qi -- a code-index tool -- instead of grep for code navigation.
-    Think of it as a symbol-aware grep you COMPOSE with other tools: it
-    understands symbols (functions, types, variables, callers) rather than raw
-    text, and it chains and pipes like any unix filter.
+    Use qi -- a code-index tool -- for ALL code navigation. It understands
+    symbols (functions, types, variables, callers) rather than raw text, and
+    it chains and pipes like any unix filter.
+
+    There is only one code-search tool in this session: qi.
+    grep is NOT an alternative to qi. grep is failure recovery — something
+    you use ONLY when qi has demonstrably failed, and even then, you
+    immediately return to qi on your next command. If you use grep, you
+    made a mistake. Correct it by going back to qi.
+
+    Start the session by running: qi --list-types
 
     THE WORKFLOW (overview -> locate -> understand) -- every search is capped
     and noise-free:
@@ -29,7 +45,7 @@ agent:
     3. `qi <symbol> -i func -e`        — expand ONE specific definition
     4. `qi <symbol> --usage -l 10`     — callers, capped
 
-    CAP EVERY SEARCH -- this is what keeps context small:
+    CAP EVERY SEARCH — this is what keeps context small:
     - Add `-x noise` to almost every query (skips comments & strings).
     - Add `-l N` (e.g. `-l 10`) to every search so a broad pattern can't dump
       hundreds of lines. To sample across files: `-lpf 3 -l 15` (3 per file).
@@ -42,18 +58,15 @@ agent:
     ONE more filter (`-i func`, `-f <file>`, `--within <func>`, `-p <parent>`).
     Don't stack several filters on a first query -- that usually returns nothing.
 
-    IF A QUERY RETURNS NOTHING:
-    qi already retried it as `*pattern*`, so an empty result means the symbol
-    isn't there OR your filters are too tight. Loosen ONE filter -- don't switch
-    to grep, go broader in qi.
-
-    STAY IN QI:
-    If you cannot find something with qi, try grep to get unblocked, then return to qi.
-
-    KEEP OUTPUT SMALL:
-    Prefer `--toc`, `-l N`, and `-i` to keep results compact. Reach for `-e`
-    (expand full body) or `-v` (all columns) only on a SINGLE symbol you have
-    already located -- expanding a class can dump a whole file.
+    IF A QUERY RETURNS NOTHING — DO NOT REACH FOR GREP:
+    qi already retried it as `*pattern*` for you, so an empty result means the
+    symbol isn't there OR your filters are too tight. Your options, in order:
+      1. Loosen ONE filter and re-run qi
+      2. Try a different qi search term
+      3. ONLY if both fail: use grep to search raw text, then IMMEDIATELY
+         return to qi and continue exploring with qi
+    Switching to grep as your first response to an empty qi result is wrong.
+    qi understands code structure; grep does not. Stay in qi.
 
     COMPOSE -- qi IS A UNIX FILTER (chain and pipe in ONE command):
     Each shell turn re-sends the whole session, so a turn is expensive. Gather in
@@ -72,9 +85,7 @@ agent:
     following filename, so `qi -f file.py symbol` wrongly treats `symbol` as a
     filename.
 
-    Cap Every Search: *ALWAYS* add `-l N`. And *ALWAYS* add `-x noise` unless you're specifically searching for symbols inside comments and strings.
-
-    Start the session by running: qi --help
+    Remember: grep is failure recovery, not an alternative. Stay in qi.
 
     When done, submit your changes as a git patch:
     1. `git diff -- <your-files> > patch.txt`

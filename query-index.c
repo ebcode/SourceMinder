@@ -651,8 +651,8 @@ static void setup_default_columns(int verbose, QueryFilters *filters, ShowColumn
     active_columns[num_active_columns++] = (ActiveColumn){find_column_by_name("context"), 1};
 }
 
-static void print_table_header(int compact) {
-    printf("\n");
+static void print_table_header(int compact, int quiet) {
+    if (!quiet) printf("\n");
 
     /* Print header row */
     for (int i = 0; i < num_active_columns; i++) {
@@ -670,19 +670,21 @@ static void print_table_header(int compact) {
     }
     printf("\n");
 
-    /* Print separator line */
-    for (int i = 0; i < num_active_columns; i++) {
-        if (!active_columns[i].enabled) continue;
-        if (i > 0) printf("-+-");
+    /* Print separator line (decoration; suppressed in quiet mode) */
+    if (!quiet) {
+        for (int i = 0; i < num_active_columns; i++) {
+            if (!active_columns[i].enabled) continue;
+            if (i > 0) printf("-+-");
 
-        ColumnSpec *spec = active_columns[i].spec;
-        if (!spec) continue;
-        int width = spec->width > 0 ? spec->width : 24;  /* default width for variable columns */
-        for (int j = 0; j < width; j++) {
-            printf("-");
+            ColumnSpec *spec = active_columns[i].spec;
+            if (!spec) continue;
+            int width = spec->width > 0 ? spec->width : 24;  /* default width for variable columns */
+            for (int j = 0; j < width; j++) {
+                printf("-");
+            }
         }
+        printf("\n");
     }
-    printf("\n");
 }
 
 static void print_table_row(RowData *data, int compact) {
@@ -713,8 +715,8 @@ static void print_table_row(RowData *data, int compact) {
 }
 
 /* Print header for all-columns mode */
-static void print_all_columns_header(void) {
-    printf("\n");
+static void print_all_columns_header(int quiet) {
+    if (!quiet) printf("\n");
 
     /* Print internal column headers */
     printf("%-24s | %-16s | %-4s | %-20s | %-3s | %-24s | %-20s",
@@ -726,12 +728,14 @@ static void print_all_columns_header(void) {
     }
     printf("\n");
 
-    /* Print separator line */
-    printf("------------------------+------------------+------+----------------------+-----+--------------------------+----------------------");
-    for (int i = 0; column_registry[i].name != NULL; i++) {
-        printf("+-------------");
+    /* Print separator line (decoration; suppressed in quiet mode) */
+    if (!quiet) {
+        printf("------------------------+------------------+------+----------------------+-----+--------------------------+----------------------");
+        for (int i = 0; column_registry[i].name != NULL; i++) {
+            printf("+-------------");
+        }
+        printf("\n");
     }
-    printf("\n");
 }
 
 /* Print all columns (internal + extensible) - used for --columns all */
@@ -2261,11 +2265,20 @@ static int build_query_sql(SqlQueryBuilder *builder, PatternList *patterns,
 static void print_summary_stats(CodeIndexDatabase *db, PatternList *patterns,
                                 ContextTypeList *include, ContextTypeList *exclude,
                                 QueryFilters *filters, FileFilterList *file_filter,
-                                WithinRangeList *within_ranges, int line_range, int total_count, int limit, int debug) {
+                                WithinRangeList *within_ranges, int line_range, int total_count, int limit, int quiet, int debug) {
     /* Get actual total if limit was hit */
     int actual_total = total_count;
     if (limit > 0 && total_count >= limit) {
         actual_total = get_total_count(db, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug);
+    }
+
+    /* Quiet mode: emit nothing except a terse notice when a limit clipped
+     * results, so the agent still knows the output was truncated. */
+    if (quiet) {
+        if (limit > 0 && total_count >= limit) {
+            printf("... %d matches, showing %d\n", actual_total, limit);
+        }
+        return;
     }
 
     char match_word[16];
@@ -2286,10 +2299,89 @@ static void print_summary_stats(CodeIndexDatabase *db, PatternList *patterns,
     }
 }
 
+/* When every match was excluded by filters, find WHICH filter is responsible
+ * so the user drops the right one instead of all of them. Re-counts with each
+ * narrowing filter (-i include, -f file) cleared in turn, keeping the others.
+ * -x (exclude) is special: clearing it would re-add what the user deliberately
+ * removed, so when only clearing -x recovers matches we suggest a positive
+ * include (-i com str, which overrides -x noise) rather than dropping -x.
+ * --within redefines what a match is, so when it is active we fall back to the
+ * generic message. */
+static void diagnose_filter_exclusion(CodeIndexDatabase *db, PatternList *patterns,
+                                      ContextTypeList *include, ContextTypeList *exclude,
+                                      QueryFilters *filters, FileFilterList *file_filter,
+                                      WithinRangeList *within_ranges, int line_range, int debug) {
+    ContextTypeList no_ctx = {0};
+    FileFilterList no_files = {0};
+    int has_within = (within_ranges && within_ranges->count > 0);
+
+    /* Count with exactly one filter cleared; the others (including -x) stay,
+     * so each count isolates that one filter's effect. */
+    int n_no_include = (include->count > 0 && !has_within)
+        ? get_total_count(db, patterns, &no_ctx, exclude, filters, file_filter, within_ranges, line_range, debug) : 0;
+    int n_no_file = (file_filter->count > 0 && !has_within)
+        ? get_total_count(db, patterns, include, exclude, filters, &no_files, within_ranges, line_range, debug) : 0;
+    int n_no_exclude = (exclude->count > 0 && !has_within)
+        ? get_total_count(db, patterns, include, &no_ctx, filters, file_filter, within_ranges, line_range, debug) : 0;
+
+    /* Build the culprit list for narrowing guesses (-i / -f). */
+    char culprits[32] = "";
+    int recovered = 0;
+    if (n_no_include > 0) {
+        snprintf(culprits, sizeof(culprits), "-i");
+        recovered = n_no_include;
+    }
+    if (n_no_file > 0) {
+        if (culprits[0]) {
+            strncat(culprits, " and -f", sizeof(culprits) - strlen(culprits) - 1);
+        } else {
+            snprintf(culprits, sizeof(culprits), "-f");
+        }
+        if (n_no_file > recovered) recovered = n_no_file;
+    }
+
+    const char *pat = patterns->patterns[0];
+    int single = (patterns->count == 1);
+
+    if (culprits[0]) {
+        /* A narrowing guess hid real matches: name it, leave -x untouched. */
+        if (single) {
+            printf("'%s': %d %s excluded by %s. Re-run without %s to see them.\n",
+                   pat, recovered, recovered == 1 ? "match" : "matches", culprits, culprits);
+        } else {
+            printf("Matches exist but were excluded by %s. Re-run without %s to see them.\n",
+                   culprits, culprits);
+        }
+    } else if (n_no_exclude > 0) {
+        /* Only clearing -x recovers matches. We don't know the exact category
+         * here; with the usual -x noise they are comment/string words. Suggest
+         * adding -i com str, which overrides the exclude without dropping it. */
+        if (single) {
+            printf("'%s': %d %s excluded by -x. Add -i com str to include comment/string matches.\n",
+                   pat, n_no_exclude, n_no_exclude == 1 ? "match" : "matches");
+        } else {
+            printf("Matches excluded by -x. Add -i com str to include comment/string matches.\n");
+        }
+    } else {
+        /* No single filter explains it -- a combination did. Suggest unfiltered. */
+        if (single) {
+            printf("'%s' has %d matches, all excluded by filters.\n",
+                   pat, count_pattern_matches(db, pat));
+        } else {
+            printf("All patterns exist, but all matches were excluded by filters.\n");
+        }
+        printf("Re-run without filters to see them:\n  qi");
+        for (int i = 0; i < patterns->count; i++) {
+            printf(" %s", patterns->patterns[i]);
+        }
+        printf("\n");
+    }
+}
+
 /* HOST_ONLY: mixes indexed querying with terminal rendering and host-backed source expansion. */
 static void print_results_by_file(CodeIndexDatabase *db, PatternList *patterns,
                                   ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
-                                  WithinRangeList *within_ranges, int limit, int limit_per_file, int compact, int line_range, int expand, int context_before, int context_after, int debug, int show_all_columns, int raw, const FileExtensions *known_exts) {
+                                  WithinRangeList *within_ranges, int limit, int limit_per_file, int compact, int line_range, int expand, int context_before, int context_after, int debug, int show_all_columns, int raw, int quiet, const FileExtensions *known_exts) {
 
     /* Two-step proximity search for line_range > 0 */
     if (line_range > 0 && patterns->count > 1) {
@@ -2344,9 +2436,12 @@ retry_query:
     /* Check if there are any results before printing header */
     int first_result = sqlite3_step(stmt);
     if (first_result != SQLITE_ROW) {
-        /* No results found - provide diagnostics */
+        /* No results: run diagnostics first and print the blunt "No results"
+         * verdict LAST (below), so the actionable line -- e.g. "'x' has N
+         * matches but all were excluded by filters" -- leads instead. (A
+         * successful wildcard retry gotos past the trailing verdict, so it no
+         * longer prints a misleading "No results" before its matches.) */
         sqlite3_finalize(stmt);
-        printf("No results\n");
 
         /* Initialize filter to check if patterns are valid symbols */
         SymbolFilter symbol_filter;
@@ -2363,6 +2458,7 @@ retry_query:
 
         /* Check each pattern individually to see which ones matched */
         int all_patterns_matched = 1;
+        int show_verdict = 1;  /* cleared when a branch already reports the count */
         for (int i = 0; i < patterns->count; i++) {
             int count = count_pattern_matches(db, patterns->patterns[i]);
             if (count == 0) {
@@ -2386,7 +2482,7 @@ retry_query:
                                         patterns->patterns[i] = safe_strdup_ctx(wildcard_pattern, "Failed to allocate memory for wildcard pattern");
                                         goto retry_query;
                                     } else {
-                                        printf("No partial matches found for '*%s*' either.", patterns->patterns[i]);
+                                        printf("No partial matches found for '*%s*'.", patterns->patterns[i]);
                                     }
                                 }
                                 break;
@@ -2424,16 +2520,19 @@ retry_query:
             if (line_range >= 0) {
                 printf("No lines contain ALL patterns together.\n");
             } else if (has_any_filters(include, exclude, filters, file_filter)) {
-                printf("All matches were excluded by filters.\n");
-                printf("Try without filters to see if symbols exist:\n  qi");
-
-                for (int i = 0; i < patterns->count; i++) {
-                    printf(" %s", patterns->patterns[i]);
-                }
-                printf("\n");
+                /* Name the responsible filter so the user drops the right one,
+                 * instead of the blunt "No results" that sends them to grep. */
+                diagnose_filter_exclusion(db, patterns, include, exclude, filters,
+                                          file_filter, within_ranges, line_range, debug);
+                show_verdict = 0;  /* the diagnostic already reports the count */
             }
         }
 
+        /* The blunt verdict, last -- after the diagnostics that explain it.
+         * Skipped when the filtered-miss branch already reported the count. */
+        if (show_verdict) {
+            printf("0 matches\n");
+        }
         warn_unknown_extensions(file_filter, known_exts);
         return;
     }
@@ -2441,9 +2540,9 @@ retry_query:
     /* Print table header only if we have results */
     if (!raw) {
         if (show_all_columns) {
-            print_all_columns_header();
+            print_all_columns_header(quiet);
         } else {
-            print_table_header(compact);
+            print_table_header(compact, quiet);
         }
     }
 
@@ -2531,7 +2630,7 @@ retry_query:
 
     /* Print summary statistics */
     if (!raw) print_summary_stats(db, patterns, include, exclude, filters, file_filter, within_ranges,
-                       line_range, total_count, limit, debug);
+                       line_range, total_count, limit, quiet, debug);
 }
 
 static void print_context_types(void) {
@@ -2640,6 +2739,7 @@ static void show_help_compact(void) {
     printf("  -v, --verbose                  all columns\n");
     printf("      --full                     full column names\n");
     printf("      --raw                      source only; useful with -e/-A/-B\n");
+    printf("  -q, --quiet                    drop banner/footer/rule chrome; keep header + rows\n");
     printf("\n");
 
     printf("Database:\n");
@@ -2729,6 +2829,7 @@ int main(int argc, char *argv[]) {
     int context_after = 0;
     int debug = 0;  /* Debug mode - show SQL queries */
     int raw_mode = 0;  /* Raw mode - suppress all non-source output */
+    int quiet = 0;     /* Quiet mode - drop banner + footer + separator-rule chrome; keep header row and match rows */
     int def_only = 0;
     int usage_only = 0;
     const char *db_file = "code-index.db";  /* Default database location */
@@ -2859,6 +2960,9 @@ int main(int argc, char *argv[]) {
         }
         else if (strcmp(argv[i], "--raw") == 0) {
             raw_mode = 1;
+        }
+        else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
+            quiet = 1;
         }
         else if (strcmp(argv[i], "--files") == 0) {
             files_only = 1;
@@ -3529,8 +3633,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /* Print header (suppressed in raw mode) */
-    if (!raw_mode) {
+    /* Print header (suppressed in raw and quiet modes) */
+    if (!raw_mode && !quiet) {
         printf("Searching for:");
         for (int j = 0; j < patterns.count; j++) {
             printf(" %s", patterns.patterns[j]);
@@ -3639,7 +3743,7 @@ int main(int argc, char *argv[]) {
     if (files_only) {
         print_files_only(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, line_range, debug);
     } else {
-        print_results_by_file(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, limit_per_file, compact, line_range, expand, context_before, context_after, debug, show_all_columns, raw_mode, &known_extensions);
+        print_results_by_file(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, limit_per_file, compact, line_range, expand, context_before, context_after, debug, show_all_columns, raw_mode, quiet, &known_extensions);
     }
 
 cleanup:

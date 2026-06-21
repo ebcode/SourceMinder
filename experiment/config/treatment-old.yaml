@@ -30,7 +30,7 @@ agent:
     `qi '*<symbol>*' -i func --def --limit 10`       — Find functions of interest
     `qi <symbol> -i func -e`                 — Expand a specific function
     `qi <symbol> --usage -C 5`               — Find usage examples with 5 lines of surrounding context (default: 3)
-
+    
     Start the session by running: qi --help. And *ALWAYS* prefer it to grep for code exploration.
 
     When done, submit your changes as a git patch:

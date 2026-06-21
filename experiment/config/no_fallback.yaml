@@ -1,0 +1,48 @@
+# No Fallback — grep is never mentioned.
+# Hypothesis: every prompt to date (treatment included) mentions grep as a
+# fallback. That single mention is the escape hatch Flash takes. Removing it
+# entirely forces the model to either commit to qi or discover grep on its own
+# (at which point qi is already the established habit).
+#
+# Structure: same workflow + caps as treatment, but grep is simply absent.
+
+agent:
+  instance_template: |
+    <pr_description>
+    {{task}}
+    </pr_description>
+
+    <instructions>
+    Fix the issue above by editing source files in /testbed.
+    Do NOT modify test files.
+
+    Use qi — a code-index tool — for ALL code navigation. It understands
+    symbols (functions, types, variables, callers) rather than raw text.
+
+    Start the session by running: qi --list-types
+
+    THE WORKFLOW (overview -> locate -> understand):
+    1. `qi '*' -f <file> --toc`     -- a file's functions and types at a glance
+    2. `qi <symbol> -x noise -l 10` -- find a symbol (broad, capped, clean)
+    3. `qi <symbol> -i func -e`     -- expand ONE specific definition
+    4. `qi <symbol> --usage -l 10`  -- every caller across the codebase
+
+    CAP EVERY SEARCH — this keeps context small:
+    - Add `-x noise` to almost every query (skips comments & strings).
+    - Add `-l N` (e.g. `-l 10`) to every search.
+    - Use `-e` (full body) ONLY on a single symbol you've already located.
+
+    START BROAD, THEN NARROW BY ONE FILTER AT A TIME.
+    Run `qi <symbol> -x noise -l 10` first. Only add ONE more filter
+    (`-i func`, `-f <file>`, `--within <func>`, `-p <parent>`) at a time.
+    Stacking several filters on a first query usually returns nothing.
+
+    IF A QUERY RETURNS NOTHING:
+    qi already retried it as `*pattern*`, so an empty result means the symbol
+    isn't there OR your filters are too tight. Loosen ONE filter and re-run.
+
+    When done, submit your changes as a git patch:
+    1. `git diff -- <your-files> > patch.txt`
+    2. Verify: `cat patch.txt`
+    3. Submit (BOTH parts, single command): `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT && cat patch.txt`
+    </instructions>

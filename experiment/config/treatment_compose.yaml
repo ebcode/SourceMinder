@@ -1,10 +1,14 @@
-# Hybrid arm: stay-in-qi base + new-treatment's token discipline.
-# stay-in-qi.yaml had the best adherence (highest qi adoption, lowest dead-query
-# rate) but the HIGHEST peak-prompt tokens of the four arms -- its "use qi a lot
-# / stay in it" guidance inflated context. This keeps stay-in-qi's workflow and
-# discipline but bakes in new-treatment's token levers: -x noise by default and a
-# hard -l / -lpf cap on EVERY search, plus stricter limits on -e/-v expansion.
-# Goal: keep the adherence, cut the context cost.
+# Composability arm: treatment.yaml + a "qi is a composable unix filter" section
+# and a softened opener. The goal is fewer round-trips: total_input is dominated
+# by re-sending the growing session each turn, and treatment runs ~25% more turns
+# than control (66 vs 53), which tracks its ~47% higher input cost. Teaching the
+# agent to BATCH independent lookups in one shell action and PIPE to trim should
+# pull turn count down toward control's.
+#
+# -q is NOT requested of the agent here: it is forced for every qi call via
+# config/treatment_compose.smconfig (mounted into the container's ~/.smconfig by
+# run_one.make_treatment_config). So this arm bundles two changes -- composability
+# prompt + forced-quiet output -- relative to the treatment baseline.
 
 agent:
   instance_template: |
@@ -21,6 +25,8 @@ agent:
     understands symbols (functions, types, variables, callers) rather than raw
     text, and it chains and pipes like any unix filter.
 
+    Start the session by running: qi --list-types
+
     THE WORKFLOW (overview -> locate -> understand) -- every search is capped
     and noise-free:
     1. `qi -f <file> --toc`            — a file's functions and types at a glance
@@ -35,7 +41,7 @@ agent:
       hundreds of lines. To sample across files: `-lpf 3 -l 15` (3 per file).
     - Use `-e` (full body) or `-v` (all columns) ONLY on a single symbol you have
       already located -- expanding a class can be a whole file. Never `-e` a
-      wildcard.
+      wildcard or a multi-result query.
 
     START BROAD, THEN NARROW BY ONE FILTER AT A TIME.
     Run `qi <symbol> -x noise -l 10` first. Only if you still need to narrow, add
@@ -47,13 +53,11 @@ agent:
     isn't there OR your filters are too tight. Loosen ONE filter -- don't switch
     to grep, go broader in qi.
 
-    STAY IN QI:
-    If you cannot find something with qi, try grep to get unblocked, then return to qi.
-
-    KEEP OUTPUT SMALL:
-    Prefer `--toc`, `-l N`, and `-i` to keep results compact. Reach for `-e`
-    (expand full body) or `-v` (all columns) only on a SINGLE symbol you have
-    already located -- expanding a class can dump a whole file.
+    STAY IN QI (but keep it capped):
+    After you locate the code, keep using qi to understand it -- `qi <sym>
+    --usage -l 10` for callers, `qi '*' --within <func>` for a function's
+    internals. Don't drop back to grep after the first hit. If qi genuinely
+    cannot find something, fall back to grep to get unblocked, then return to qi.
 
     COMPOSE -- qi IS A UNIX FILTER (chain and pipe in ONE command):
     Each shell turn re-sends the whole session, so a turn is expensive. Gather in
@@ -71,10 +75,6 @@ agent:
     Put the search pattern FIRST, then flags -- `-f` greedily consumes every
     following filename, so `qi -f file.py symbol` wrongly treats `symbol` as a
     filename.
-
-    Cap Every Search: *ALWAYS* add `-l N`. And *ALWAYS* add `-x noise` unless you're specifically searching for symbols inside comments and strings.
-
-    Start the session by running: qi --help
 
     When done, submit your changes as a git patch:
     1. `git diff -- <your-files> > patch.txt`

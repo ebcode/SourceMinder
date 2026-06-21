@@ -1,0 +1,21 @@
+# 18 balanced SWE-bench Verified instances (seed=126660)
+# Generated: 20260618_203358
+# Manifest: /home/eli/projects/awesome/SourceMinder/experiment/results/samples/sample_20260618_203358_seed126660.json
+astropy__astropy-13398 astropy/astropy 4
+astropy__astropy-14369 astropy/astropy 2
+django__django-11532 django/django 5
+matplotlib__matplotlib-14623 matplotlib/matplotlib 3
+matplotlib__matplotlib-25775 matplotlib/matplotlib 3
+mwaskom__seaborn-3187 mwaskom/seaborn 2
+pydata__xarray-3095 pydata/xarray 2
+pydata__xarray-3993 pydata/xarray 2
+pylint-dev__pylint-4551 pylint-dev/pylint 4
+pylint-dev__pylint-6386 pylint-dev/pylint 4
+pytest-dev__pytest-5840 pytest-dev/pytest 2
+pytest-dev__pytest-8399 pytest-dev/pytest 2
+scikit-learn__scikit-learn-12682 scikit-learn/scikit 2
+scikit-learn__scikit-learn-25102 scikit-learn/scikit 2
+sphinx-doc__sphinx-7590 sphinx-doc/sphinx 3
+sphinx-doc__sphinx-9461 sphinx-doc/sphinx 3
+sympy__sympy-14248 sympy/sympy 3
+sympy__sympy-16597 sympy/sympy 6

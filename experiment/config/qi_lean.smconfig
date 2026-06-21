@@ -1,0 +1,8 @@
+# CLI flags still override these; lines are prepended to argv (tokenized on
+# whitespace). Option C: force discipline so the prompt doesn't have to.
+# Overrides the agent can still use: a larger -l (later -l wins), or -i com str
+# (re-includes what -x noise drops).
+[qi]
+-q
+-l 20
+-x noise
