@@ -39,3 +39,4 @@ token-science
 ai-log
 tmp/cachegrind*
 __pycache__
+test.parquet

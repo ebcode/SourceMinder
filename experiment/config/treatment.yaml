@@ -16,21 +16,22 @@ agent:
     Fix the issue above by editing source files in /testbed.
     Do NOT modify test files.
 
-    Use qi -- a code-index tool -- instead of grep for code navigation.
+    IMPORTANT! Use qi -- a code search tool -- for code navigation and comprehension.
     Think of it as a symbol-aware grep you COMPOSE with other tools: it
     understands symbols (functions, types, variables, callers) rather than raw
     text, and it chains and pipes like any unix filter.
 
-    THE WORKFLOW (overview -> locate -> understand) -- every search is capped
+    THE WORKFLOW (overview -> locate -> understand)
     and noise-free:
-    1. `qi -f <file> --toc`            — a file's functions and types at a glance
-    2. `qi <symbol> -x noise -l 10`    — find a symbol (broad, but -x noise drops
+    1. `qi -f FILENAME --toc`           — *ALL* of a file's imports, functions, types (table of contents)
+    2. `qi '*TERM*' -x noise -l 10`     — Search for a symbol containing TERM (broad, but -x noise drops
                                          comments/strings and -l 10 caps output)
-    3. `qi <symbol> -i func -e`        — expand ONE specific definition
-    4. `qi <symbol> --usage -l 10`     — callers, capped
+    3. `qi SYMBOL -i func -e --raw`     — expand ONE specific definition (hide line numbers)
+    3. `qi SYMBOL1 SYMBOL2 -i func -e`  — expand TWO specific definitions
+    4. `qi SYMBOL --usage -l 10`        — callers, capped
 
-    CAP EVERY SEARCH -- this is what keeps context small:
-    - Add `-x noise` to almost every query (skips comments & strings).
+    LIMIT EVERY SEARCH -- this is what keeps context small:
+    - Add `-x noise` to almost every query -- skips comments & strings, eliminating false positives ("this symbol was not code but a comment").
     - Add `-l N` (e.g. `-l 10`) to every search so a broad pattern can't dump
       hundreds of lines. To sample across files: `-lpf 3 -l 15` (3 per file).
     - Use `-e` (full body) or `-v` (all columns) ONLY on a single symbol you have
@@ -38,17 +39,19 @@ agent:
       wildcard.
 
     START BROAD, THEN NARROW BY ONE FILTER AT A TIME.
-    Run `qi <symbol> -x noise -l 10` first. Only if you still need to narrow, add
-    ONE more filter (`-i func`, `-f <file>`, `--within <func>`, `-p <parent>`).
-    Don't stack several filters on a first query -- that usually returns nothing.
+    Run `qi SYMBOL -x noise -l 10` first. Only if you still need to narrow, add
+    ONE more filter (`-i func`, `-f FILENAME`, `--within FUNCTIONNAME`, `-p PARENTSYMBOL`).
+    Don't stack several filters on a first query.
 
     IF A QUERY RETURNS NOTHING:
-    qi already retried it as `*pattern*`, so an empty result means the symbol
+    qi already retries it as `*pattern*`, so an empty result means the symbol
     isn't there OR your filters are too tight. Loosen ONE filter -- don't switch
-    to grep, go broader in qi.
+    to grep, go broader in qi. (NOTE: single-letter symbols and common words are kept out of the index).
 
     STAY IN QI:
-    If you cannot find something with qi, try grep to get unblocked, then return to qi.
+    If you cannot find something using qi, use grep to get unblocked for that query, then go back to using qi.
+    After you locate the code, keep using qi to understand it -- `--usage` for
+    callers, `qi '*' --within FUNCTIONNAME -v` for a function's internals.
 
     KEEP OUTPUT SMALL:
     Prefer `--toc`, `-l N`, and `-i` to keep results compact. Reach for `-e`
@@ -56,23 +59,23 @@ agent:
     already located -- expanding a class can dump a whole file.
 
     COMPOSE -- qi IS A UNIX FILTER (chain and pipe in ONE command):
-    Each shell turn re-sends the whole session, so a turn is expensive. Gather in
-    batches, not one query per turn.
+    Turns are expensive. Gather in batches, not one query per turn.
     - Batch independent lookups for a symbol you've located into a single command:
-      `qi % -f utils.py --toc;  qi parse_config -i func -e | head -40;  qi parse_config --usage -l 10`
-    - Pipe to cap or count instead of running another turn:
-      `qi '*handler*' -x noise | head -30`      `qi parse -x noise | wc -l`
+      `qi '*' -f utils.py --toc;  qi parse_config -i func -e | head -40;  qi parse_config --usage -l 40`
+    - Pipe to limit results instead of running another turn:
+      `qi '*handler*' -x noise | head -30`
     - One rich action beats three small turns. Only split when your NEXT query
-      depends on what you just saw (find a symbol, THEN inspect its caller).
+      depends on what you just saw (find a symbol, THEN inspect its usages).
 
-    NOTE -- one non-standard quirk: qi takes MULTIPLE values per argument:
-    `qi user session token`        — user OR session OR token (OR logic)
-    `qi malloc -f *.c *.h`         — across all .c OR .h files
-    Put the search pattern FIRST, then flags -- `-f` greedily consumes every
-    following filename, so `qi -f file.py symbol` wrongly treats `symbol` as a
-    filename.
+    NOTE -- qi takes MULTIPLE values per argument (non-standard for a UNIX tool):
+    `qi user session`                  — user OR session OR token (OR logic)
+    `qi '*user*' '*auth*' -f .py .ts`  — across all .ts OR .py files (flags also accept multiple arguments)
+    Put the search pattern(s) FIRST, then flags.
 
     Cap Every Search: *ALWAYS* add `-l N`. And *ALWAYS* add `-x noise` unless you're specifically searching for symbols inside comments and strings.
+
+    Finally, please use qi in as efficient manner as you can.
+    The purpose of qi is to aid in code comprehension by providing additional context that is impossible with other tools.
 
     Start the session by running: qi --help
 

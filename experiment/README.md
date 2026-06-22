@@ -22,6 +22,9 @@ experiment/
 ├── MONITORING.md               # Watching runs in progress
 ├── RUN_BOOKKEEPING.md           # Manifest, ledger, and resume system
 ├── build_qi_static.sh         # Build static qi binary for Docker containers
+├── build_index_python_static.sh  # Build static Python indexer
+├── build_index_go_static.sh      # Build static Go indexer
+├── build_index_ts_static.sh      # Build static TypeScript indexer
 ├── verified_instance_ids.txt  # 20 sampled SWE-bench Verified instances (seed 42)
 ├── verified_docker_images.txt # 70 multi-file Verified instances + image names
 ├── index_instance.sh          # Index one instance's /testbed via its Docker image
@@ -39,12 +42,15 @@ experiment/
 │   ├── run_ledger.jsonl       # Append-only record of every run attempt
 │   ├── control/               # <instance>/<rep>.traj.json + <rep>.manifest.json
 │   └── treatment/             # <instance>/<rep>.traj.json + <rep>.manifest.json
-└── analysis/
-    ├── DESIGN.md                # Patch-evaluation design notes
-    ├── analyze_trajectories.py  # Extract per-run token metrics -> runs.csv
-    ├── evaluate_patches.py      # SWE-bench harness -> task_success (eval_results.csv)
-    ├── merge_results.py         # Join runs.csv + eval_results.csv -> runs_with_success.csv
-    └── <timestamp>/             # Per-analysis-run output (runs.csv, eval_results.csv, runs_with_success.csv)
+├── analysis/
+│   ├── DESIGN.md                # Patch-evaluation design notes
+│   ├── analyze_trajectories.py  # Extract per-run token metrics -> runs.csv
+│   ├── evaluate_patches.py      # SWE-bench harness -> task_success (eval_results.csv)
+│   ├── merge_results.py         # Join runs.csv + eval_results.csv -> runs_with_success.csv
+│   └── <timestamp>/             # Per-analysis-run output (runs.csv, eval_results.csv, runs_with_success.csv)
+└── vendor/
+    ├── swebench_pro_mini/       # ScaleAI mini-swe-agent fork (patch generation)
+    └── swebench_pro_os/         # ScaleAI SWE-bench_Pro-os (evaluation harness)
 ```
 
 ## Pinned Versions
@@ -55,6 +61,8 @@ experiment/
 | mini-swe-agent | v2.4.1 | `531dbaf` |
 | SWE-bench | v4.1.0 | `726c546` |
 | Model | `deepseek/deepseek-v4-flash` | — |
+| SWE-bench Pro (mini) | `scaleapi/mini-swe-agent` | `0d6a460` |
+| SWE-bench Pro (os) | `scaleapi/SWE-bench_Pro-os` | `ca10a60` |
 
 ## qi Delivery Mechanism
 

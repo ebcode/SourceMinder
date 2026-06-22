@@ -28,3 +28,4 @@ results/
 eval_results.db-wal
 eval_results.db-shm
 logs
+vendor

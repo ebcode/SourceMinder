@@ -25,11 +25,12 @@ script does not touch it. Run with the Pro venv interpreter:
 from __future__ import annotations
 
 import argparse
+import json
 import subprocess
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 EXPERIMENT_DIR = Path(__file__).resolve().parent
@@ -53,10 +54,27 @@ def default_output(batch_id: str = "", model: str = DEFAULT_MODEL) -> Path:
 
 _print_lock = threading.Lock()
 
+# Append-only ledger of every completed attempt (one JSON object per line). The
+# orchestrator (this parent) writes a row after each subprocess returns, so a rep
+# that is killed or crashes without writing a trajectory is still recorded. Pro
+# analog of run_experiment.py's logs/run_ledger.jsonl. Lives under logs/ (ignored),
+# so it is a local, regenerable artifact -- never committed.
+LEDGER_PATH = EXPERIMENT_DIR / "logs" / "run_pro_ledger.jsonl"
+_ledger_lock = threading.Lock()
+
 
 def board(msg: str) -> None:
     with _print_lock:
         print(msg, flush=True)
+
+
+def append_ledger(record: dict) -> None:
+    """Append one attempt record to the ledger (atomic small-write under O_APPEND)."""
+    LEDGER_PATH.parent.mkdir(parents=True, exist_ok=True)
+    line = json.dumps(record) + "\n"
+    with _ledger_lock:
+        with LEDGER_PATH.open("a") as f:
+            f.write(line)
 
 
 def traj_path(output: Path, arm: str, instance: str, rid: str) -> Path:
@@ -82,7 +100,8 @@ def is_done(output: Path, arm: str, instance: str, rid: str) -> bool:
 
 
 def run_one(arm: str, rid: str, instance: str, model: str, subset: str | None,
-            logdir: Path, output: Path, force: bool) -> tuple[str, str, int, str]:
+            logdir: Path, output: Path, force: bool,
+            batch_id: str = "") -> tuple[str, str, int, str]:
     """Run a single (arm, rep). Returns (arm, rid, returncode, summary_line)."""
     if not force and is_done(output, arm, instance, rid):
         return arm, rid, 0, "SKIP (already done)"
@@ -99,8 +118,10 @@ def run_one(arm: str, rid: str, instance: str, model: str, subset: str | None,
         cmd += ["--subset", subset]
 
     board(f"{arm:<16} {rid}  {datetime.now():%H:%M:%S}  starting  -> {log}")
+    started_at = datetime.now(timezone.utc).isoformat()
     with log.open("w") as fh:
         rc = subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT).returncode
+    finished_at = datetime.now(timezone.utc).isoformat()
 
     summary = ""
     try:
@@ -109,6 +130,32 @@ def run_one(arm: str, rid: str, instance: str, model: str, subset: str | None,
                 summary = line
     except Exception:
         pass
+
+    # Record the attempt: subprocess.run() returns even if the child was killed,
+    # so this captures crashes that leave no trajectory. exit_status is read from
+    # the written trajectory (same source is_done uses), or None if none was written.
+    tp = traj_path(output, arm, instance, rid)
+    traj_written = tp.exists()
+    exit_status = None
+    if traj_written:
+        try:
+            exit_status = json.loads(tp.read_text()).get("info", {}).get("exit_status", "")
+        except Exception:
+            exit_status = None
+    append_ledger({
+        "arm": arm,
+        "instance_id": instance,
+        "rep": rid,
+        "batch_id": batch_id,
+        "model": model,
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "returncode": rc,
+        "traj_written": traj_written,
+        "exit_status": exit_status,
+        "ok": rc == 0 and traj_written,
+    })
+
     return arm, rid, rc, summary or "(no summary line)"
 
 
@@ -151,6 +198,7 @@ def main() -> int:
           + (f"  (run-id prefix '{args.run_id_prefix}')" if args.run_id_prefix else ""))
     print(f"workers:  {args.workers}   (temp 0.0, upstream-faithful)")
     print(f"logs:     {logdir}/<arm>_repNN.log")
+    print(f"ledger:   {LEDGER_PATH}")
     print("=" * 72)
 
     failures = 0
@@ -158,7 +206,8 @@ def main() -> int:
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {
             pool.submit(run_one, arm, rid, args.instance, args.model,
-                        args.subset, logdir, output, args.force): (arm, rid)
+                        args.subset, logdir, output, args.force,
+                        args.batch_id): (arm, rid)
             for arm, rid in tasks
         }
         for fut in as_completed(futures):

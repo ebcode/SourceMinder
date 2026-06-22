@@ -31,8 +31,11 @@ Outputs (under <output>/<arm>/<instance_id>/):
 from __future__ import annotations
 
 import argparse
+import atexit
 import json
+import shutil
 import sys
+import tempfile
 import traceback
 from pathlib import Path
 
@@ -59,6 +62,69 @@ def load_env_file(path: Path) -> None:
         key, _, val = line.partition("=")
         key, val = key.strip(), val.strip().strip('"').strip("'")
         os.environ.setdefault(key, val)
+
+
+def prepare_treatment_mounts(config, arm, instance_id, experiment_dir):
+    """If this is a treatment (non-control) arm, verify qi prerequisites,
+    prepare a DB copy, and inject Docker volume mounts for qi-static,
+    code-index.db, and .smconfig into config['environment']['run_args'].
+
+    Returns a cleanup callable (None for control arms).
+    """
+    if arm == "swebp_control":
+        return lambda: None
+
+    repo_root = experiment_dir.parent
+
+    # --- Prerequisites ---
+    qi_static = repo_root / "build" / "qi-static"
+    if not qi_static.is_file():
+        print(f"ERROR: qi-static not found: {qi_static}", file=sys.stderr)
+        sys.exit(2)
+
+    db_path = experiment_dir / "dbs" / f"{instance_id}.db"
+    if not db_path.exists():
+        print(f"ERROR: DB not found: {db_path}\n"
+              f"  Index it first: bash experiment/index_instance_pro.sh {instance_id}",
+              file=sys.stderr)
+        sys.exit(2)
+
+    sys.path.insert(0, str(experiment_dir))
+    from lib.dbcheck import integrity_ok
+    ok, detail = integrity_ok(db_path, timeout=30, retries=2)
+    if not ok:
+        print(f"ERROR: DB integrity check failed for {db_path}: {detail}", file=sys.stderr)
+        sys.exit(3)
+    print(f"DB integrity: {detail}  ({db_path.name})", flush=True)
+
+    smconfig = experiment_dir / "config" / f"{arm}.smconfig"
+    if not smconfig.exists():
+        print(f"WARNING: no .smconfig found for arm '{arm}' at {smconfig}"
+              f" -- qi will use built-in defaults", file=sys.stderr)
+        smconfig = None
+
+    # --- DB copy ---
+    tmpdir = Path(tempfile.mkdtemp(prefix="sm_pro_"))
+    db_copy = tmpdir / "code-index.db"
+    shutil.copy2(db_path, db_copy)
+
+    def cleanup():
+        shutil.rmtree(tmpdir, ignore_errors=True)
+    atexit.register(cleanup)
+
+    # --- Inject mounts ---
+    run_args = config.setdefault("environment", {}).setdefault("run_args", [])
+    run_args.extend(["-v", f"{qi_static}:/usr/local/bin/qi:ro"])
+    # Mount outside the git repo so git diff doesn't pick up the DB.
+    run_args.extend(["-v", f"{db_copy}:/code-index.db"])
+
+    if smconfig:
+        run_args.extend(["-e", "HOME=/root"])
+        run_args.extend(["-v", f"{smconfig}:/root/.smconfig:ro"])
+
+    print(f"Treatment mounts: qi + DB + {'smconfig ' if smconfig else '(no smconfig) '}"
+          f"({(db_copy.stat().st_size + 1023) // 1024}K DB copy @ {tmpdir})", flush=True)
+    return cleanup
 
 
 def main() -> int:
@@ -120,6 +186,9 @@ def main() -> int:
     # agent unattended but still streams every step to the console).
     config.setdefault("agent", {})["confirm_exit"] = False
 
+    treatment_cleanup = prepare_treatment_mounts(
+        config, args.arm, args.instance, EXPERIMENT_DIR)
+
     out_dir = Path(args.output) / args.arm / args.instance
     out_dir.mkdir(parents=True, exist_ok=True)
     stem = args.instance + (f".{args.run_id}" if args.run_id else "")
@@ -151,6 +220,7 @@ def main() -> int:
             "model_patch": patch or "",
             "model_name_or_path": args.model,
         }) + "\n")
+        treatment_cleanup()
 
     n = len(patch or "")
     print(f"\nexit_status={exit_status}  patch_chars={n}")
