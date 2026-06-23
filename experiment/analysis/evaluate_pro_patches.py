@@ -16,6 +16,21 @@ own ``output_dir``:
     so parallel reps of the same instance would clobber each other.
 Per-run isolated output dirs (``<dir>/eval/<arm>/<run_id>/``) fix both.
 
+Outputs two CSVs:
+  * eval_results.csv -- one row per run. Beyond the binary ``resolved`` it now
+    carries the granular signal the verdict hides: ``failure_mode``
+    (resolved / bug_not_fixed / regression / both); ``pass_rate`` with
+    ``required_passed/required_total`` -- the fraction of all required tests
+    (FAIL_TO_PASS + PASS_TO_PASS pooled) that passed, so "1 test away" (~0.98) is
+    distinguishable from "20 away" (~0.60); and the per-category counts
+    ``f2p_total/f2p_passed/p2p_total/p2p_passed`` (FAIL_TO_PASS = did the fix
+    land; PASS_TO_PASS = did it break anything).
+  * eval_test_failures.csv -- long format, one row per required test that did NOT
+    pass: (model, arm, instance_id, rep, kind, test_name, status). Lets you see
+    exactly which tests failed without re-reading the per-rep output.json.
+
+``resolved`` is unchanged: (FAIL_TO_PASS u PASS_TO_PASS) all PASSED.
+
 Usage:
   experiment/.venv_pro/bin/python experiment/analysis/evaluate_pro_patches.py \
       --dir experiment/results/pro_runs/<batch> --workers 5 [--run-prefix oldprompt_]
@@ -74,6 +89,48 @@ def to_set(v) -> set:
     if isinstance(v, (list, tuple, set)):
         return set(v)
     return set(eval(v)) if v else set()
+
+
+def classify_failure(f2p_total: int, f2p_passed: int,
+                     p2p_total: int, p2p_passed: int) -> str:
+    """Refine the binary verdict into a failure mode (what 'unresolved' hides):
+      resolved      -- every FAIL_TO_PASS and PASS_TO_PASS test passes
+      bug_not_fixed -- a FAIL_TO_PASS test still fails (the fix didn't land)
+      regression    -- the bug is fixed but a PASS_TO_PASS test broke
+      both          -- failures on both sides
+    """
+    f2p_ok = f2p_passed == f2p_total
+    p2p_ok = p2p_passed == p2p_total
+    if f2p_ok and p2p_ok:
+        return "resolved"
+    if not f2p_ok and not p2p_ok:
+        return "both"
+    return "bug_not_fixed" if not f2p_ok else "regression"
+
+
+def result_row(model, arm, iid, rid, outcome, resolved, *, failure_mode=None,
+               f2p_total="", f2p_passed="", p2p_total="", p2p_passed="",
+               failures=None) -> dict:
+    """Build one summary row. ``failures`` (per-test long-format rows) is stashed
+    under ``_failures`` and split out before the summary CSV is written. For the
+    non-test outcomes (error/empty/missing) failure_mode defaults to the outcome.
+
+    required_total/required_passed pool FAIL_TO_PASS + PASS_TO_PASS, and pass_rate
+    is the fraction passing across that pool -- partial credit that distinguishes
+    "1 test away" (e.g. 0.98) from "20 away" (e.g. 0.60). pass_rate is "" when
+    there are no required tests or for the non-test outcomes."""
+    req_total = (f2p_total + p2p_total) if isinstance(f2p_total, int) else ""
+    req_passed = (f2p_passed + p2p_passed) if isinstance(f2p_passed, int) else ""
+    pass_rate = round(req_passed / req_total, 4) if isinstance(req_total, int) and req_total else ""
+    return dict(
+        model=model, arm=arm, instance_id=iid, rep=rid,
+        outcome=outcome, resolved=resolved,
+        failure_mode=failure_mode if failure_mode is not None else outcome,
+        f2p_total=f2p_total, f2p_passed=f2p_passed,
+        p2p_total=p2p_total, p2p_passed=p2p_passed,
+        required_total=req_total, required_passed=req_passed, pass_rate=pass_rate,
+        _failures=failures or [],
+    )
 
 
 def main() -> int:
@@ -141,11 +198,9 @@ def main() -> int:
         arm, iid, rid, patch, model = task
         row = by_id.get(iid)
         if row is None:
-            return dict(model=model, arm=arm, instance_id=iid, rep=rid,
-                        outcome="missing_instance", resolved=0)
+            return result_row(model, arm, iid, rid, "missing_instance", 0)
         if not patch.strip():
-            return dict(model=model, arm=arm, instance_id=iid, rep=rid,
-                        outcome="empty_patch", resolved=0)
+            return result_row(model, arm, iid, rid, "empty_patch", 0)
         sample = pd.Series({k: row[k] for k in RAW_FIELDS})
         out_dir = eval_root / arm / rid
         out_dir.mkdir(parents=True, exist_ok=True)
@@ -155,18 +210,34 @@ def main() -> int:
                 str(args.scripts_dir), prefix=f"{arm}_{rid}",
                 redo=args.redo, block_network=args.block_network)
             if not output:
-                return dict(model=model, arm=arm, instance_id=iid, rep=rid,
-                            outcome="error", resolved=0)
-            passed = {t["name"] for t in output["tests"] if t["status"] == "PASSED"}
-            required = to_set(row["fail_to_pass"]) | to_set(row["pass_to_pass"])
-            ok = required <= passed
-            return dict(model=model, arm=arm, instance_id=iid, rep=rid,
-                        outcome="resolved" if ok else "unresolved", resolved=int(ok))
+                return result_row(model, arm, iid, rid, "error", 0)
+            status_by = {t["name"]: t["status"] for t in output["tests"]}
+            passed = {n for n, s in status_by.items() if s == "PASSED"}
+            f2p = to_set(row["fail_to_pass"])
+            p2p = to_set(row["pass_to_pass"])
+            f2p_passed = len(f2p & passed)
+            p2p_passed = len(p2p & passed)
+            ok = (f2p | p2p) <= passed   # resolved verdict, unchanged
+            # one long-format row per required test that did NOT pass (a true
+            # FAILED, or MISSING if it never ran -- e.g. a collection error).
+            failures = [
+                dict(model=model, arm=arm, instance_id=iid, rep=rid, kind=kind,
+                     test_name=t, status=status_by.get(t, "MISSING"))
+                for kind, names in (("fail_to_pass", f2p), ("pass_to_pass", p2p))
+                for t in sorted(names - passed)
+            ]
+            return result_row(
+                model, arm, iid, rid,
+                "resolved" if ok else "unresolved", int(ok),
+                failure_mode=classify_failure(len(f2p), f2p_passed,
+                                              len(p2p), p2p_passed),
+                f2p_total=len(f2p), f2p_passed=f2p_passed,
+                p2p_total=len(p2p), p2p_passed=p2p_passed,
+                failures=failures)
         except Exception as exc:  # noqa: BLE001 -- record, never crash the batch
             with _print_lock:
                 print(f"  [{arm} {rid}] exception: {exc}", file=sys.stderr)
-            return dict(model=model, arm=arm, instance_id=iid, rep=rid,
-                        outcome="error", resolved=0)
+            return result_row(model, arm, iid, rid, "error", 0)
 
     results = []
     done = 0
@@ -181,20 +252,46 @@ def main() -> int:
                       f"{r['outcome']} (resolved={r['resolved']})", flush=True)
 
     args.dir.mkdir(parents=True, exist_ok=True)
+
+    # Split the per-test failure rows (long format) off the summary rows. Pop so
+    # the summary DictWriter sees only its own fields.
+    test_failures = []
+    for r in results:
+        test_failures.extend(r.pop("_failures", []))
+
     out_path = args.dir / "eval_results.csv"
-    fields = ["model", "arm", "instance_id", "rep", "outcome", "resolved"]
+    fields = ["model", "arm", "instance_id", "rep", "outcome", "resolved",
+              "failure_mode", "pass_rate", "required_passed", "required_total",
+              "f2p_total", "f2p_passed", "p2p_total", "p2p_passed"]
     results.sort(key=lambda r: (r["arm"], r["rep"]))
     with out_path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
         w.writerows(results)
 
+    # Separate long-format CSV: one row per required test that did not pass.
+    fail_path = args.dir / "eval_test_failures.csv"
+    tf_fields = ["model", "arm", "instance_id", "rep", "kind", "test_name", "status"]
+    test_failures.sort(key=lambda r: (r["arm"], r["rep"], r["kind"], r["test_name"]))
+    with fail_path.open("w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=tf_fields)
+        w.writeheader()
+        w.writerows(test_failures)
+
+    from collections import Counter
     n_res = sum(r["resolved"] for r in results)
     print(f"\nWrote {len(results)} row(s) -> {out_path}  ({n_res} resolved)")
+    print(f"Wrote {len(test_failures)} failing-test row(s) -> {fail_path}")
+    print(f"  failure modes: {dict(Counter(r['failure_mode'] for r in results))}")
     for arm in args.arms:
         ar = [r for r in results if r["arm"] == arm]
         if ar:
-            print(f"  {arm:18s} resolved {sum(x['resolved'] for x in ar)}/{len(ar)}")
+            res = sum(x["resolved"] for x in ar)
+            # partial credit: mean pass_rate across required (F2P+P2P) tests
+            rates = [x["pass_rate"] for x in ar if isinstance(x["pass_rate"], float)]
+            mr = (sum(rates) / len(rates)) if rates else float("nan")
+            print(f"  {arm:18s} resolved {res}/{len(ar)}  "
+                  f"mean pass_rate: {mr:.0%} (n={len(rates)})")
     return 0
 
 

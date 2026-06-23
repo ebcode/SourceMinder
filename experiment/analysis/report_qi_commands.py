@@ -23,7 +23,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # -> experiment/
 from lib import paths
-from analysis.extract_qi_commands import QI_FLAG_COLS
+from analysis.extract_qi_commands import QI_FLAG_COLS, QI_ANTIPATTERN_COLS
 
 
 def _median(vals: list[float]):
@@ -54,8 +54,9 @@ def load(csv_path: Path) -> list[dict]:
             r[k] = int(r[k]) if r[k] not in ("", None) else 0
         r["is_error"] = int(r["is_error"]) if r["is_error"] not in ("", None) else None
         r["qi_results"] = int(r["qi_results"]) if r.get("qi_results") not in ("", None) else None
-        for k in QI_FLAG_COLS:
-            r[k] = int(r[k]) if r[k] not in ("", None) else 0
+        # r.get(): tolerate CSVs written before these columns existed.
+        for k in (*QI_FLAG_COLS, *QI_ANTIPATTERN_COLS):
+            r[k] = int(r[k]) if r.get(k) not in ("", None) else 0
     return rows
 
 
@@ -217,6 +218,15 @@ def essentials(by_arm: dict[str, list[dict]], p) -> None:
     line("limit-flag adoption (% qi)",
          lambda rs: (f"{sum(1 for r in qi(rs) if r['qi_limit'] or r['qi_limit_per_file'])/len(qi(rs)):.0%}"
                      if qi(rs) else "n/a"))
+
+    def qi_rate(rs, col):  # % of qi calls with a 1 in `col`
+        q = qi(rs)
+        return f"{sum(r[col] for r in q)/len(q):.0%}" if q else "n/a"
+
+    line("-p / --parent adoption (% qi)", lambda rs: qi_rate(rs, "qi_parent"))
+    line("dotted-name misuse (% qi)", lambda rs: qi_rate(rs, "qi_dotted_name"))
+    line("quoted-phrase misuse (% qi)", lambda rs: qi_rate(rs, "qi_quoted_phrase"))
+    line("abs-path -f filter (% qi)", lambda rs: qi_rate(rs, "qi_abs_path"))
     p("\n  * output/call = SUCCESSFUL calls only (errors return tiny outputs);")
     p("    qi uses qi_pure (no compound/pipe) so output isn't mis-attributed.")
 

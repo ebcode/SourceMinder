@@ -4,7 +4,9 @@
 # Pro differs from Verified in three ways this script handles:
 #   1. Images live at jefzda/sweap-images:<tag> (read from data/pool_pro.csv,
 #      not derived from the instance id like Verified's swebench/sweb.eval.*).
-#   2. The repo is checked out at /app, not /testbed.
+#   2. The repo is checked out at /app, not /testbed. The index stores paths in
+#      their absolute /app/... form (see IDX_CWD below) so the agent's queries
+#      inside the container match the index without a path-prefix translation.
 #   3. Pro is multi-language: the right index-<lang>-static binary is chosen per
 #      instance from the pool's repo_language column (js uses the TS indexer,
 #      which also parses .js/.jsx/.mjs).
@@ -86,18 +88,27 @@ index_one() {
     docker cp "$BIN" "$CONTAINER_NAME:/usr/local/bin/${INDEXER%-static}"
     docker exec "$CONTAINER_NAME" chmod +x "/usr/local/bin/${INDEXER%-static}"
 
-    # Config is resolved relative to the indexer's cwd (/app): each binary looks
-    # for <lang>/config and shared/config. The indexing container is disposable,
-    # so writing these into /app does not affect the agent's container.
-    docker exec "$CONTAINER_NAME" mkdir -p "/app/${CONFIG_SUBDIR}/config" /app/shared/config
-    docker cp "${REPO_ROOT}/${CONFIG_SUBDIR}/config/." "$CONTAINER_NAME:/app/${CONFIG_SUBDIR}/config/"
-    docker cp "${REPO_ROOT}/shared/config/." "$CONTAINER_NAME:/app/shared/config/"
+    # Index from a working dir OUTSIDE /app so stored paths keep their absolute
+    # /app/... form. get_relative_path() (shared/file_utils.c) stores files that
+    # fall outside the cwd verbatim, while files under cwd get the "./"-relative
+    # prefix. Storing /app/... makes the agent's in-container qi queries match the
+    # index: `qi -f /app/lib/x.py` (exact) and `qi -f lib/x.py` (%-prefix) both
+    # work; only the rare explicit "./lib/x.py" form does not.
+    #
+    # Config is resolved relative to cwd, so it lives in IDX_CWD too. Keeping it
+    # (and the DB) outside /app also means the config files are never themselves
+    # indexed into the DB.
+    local IDX_CWD=/sm-index
+    docker exec "$CONTAINER_NAME" mkdir -p "${IDX_CWD}/${CONFIG_SUBDIR}/config" "${IDX_CWD}/shared/config"
+    docker cp "${REPO_ROOT}/${CONFIG_SUBDIR}/config/." "$CONTAINER_NAME:${IDX_CWD}/${CONFIG_SUBDIR}/config/"
+    docker cp "${REPO_ROOT}/shared/config/." "$CONTAINER_NAME:${IDX_CWD}/shared/config/"
 
-    echo "Running ${INDEXER%-static} on /app..."
-    docker exec "$CONTAINER_NAME" bash -c "cd /app && ${INDEXER%-static} /app --once --silent"
+    echo "Running ${INDEXER%-static} on /app (cwd ${IDX_CWD}, absolute paths)..."
+    docker exec "$CONTAINER_NAME" bash -c \
+        "cd ${IDX_CWD} && ${INDEXER%-static} /app --once --silent --db-file ${IDX_CWD}/code-index.db"
 
     mkdir -p "${REPO_ROOT}/experiment/dbs"
-    docker cp "$CONTAINER_NAME:/app/code-index.db" "$DB_PATH"
+    docker cp "$CONTAINER_NAME:${IDX_CWD}/code-index.db" "$DB_PATH"
     echo "Saved $(du -h "$DB_PATH" | cut -f1)"
 
     cleanup

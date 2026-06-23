@@ -41,7 +41,7 @@ agent:
     1. `qi -f FILENAME --toc`           — *ALL* of a file's imports, functions, types (table of contents)
     2. `qi '*TERM*' -x noise -l 10`     — Search for a symbol containing TERM (broad, but -x noise drops
                                          comments/strings and -l 10 caps output)
-    3. `qi SYMBOL -i func -e --raw`     — expand ONE specific definition (hide line numbers)
+    3. `qi SYMBOL -i func -e --raw -v`  — expand ONE specific definition (--raw hides line numbers, -v shows all columns)
     3. `qi SYMBOL1 SYMBOL2 -i func -e`  — expand TWO specific definitions
     4. `qi SYMBOL --usage -l 10`        — callers, capped
 
@@ -54,14 +54,31 @@ agent:
       wildcard.
 
     START BROAD, THEN NARROW BY ONE FILTER AT A TIME.
-    Run `qi SYMBOL -x noise -l 10` first. Only if you still need to narrow, add
-    ONE more filter (`-i func`, `-f FILENAME`, `--within FUNCTIONNAME`, `-p PARENTSYMBOL`).
+    Run `qi SYMBOL -x noise -l 10` first. Only if you still need to narrow, add ONE
+    more filter -- each pins a column you can see in `-v` output:
+      -p PARENT     the containing symbol (class/module) -- best disambiguator
+      --def / --usage   only where it's DEFINED / only where it's USED
+      -i func       a context kind (func, class, import, ...)
+      -t TYPE       by type annotation 
+      -m MODIFIER   by modifier (static, async, ...)
+      -w SYMBOL     inside a definition's body
+    Add filters one at a time; if a query goes empty, the last filter was too tight.
     Don't stack several filters on a first query.
 
     IF A QUERY RETURNS NOTHING:
     qi already retries it as `*pattern*`, so an empty result means the symbol
     isn't there OR your filters are too tight. Loosen ONE filter -- don't switch
     to grep, go broader in qi. (NOTE: single-letter symbols and common words are kept out of the index).
+
+    QUALIFIED / DOTTED NAMES -- split them, never pass them whole:
+    A qualified name like `PARENT.SYMBOL` (a class member, or a symbol written with
+    its module/namespace) is NOT one symbol to qi -- passed whole it matches the
+    literal text and finds nothing. Pass the LAST segment as the pattern and the
+    container as `-p`:
+      `qi SYMBOL -p PARENT`        (NOT `qi PARENT.SYMBOL`)
+      `qi METHOD -p CLASSNAME`     (a method on a class)
+    `-p` filters by parent symbol, so it also pins which one you mean when a name
+    appears across many files.
 
     STAY IN QI:
     If you cannot find something using qi, use grep to get unblocked for that query, then go back to using qi.
@@ -77,7 +94,7 @@ agent:
     Turns are expensive. Gather in batches, not one query per turn.
     - Batch independent lookups for a symbol you've located into a single command:
       `qi '*' -f utils.py --toc;  qi parse_config -i func -e | head -40;  qi parse_config --usage -l 40`
-    - Pipe to limit results instead of running another turn:
+    - Pipe to head to limit results:
       `qi '*handler*' -x noise | head -30`
     - One rich action beats three small turns. Only split when your NEXT query
       depends on what you just saw (find a symbol, THEN inspect its usages).
@@ -86,13 +103,21 @@ agent:
     `qi user session`                  — user OR session OR token (OR logic)
     `qi '*user*' '*auth*' -f .py .ts`  — across all .ts OR .py files (flags also accept multiple arguments)
     Put the search pattern(s) FIRST, then flags.
+    A quoted pattern with a space ('one two') is matched as that LITERAL text and
+    usually finds nothing -- qi indexes SYMBOLS, not source lines, and language
+    keywords/punctuation around a name are NOT in the index. Pass the bare
+    identifier and say the kind with -i:
+      `qi SYMBOL -i func`     (NOT `qi 'KEYWORD SYMBOL'`)
+      `qi WORD1 WORD2`        (separate args = OR; NOT one quoted `'WORD1 WORD2'`)
 
     Cap Every Search: *ALWAYS* add `-l N`. And *ALWAYS* add `-x noise` unless you're specifically searching for symbols inside comments and strings.
 
     Finally, please use qi in as efficient manner as you can.
     The purpose of qi is to aid in code comprehension by providing additional context that is impossible with other tools.
 
-    Start the session by running: qi --help
+    Start the session by running: qi --help;  qi '*' -l 1 -x file noise imp -v
+    
+    The second command prints one sample indexed row, and the columns after SYM (PAR, TYPE, ...) are all filterable.
 
     Now follow these steps:
     1. Use qi to find and read code relevant to the <pr_description>

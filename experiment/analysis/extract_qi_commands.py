@@ -17,7 +17,9 @@ Output columns:
   returncode, is_error                     -- parsed from <returncode>N</returncode>
   qi_pure                                  -- 1 if a qi command with no grep/read/pipe
   qi_limit, qi_limit_per_file, qi_toc, qi_expand, qi_include, qi_exclude,
-  qi_within, qi_and, qi_def, qi_usage, qi_raw   -- flag present (1/0), qi rows only
+  qi_within, qi_and, qi_def, qi_usage, qi_raw, qi_parent, qi_file, qi_type,
+  qi_modifier, qi_scope                          -- flag present (1/0), qi rows only
+  qi_dotted_name, qi_quoted_phrase, qi_abs_path  -- misuse markers (1/0), qi rows only
 
 Defaults to the prompt_study batch.
 
@@ -57,8 +59,20 @@ QI_FLAGS = {
     "qi_def": {"--def"},
     "qi_usage": {"--usage"},
     "qi_raw": {"--raw"},
+    # Column filters whose adoption we want to track (e.g. did teaching -p land?).
+    "qi_parent": {"-p", "--parent"},
+    "qi_file": {"-f", "--file"},
+    "qi_type": {"-t", "--type"},
+    "qi_modifier": {"-m", "--modifier"},
+    "qi_scope": {"-s", "--scope"},
 }
 QI_FLAG_COLS = list(QI_FLAGS)
+
+# Misuse columns: not simple flag-presence, so detected by lib.cmds helpers.
+#   qi_dotted_name  -- a qualified parent.symbol pattern passed whole (finds nothing)
+#   qi_quoted_phrase-- a multi-word phrase in quotes (matched as literal text)
+#   qi_abs_path     -- a -f value that is an absolute /app/... path
+QI_ANTIPATTERN_COLS = ["qi_dotted_name", "qi_quoted_phrase", "qi_abs_path"]
 
 _RC_RE = re.compile(r"<returncode>(-?\d+)</returncode>")
 # qi prints "Found N matches" on a hit and "No results" on a miss. Captured for
@@ -150,6 +164,59 @@ def _qi_miss_kind(output: str, count: int | None) -> str:
     return "other"
 
 
+def build_command_row(meta: dict, turn_idx: int, cmd_idx: int,
+                      command: str, output: str) -> dict:
+    """Build one per-command CSV row from a command + its tool output.
+
+    ``meta`` carries provenance: arm, instance, run_id, model, batch_id. Shared
+    by the Verified extractor (here) and the Pro extractor
+    (extract_pro_qi_commands.py) so both emit an identical schema -- the only
+    thing that differs between them is how the trajectory is parsed into
+    (command, output) pairs."""
+    tool = _primary_tool(command)
+    rc = _returncode(output)
+    res = _qi_result_count(output) if tool == "qi" else None
+    tokset = set(_tokens(command)) if tool == "qi" else set()
+
+    row = {
+        "arm": meta.get("arm", ""),
+        "instance": meta.get("instance", ""),
+        "run_id": meta.get("run_id", ""),
+        "model": meta.get("model", ""),
+        "batch_id": meta.get("batch_id", ""),
+        "turn_idx": turn_idx,
+        "cmd_idx": cmd_idx,
+        "tool": tool,
+        "command": command,
+        "output_chars": len(output),
+        "output_tokens_approx": round(len(output) / CHARS_PER_TOKEN),
+        "returncode": rc if rc is not None else "",
+        "is_error": "" if rc is None else int(rc != 0),
+        "qi_pure": int(_qi_pure(command)),
+        "qi_results": res if res is not None else "",
+        "qi_miss_kind": _qi_miss_kind(output, res) if tool == "qi" else "",
+    }
+    for col, flags in QI_FLAGS.items():
+        row[col] = int(bool(tokset & flags)) if tool == "qi" else ""
+    if tool == "qi":
+        subs = cmds.qi_subcommands(command)
+        row["qi_dotted_name"] = int(any(cmds.qi_dotted_pattern(s) for s in subs))
+        row["qi_quoted_phrase"] = int(any(cmds.qi_quoted_phrase(s) for s in subs))
+        row["qi_abs_path"] = int(any(cmds.qi_abs_path_filter(s) for s in subs))
+    else:
+        for col in QI_ANTIPATTERN_COLS:
+            row[col] = ""
+    return row
+
+
+# Column order for the per-command CSV; shared with extract_pro_qi_commands.py
+# so the reporter reads either experiment's output unchanged.
+CSV_FIELDS = ["arm", "instance", "run_id", "model", "batch_id", "turn_idx",
+              "cmd_idx", "tool", "command", "output_chars",
+              "output_tokens_approx", "returncode", "is_error", "qi_pure",
+              "qi_results", "qi_miss_kind", *QI_FLAG_COLS, *QI_ANTIPATTERN_COLS]
+
+
 def rows_for(path: Path) -> list[dict]:
     try:
         data = json.loads(path.read_text())
@@ -159,7 +226,8 @@ def rows_for(path: Path) -> list[dict]:
 
     messages = data.get("messages", [])
     model, batch, arm, instance = infer_path_meta(path)
-    run_id = path.name.replace(".traj.json", "")
+    meta = {"arm": arm, "instance": instance, "model": model, "batch_id": batch,
+            "run_id": path.name.replace(".traj.json", "")}
 
     # Pair outputs to actions by tool_call_id (turns can issue several commands).
     out_by_id = {
@@ -178,32 +246,7 @@ def rows_for(path: Path) -> list[dict]:
                 continue
             command = action.get("command", "") or ""
             output = out_by_id.get(action.get("tool_call_id"), "")
-            tool = _primary_tool(command)
-            rc = _returncode(output)
-            res = _qi_result_count(output) if tool == "qi" else None
-            tokset = set(_tokens(command)) if tool == "qi" else set()
-
-            row = {
-                "arm": arm,
-                "instance": instance,
-                "run_id": run_id,
-                "model": model,
-                "batch_id": batch,
-                "turn_idx": turn_idx,
-                "cmd_idx": cmd_idx,
-                "tool": tool,
-                "command": command,
-                "output_chars": len(output),
-                "output_tokens_approx": round(len(output) / CHARS_PER_TOKEN),
-                "returncode": rc if rc is not None else "",
-                "is_error": "" if rc is None else int(rc != 0),
-                "qi_pure": int(_qi_pure(command)),
-                "qi_results": res if res is not None else "",
-                "qi_miss_kind": _qi_miss_kind(output, res) if tool == "qi" else "",
-            }
-            for col, flags in QI_FLAGS.items():
-                row[col] = int(bool(tokset & flags)) if tool == "qi" else ""
-            out.append(row)
+            out.append(build_command_row(meta, turn_idx, cmd_idx, command, output))
     return out
 
 
@@ -242,12 +285,8 @@ def main() -> int:
                             / "qi_commands.csv")
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    fields = ["arm", "instance", "run_id", "model", "batch_id", "turn_idx",
-              "cmd_idx", "tool", "command", "output_chars",
-              "output_tokens_approx", "returncode", "is_error", "qi_pure",
-              "qi_results", "qi_miss_kind", *QI_FLAG_COLS]
     with out_path.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
+        writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
         writer.writeheader()
         writer.writerows(rows)
 

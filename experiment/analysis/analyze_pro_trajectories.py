@@ -38,6 +38,7 @@ DEFAULT_LOGS = paths.LOGS_DIR / "pro_pilot"
 DEFAULT_ARMS = ["swebp_control", "swebp_treatment"]
 CHARS_PER_TOKEN = 4.0
 BASH_RE = re.compile(r"```bash\s*(.+?)```", re.S)
+DIFF_FILE_RE = re.compile(r"^\+\+\+ b/(.+)", re.M)
 
 
 def norm_model(s: str) -> str:
@@ -58,6 +59,14 @@ def parse_run_id(path: Path, instance_id: str) -> str:
     return stem
 
 
+def _patch_stats(submission: str) -> tuple[int, int]:
+    if not submission.strip():
+        return 0, 0
+    files = DIFF_FILE_RE.findall(submission)
+    lines = submission.count("\n")
+    return len(set(files)), lines
+
+
 def analyze_one(path: Path) -> dict | None:
     try:
         data = json.loads(path.read_text())
@@ -75,16 +84,25 @@ def analyze_one(path: Path) -> dict | None:
     completion_toks: list[int] = []
     reasoning_toks = cached_toks = 0
     qi_n = grep_n = read_n = 0
+    # qi-usage quality rollups (per shared lib.cmds detectors): -p adoption and
+    # the three misuse markers, counted per qi sub-command across the run.
+    qi_parent_n = qi_dotted_n = qi_quoted_n = qi_abs_n = 0
     model = ""
 
     for msg in messages:
         if msg.get("role") == "assistant":
             mm = BASH_RE.search(str(msg.get("content", "")))
             if mm:
-                dq, dg, dr = cmds.count_tools(mm.group(1))
+                block = mm.group(1)
+                dq, dg, dr = cmds.count_tools(block)
                 qi_n += dq
                 grep_n += dg
                 read_n += dr
+                for sub in cmds.qi_subcommands(block):
+                    qi_parent_n += cmds.qi_parent_filter(sub)
+                    qi_dotted_n += cmds.qi_dotted_pattern(sub)
+                    qi_quoted_n += cmds.qi_quoted_phrase(sub)
+                    qi_abs_n += cmds.qi_abs_path_filter(sub)
         extra = msg.get("extra")
         if isinstance(extra, dict):
             resp = extra.get("response")
@@ -112,6 +130,7 @@ def analyze_one(path: Path) -> dict | None:
     model = model or info.get("config", {}).get("model", {}).get("model_name", "")
     stats = info.get("model_stats", {}) or {}
     submission = (info.get("submission") or "").strip()
+    files_touched, patch_lines = _patch_stats(submission)
     return {
         "model": norm_model(model),
         "arm": arm,
@@ -131,8 +150,14 @@ def analyze_one(path: Path) -> dict | None:
         "qi_invocations": qi_n,
         "grep_invocations": grep_n,
         "file_read_invocations": read_n,
+        "qi_parent_calls": qi_parent_n,
+        "qi_dotted_name": qi_dotted_n,
+        "qi_quoted_phrase": qi_quoted_n,
+        "qi_abs_path": qi_abs_n,
         "submitted": bool(submission),
         "patch_chars": len(submission),
+        "patch_lines": patch_lines,
+        "files_touched": files_touched,
         "source": str(path),
     }
 

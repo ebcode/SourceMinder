@@ -81,6 +81,22 @@ def traj_path(output: Path, arm: str, instance: str, rid: str) -> Path:
     return output / arm / instance / f"{instance}.{rid}.traj.json"
 
 
+def rep_artifacts(output: Path, logdir: Path, arm: str, instance: str,
+                  rid: str) -> list[Path]:
+    """Every file a rep (re)writes: the per-run log plus the child's outputs
+    (traj, pred, and a manifest if one is ever added). Used by --force to clear
+    prior artifacts before a rerun so a mid-run crash can't leave a half-old,
+    half-new mix on disk."""
+    stem_dir = output / arm / instance
+    stem = f"{instance}.{rid}"
+    return [
+        logdir / f"{arm}_{rid}.log",
+        stem_dir / f"{stem}.traj.json",
+        stem_dir / f"{stem}.pred",
+        stem_dir / f"{stem}.manifest.json",
+    ]
+
+
 def is_done(output: Path, arm: str, instance: str, rid: str) -> bool:
     """A rep counts as done if its trajectory exists with a clean exit_status.
 
@@ -106,6 +122,13 @@ def run_one(arm: str, rid: str, instance: str, model: str, subset: str | None,
     if not force and is_done(output, arm, instance, rid):
         return arm, rid, 0, "SKIP (already done)"
 
+    if force:
+        # Clear prior artifacts up front so a crash partway through the rerun
+        # can't leave a partially-overwritten mix of old and new output. The
+        # child recreates each file as it runs.
+        for p in rep_artifacts(output, logdir, arm, instance, rid):
+            p.unlink(missing_ok=True)
+
     log = logdir / f"{arm}_{rid}.log"
     cmd = [str(VENV_PYTHON if VENV_PYTHON.exists() else sys.executable),
            str(RUN_ONE),
@@ -120,7 +143,12 @@ def run_one(arm: str, rid: str, instance: str, model: str, subset: str | None,
     board(f"{arm:<16} {rid}  {datetime.now():%H:%M:%S}  starting  -> {log}")
     started_at = datetime.now(timezone.utc).isoformat()
     with log.open("w") as fh:
-        rc = subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT).returncode
+        # stdin=DEVNULL so the agent runs unattended: InteractiveAgent prompts
+        # `New step limit:` via input() when limits are hit; with no TTY that
+        # raises EOFError and the rep terminates instead of hanging forever.
+        # (Mirrors the Verified run_one.py invocation.)
+        rc = subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT,
+                            stdin=subprocess.DEVNULL).returncode
     finished_at = datetime.now(timezone.utc).isoformat()
 
     summary = ""
