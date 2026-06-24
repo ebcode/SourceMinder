@@ -86,7 +86,7 @@ def analyze_one(path: Path) -> dict | None:
     qi_n = grep_n = read_n = 0
     # qi-usage quality rollups (per shared lib.cmds detectors): -p adoption and
     # the three misuse markers, counted per qi sub-command across the run.
-    qi_parent_n = qi_dotted_n = qi_quoted_n = qi_abs_n = 0
+    qi_parent_n = qi_dotted_n = qi_quoted_n = qi_abs_n = qi_verbose_n = 0
     model = ""
 
     for msg in messages:
@@ -103,6 +103,7 @@ def analyze_one(path: Path) -> dict | None:
                     qi_dotted_n += cmds.qi_dotted_pattern(sub)
                     qi_quoted_n += cmds.qi_quoted_phrase(sub)
                     qi_abs_n += cmds.qi_abs_path_filter(sub)
+                    qi_verbose_n += cmds.qi_verbose_filter(sub)
         extra = msg.get("extra")
         if isinstance(extra, dict):
             resp = extra.get("response")
@@ -154,6 +155,7 @@ def analyze_one(path: Path) -> dict | None:
         "qi_dotted_name": qi_dotted_n,
         "qi_quoted_phrase": qi_quoted_n,
         "qi_abs_path": qi_abs_n,
+        "qi_verbose_calls": qi_verbose_n,
         "submitted": bool(submission),
         "patch_chars": len(submission),
         "patch_lines": patch_lines,

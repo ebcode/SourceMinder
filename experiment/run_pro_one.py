@@ -31,11 +31,8 @@ Outputs (under <output>/<arm>/<instance_id>/):
 from __future__ import annotations
 
 import argparse
-import atexit
 import json
-import shutil
 import sys
-import tempfile
 import traceback
 from pathlib import Path
 
@@ -44,6 +41,13 @@ DEFAULT_SUBSET = str(EXPERIMENT_DIR / "data" / "swebench_pro")
 DEFAULT_OUTPUT = EXPERIMENT_DIR / "logs" / "pro_pilot"
 DEFAULT_MODEL = "deepseek/deepseek-v4-flash"
 ENV_FILE = EXPERIMENT_DIR / ".env"
+
+# Treatment qi index DB: the original is bind-mounted read-only as a seed, then
+# copied into the container's /dev/shm ramdisk so qi serves queries from RAM and
+# has a writable home for the WAL -wal/-shm sidecars (see prepare_treatment_mounts
+# and seed_ramdisk_db).
+DB_SEED_PATH = "/code-index.db.seed"
+RAMDISK_DB_PATH = "/dev/shm/code-index.db"
 
 
 def load_env_file(path: Path) -> None:
@@ -103,28 +107,65 @@ def prepare_treatment_mounts(config, arm, instance_id, experiment_dir):
               f" -- qi will use built-in defaults", file=sys.stderr)
         smconfig = None
 
-    # --- DB copy ---
-    tmpdir = Path(tempfile.mkdtemp(prefix="sm_pro_"))
-    db_copy = tmpdir / "code-index.db"
-    shutil.copy2(db_path, db_copy)
-
-    def cleanup():
-        shutil.rmtree(tmpdir, ignore_errors=True)
-    atexit.register(cleanup)
-
     # --- Inject mounts ---
+    # The original DB is mounted read-only as a seed and copied into the
+    # container's /dev/shm ramdisk at startup (seed_ramdisk_db). Size /dev/shm at
+    # Docker's 64M default + the DB size so the copy fits. No host-side temp copy
+    # is needed: the read-only seed is shareable across concurrent reps, and each
+    # container's own ramdisk copy provides the per-rep writable working DB.
+    db_bytes = db_path.stat().st_size
+    shm_mb = 64 + (db_bytes + 1048575) // 1048576
+
     run_args = config.setdefault("environment", {}).setdefault("run_args", [])
     run_args.extend(["-v", f"{qi_static}:/usr/local/bin/qi:ro"])
-    # Mount outside the git repo so git diff doesn't pick up the DB.
-    run_args.extend(["-v", f"{db_copy}:/code-index.db"])
+    run_args.extend(["--shm-size", f"{shm_mb}m"])
+    # Seed mount lives outside the git repo so `git diff` in /app never sees it.
+    run_args.extend(["-v", f"{db_path}:{DB_SEED_PATH}:ro"])
 
     if smconfig:
         run_args.extend(["-e", "HOME=/root"])
         run_args.extend(["-v", f"{smconfig}:/root/.smconfig:ro"])
 
-    print(f"Treatment mounts: qi + DB + {'smconfig ' if smconfig else '(no smconfig) '}"
-          f"({(db_copy.stat().st_size + 1023) // 1024}K DB copy @ {tmpdir})", flush=True)
-    return cleanup
+    print(f"Treatment mounts: qi + DB seed ({(db_bytes + 1023) // 1024}K, "
+          f"ramdisk /dev/shm={shm_mb}M) + "
+          f"{'smconfig' if smconfig else '(no smconfig)'}", flush=True)
+    return lambda: None
+
+
+def seed_ramdisk_db(env) -> None:
+    """Copy the read-only seed DB into the container's /dev/shm ramdisk.
+
+    Run once after the container starts and before the agent, so every qi query
+    is served from RAM. The copy also gives WAL-mode SQLite a writable directory
+    for its -wal/-shm sidecars (a read-only mount would fail to open). /dev/shm
+    is mounted at container creation (sized via --shm-size in prepare_treatment_mounts),
+    so it is available immediately. Fails loudly: a missing ramdisk DB would make
+    every qi call error.
+    """
+    res = env.execute(f"cp {DB_SEED_PATH} {RAMDISK_DB_PATH}")
+    if res.get("returncode", 0) != 0:
+        raise RuntimeError(
+            f"failed to seed ramdisk DB ({DB_SEED_PATH} -> {RAMDISK_DB_PATH}): "
+            f"{res.get('output', '')}")
+
+
+def recover_empty_patch(env, agent) -> str:
+    """Re-collect a patch that came back empty due to a broken /dev/null.
+
+    An empty patch can be a false negative: if an agent command unlinks the
+    /dev/null device node (e.g. `go tool compile -o /dev/null` cleaning up its
+    output file after a *failed* compile), the agent's collection step
+    (`git add -A && git diff --cached`) fails with exit 128 and returns "" even
+    though the edits are present in the repo. Recreate /dev/null and re-collect.
+    A genuinely empty patch stays empty, so this is safe to always attempt.
+    """
+    try:
+        env.execute("[ -c /dev/null ] || { rm -f /dev/null 2>/dev/null; "
+                    "mknod -m 666 /dev/null c 1 3; }")
+        return agent.collect_patch() or ""
+    except Exception as e:  # noqa: BLE001 -- best-effort salvage; never raise
+        print(f"\nWARNING: empty-patch recovery failed: {e}", file=sys.stderr)
+        return ""
 
 
 def main() -> int:
@@ -196,6 +237,8 @@ def main() -> int:
     pred_path = out_dir / f"{stem}.pred"
 
     env = get_sb_environment(config, instance)
+    if args.arm != "swebp_control":
+        seed_ramdisk_db(env)
     agent = InteractiveAgent(
         get_model(args.model, config.get("model", {})),
         env,
@@ -203,15 +246,26 @@ def main() -> int:
     )
 
     exit_status, result, patch, extra_info = None, None, "", None
+    patch_recovered = False
     try:
         # The scaffold's agent.run() returns a 3-tuple; the upstream single-CLI
         # bug is unpacking only 2. We unpack all three so the patch survives.
         exit_status, result, patch = agent.run(instance["problem_statement"])
+        # An empty patch may be a false negative from a broken /dev/null device
+        # node (see recover_empty_patch); repair it and re-collect once.
+        if not patch:
+            patch = recover_empty_patch(env, agent)
+            patch_recovered = bool(patch)
+            if patch_recovered:
+                print(f"\nRecovered empty patch ({len(patch)} chars) after "
+                      "repairing /dev/null", file=sys.stderr)
     except Exception as e:  # noqa: BLE001 -- persist whatever we have on failure
         exit_status, result = type(e).__name__, str(e)
         extra_info = {"traceback": traceback.format_exc()}
         print(f"\nERROR during run: {e}", file=sys.stderr)
     finally:
+        if patch_recovered:
+            extra_info = {**(extra_info or {}), "patch_recovered": True}
         save_traj(agent, traj_path, exit_status=exit_status, result=patch or result,
                   extra_info=extra_info)
         # .pred in the format gather_patches.py expects (JSON w/ model_patch).
@@ -219,6 +273,7 @@ def main() -> int:
             "instance_id": args.instance,
             "model_patch": patch or "",
             "model_name_or_path": args.model,
+            "patch_recovered": patch_recovered,
         }) + "\n")
         treatment_cleanup()
 

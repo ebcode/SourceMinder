@@ -297,45 +297,57 @@ EOF
 # Prepare language-specific build targets
 ALL_TARGETS=""
 SYMLINK_TARGETS=""
+# STATIC_TARGETS mirrors ALL_TARGETS for the Linux-only `make static` target,
+# which links fully self-contained build/<tool>-static binaries (for use inside
+# SWE-bench Docker containers) from the same objects as the normal build.
+STATIC_TARGETS=""
 
 if [ $ENABLE_C -eq 1 ]; then
     ALL_TARGETS="$ALL_TARGETS \$(BUILD_DIR)/index-c"
     SYMLINK_TARGETS="$SYMLINK_TARGETS ./index-c"
+    STATIC_TARGETS="$STATIC_TARGETS \$(BUILD_DIR)/index-c-static"
 fi
 
 if [ $ENABLE_GO -eq 1 ]; then
     ALL_TARGETS="$ALL_TARGETS \$(BUILD_DIR)/index-go"
     SYMLINK_TARGETS="$SYMLINK_TARGETS ./index-go"
+    STATIC_TARGETS="$STATIC_TARGETS \$(BUILD_DIR)/index-go-static"
 fi
 
 if [ $ENABLE_PERL -eq 1 ]; then
     ALL_TARGETS="$ALL_TARGETS \$(BUILD_DIR)/index-perl"
     SYMLINK_TARGETS="$SYMLINK_TARGETS ./index-perl"
+    STATIC_TARGETS="$STATIC_TARGETS \$(BUILD_DIR)/index-perl-static"
 fi
 
 if [ $ENABLE_PHP -eq 1 ]; then
     ALL_TARGETS="$ALL_TARGETS \$(BUILD_DIR)/index-php"
     SYMLINK_TARGETS="$SYMLINK_TARGETS ./index-php"
+    STATIC_TARGETS="$STATIC_TARGETS \$(BUILD_DIR)/index-php-static"
 fi
 
 if [ $ENABLE_PYTHON -eq 1 ]; then
     ALL_TARGETS="$ALL_TARGETS \$(BUILD_DIR)/index-python"
     SYMLINK_TARGETS="$SYMLINK_TARGETS ./index-python"
+    STATIC_TARGETS="$STATIC_TARGETS \$(BUILD_DIR)/index-python-static"
 fi
 
 if [ $ENABLE_RUST -eq 1 ]; then
     ALL_TARGETS="$ALL_TARGETS \$(BUILD_DIR)/index-rust"
     SYMLINK_TARGETS="$SYMLINK_TARGETS ./index-rust"
+    STATIC_TARGETS="$STATIC_TARGETS \$(BUILD_DIR)/index-rust-static"
 fi
 
 if [ $ENABLE_TS -eq 1 ]; then
     ALL_TARGETS="$ALL_TARGETS \$(BUILD_DIR)/index-ts"
     SYMLINK_TARGETS="$SYMLINK_TARGETS ./index-ts"
+    STATIC_TARGETS="$STATIC_TARGETS \$(BUILD_DIR)/index-ts-static"
 fi
 
 # Always include qi
 ALL_TARGETS="$ALL_TARGETS \$(BUILD_DIR)/qi"
 SYMLINK_TARGETS="$SYMLINK_TARGETS ./qi"
+STATIC_TARGETS="$STATIC_TARGETS \$(BUILD_DIR)/qi-static"
 
 # Generate Makefile
 echo "Generating Makefile..."
@@ -401,6 +413,17 @@ ifneq ($(IS_MSYS),)
 else
     LDFLAGS = $(LIB_PATHS) -lsqlite3 -ltree-sitter
     LDFLAGS_DEBUG = $(LIB_PATHS) -lsqlite3 -ltree-sitter -rdynamic
+endif
+
+# Static-link flags for `make static` (Linux only). Produces fully self-contained
+# binaries (no shared-library deps) for use inside SWE-bench Docker containers.
+# Requires libsqlite3.a (apt-get install libsqlite3-dev) and a static
+# libtree-sitter.a built from source in /usr/local/lib. uname -m keeps the
+# multiarch path correct on both x86_64 and aarch64.
+ifeq ($(UNAME_S),Linux)
+    SQLITE_STATIC = /usr/lib/$(shell uname -m)-linux-gnu/libsqlite3.a
+    TREE_SITTER_STATIC = /usr/local/lib/libtree-sitter.a
+    STATIC_LDFLAGS = $(SQLITE_STATIC) $(TREE_SITTER_STATIC) -lm -lpthread -ldl -static
 endif
 
 # Compiler-specific warning flags for our code (strict)
@@ -554,6 +577,44 @@ $(BUILD_DIR)/index-ts: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(TS_TREE_SITTER_OBJ
 $(BUILD_DIR)/qi: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(QUERY_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
+# ── Static binaries (Linux only): `make static` ───────────────────────────────
+# Links fully self-contained build/<tool>-static binaries for use inside
+# SWE-bench Docker containers, reusing the same objects as the normal build.
+# Canned recipe: enforce Linux, static-link $^ into $@, then verify no dyn deps.
+define static_link
+	@test "$(UNAME_S)" = "Linux" || { echo "ERROR: 'make static' is supported on Linux only (got $(UNAME_S))"; exit 1; }
+	$(CC) $(CFLAGS) -o $@ $^ $(STATIC_LDFLAGS)
+	@ldd $@ 2>&1 | grep -q "not a dynamic executable" && echo "OK: $@ is fully static ($$(du -h $@ | cut -f1))" || { echo "ERROR: $@ has dynamic dependencies:"; ldd $@; exit 1; }
+endef
+
+$(BUILD_DIR)/index-c-static: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(C_TREE_SITTER_OBJ) $(C_LANGUAGE_OBJ) $(C_MAIN_OBJ) | $(BUILD_DIR)
+	$(static_link)
+
+$(BUILD_DIR)/index-go-static: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(GO_TREE_SITTER_OBJ) $(GO_LANGUAGE_OBJ) $(GO_MAIN_OBJ) | $(BUILD_DIR)
+	$(static_link)
+
+$(BUILD_DIR)/index-perl-static: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(PERL_TREE_SITTER_OBJ) $(PERL_LANGUAGE_OBJ) $(PERL_MAIN_OBJ) | $(BUILD_DIR)
+	$(static_link)
+
+$(BUILD_DIR)/index-php-static: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(PHP_TREE_SITTER_OBJ) $(PHP_LANGUAGE_OBJ) $(PHP_MAIN_OBJ) | $(BUILD_DIR)
+	$(static_link)
+
+$(BUILD_DIR)/index-python-static: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(PYTHON_TREE_SITTER_OBJ) $(PYTHON_LANGUAGE_OBJ) $(PYTHON_MAIN_OBJ) | $(BUILD_DIR)
+	$(static_link)
+
+$(BUILD_DIR)/index-rust-static: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(RUST_TREE_SITTER_OBJ) $(RUST_LANGUAGE_OBJ) $(RUST_MAIN_OBJ) | $(BUILD_DIR)
+	$(static_link)
+
+$(BUILD_DIR)/index-ts-static: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(TS_TREE_SITTER_OBJ) $(TS_LANGUAGE_OBJ) $(TS_MAIN_OBJ) | $(BUILD_DIR)
+	$(static_link)
+
+$(BUILD_DIR)/qi-static: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(QUERY_OBJ) | $(BUILD_DIR)
+	$(static_link)
+
+# Aggregate: build static binaries for the enabled languages (+ qi).
+static: $(BUILD_DIR)@STATIC_TARGETS@
+	@echo "Static binaries built in $(BUILD_DIR)/ (Linux, fully static)."
+
 # All selected binaries. Used as an order-only prerequisite (after the '|') on
 # every symlink so that under a parallel build (make -j) no 'ln -sf' runs until
 # the entire build is finished. This keeps output grouped (all compiles, then
@@ -691,7 +752,7 @@ tests/run-tests: tests/run-tests.c
 	@echo "Compiling test runner..."
 	@$(CC) -std=c11 -Wall -Wextra -o tests/run-tests tests/run-tests.c
 
-.PHONY: all clean install install-data uninstall lint debug test tests
+.PHONY: all static clean install install-data uninstall lint debug test tests
 EOF_MAKEFILE
 
 # Substitute variables in Makefile
@@ -699,10 +760,12 @@ if [ "$UNAME_S" = "Darwin" ]; then
     sed -i '' "s|@CC@|$CC|g" Makefile
     sed -i '' "s|@ALL_TARGETS@|$ALL_TARGETS|g" Makefile
     sed -i '' "s|@SYMLINK_TARGETS@|$SYMLINK_TARGETS|g" Makefile
+    sed -i '' "s|@STATIC_TARGETS@|$STATIC_TARGETS|g" Makefile
 else
     sed -i "s|@CC@|$CC|g" Makefile
     sed -i "s|@ALL_TARGETS@|$ALL_TARGETS|g" Makefile
     sed -i "s|@SYMLINK_TARGETS@|$SYMLINK_TARGETS|g" Makefile
+    sed -i "s|@STATIC_TARGETS@|$STATIC_TARGETS|g" Makefile
 fi
 
 # Build install/uninstall targets based on enabled languages

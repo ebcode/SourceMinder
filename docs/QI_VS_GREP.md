@@ -267,7 +267,7 @@ grep -B 5 "database_connect" database.c | grep "^/\*"  # Documentation
 
 ## Key Points
 
-1. **Config file recommended**: Add `-x noise` to `~/.indexerconfig` to exclude comments/strings by default
+1. **Config file recommended**: Add `-x noise` to `~/.smconfig` to exclude comments/strings by default
 2. **Context support**: qi's `-C`, `-A`, `-B` flags work excellently with symbol highlighting
 3. **Files-only**: qi's `--files` is faster and cleaner than `grep -l`
 4. **Expand definitions**: Use `-e` to see complete function/struct bodies
@@ -280,4 +280,4 @@ grep -B 5 "database_connect" database.c | grep "^/\*"  # Documentation
 
 **Symbol? Use qi. Text? Use grep.**
 
-When in doubt, try qi first—easier to fall back to grep than wade through grep noise for code symbols.
+When in doubt, try qi first. It's easier to fall back to grep than wade through grep noise for code symbols.

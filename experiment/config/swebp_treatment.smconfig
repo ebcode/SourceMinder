@@ -1,4 +1,4 @@
 # CLI flags still override these; lines are prepended to argv.
 [qi]
 -q
---db-file /code-index.db
+--db-file /dev/shm/code-index.db

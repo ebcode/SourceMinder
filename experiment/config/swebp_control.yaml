@@ -21,7 +21,7 @@ agent:
     <uploaded_files>
     {{working_dir}}
     </uploaded_files>
-    I've uploaded a python code repository in the directory {{working_dir}}. Consider the following PR description:
+    I've uploaded a code repository in the directory {{working_dir}}. Consider the following PR description:
 
     <pr_description>
     {{task}}

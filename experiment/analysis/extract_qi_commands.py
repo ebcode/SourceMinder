@@ -65,6 +65,7 @@ QI_FLAGS = {
     "qi_type": {"-t", "--type"},
     "qi_modifier": {"-m", "--modifier"},
     "qi_scope": {"-s", "--scope"},
+    "qi_verbose": {"-v", "--verbose"},
 }
 QI_FLAG_COLS = list(QI_FLAGS)
 

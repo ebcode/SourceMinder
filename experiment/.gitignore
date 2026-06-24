@@ -1,6 +1,7 @@
 # API keys / secrets: sourced at launch, never committed.
 .env
 .env.*
+*.swp
 
 # Python venv for mini-swe-agent + swebench
 .venv/

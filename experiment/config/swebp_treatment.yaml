@@ -21,7 +21,7 @@ agent:
     <uploaded_files>
     {{working_dir}}
     </uploaded_files>
-    I've uploaded a python code repository in the directory {{working_dir}}. Consider the following PR description:
+    I've uploaded a code repository in the directory {{working_dir}}. Consider the following PR description:
 
     <pr_description>
     {{task}}
@@ -32,30 +32,33 @@ agent:
     Your task is to make the minimal changes to non-tests files in the {{working_dir}} directory to ensure the <pr_description> is satisfied.
 
     IMPORTANT! Use qi -- a code search tool -- for code navigation and comprehension.
-    Think of it as a symbol-aware grep you COMPOSE with other tools: it
-    understands symbols (functions, types, variables, callers) rather than raw
+    Think of it as a context-aware code search you COMPOSE with other tools: it
+    understands ATOMIC symbols (functions, types, variables, callers) instead of raw
     text, and it chains and pipes like any unix filter.
 
     THE WORKFLOW (overview -> locate -> understand)
     and noise-free:
-    1. `qi -f FILENAME --toc`           — *ALL* of a file's imports, functions, types (table of contents)
-    2. `qi '*TERM*' -x noise -l 10`     — Search for a symbol containing TERM (broad, but -x noise drops
-                                         comments/strings and -l 10 caps output)
+    1. `qi -f FILENAME --toc`           — Gain a high-level overview of a file (table of contents)
+    2. `qi 'TERM*' -x noise -l 20`      — Search for a symbol starting with TERM (case-insensitive, broad, but -x noise drops
+                                         comments/strings and -l 20 caps output). Use '*TERM*' to search for a symbol containing TERM.
     3. `qi SYMBOL -i func -e --raw -v`  — expand ONE specific definition (--raw hides line numbers, -v shows all columns)
     3. `qi SYMBOL1 SYMBOL2 -i func -e`  — expand TWO specific definitions
-    4. `qi SYMBOL --usage -l 10`        — callers, capped
+    4. `qi SYMBOL --usage -l 20`        — callers, capped
 
     LIMIT EVERY SEARCH -- this is what keeps context small:
     - Add `-x noise` to almost every query -- skips comments & strings, eliminating false positives ("this symbol was not code but a comment").
-    - Add `-l N` (e.g. `-l 10`) to every search so a broad pattern can't dump
-      hundreds of lines. To sample across files: `-lpf 3 -l 15` (3 per file).
-    - Use `-e` (full body) or `-v` (all columns) ONLY on a single symbol you have
-      already located -- expanding a class can be a whole file. Never `-e` a
-      wildcard.
+    - Add `-l N` (e.g. `-l 20`) to every search so a broad pattern can't dump
+      hundreds of lines. To sample across files: `-lpf 3 -l 20` (3 per file).
+    - `-e` (full body) expands a definition -- a class can be a whole file, so use
+      it ONLY on a single located symbol.
+    - `-v` (all columns) is CHEAP -- it adds columns, not bodies. Reach for it
+      whenever a name is ambiguous: it reveals PAR (parent), SCOPE and TYPE, so you
+      can SEE which match you mean and which filter to narrow with.
 
     START BROAD, THEN NARROW BY ONE FILTER AT A TIME.
-    Run `qi SYMBOL -x noise -l 10` first. Only if you still need to narrow, add ONE
-    more filter -- each pins a column you can see in `-v` output:
+    Run `qi SYMBOL -x noise -l 20` first. When several rows share the name, re-run
+    with `-v` to reveal PAR/SCOPE/TYPE and see which one you mean. Only if you still
+    need to narrow, add ONE more filter -- each pins a column you can see in `-v` output:
       -p PARENT     the containing symbol (class/module) -- best disambiguator
       --def / --usage   only where it's DEFINED / only where it's USED
       -i func       a context kind (func, class, import, ...)
@@ -86,9 +89,10 @@ agent:
     callers, `qi '*' --within FUNCTIONNAME -v` for a function's internals.
 
     KEEP OUTPUT SMALL:
-    Prefer `--toc`, `-l N`, and `-i` to keep results compact. Reach for `-e`
-    (expand full body) or `-v` (all columns) only on a SINGLE symbol you have
-    already located -- expanding a class can dump a whole file.
+    Prefer `--toc`, `-l N`, and `-i` to keep results compact. `-e` (expand full
+    body) is the costly one -- use it only on a SINGLE located symbol, never a
+    wildcard. `-v` (all columns) is cheap and adds no bodies -- use it freely to
+    disambiguate by PAR/SCOPE/TYPE.
 
     COMPOSE -- qi IS A UNIX FILTER (chain and pipe in ONE command):
     Turns are expensive. Gather in batches, not one query per turn.
@@ -100,24 +104,25 @@ agent:
       depends on what you just saw (find a symbol, THEN inspect its usages).
 
     NOTE -- qi takes MULTIPLE values per argument (non-standard for a UNIX tool):
-    `qi user session`                  — user OR session OR token (OR logic)
-    `qi '*user*' '*auth*' -f .py .ts`  — across all .ts OR .py files (flags also accept multiple arguments)
+    `qi user session`                  — user OR session
+    `qi '*user*' '*auth*' -f .py .ts .js`  — across all .ts OR .py OR .js files (NOTE: flags *also* accept multiple arguments)
     Put the search pattern(s) FIRST, then flags.
-    A quoted pattern with a space ('one two') is matched as that LITERAL text and
-    usually finds nothing -- qi indexes SYMBOLS, not source lines, and language
+    A quoted pattern with a space (qi 'one two') is matched as that LITERAL text and
+    will find nothing -- qi indexes SYMBOLS, not source lines, and language
     keywords/punctuation around a name are NOT in the index. Pass the bare
-    identifier and say the kind with -i:
-      `qi SYMBOL -i func`     (NOT `qi 'KEYWORD SYMBOL'`)
-      `qi WORD1 WORD2`        (separate args = OR; NOT one quoted `'WORD1 WORD2'`)
+    identifier and state the context type(s) to include with -i:
+      `qi one two -i func class arg`
+      `qi 'one*' 'two*' -i class` (quote '*' to prevent shell expansion)
 
     Cap Every Search: *ALWAYS* add `-l N`. And *ALWAYS* add `-x noise` unless you're specifically searching for symbols inside comments and strings.
-
-    Finally, please use qi in as efficient manner as you can.
-    The purpose of qi is to aid in code comprehension by providing additional context that is impossible with other tools.
-
-    Start the session by running: qi --help;  qi '*' -l 1 -x file noise imp -v
     
-    The second command prints one sample indexed row, and the columns after SYM (PAR, TYPE, ...) are all filterable.
+    The purpose of qi is to aid in code comprehension by providing additional context that is impossible with other tools (like grep or sed).
+
+    Start the session by running: qi --help;  echo '==='; qi '*' -l 1 -x file noise imp -v
+
+    The second qi command prints one sample indexed row, and the columns after SYM (PAR, TYPE, ...) are all filterable with flags (-p PAR, -t TYPE, ...).
+    
+    When you've found a file of interest, run: qi -f FILENAME --toc    
 
     Now follow these steps:
     1. Use qi to find and read code relevant to the <pr_description>

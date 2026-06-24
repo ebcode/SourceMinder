@@ -259,32 +259,63 @@ def main() -> int:
     for r in results:
         test_failures.extend(r.pop("_failures", []))
 
+    # Read-modify-write merge: refresh only the runs we just evaluated and keep
+    # every other row intact, so a targeted re-eval (e.g.
+    # --arms swebp_treatment --run-prefix rep01) updates a single run's row(s)
+    # without clobbering the rest of the batch. A full-batch run refreshes every
+    # key, reproducing the old whole-file behavior. (To start clean, delete the
+    # CSVs first.) Runs are keyed by (arm, instance_id, rep).
+    touched = {(r["arm"], r["instance_id"], r["rep"]) for r in results}
+
     out_path = args.dir / "eval_results.csv"
     fields = ["model", "arm", "instance_id", "rep", "outcome", "resolved",
               "failure_mode", "pass_rate", "required_passed", "required_total",
               "f2p_total", "f2p_passed", "p2p_total", "p2p_passed"]
-    results.sort(key=lambda r: (r["arm"], r["rep"]))
+    merged = list(results)
+    if out_path.exists():
+        with out_path.open(newline="") as f:
+            for row in csv.DictReader(f):
+                if (row["arm"], row["instance_id"], row["rep"]) in touched:
+                    continue  # superseded by a freshly-evaluated row above
+                row = {k: row.get(k, "") for k in fields}
+                row["resolved"] = int(row["resolved"] or 0)
+                try:
+                    row["pass_rate"] = float(row["pass_rate"])
+                except (ValueError, TypeError):
+                    pass  # "" for empty/missing/error rows -- left as-is
+                merged.append(row)
+    merged.sort(key=lambda r: (r["arm"], r["rep"]))
     with out_path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
-        w.writerows(results)
+        w.writerows(merged)
 
-    # Separate long-format CSV: one row per required test that did not pass.
+    # Separate long-format CSV: one row per required test that did not pass. Drop
+    # every old failure row for the touched runs (a now-resolved run contributes
+    # zero), then add the fresh ones.
     fail_path = args.dir / "eval_test_failures.csv"
     tf_fields = ["model", "arm", "instance_id", "rep", "kind", "test_name", "status"]
-    test_failures.sort(key=lambda r: (r["arm"], r["rep"], r["kind"], r["test_name"]))
+    merged_tf = list(test_failures)
+    if fail_path.exists():
+        with fail_path.open(newline="") as f:
+            for row in csv.DictReader(f):
+                if (row["arm"], row["instance_id"], row["rep"]) in touched:
+                    continue
+                merged_tf.append({k: row.get(k, "") for k in tf_fields})
+    merged_tf.sort(key=lambda r: (r["arm"], r["rep"], r["kind"], r["test_name"]))
     with fail_path.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=tf_fields)
         w.writeheader()
-        w.writerows(test_failures)
+        w.writerows(merged_tf)
 
     from collections import Counter
-    n_res = sum(r["resolved"] for r in results)
-    print(f"\nWrote {len(results)} row(s) -> {out_path}  ({n_res} resolved)")
-    print(f"Wrote {len(test_failures)} failing-test row(s) -> {fail_path}")
-    print(f"  failure modes: {dict(Counter(r['failure_mode'] for r in results))}")
-    for arm in args.arms:
-        ar = [r for r in results if r["arm"] == arm]
+    n_res = sum(r["resolved"] for r in merged)
+    print(f"\nWrote {len(merged)} row(s) -> {out_path}  ({n_res} resolved; "
+          f"{len(results)} refreshed this run)")
+    print(f"Wrote {len(merged_tf)} failing-test row(s) -> {fail_path}")
+    print(f"  failure modes: {dict(Counter(r['failure_mode'] for r in merged))}")
+    for arm in sorted({r["arm"] for r in merged}):
+        ar = [r for r in merged if r["arm"] == arm]
         if ar:
             res = sum(x["resolved"] for x in ar)
             # partial credit: mean pass_rate across required (F2P+P2P) tests

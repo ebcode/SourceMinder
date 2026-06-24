@@ -152,6 +152,12 @@ def qi_parent_filter(subcmd: str) -> bool:
     return "-p" in toks or "--parent" in toks
 
 
+def qi_verbose_filter(subcmd: str) -> bool:
+    """True if the qi command uses the -v/--verbose flag."""
+    toks = _qi_tokenize(subcmd)
+    return "-v" in toks or "--verbose" in toks
+
+
 def count_tools(cmd: str) -> tuple[int, int, int]:
     """Return (qi, grep, file_read) invocation counts in one command string."""
     return (

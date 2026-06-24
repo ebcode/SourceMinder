@@ -227,6 +227,7 @@ def essentials(by_arm: dict[str, list[dict]], p) -> None:
     line("dotted-name misuse (% qi)", lambda rs: qi_rate(rs, "qi_dotted_name"))
     line("quoted-phrase misuse (% qi)", lambda rs: qi_rate(rs, "qi_quoted_phrase"))
     line("abs-path -f filter (% qi)", lambda rs: qi_rate(rs, "qi_abs_path"))
+    line("-v / --verbose adoption (% qi)", lambda rs: qi_rate(rs, "qi_verbose"))
     p("\n  * output/call = SUCCESSFUL calls only (errors return tiny outputs);")
     p("    qi uses qi_pure (no compound/pipe) so output isn't mis-attributed.")
 

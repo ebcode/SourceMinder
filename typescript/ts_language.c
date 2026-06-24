@@ -1634,6 +1634,16 @@ static void extract_enclosing_type(TSNode node, const char *source_code,
     }
 }
 
+/* A computed property name ([expr]) is a runtime expression, not a static
+ * identifier. Like destructuring patterns (see handle_variable_declaration) and
+ * non-identifier object keys (see handle_pair), it is not a meaningful symbol
+ * name, and its text can be arbitrarily long (overflowing the name buffer). Skip
+ * indexing it as a name; its body/value is still processed by the caller. */
+static int is_computed_property_name(TSNode name_node) {
+    const char *t = ts_node_type(name_node);
+    return t && strcmp(t, "computed_property_name") == 0;
+}
+
 static void handle_method_definition(TSNode node, const char *source_code, const char *directory,
                                      const char *filename, ParseResult *result, SymbolFilter *filter,
                                      int line) {
@@ -1656,7 +1666,7 @@ static void handle_method_definition(TSNode node, const char *source_code, const
     extract_modifiers(node, modifier, sizeof(modifier), method_modifiers);
 
     TSNode name_node = ts_node_child_by_field_name(node, "name", 4);
-    if (!ts_node_is_null(name_node)) {
+    if (!ts_node_is_null(name_node) && !is_computed_property_name(name_node)) {
         safe_extract_node_text(source_code, name_node, symbol, sizeof(symbol), filename);
 
         /* Check for ES2019 private method identifier (#) */
@@ -1759,7 +1769,7 @@ static void handle_property_signature(TSNode node, const char *source_code, cons
     extract_modifiers(node, modifier, sizeof(modifier), property_modifiers);
 
     TSNode name_node = ts_node_child_by_field_name(node, "name", 4);
-    if (!ts_node_is_null(name_node)) {
+    if (!ts_node_is_null(name_node) && !is_computed_property_name(name_node)) {
         safe_extract_node_text(source_code, name_node, symbol, sizeof(symbol), filename);
 
         /* Check for ES2019 private property identifier (#) */

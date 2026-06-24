@@ -82,7 +82,11 @@ index_one() {
         --entrypoint sleep "$IMAGE" 3600 > /dev/null
 
     cleanup() { docker rm -f "$CONTAINER_NAME" > /dev/null 2>&1 || true; }
-    trap cleanup RETURN
+    # Bake the container name into an EXIT trap (expanded now, so it survives the
+    # local going out of scope). EXIT fires even when `set -e` aborts mid-function
+    # on an indexer error -- a RETURN trap does NOT, which leaked the container and
+    # caused a name collision on the next run.
+    trap "docker rm -f '$CONTAINER_NAME' > /dev/null 2>&1 || true" EXIT
 
     # Copy the indexer binary in.
     docker cp "$BIN" "$CONTAINER_NAME:/usr/local/bin/${INDEXER%-static}"
@@ -112,7 +116,7 @@ index_one() {
     echo "Saved $(du -h "$DB_PATH" | cut -f1)"
 
     cleanup
-    trap - RETURN
+    trap - EXIT
     echo "=== Done: $INSTANCE_ID ==="
 }
 

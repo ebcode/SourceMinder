@@ -1132,6 +1132,11 @@ static void handle_type_spec(TSNode node, const char *source_code, const char *d
         get_package(node, source_code, package_buf, sizeof(package_buf), filename);
 
         if (type_name[0] && filter_should_index(filter, type_name)) {
+            /* Extract source location for the full type definition (so -e can
+             * expand the struct/interface body, like funcs and vars). */
+            char location[SOURCE_LOCATION_MAX_LENGTH];
+            format_source_location(node, location, sizeof(location));
+
             ExtColumns ext = {
                 .parent = NULL,
                 .scope = get_scope_from_name(type_name),
@@ -1142,7 +1147,7 @@ static void handle_type_spec(TSNode node, const char *source_code, const char *d
                 .definition = "1"
             };
             add_entry(result, type_name, line, CONTEXT_TYPE,
-                     directory, filename, NULL, &ext);
+                     directory, filename, location, &ext);
         }
 
         /* Process the type definition (struct_type, interface_type, etc.) */
@@ -1203,6 +1208,10 @@ static void handle_type_alias(TSNode node, const char *source_code, const char *
         }
 
         if (alias_name[0] && filter_should_index(filter, alias_name)) {
+            /* Extract source location for the full alias declaration. */
+            char location[SOURCE_LOCATION_MAX_LENGTH];
+            format_source_location(node, location, sizeof(location));
+
             ExtColumns ext = {
                 .parent = NULL,
                 .scope = get_scope_from_name(alias_name),
@@ -1213,7 +1222,7 @@ static void handle_type_alias(TSNode node, const char *source_code, const char *
                 .definition = "1"
             };
             add_entry(result, alias_name, line, CONTEXT_TYPE,
-                     directory, filename, NULL, &ext);
+                     directory, filename, location, &ext);
         }
     }
 }

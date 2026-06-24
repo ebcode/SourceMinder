@@ -482,6 +482,84 @@ static void convert_wildcards(const char *pattern, char *output, size_t output_s
     output[j] = '\0';
 }
 
+/* Split a term on the alternation operator '|' (the grep-ism '\|' is also
+ * accepted). Writes up to max_out newly-allocated segments into out[] and
+ * returns the count; empty segments produced by a leading, trailing, or
+ * doubled separator are dropped. The caller owns and must free each segment.
+ * '|' is never a valid identifier character or a qi wildcard, so the split is
+ * unambiguous. */
+static int split_alternation(const char *term, char *out[], int max_out) {
+    int count = 0;
+    const char *seg_start = term;
+    const char *p = term;
+    while (count < max_out) {
+        int sep_len = 0;
+        if (p[0] == '\\' && p[1] == '|') {
+            sep_len = 2;
+        } else if (p[0] == '|') {
+            sep_len = 1;
+        }
+        if (sep_len > 0 || *p == '\0') {
+            size_t len = (size_t)(p - seg_start);
+            if (len > 0) {
+                char seg[SYMBOL_MAX_LENGTH];
+                if (len >= sizeof(seg)) {
+                    len = sizeof(seg) - 1;
+                }
+                memcpy(seg, seg_start, len);
+                seg[len] = '\0';
+                out[count++] = safe_strdup_ctx(seg,
+                    "Failed to allocate memory for alternation segment");
+            }
+            if (*p == '\0') {
+                break;
+            }
+            p += sep_len;
+            seg_start = p;
+        } else {
+            p++;
+        }
+    }
+    return count;
+}
+
+/* Records the first grep-style alternation that was split, so a single warning
+ * can be emitted (with the user's actual terms) after all args are parsed. */
+typedef struct {
+    char *original;      /* the offending term as entered, e.g. "Renew\|Session" */
+    char *alternatives;  /* its split terms re-quoted and space-joined: 'Renew' 'Session' */
+    const char *sep;     /* the separator form the user typed: "\\|" or "|" */
+} AltWarning;
+
+/* Capture warning data for the first split term only (keep the message focused
+ * on one example). `original` is the term as entered; `segs`/`nseg` are its raw
+ * split alternatives. Echoes the separator form the user actually used. */
+static void capture_alt_warning(const char *original, char *const segs[], int nseg,
+                                AltWarning *w) {
+    if (w->original != NULL) {
+        return;  /* already captured an earlier term */
+    }
+    w->sep = strstr(original, "\\|") ? "\\|" : "|";
+    w->original = safe_strdup_ctx(original,
+        "Failed to allocate memory for alternation warning");
+
+    /* Build "'seg0' 'seg1' ...": two quotes per term, a space between, plus NUL. */
+    size_t cap = 1;
+    for (int i = 0; i < nseg; i++) {
+        cap += strlen(segs[i]) + 3;
+    }
+    char *buf = malloc(cap);
+    if (!buf) {
+        fprintf(stderr, "Failed to allocate memory for alternation warning\n");
+        exit(1);
+    }
+    size_t pos = 0;
+    for (int i = 0; i < nseg; i++) {
+        pos += (size_t)snprintf(buf + pos, cap - pos, "%s'%s'", i ? " " : "", segs[i]);
+    }
+    w->alternatives = buf;
+}
+
 /* Check if a word matches any regex pattern in the regex-patterns file */
 /*
 static int matches_regex_filter(const char *word, const char *filepath) {
@@ -2228,9 +2306,24 @@ static void print_expansion_or_context(const char *filepath, int line,
         int start_line, start_column, end_line, end_column;
         if (parse_source_location(source_location, &start_line, &start_column,
                                  &end_line, &end_column) == 0) {
-            print_lines_range(filepath, start_line, end_line, start_column, end_column, raw);
+            if (context_before > 0 || context_after > 0) {
+                /* Expand the definition plus surrounding context as one block of
+                 * whole lines (start_column = -1 disables column trimming). */
+                int ctx_start = start_line - context_before;
+                if (ctx_start < 1) ctx_start = 1;
+                print_lines_range(filepath, ctx_start, end_line + context_after, -1, -1, raw);
+            } else {
+                print_lines_range(filepath, start_line, end_line, start_column, end_column, raw);
+            }
             if (!raw) printf("--\n");  /* Closing separator after definition */
         }
+    } else if (expand && is_definition == 1) {
+        /* Expansion was requested for a definition, but the indexer recorded no
+         * source range. Warn instead of printing nothing, so the gap is visible
+         * rather than looking like an empty result. */
+        fprintf(stderr,
+            "Warning: No source location recorded for definition at %s:%d; cannot expand (re-index may be needed).\n",
+            filepath, line);
     } else if (context_before > 0 || context_after > 0) {
         /* Fall back to context lines for non-definitions or when expand not set */
         print_context_lines(filepath, line, patterns->patterns, patterns->count,
@@ -2814,6 +2907,9 @@ int main(int argc, char *argv[]) {
     }
 
     PatternList patterns = { .count = 0 };
+    /* Records the first grep-style alternation split, for the educational
+     * warning emitted after parsing; .original stays NULL if none occurred. */
+    AltWarning alt_warning = { 0 };
     int limit = 0;
     int limit_per_file = 0;  /* Limit results per file */
     int verbose = 0;
@@ -2866,26 +2962,36 @@ int main(int argc, char *argv[]) {
     /* Parse pattern arguments (before flags) */
     int i = 1;
     while (i < argc && argv[i][0] != '-') {
-        if (patterns.count < MAX_PATTERNS) {
-            /* Strip leading backslash if present (escape for patterns starting with '-') */
-            const char *pattern = argv[i];
-            /* Skip leading backslash ONLY if it's escaping a dash (for searching "-flag" symbols)
-             * Don't skip for wildcard escaping like \* or \. */
-            if (pattern[0] == '\\' && pattern[1] == '-') {
-                pattern++;  /* Skip the leading backslash */
+        /* Strip leading backslash if present (escape for patterns starting with '-')
+         * Skip leading backslash ONLY if it's escaping a dash (for searching "-flag"
+         * symbols). Don't skip for wildcard escaping like \* or \. */
+        const char *pattern = argv[i];
+        if (pattern[0] == '\\' && pattern[1] == '-') {
+            pattern++;  /* Skip the leading backslash */
+        }
+        /* Split grep-style alternation 'A|B' (or 'A\|B') into separate OR'd terms. */
+        char *segs[MAX_PATTERNS];
+        int nseg = split_alternation(pattern, segs, MAX_PATTERNS);
+        if (nseg > 1) {
+            capture_alt_warning(pattern, segs, nseg, &alt_warning);
+        }
+        for (int s = 0; s < nseg; s++) {
+            if (patterns.count < MAX_PATTERNS) {
+                /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) */
+                char converted_pattern[SYMBOL_MAX_LENGTH];
+                convert_wildcards(segs[s], converted_pattern, sizeof(converted_pattern));
+                patterns.patterns[patterns.count] = try_strdup_ctx(converted_pattern, "Failed to allocate memory for pattern");
+                if (!patterns.patterns[patterns.count]) {
+                    for (int r = s; r < nseg; r++) free(segs[r]);
+                    retval = 1;
+                    goto cleanup;
+                }
+                patterns.count++;
+            } else {
+                fprintf(stderr, "Warning: Maximum pattern limit (%d) reached. Ignoring: %s\n",
+                        MAX_PATTERNS, segs[s]);
             }
-            /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) */
-            char converted_pattern[SYMBOL_MAX_LENGTH];
-            convert_wildcards(pattern, converted_pattern, sizeof(converted_pattern));
-            patterns.patterns[patterns.count] = try_strdup_ctx(converted_pattern, "Failed to allocate memory for pattern");
-            if (!patterns.patterns[patterns.count]) {
-                retval = 1;
-                goto cleanup;
-            }
-            patterns.count++;
-        } else {
-            fprintf(stderr, "Warning: Maximum pattern limit (%d) reached. Ignoring: %s\n",
-                    MAX_PATTERNS, argv[i]);
+            free(segs[s]);
         }
         i++;
     }
@@ -3056,13 +3162,20 @@ int main(int argc, char *argv[]) {
                  strcmp(argv[i], "-" #short_flag) == 0) { \
             show_columns.name = 1; \
             while (i + 1 < argc && argv[i + 1][0] != '-') { \
-                if (filters.name.count < MAX_CONTEXT_TYPES) { \
-                    char converted_value[SYMBOL_MAX_LENGTH]; \
-                    convert_wildcards(argv[i + 1], converted_value, sizeof(converted_value)); \
-                    filters.name.values[filters.name.count++] = safe_strdup_ctx(converted_value, "Failed to allocate memory for " #long_flag " filter"); \
-                } else { \
-                    fprintf(stderr, "Warning: Maximum filter limit (%d) reached for --%s. Ignoring: %s\n", \
-                            MAX_CONTEXT_TYPES, #long_flag, argv[i + 1]); \
+                /* Split grep-style alternation 'A|B' into separate OR'd values. */ \
+                char *fsegs[MAX_CONTEXT_TYPES]; \
+                int fnseg = split_alternation(argv[i + 1], fsegs, MAX_CONTEXT_TYPES); \
+                if (fnseg > 1) capture_alt_warning(argv[i + 1], fsegs, fnseg, &alt_warning); \
+                for (int fs = 0; fs < fnseg; fs++) { \
+                    if (filters.name.count < MAX_CONTEXT_TYPES) { \
+                        char converted_value[SYMBOL_MAX_LENGTH]; \
+                        convert_wildcards(fsegs[fs], converted_value, sizeof(converted_value)); \
+                        filters.name.values[filters.name.count++] = safe_strdup_ctx(converted_value, "Failed to allocate memory for " #long_flag " filter"); \
+                    } else { \
+                        fprintf(stderr, "Warning: Maximum filter limit (%d) reached for --%s. Ignoring: %s\n", \
+                                MAX_CONTEXT_TYPES, #long_flag, fsegs[fs]); \
+                    } \
+                    free(fsegs[fs]); \
                 } \
                 i++; \
             } \
@@ -3089,13 +3202,20 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "--parent-type") == 0) {
             show_columns.parent_symbol = 1;
             while (i + 1 < argc && argv[i + 1][0] != '-') {
-                if (filters.parent_type.count < MAX_CONTEXT_TYPES) {
-                    char converted_value[SYMBOL_MAX_LENGTH];
-                    convert_wildcards(argv[i + 1], converted_value, sizeof(converted_value));
-                    filters.parent_type.values[filters.parent_type.count++] = safe_strdup_ctx(converted_value, "Failed to allocate memory for parent-type filter");
-                } else {
-                    fprintf(stderr, "Warning: Maximum filter limit (%d) reached for --parent-type. Ignoring: %s\n",
-                            MAX_CONTEXT_TYPES, argv[i + 1]);
+                /* Split grep-style alternation 'A|B' into separate OR'd values. */
+                char *fsegs[MAX_CONTEXT_TYPES];
+                int fnseg = split_alternation(argv[i + 1], fsegs, MAX_CONTEXT_TYPES);
+                if (fnseg > 1) capture_alt_warning(argv[i + 1], fsegs, fnseg, &alt_warning);
+                for (int fs = 0; fs < fnseg; fs++) {
+                    if (filters.parent_type.count < MAX_CONTEXT_TYPES) {
+                        char converted_value[SYMBOL_MAX_LENGTH];
+                        convert_wildcards(fsegs[fs], converted_value, sizeof(converted_value));
+                        filters.parent_type.values[filters.parent_type.count++] = safe_strdup_ctx(converted_value, "Failed to allocate memory for parent-type filter");
+                    } else {
+                        fprintf(stderr, "Warning: Maximum filter limit (%d) reached for --parent-type. Ignoring: %s\n",
+                                MAX_CONTEXT_TYPES, fsegs[fs]);
+                    }
+                    free(fsegs[fs]);
                 }
                 i++;
             }
@@ -3359,6 +3479,21 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Run 'qi --help' for a list of valid options.\n");
             retval = 1;
             goto cleanup;
+        }
+    }
+
+    /* Educate when grep-style alternation '|' (or '\|') was split into OR'd
+     * terms, echoing the user's actual terms and separator form. Goes to
+     * stderr so it survives -q, which only strips stdout chrome. */
+    if (alt_warning.original != NULL) {
+        fprintf(stderr,
+            "qi: '%s' contains grep-style %s alternation; searching for %s instead.\n"
+            "    Pass symbols as separate arguments: qi %s\n",
+            alt_warning.original, alt_warning.sep,
+            alt_warning.alternatives, alt_warning.alternatives);
+        if (line_range >= 0) {
+            fprintf(stderr,
+                "    --and [N] is used to find matches within a certain number of lines from eachother (0 by default).\n");
         }
     }
 
@@ -3750,6 +3885,10 @@ cleanup:
     /* Cleanup: free all allocated memory (safe to call even if some allocations failed)
      * Note: free(NULL) is a no-op, so we don't need to check each pointer */
     db_close(&db);
+
+    /* Free alternation-warning capture */
+    free(alt_warning.original);
+    free(alt_warning.alternatives);
 
     /* Free allocated patterns */
     for (int j = 0; j < patterns.count; j++) {
