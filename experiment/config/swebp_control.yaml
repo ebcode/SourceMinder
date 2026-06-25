@@ -1,3 +1,5 @@
+cost_tracking: ignore_errors
+
 agent:
   system_template: |
     You are a helpful assistant that can interact with a computer.
@@ -30,9 +32,10 @@ agent:
     Can you help me implement the necessary changes to the repository so that the requirements specified in the <pr_description> are met?
     I've already taken care of all changes to any of the test files described in the <pr_description>. This means you DON'T have to modify the testing logic or any of the tests in any way!
     Your task is to make the minimal changes to non-tests files in the {{working_dir}} directory to ensure the <pr_description> is satisfied.
+    
     Follow these steps to resolve the issue:
     1. As a first step, it might be a good idea to find and read code relevant to the <pr_description>
-    2. Create a script to reproduce the error and execute it with `python <filename.py>` using the bash tool, to confirm the error
+    2. Create a script to reproduce the error and execute it to confirm the error
     3. Edit the sourcecode of the repo to resolve the issue
     4. Rerun your reproduce script and confirm that the error is fixed!
     5. Think about edgecases and make sure your fix handles them as well
@@ -160,6 +163,34 @@ environment:
     LESS: -R
     PIP_PROGRESS_BAR: 'off'
     TQDM_DISABLE: '1'
+run:
+  # Per-container startup, run once by get_sb_environment before the agent starts.
+  # Two ordered steps; must exit 0 or the run aborts (set -e).
+  #
+  # 1. before_repo_set_cmd: the dataset's repo setup -- resets to {{base_commit}},
+  #    cleans, then `git checkout <fix> -- <test files>` to apply the test_patch
+  #    (the failing tests) WITHOUT the gold solution (which stays at base on disk).
+  #    This needs the fix commit present, so it runs FIRST.
+  #
+  # 2. Contamination guard (ref-only). The jefzda Pro images ship the full upstream
+  #    history with the gold fix commit still reachable from main/master, so an
+  #    agent could `git log --all` / `git show <fix>` to copy the real solution
+  #    (this is how the openlibrary control reps "solved" -- see work summaries).
+  #    before_repo_set_cmd's `git checkout <base>` already detached HEAD at base;
+  #    here we delete every branch/remote/tag ref and prune, making the fix commit
+  #    unreachable. This is ref-only on purpose: no `reset --hard`/`clean`, so the
+  #    test files just checked out survive (their blobs stay referenced by the
+  #    index). The full ancestor history is preserved, so `git diff`/`git log`/blame
+  #    still show the pre-existing state and the agent can tell a failing test is
+  #    pre-existing, not its own change.
+  env_startup_command: |-
+    set -e
+    cd /app
+    {{before_repo_set_cmd}}
+    git remote remove origin 2>/dev/null || true
+    git for-each-ref --format='delete %(refname)' refs/heads refs/remotes refs/tags | git update-ref --stdin
+    git reflog expire --expire=now --all
+    git gc --prune=now --quiet
 model:
   model_kwargs:
     temperature: 0.0

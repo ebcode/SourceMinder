@@ -1845,7 +1845,7 @@ static void get_context_summary(CodeIndexDatabase *db, PatternList *patterns,
         }
     }
 
-    printf("Result breakdown: ");
+    printf("Results CTX Totals: ");
     int first = 1;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         const char *context_full = (const char *)sqlite3_column_text(stmt, 0);
@@ -1862,7 +1862,7 @@ static void get_context_summary(CodeIndexDatabase *db, PatternList *patterns,
         printf("%s (%d)", context_compact, count);
         first = 0;
     }
-    printf("\nTip: Use -i <context> to narrow results\n");
+    printf("\nTip: Use -i CTX to narrow results\n");
 
     sqlite3_finalize(stmt);
     free_sql_builder(&builder);
@@ -2300,30 +2300,37 @@ static void print_expansion_or_context(const char *filepath, int line,
     /* Print expanded definition or context lines if requested
      * Note: is_definition is an INT_COLUMN (int), not COLUMN (const char *),
      * so compare directly to 1, not strcmp(is_definition, "1") */
-    if (expand && is_definition == 1 &&
-        source_location && source_location[0] != '\0') {
-        /* Expand full definition for is_definition=1 entries */
+    if (expand && is_definition == 1) {
+        /* Expand the definition. Two kinds of row share is_definition=1:
+         *   - Body-bearing definitions (functions, structs, enums, impls, ...)
+         *     carry a full source span and expand to their whole body.
+         *   - Body-less definition sites (let/$x bindings, struct fields, enum
+         *     variants, parameters, imports) are legitimate definitions too --
+         *     `$x = 1;` is where $x is defined -- but the indexer records no
+         *     span for them yet, so fall back to showing the single defining
+         *     line at this row's location.
+         * Either way -e shows the actual source text. A missing span is an
+         * expected, permanent property of these rows, never evidence of a stale
+         * index, so we do not warn or guess about freshness. */
         int start_line, start_column, end_line, end_column;
-        if (parse_source_location(source_location, &start_line, &start_column,
-                                 &end_line, &end_column) == 0) {
-            if (context_before > 0 || context_after > 0) {
-                /* Expand the definition plus surrounding context as one block of
-                 * whole lines (start_column = -1 disables column trimming). */
-                int ctx_start = start_line - context_before;
-                if (ctx_start < 1) ctx_start = 1;
-                print_lines_range(filepath, ctx_start, end_line + context_after, -1, -1, raw);
-            } else {
-                print_lines_range(filepath, start_line, end_line, start_column, end_column, raw);
-            }
-            if (!raw) printf("--\n");  /* Closing separator after definition */
+        int have_span = source_location && source_location[0] != '\0' &&
+            parse_source_location(source_location, &start_line, &start_column,
+                                 &end_line, &end_column) == 0;
+        if (!have_span) {
+            start_line = end_line = line;  /* fall back to the defining line */
         }
-    } else if (expand && is_definition == 1) {
-        /* Expansion was requested for a definition, but the indexer recorded no
-         * source range. Warn instead of printing nothing, so the gap is visible
-         * rather than looking like an empty result. */
-        fprintf(stderr,
-            "Warning: No source location recorded for definition at %s:%d; cannot expand (re-index may be needed).\n",
-            filepath, line);
+        /* Always whole-line mode (-1 columns): print the complete lines the
+         * definition spans, preserving leading indentation. Column-precise
+         * trimming would slice the indentation off the first line, leaving it
+         * misaligned against the rest of the body. */
+        if (context_before > 0 || context_after > 0) {
+            int ctx_start = start_line - context_before;
+            if (ctx_start < 1) ctx_start = 1;
+            print_lines_range(filepath, ctx_start, end_line + context_after, -1, -1, raw);
+        } else {
+            print_lines_range(filepath, start_line, end_line, -1, -1, raw);
+        }
+        if (!raw) printf("--\n");  /* Closing separator after definition */
     } else if (context_before > 0 || context_after > 0) {
         /* Fall back to context lines for non-definitions or when expand not set */
         print_context_lines(filepath, line, patterns->patterns, patterns->count,
@@ -2392,6 +2399,57 @@ static void print_summary_stats(CodeIndexDatabase *db, PatternList *patterns,
     }
 }
 
+/* Print the actual file paths where matches live (ignoring the -f filter).
+ * Used in the -f exclusion diagnostic to tell the user where to look. */
+static void print_file_filter_hint(CodeIndexDatabase *db, PatternList *patterns,
+                                   ContextTypeList *include, ContextTypeList *exclude,
+                                   QueryFilters *filters,
+                                   WithinRangeList *within_ranges, int line_range, int debug) {
+    FileFilterList no_files = {0};
+
+    int total_files = get_total_file_count(db, patterns, include, exclude, filters, &no_files, within_ranges, line_range, debug);
+    if (total_files <= 0) return;
+
+    SqlQueryBuilder builder;
+    if (init_sql_builder(&builder) != 0) return;
+
+    if (sql_append(&builder, "SELECT DISTINCT directory, filename FROM code_index WHERE (") != 0 ||
+        build_query_filters(&builder, patterns, include, exclude, filters, &no_files, within_ranges, line_range, debug) != 0 ||
+        sql_append(&builder, " ORDER BY directory, filename LIMIT 3") != 0) {
+        free_sql_builder(&builder);
+        return;
+    }
+
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db->db, builder.sql, -1, &stmt, NULL) != SQLITE_OK) {
+        free_sql_builder(&builder);
+        return;
+    }
+    free_sql_builder(&builder);
+
+    if (line_range < 0) {
+        for (int i = 0; i < patterns->count; i++) {
+            sqlite3_bind_text(stmt, i + 1, patterns->patterns[i], -1, SQLITE_STATIC);
+        }
+    }
+
+    int shown = 0;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        const char *dir  = (const char *)sqlite3_column_text(stmt, 0);
+        const char *file = (const char *)sqlite3_column_text(stmt, 1);
+        if (shown == 0) { printf("  Match found at: "); }
+        else            { printf("                  "); }
+        printf("%s%s\n", dir ? dir : "", file ? file : "");
+        shown++;
+    }
+    sqlite3_finalize(stmt);
+
+    if (total_files > shown) {
+        printf("                  ... plus %d other %s\n",
+               total_files - shown, total_files - shown == 1 ? "file" : "files");
+    }
+}
+
 /* When every match was excluded by filters, find WHICH filter is responsible
  * so the user drops the right one instead of all of them. Re-counts with each
  * narrowing filter (-i include, -f file) cleared in turn, keeping the others.
@@ -2445,15 +2503,17 @@ static void diagnose_filter_exclusion(CodeIndexDatabase *db, PatternList *patter
             printf("Matches exist but were excluded by %s. Re-run without %s to see them.\n",
                    culprits, culprits);
         }
+        if (n_no_file > 0) {
+            print_file_filter_hint(db, patterns, include, exclude, filters, within_ranges, line_range, debug);
+        }
     } else if (n_no_exclude > 0) {
-        /* Only clearing -x recovers matches. We don't know the exact category
-         * here; with the usual -x noise they are comment/string words. Suggest
-         * adding -i com str, which overrides the exclude without dropping it. */
+        /* Only clearing -x recovers matches. */
         if (single) {
-            printf("'%s': %d %s excluded by -x. Add -i com str to include comment/string matches.\n",
+            printf("'%s': %d %s excluded by -x. Remove -x to see them.\n",
                    pat, n_no_exclude, n_no_exclude == 1 ? "match" : "matches");
         } else {
-            printf("Matches excluded by -x. Add -i com str to include comment/string matches.\n");
+            printf("%d result%s excluded by -x. Remove -x to see them.\n",
+                   n_no_exclude, n_no_exclude == 1 ? "" : "s");
         }
     } else {
         /* No single filter explains it -- a combination did. Suggest unfiltered. */
@@ -2525,6 +2585,7 @@ retry_query:
     char current_file[PATH_MAX_LENGTH] = "";
     int total_count = 0;
     int current_file_count = 0;  /* Track results in current file for --limit-per-file */
+    int n_skipped_expand = 0;    /* Non-definition rows skipped by -e in raw mode */
 
     /* Check if there are any results before printing header */
     int first_result = sqlite3_step(stmt);
@@ -2711,6 +2772,8 @@ retry_query:
         print_expansion_or_context(filepath, line, source_location, is_definition,
                                   expand, context_before, context_after, patterns, raw);
 
+        if (expand && is_definition != 1) n_skipped_expand++;
+
         total_count++;
         current_file_count++;  /* Increment per-file counter */
 
@@ -2720,6 +2783,21 @@ retry_query:
     } while (sqlite3_step(stmt) == SQLITE_ROW);
 
     sqlite3_finalize(stmt);
+
+    /* Warn when -e skipped non-expandable rows (usages, not definitions).
+     * In raw mode these rows produce no output at all, which looks like a bug. */
+    if (expand && n_skipped_expand > 0) {
+        if (n_skipped_expand == total_count) {
+            fprintf(stderr, "No expandable definitions found: all %d result%s %s not a definition. "
+                    "Try -i func/class to narrow, or remove -e.\n",
+                    n_skipped_expand, n_skipped_expand == 1 ? "" : "s",
+                    n_skipped_expand == 1 ? "is" : "are");
+        } else {
+            fprintf(stderr, "%d result%s not expanded (not a definition). "
+                    "Try -i func/class to narrow.\n",
+                    n_skipped_expand, n_skipped_expand == 1 ? "" : "s");
+        }
+    }
 
     /* Print summary statistics */
     if (!raw) print_summary_stats(db, patterns, include, exclude, filters, file_filter, within_ranges,
@@ -2841,10 +2919,9 @@ static void show_help_compact(void) {
     printf("\n");
 
     printf("Types: func class macro var arg type prop call imp com str file; use --list-types for all.\n");
-    printf("Patterns: exact by default; wildcards: * any, . one char. %% and _ also work.\n");
+    printf("Patterns: case-insensitive, exact by default; wildcards: %% or * any chars, _ or . one char (* needs shell quoting).\n");
     printf("Escape leading flags: qi '\\--help'. Prefer prefix patterns like get* for speed.\n");
     printf("Config: ~/%s, [qi] section; CLI flags override config.\n", CONFIG_FILENAME);
-    printf("More examples: README.md, docs/C_GUIDE.md, docs/QI_VS_GREP.md\n");
 }
 
 /* HOST_ONLY: CLI entry point depends on argv parsing, filesystem checks, environment, and terminal output. */

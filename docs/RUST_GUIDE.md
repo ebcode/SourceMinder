@@ -110,14 +110,16 @@ qi token --within handle_request # 4. explore inside a function
 
 ### Scope (visibility)
 
-Captured exactly as written:
+Explicit `pub` visibility is captured exactly as written; items with no
+visibility keyword default to `private`. This applies uniformly to every item
+kind, including `pub mod` declarations.
 
 | Scope | Meaning |
 |-------|---------|
 | `pub` | Fully public |
 | `pub(crate)` | Crate-private |
 | `pub(super)` | Visible to parent module |
-| *(empty)* | Module-private (Rust default) |
+| `private` | Module-private (Rust default; no `pub` written) |
 
 ### Modifiers
 

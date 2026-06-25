@@ -615,7 +615,7 @@ int build_toc(const TocConfig *config) {
         }
     } else {
         /* Print summary header */
-        printf("Result breakdown: ");
+        printf("Results CTX Totals: ");
         for (int i = 0; i < count_types; i++) {
             printf("%s (%d)%s", counts[i].type, counts[i].count,
                    i < count_types - 1 ? ", " : "\n");

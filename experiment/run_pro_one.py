@@ -49,6 +49,41 @@ ENV_FILE = EXPERIMENT_DIR / ".env"
 DB_SEED_PATH = "/code-index.db.seed"
 RAMDISK_DB_PATH = "/dev/shm/code-index.db"
 
+# Directory inside the agent container where indexer configs are mounted.
+# Daemon runs from here so file paths are stored as absolute /app/... (outside
+# this dir), matching the seed DB which was indexed from outside /app.
+INDEXER_CWD = "/sm-config"
+DAEMON_PID_FILE = "/dev/shm/sm-indexer.pid"
+DAEMON_LOG_FILE = "/dev/shm/sm-indexer.log"
+
+# Maps pool_pro.csv repo_language to the indexer binary basename (without -static).
+# js uses the TypeScript indexer (covers .js/.jsx/.mjs).
+LANG_TO_INDEXER = {
+    "python": "index-python",
+    "go":     "index-go",
+    "ts":     "index-ts",
+    "js":     "index-ts",
+}
+
+# Maps indexer binary basename to its config subdirectory name under the repo root.
+INDEXER_CONFIG_SUBDIR = {
+    "index-python": "python",
+    "index-go":     "go",
+    "index-ts":     "typescript",
+}
+
+
+def get_repo_language(instance_id: str, experiment_dir: Path) -> str | None:
+    """Return repo_language for instance_id from pool_pro.csv, or None."""
+    pool = experiment_dir / "data" / "pool_pro.csv"
+    if not pool.exists():
+        return None
+    for line in pool.read_text().splitlines()[1:]:  # skip header
+        parts = line.split(",")
+        if parts and parts[0] == instance_id:
+            return parts[2] if len(parts) > 2 else None
+    return None
+
 
 def load_env_file(path: Path) -> None:
     """Best-effort load of KEY=VALUE lines from experiment/.env into os.environ.
@@ -71,12 +106,14 @@ def load_env_file(path: Path) -> None:
 def prepare_treatment_mounts(config, arm, instance_id, experiment_dir):
     """If this is a treatment (non-control) arm, verify qi prerequisites,
     prepare a DB copy, and inject Docker volume mounts for qi-static,
-    code-index.db, and .smconfig into config['environment']['run_args'].
+    code-index.db, .smconfig, the language indexer binary, and indexer configs
+    into config['environment']['run_args'].
 
-    Returns a cleanup callable (None for control arms).
+    Returns (cleanup_callable, indexer_name) where indexer_name is the binary
+    basename (e.g. 'index-python') for the daemon launch, or None for control.
     """
     if arm == "swebp_control":
-        return lambda: None
+        return lambda: None, None
 
     repo_root = experiment_dir.parent
 
@@ -92,6 +129,19 @@ def prepare_treatment_mounts(config, arm, instance_id, experiment_dir):
               f"  Index it first: bash experiment/index_instance_pro.sh {instance_id}",
               file=sys.stderr)
         sys.exit(2)
+
+    # --- Language indexer for watch daemon ---
+    lang = get_repo_language(instance_id, experiment_dir)
+    indexer_name = LANG_TO_INDEXER.get(lang) if lang else None
+    if indexer_name:
+        indexer_static = repo_root / "build" / f"{indexer_name}-static"
+        if not indexer_static.is_file():
+            print(f"WARNING: indexer not found: {indexer_static} -- watch daemon disabled",
+                  file=sys.stderr)
+            indexer_name = None
+    else:
+        print(f"WARNING: unknown repo_language {lang!r} for {instance_id} "
+              f"-- watch daemon disabled", file=sys.stderr)
 
     sys.path.insert(0, str(experiment_dir))
     from lib.dbcheck import integrity_ok
@@ -109,12 +159,26 @@ def prepare_treatment_mounts(config, arm, instance_id, experiment_dir):
 
     # --- Inject mounts ---
     # The original DB is mounted read-only as a seed and copied into the
-    # container's /dev/shm ramdisk at startup (seed_ramdisk_db). Size /dev/shm at
-    # Docker's 64M default + the DB size so the copy fits. No host-side temp copy
-    # is needed: the read-only seed is shareable across concurrent reps, and each
-    # container's own ramdisk copy provides the per-rep writable working DB.
+    # container's /dev/shm ramdisk at startup (seed_ramdisk_db). No host-side temp
+    # copy is needed: the read-only seed is shareable across concurrent reps, and
+    # each container's own ramdisk copy provides the per-rep writable working DB.
+    #
+    # Size /dev/shm to hold: 64M base + the DB copy + a WAL allowance. We now write
+    # the DB at runtime (reconcile_startup_changes + the watch daemon's per-edit
+    # re-indexing), so the -wal sidecar lives in the ramdisk too. The indexer runs
+    # journal_mode=WAL with the default 1000-page autocheckpoint and no
+    # journal_size_limit, so the WAL is not hard-bounded: short qi reads colliding
+    # with checkpoints over a long session can let it grow toward the DB's own size
+    # before it truncates. We therefore reserve a WAL allowance equal to the DB
+    # size (worst case: a full rewrite before checkpoint), floored at 128M for
+    # small DBs. The -shm sidecar is negligible (~tens of KB). --shm-size is a
+    # ceiling on a lazy tmpfs, not a reservation, so the headroom only costs RAM if
+    # the WAL actually grows -- overflow on a ramdisk is a hard failure ("database
+    # disk image is malformed" / "disk I/O error"), so we err generous.
     db_bytes = db_path.stat().st_size
-    shm_mb = 64 + (db_bytes + 1048575) // 1048576
+    db_mb = (db_bytes + 1048575) // 1048576
+    wal_mb = max(128, db_mb)
+    shm_mb = 64 + db_mb + wal_mb
 
     run_args = config.setdefault("environment", {}).setdefault("run_args", [])
     run_args.extend(["-v", f"{qi_static}:/usr/local/bin/qi:ro"])
@@ -126,10 +190,22 @@ def prepare_treatment_mounts(config, arm, instance_id, experiment_dir):
         run_args.extend(["-e", "HOME=/root"])
         run_args.extend(["-v", f"{smconfig}:/root/.smconfig:ro"])
 
+    # Indexer binary + language/shared configs for the watch daemon.
+    # Configs mount at INDEXER_CWD so the daemon finds them relative to its cwd,
+    # matching the path layout used at pre-index time.
+    if indexer_name:
+        config_subdir = INDEXER_CONFIG_SUBDIR[indexer_name]
+        lang_config = repo_root / config_subdir / "config"
+        shared_config = repo_root / "shared" / "config"
+        run_args.extend(["-v", f"{indexer_static}:/usr/local/bin/{indexer_name}:ro"])
+        run_args.extend(["-v", f"{lang_config}:{INDEXER_CWD}/{config_subdir}/config:ro"])
+        run_args.extend(["-v", f"{shared_config}:{INDEXER_CWD}/shared/config:ro"])
+
+    daemon_info = f" + indexer daemon ({indexer_name})" if indexer_name else " (no indexer daemon)"
     print(f"Treatment mounts: qi + DB seed ({(db_bytes + 1023) // 1024}K, "
           f"ramdisk /dev/shm={shm_mb}M) + "
-          f"{'smconfig' if smconfig else '(no smconfig)'}", flush=True)
-    return lambda: None
+          f"{'smconfig' if smconfig else '(no smconfig)'}{daemon_info}", flush=True)
+    return lambda: None, indexer_name
 
 
 def seed_ramdisk_db(env) -> None:
@@ -147,6 +223,71 @@ def seed_ramdisk_db(env) -> None:
         raise RuntimeError(
             f"failed to seed ramdisk DB ({DB_SEED_PATH} -> {RAMDISK_DB_PATH}): "
             f"{res.get('output', '')}")
+
+
+def reconcile_startup_changes(env, indexer_name: str) -> None:
+    """Index files mutated by container startup into the ramdisk DB.
+
+    The seed DB was built at the base commit, but the startup env_startup_command
+    runs before_repo_set_cmd, whose `git checkout <fix> -- <test files>` adds and
+    modifies the test_patch files. The watch daemon launched next runs with
+    --watch-only (skips initial indexing), and git's atomic writes do not reliably
+    fire the inotify events the daemon re-indexes on -- so without this pass qi
+    would miss every startup-added test file (confirmed empirically on the ansible
+    instance: the new test symbols returned 0 matches until reconciled).
+
+    Scope is `git status --porcelain` -- exactly the files startup touched. By
+    construction that is the test_patch set; the gold solution is never written to
+    the working tree (its files stay at base content on disk), so this never
+    indexes solution code. Paths are absolutized to /app/... so DB rows match the
+    seed's path format. Best-effort: a failure degrades qi coverage for the
+    startup files but must not abort the run.
+    """
+    cmd = (
+        "cd /app && CHANGED=$(git status --porcelain | awk '{print $2}' | "
+        "sort -u | sed 's#^#/app/#'); "
+        f"[ -z \"$CHANGED\" ] || ( cd {INDEXER_CWD} && {indexer_name} $CHANGED "
+        f"--db-file {RAMDISK_DB_PATH} --silent )"
+    )
+    res = env.execute(cmd)
+    if res.get("returncode", 0) != 0:
+        print(f"WARNING: startup reconcile index failed (qi may miss startup-added "
+              f"files): {res.get('output', '')}", file=sys.stderr)
+    else:
+        print("Reconciled startup-added files into ramdisk DB", flush=True)
+
+
+def start_indexer_daemon(env, indexer_name: str):
+    """Launch the language indexer in --watch-only mode as a background daemon.
+
+    The daemon watches /app for file changes and re-indexes on edits, keeping
+    qi queries current after the agent modifies source files.  Runs from
+    INDEXER_CWD (outside /app) so file paths in the DB stay as absolute
+    /app/... entries -- matching the seed DB path format.
+
+    Returns a stop callable that kills the daemon cleanly.
+    """
+    # Subshell: cd into INDEXER_CWD (outside /app for path consistency), then
+    # exec the indexer so the subshell is replaced directly -- $! becomes the
+    # indexer PID, and kill $pid cleanly terminates the indexer (not a bash wrapper).
+    cmd = (
+        f"( cd {INDEXER_CWD} && exec {indexer_name} /app --watch-only --silent "
+        f"--db-file {RAMDISK_DB_PATH} ) > {DAEMON_LOG_FILE} 2>&1 "
+        f"& echo $! > {DAEMON_PID_FILE}"
+    )
+    res = env.execute(cmd)
+    if res.get("returncode", 0) != 0:
+        print(f"WARNING: indexer daemon launch failed: {res.get('output', '')}",
+              file=sys.stderr)
+        return lambda: None
+
+    print(f"Indexer daemon started ({indexer_name} --watch-only, "
+          f"pid in {DAEMON_PID_FILE})", flush=True)
+
+    def stop():
+        env.execute(f"kill $(cat {DAEMON_PID_FILE} 2>/dev/null) 2>/dev/null || true")
+
+    return stop
 
 
 def recover_empty_patch(env, agent) -> str:
@@ -227,7 +368,7 @@ def main() -> int:
     # agent unattended but still streams every step to the console).
     config.setdefault("agent", {})["confirm_exit"] = False
 
-    treatment_cleanup = prepare_treatment_mounts(
+    treatment_cleanup, indexer_name = prepare_treatment_mounts(
         config, args.arm, args.instance, EXPERIMENT_DIR)
 
     out_dir = Path(args.output) / args.arm / args.instance
@@ -237,8 +378,16 @@ def main() -> int:
     pred_path = out_dir / f"{stem}.pred"
 
     env = get_sb_environment(config, instance)
+    daemon_stop = lambda: None  # noqa: E731
     if args.arm != "swebp_control":
         seed_ramdisk_db(env)
+        if indexer_name:
+            # Order matters: reconcile the startup-added files (before_repo_set_cmd's
+            # test checkout) into the freshly-seeded ramdisk DB BEFORE the watch-only
+            # daemon starts. --watch-only skips initial indexing and won't catch the
+            # already-on-disk files, so the reconcile is what makes qi see them.
+            reconcile_startup_changes(env, indexer_name)
+            daemon_stop = start_indexer_daemon(env, indexer_name)
     agent = InteractiveAgent(
         get_model(args.model, config.get("model", {})),
         env,
@@ -264,6 +413,7 @@ def main() -> int:
         extra_info = {"traceback": traceback.format_exc()}
         print(f"\nERROR during run: {e}", file=sys.stderr)
     finally:
+        daemon_stop()
         if patch_recovered:
             extra_info = {**(extra_info or {}), "patch_recovered": True}
         save_traj(agent, traj_path, exit_status=exit_status, result=patch or result,

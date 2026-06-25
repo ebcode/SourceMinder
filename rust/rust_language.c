@@ -77,11 +77,13 @@ static void process_children(TSNode node, const char *source_code, const char *d
 
 /* ---------------- Helpers ---------------- */
 
-/* Extract visibility modifier text ("pub", "pub(crate)", etc.) from direct
- * children of an item node. Returns "" if none. */
+/* Extract visibility modifier text ("pub", "pub(crate)", etc.) verbatim from
+ * direct children of an item node — Rust's literal visibility vocabulary.
+ * Absence of a visibility_modifier means module-private in Rust; emit "private"
+ * explicitly (rather than "") so `-s private` is queryable and an empty scope is
+ * never ambiguous between "private" and "not extracted". */
 static void extract_visibility(TSNode node, const char *source_code,
                                char *out, size_t out_size, const char *filename) {
-    out[0] = '\0';
     uint32_t n = ts_node_child_count(node);
     for (uint32_t i = 0; i < n; i++) {
         TSNode child = ts_node_child(node, i);
@@ -90,6 +92,7 @@ static void extract_visibility(TSNode node, const char *source_code,
             return;
         }
     }
+    snprintf(out, out_size, "private");
 }
 
 /* Extract function modifier keywords (async, unsafe, const, extern) from a
@@ -362,8 +365,8 @@ static int has_mut_specifier(TSNode node) {
 static void index_pattern_identifiers(TSNode pattern, const char *source_code,
                                       const char *directory, const char *filename,
                                       ParseResult *result, SymbolFilter *filter,
-                                      int line, const char *type_str,
-                                      const char *modifier) {
+                                      int line, const char *source_location,
+                                      const char *type_str, const char *modifier) {
     if (ts_node_is_null(pattern)) return;
     const char *t = ts_node_type(pattern);
 
@@ -379,7 +382,7 @@ static void index_pattern_identifiers(TSNode pattern, const char *source_code,
         if (name[0] >= 'A' && name[0] <= 'Z') return;
         if (filter_should_index(filter, name)) {
             add_entry(result, name, line, CONTEXT_VARIABLE,
-                      directory, filename, NULL,
+                      directory, filename, source_location,
                       &(ExtColumns){
                           .definition = "1",
                           .type = (type_str && type_str[0]) ? type_str : NULL,
@@ -428,7 +431,7 @@ static void index_pattern_identifiers(TSNode pattern, const char *source_code,
                 if (strcmp(ct, "scoped_identifier") == 0 ||
                     strcmp(ct, "scoped_type_identifier") == 0) {
                     index_pattern_identifiers(c, source_code, directory, filename,
-                                              result, filter, line, NULL, NULL);
+                                              result, filter, line, source_location, NULL, NULL);
                 } else if (strcmp(ct, "identifier") == 0 ||
                            strcmp(ct, "type_identifier") == 0) {
                     char sym[SYMBOL_MAX_LENGTH];
@@ -441,7 +444,7 @@ static void index_pattern_identifiers(TSNode pattern, const char *source_code,
                 continue;
             }
             index_pattern_identifiers(c, source_code, directory, filename,
-                                      result, filter, line, NULL, modifier);
+                                      result, filter, line, source_location, NULL, modifier);
         }
         return;
     }
@@ -453,7 +456,7 @@ static void index_pattern_identifiers(TSNode pattern, const char *source_code,
             bound = ts_node_child_by_field_name(pattern, "name", 4);
         }
         index_pattern_identifiers(bound, source_code, directory, filename,
-                                  result, filter, line, NULL, modifier);
+                                  result, filter, line, source_location, NULL, modifier);
         return;
     }
 
@@ -466,7 +469,7 @@ static void index_pattern_identifiers(TSNode pattern, const char *source_code,
     for (uint32_t i = 0; i < n; i++) {
         index_pattern_identifiers(ts_node_child(pattern, i), source_code,
                                   directory, filename, result, filter, line,
-                                  NULL, modifier);
+                                  source_location, NULL, modifier);
     }
 }
 
@@ -830,7 +833,7 @@ static void handle_mod_item(TSNode node, const char *source_code,
                   directory, filename, location,
                   &(ExtColumns){
                       .definition = "1",
-                      .modifier = vis[0] ? vis : NULL,
+                      .scope = vis[0] ? vis : NULL,
                       .clue = attrs[0] ? attrs : NULL
                   });
     }
@@ -983,8 +986,14 @@ static void handle_let_declaration(TSNode node, const char *source_code,
         safe_extract_node_text(source_code, type_node, type_str, sizeof(type_str), filename);
     }
 
+    /* The whole `let PAT = VALUE;` statement is the span of the binding(s) it
+     * introduces, so -e expands a multi-line let to its full defining statement
+     * instead of falling back to just the first line. */
+    char location[SOURCE_LOCATION_MAX_LENGTH];
+    format_source_location(node, location, sizeof(location));
+
     index_pattern_identifiers(pattern, source_code, directory, filename,
-                              result, filter, line, type_str,
+                              result, filter, line, location, type_str,
                               has_mut_specifier(node) ? "mut" : NULL);
 
     /* Visit value so calls/identifiers inside get indexed */
@@ -1021,7 +1030,7 @@ static void handle_let_condition(TSNode node, const char *source_code,
         else if (seen_eq && ts_node_is_null(value)) value = c;
     }
     index_pattern_identifiers(pattern, source_code, directory, filename,
-                              result, filter, line, NULL, NULL);
+                              result, filter, line, NULL, NULL, NULL);
     if (!ts_node_is_null(value)) {
         visit_node(value, source_code, directory, filename, result, filter);
     }
@@ -1035,7 +1044,7 @@ static void handle_for_expression(TSNode node, const char *source_code,
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
 
     index_pattern_identifiers(pattern, source_code, directory, filename,
-                              result, filter, line, NULL, NULL);
+                              result, filter, line, NULL, NULL, NULL);
     if (!ts_node_is_null(value)) {
         visit_node(value, source_code, directory, filename, result, filter);
     }
@@ -1075,7 +1084,7 @@ static void handle_match_expression(TSNode node, const char *source_code,
                 for (uint32_t k = 0; k < mn; k++) {
                     TSNode mc = ts_node_child(ac, k);
                     index_pattern_identifiers(mc, source_code, directory, filename,
-                                              result, filter, arm_line, NULL, NULL);
+                                              result, filter, arm_line, NULL, NULL, NULL);
                 }
             } else if (strcmp(act, "=>") != 0 && strcmp(act, ",") != 0) {
                 /* The arm body expression */

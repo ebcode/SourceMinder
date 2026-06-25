@@ -120,6 +120,10 @@ typedef struct {
 
 /* Database operations */
 int db_init(CodeIndexDatabase *db, const char *db_path);
+/* Open an existing database for watch-only daemon mode.
+ * Skips schema migrations (CREATE/DROP INDEX) -- safe because the seed DB
+ * is already correctly indexed. Much faster than db_init on large databases. */
+int db_open_watch_only(CodeIndexDatabase *db, const char *db_path);
 int db_enable_concurrent_writes(CodeIndexDatabase *db);
 void db_close(CodeIndexDatabase *db);
 int db_begin_transaction(CodeIndexDatabase *db);

@@ -1,3 +1,5 @@
+cost_tracking: ignore_errors
+
 agent:
   system_template: |
     You are a helpful assistant that can interact with a computer.
@@ -31,104 +33,129 @@ agent:
     I've already taken care of all changes to any of the test files described in the <pr_description>. This means you DON'T have to modify the testing logic or any of the tests in any way!
     Your task is to make the minimal changes to non-tests files in the {{working_dir}} directory to ensure the <pr_description> is satisfied.
 
-    IMPORTANT! Use qi -- a code search tool -- for code navigation and comprehension.
-    Think of it as a context-aware code search you COMPOSE with other tools: it
-    understands ATOMIC symbols (functions, types, variables, callers) instead of raw
-    text, and it chains and pipes like any unix filter.
+    A new code search tool, *qi* (query-index) has been installed on this machine to assist you with your task.
 
-    THE WORKFLOW (overview -> locate -> understand)
-    and noise-free:
-    1. `qi -f FILENAME --toc`           — Gain a high-level overview of a file (table of contents)
-    2. `qi 'TERM*' -x noise -l 20`      — Search for a symbol starting with TERM (case-insensitive, broad, but -x noise drops
-                                         comments/strings and -l 20 caps output). Use '*TERM*' to search for a symbol containing TERM.
-    3. `qi SYMBOL -i func -e --raw -v`  — expand ONE specific definition (--raw hides line numbers, -v shows all columns)
-    3. `qi SYMBOL1 SYMBOL2 -i func -e`  — expand TWO specific definitions
-    4. `qi SYMBOL --usage -l 20`        — callers, capped
-
-    LIMIT EVERY SEARCH -- this is what keeps context small:
-    - Add `-x noise` to almost every query -- skips comments & strings, eliminating false positives ("this symbol was not code but a comment").
-    - Add `-l N` (e.g. `-l 20`) to every search so a broad pattern can't dump
-      hundreds of lines. To sample across files: `-lpf 3 -l 20` (3 per file).
-    - `-e` (full body) expands a definition -- a class can be a whole file, so use
-      it ONLY on a single located symbol.
-    - `-v` (all columns) is CHEAP -- it adds columns, not bodies. Reach for it
-      whenever a name is ambiguous: it reveals PAR (parent), SCOPE and TYPE, so you
-      can SEE which match you mean and which filter to narrow with.
-
-    START BROAD, THEN NARROW BY ONE FILTER AT A TIME.
-    Run `qi SYMBOL -x noise -l 20` first. When several rows share the name, re-run
-    with `-v` to reveal PAR/SCOPE/TYPE and see which one you mean. Only if you still
-    need to narrow, add ONE more filter -- each pins a column you can see in `-v` output:
-      -p PARENT     the containing symbol (class/module) -- best disambiguator
-      --def / --usage   only where it's DEFINED / only where it's USED
-      -i func       a context kind (func, class, import, ...)
-      -t TYPE       by type annotation 
-      -m MODIFIER   by modifier (static, async, ...)
-      -w SYMBOL     inside a definition's body
-    Add filters one at a time; if a query goes empty, the last filter was too tight.
-    Don't stack several filters on a first query.
-
-    IF A QUERY RETURNS NOTHING:
-    qi already retries it as `*pattern*`, so an empty result means the symbol
-    isn't there OR your filters are too tight. Loosen ONE filter -- don't switch
-    to grep, go broader in qi. (NOTE: single-letter symbols and common words are kept out of the index).
-
-    QUALIFIED / DOTTED NAMES -- split them, never pass them whole:
-    A qualified name like `PARENT.SYMBOL` (a class member, or a symbol written with
-    its module/namespace) is NOT one symbol to qi -- passed whole it matches the
-    literal text and finds nothing. Pass the LAST segment as the pattern and the
-    container as `-p`:
-      `qi SYMBOL -p PARENT`        (NOT `qi PARENT.SYMBOL`)
-      `qi METHOD -p CLASSNAME`     (a method on a class)
-    `-p` filters by parent symbol, so it also pins which one you mean when a name
-    appears across many files.
-
-    STAY IN QI:
-    If you cannot find something using qi, use grep to get unblocked for that query, then go back to using qi.
-    After you locate the code, keep using qi to understand it -- `--usage` for
-    callers, `qi '*' --within FUNCTIONNAME -v` for a function's internals.
-
-    KEEP OUTPUT SMALL:
-    Prefer `--toc`, `-l N`, and `-i` to keep results compact. `-e` (expand full
-    body) is the costly one -- use it only on a SINGLE located symbol, never a
-    wildcard. `-v` (all columns) is cheap and adds no bodies -- use it freely to
-    disambiguate by PAR/SCOPE/TYPE.
-
-    COMPOSE -- qi IS A UNIX FILTER (chain and pipe in ONE command):
-    Turns are expensive. Gather in batches, not one query per turn.
-    - Batch independent lookups for a symbol you've located into a single command:
-      `qi '*' -f utils.py --toc;  qi parse_config -i func -e | head -40;  qi parse_config --usage -l 40`
-    - Pipe to head to limit results:
-      `qi '*handler*' -x noise | head -30`
-    - One rich action beats three small turns. Only split when your NEXT query
-      depends on what you just saw (find a symbol, THEN inspect its usages).
-
-    NOTE -- qi takes MULTIPLE values per argument (non-standard for a UNIX tool):
-    `qi user session`                  — user OR session
-    `qi '*user*' '*auth*' -f .py .ts .js`  — across all .ts OR .py OR .js files (NOTE: flags *also* accept multiple arguments)
-    Put the search pattern(s) FIRST, then flags.
-    A quoted pattern with a space (qi 'one two') is matched as that LITERAL text and
-    will find nothing -- qi indexes SYMBOLS, not source lines, and language
-    keywords/punctuation around a name are NOT in the index. Pass the bare
-    identifier and state the context type(s) to include with -i:
-      `qi one two -i func class arg`
-      `qi 'one*' 'two*' -i class` (quote '*' to prevent shell expansion)
-
-    Cap Every Search: *ALWAYS* add `-l N`. And *ALWAYS* add `-x noise` unless you're specifically searching for symbols inside comments and strings.
+    qi is a code index querying tool (short for query-index): FAST, precise, and noise-free.
     
-    The purpose of qi is to aid in code comprehension by providing additional context that is impossible with other tools (like grep or sed).
+    qi adds a CTX (context) column, which tells you what a symbol *IS*. A function name, comment,
+    string, class, argument. This is impossible to see with grep, and it is what makes qi powerful.
+    No more hunting down code only to find it's been commented out!
 
-    Start the session by running: qi --help;  echo '==='; qi '*' -l 1 -x file noise imp -v
+    Use qi to UNDERSTAND the code.
 
-    The second qi command prints one sample indexed row, and the columns after SYM (PAR, TYPE, ...) are all filterable with flags (-p PAR, -t TYPE, ...).
-    
-    When you've found a file of interest, run: qi -f FILENAME --toc    
+    **Use qi as a COMPLEMENT to grep, and as a FIRST line of attack**
+    - To keep the code index database to a reasonable size, short, common english words are excluded (and, to, of, the)
+    - Language keywords are also excluded: `pub`, `fn`, `async`, `impl`, `let`, `self`, `struct`, `for`, `match`, `return`, `type`, `use`
+    - Punctuation: `.clone()`, `::`, `#[derive(...)]`, `()`, `<>`
+    - Regex patterns or exact phrases — qi uses glob wildcards only (`*`, `?`, `%`, `_`)
+    - Runtime/dynamic attributes set in code (not declarations)
+    - Single-character symbols or pure numbers
 
-    Now follow these steps:
-    1. Use qi to find and read code relevant to the <pr_description>
+    If `qi PATTERN` returns 0, qi will auto-retry as `*PATTERN*`. If still 0,
+    check the list above — if the term is a keyword or punctuation, use grep. Otherwise
+    loosen your filters. Think: for SYMBOLS, use qi; for STRINGS, use grep.
+
+    ---
+
+    ## Decision table
+
+    | Goal | Command |
+    |------|---------|
+    | Jump to a function/class definition | `qi NAME -i func -e --raw` |
+    | See definition + all metadata at once | `qi NAME -i func -e --raw -v` |
+    | Find all call sites | `qi NAME --usage -l 20` |
+    | Browse a file's structure | `qi -f FILE --toc` |
+    | Disambiguate same name in different places | `qi NAME -v` (reveals PAR, SCOPE, TYPE) |
+    | All members of a class/type | `qi '*' -p TypeName` |
+    | One method on a type | `qi METHOD -p TypeName -i func` |
+    | Symbols used inside a function | `qi '*' -w FuncName -i call` |
+    | All decorated functions (Python: @decorator) | `qi '%' -i func -c '@%'` |
+    | Async functions (Python, JS, TS, Go) | `qi '%' -i func -m async` |
+    | Keyword, punctuation, regex, or text pattern | `grep -rn 'pattern' .` |
+
+    ---
+
+    ## Reading the extra columns (-v)
+
+    Adding `-v` to any query reveals language-specific columns you can filter on:
+
+    | Column | Flag | What it captures | Example values |
+    |--------|------|------------------|----------------|
+    | CLUE   | `-c` | decorators, context hints | `@property`, `@staticmethod`, `yield`, `:=` |
+    | MOD    | `-m` | modifiers | `async` in Python/TS; `pub` in Rust |
+    | SCOPE  | `-s` | visibility / access level | `public`, `private` in Go; `pub`, `pub(crate)` in Rust |
+    | PAR    | `-p` | parent symbol (owning class, called-on object) | class name for methods |
+
+    All column flags use `*` for wildcards: `qi '*' -i func -c '@*test*' -l 20` finds test decorators.
+
+    ---
+
+    ## Workflow: overview → locate → understand
+
+    ```bash
+    # 1. Orient — file structure
+    qi -f FILENAME --toc
+
+    # 2. Locate — broad search first
+    qi 'TERM*' -x noise -l 20 -v
+
+    # 3. Understand — expand + metadata in ONE command (not two turns)
+    qi SYMBOL -i func -e --raw -v;  qi SYMBOL --usage -l 20
+
+    # 4. Text search — for anything qi can't find
+    grep -rn 'pattern' path/
+    ```
+
+    **BATCH INDEPENDENT LOOKUPS:**
+    ```bash
+    qi '*' -f utils.py --toc;  qi parse_config -i func -e | head -40;  qi parse_config --usage -l 40
+    ```
+    One rich action beats three small turns. Only use a separate turn when you need to see the result before you know what to search for next.
+
+    ---
+
+    ## Four rules that prevent the most wasted turns
+
+    1. Always add `-x noise` and `-l N` to qi queries.
+    `-x noise` drops comments and strings. `-l 20` caps output. Without them, a broad pattern dumps hundreds of irrelevant lines into your context.
+
+    2. Add `-i` before `-e` on broad terms.
+    `-e` expands definitions. Add `-i func` (or `-i class`, `-i enum`) to filter first, then expand.
+
+    3. Narrow one filter at a time.
+    Start broad: `qi SYMBOL -x noise -l 20 -v`. Inspect PAR/SCOPE/TYPE in `-v` output, then add filters to pin the match you want. If the query returns 0, the filter was too tight — broaden it.
+
+    4. Split qualified names.
+    `qi PARENT.SYMBOL` tries to match that literal string and finds nothing. Split it:      
+      `qi PARENT.SYMBOL`        ← incorrect
+      `qi SYMBOL -p PARENT`     ← CORRECT!
+
+    ---
+
+    ## Why qi is non-standard (developer ergonomics!)
+
+    Most Unix tools repeat flags for multiple values: `grep -e pat1 -e pat2`.
+    qi instead treats everything before the first flag as query patterns, so that a single flag may accept multiple values without repetition:
+      `qi user session -i func class -f .py .ts`    ← patterns first, then flag-values. This saves typing.
+
+    ---
+
+    ## Gotchas (ranked by how many turns they cost)
+
+    - **No language keywords in the index.** `pub`, `fn`, `async`, `impl`, `let`, `self`, `struct`, `for`, `match`, `return`, `type` — all return 0. Use grep.
+    - **Prefix `*` must be explicit.** `qi test_` matches only the exact symbol `test_`. To match `test_foo`, write `qi 'test_*'` (quote to prevent shell glob expansion of `*`).
+    - **`const` bindings are not flagged as definitions** (D=0). `--def` won't find them. Search without `--def` and look for VAR rows in the output.
+    - **`_` and `.` are single-char wildcards.** `run_foo` ≡ `run.foo`. Usually a harmless superset, but can produce false positives.
+    - **SCOPE and MODIFIER columns vary by language.** Don't filter with `-s` or `-m` without checking `-v` first to confirm the column is populated.
+    - **Patterns first, flags after.** `qi --def SYMBOL` treats `SYMBOL` as `--def`'s argument. Write: `qi SYMBOL --def -e --raw`.
+
+    When you find a file you want to understand, run this command FIRST: `qi -f FILENAME --toc`
+
+    Follow these steps to resolve the issue:
+    1. As a first step, it might be a good idea to find and read code relevant to the <pr_description>
     2. Create a script to reproduce the error and execute it to confirm the error
     3. Edit the sourcecode of the repo to resolve the issue
-    4. Rerun your reproduce script and confirm that the error is fixed
+    4. Rerun your reproduce script to confirm the error is fixed. **If tests still fail after an edit, go BACK TO QI before trying another fix — don't guess. Use qi to verify your understanding of the code you changed and what calls it.**
     5. Think about edgecases and make sure your fix handles them as well
     Your thinking should be thorough and so it's fine if it's very long.
 
@@ -194,6 +221,11 @@ agent:
     ```bash
     anything
     ```
+
+    IMPORTANT! YOUR FIRST COMMAND MUST BE:
+
+    qi --help    
+
   action_observation_template: |
     <returncode>{{output.returncode}}</returncode>
     {% if output.output | length < 10000 -%}
@@ -254,6 +286,36 @@ environment:
     LESS: -R
     PIP_PROGRESS_BAR: 'off'
     TQDM_DISABLE: '1'
+run:
+  # Per-container startup, run once by get_sb_environment before the agent starts.
+  # Two ordered steps; must exit 0 or the run aborts (set -e).
+  #
+  # 1. before_repo_set_cmd: the dataset's repo setup -- resets to {{base_commit}},
+  #    cleans, then `git checkout <fix> -- <test files>` to apply the test_patch
+  #    (the failing tests) WITHOUT the gold solution (which stays at base on disk).
+  #    This needs the fix commit present, so it runs FIRST. The treatment arm then
+  #    reconciles these checked-out files into the ramdisk DB (see run_pro_one.py)
+  #    so qi sees them -- the watch daemon's inotify does not catch git's writes.
+  #
+  # 2. Contamination guard (ref-only). The jefzda Pro images ship the full upstream
+  #    history with the gold fix commit still reachable from main/master, so an
+  #    agent could `git log --all` / `git show <fix>` to copy the real solution
+  #    (this is how the openlibrary control reps "solved" -- see work summaries).
+  #    before_repo_set_cmd's `git checkout <base>` already detached HEAD at base;
+  #    here we delete every branch/remote/tag ref and prune, making the fix commit
+  #    unreachable. This is ref-only on purpose: no `reset --hard`/`clean`, so the
+  #    test files just checked out survive (their blobs stay referenced by the
+  #    index). The full ancestor history is preserved, so `git diff`/`git log`/blame
+  #    still show the pre-existing state and the agent can tell a failing test is
+  #    pre-existing, not its own change.
+  env_startup_command: |-
+    set -e
+    cd /app
+    {{before_repo_set_cmd}}
+    git remote remove origin 2>/dev/null || true
+    git for-each-ref --format='delete %(refname)' refs/heads refs/remotes refs/tags | git update-ref --stdin
+    git reflog expire --expire=now --all
+    git gc --prune=now --quiet
 model:
   model_kwargs:
     temperature: 0.0

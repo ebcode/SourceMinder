@@ -66,6 +66,8 @@ PRICING = {
     "anthropic/claude-sonnet-4-6":     (3.00, 15.00, 0.30),
     "anthropic/claude-opus-4-8":       (5.00, 25.00, 0.50),
 
+    "xiaomi_mimo/mimo-v2-flash":       (0.14, 0.28,  0.0028),
+
     "openai/gpt-4.1-mini":             (0.15, 0.60,  0.075),
     "openai/gpt-4.1":                  (2.00, 8.00,  1.00),
 }

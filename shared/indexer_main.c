@@ -100,6 +100,7 @@ static int reindex_single_file(void *parser, ParserParseFunc parser_parse,
 #define FLAG_DB_FILE     (1 << 4)
 #define FLAG_EXCLUDE_DIR (1 << 5)
 #define FLAG_ECHO        (1 << 6)
+#define FLAG_WATCH_ONLY  (1 << 7)
 
 /* Scan CLI arguments to detect which flags are present (before config loading) */
 static int scan_cli_flags(int argc, char *argv[]) {
@@ -112,6 +113,7 @@ static int scan_cli_flags(int argc, char *argv[]) {
         else if (strcmp(argv[i], "--db-file") == 0 || strcmp(argv[i], "-f") == 0) flags |= FLAG_DB_FILE;
         else if (strcmp(argv[i], "--exclude-dir") == 0) flags |= FLAG_EXCLUDE_DIR;
         else if (strcmp(argv[i], "--echo") == 0) flags |= FLAG_ECHO;
+        else if (strcmp(argv[i], "--watch-only") == 0) flags |= FLAG_WATCH_ONLY;
     }
     return flags;
 }
@@ -125,6 +127,7 @@ static int should_skip_config_line(const char *line, int cli_flags) {
     if ((cli_flags & FLAG_DB_FILE) && (strstr(line, "--db-file") == line || strstr(line, "-f") == line)) return 1;
     if ((cli_flags & FLAG_EXCLUDE_DIR) && strstr(line, "--exclude-dir") == line) return 1;
     if ((cli_flags & FLAG_ECHO) && strstr(line, "--echo") == line) return 1;
+    if ((cli_flags & FLAG_WATCH_ONLY) && strstr(line, "--watch-only") == line) return 1;
     return 0;
 }
 
@@ -238,6 +241,7 @@ static void print_usage(const IndexerConfig *config) {
 
     printf("Options:\n");
     printf("      --once                     run once and exit (disable daemon mode)\n");
+    printf("      --watch-only               skip initial indexing; watch and re-index on changes\n");
     printf("      --quiet-init               suppress initial indexing output (still shows re-index messages)\n");
     printf("      --silent                   suppress all output (initial + re-index messages)\n");
     printf("      --verbose                  show preflight checks and validation\n");
@@ -303,6 +307,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     int debug = 0;
     int troubleshoot = 0;
     int daemon_mode = 1;  /* Daemon mode enabled by default */
+    int watch_only = 0;
     ExcludeDirs exclude_dirs = { .count = 0 };
     char *targets[MAX_TARGETS];
     int target_count = 0;
@@ -313,6 +318,8 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--once") == 0) {
             daemon_mode = 0;
+        } else if (strcmp(argv[i], "--watch-only") == 0) {
+            watch_only = 1;
         } else if (strcmp(argv[i], "--quiet-init") == 0) {
             quiet_init = 1;
         } else if (strcmp(argv[i], "--silent") == 0) {
@@ -398,7 +405,17 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
 
     /* Daemon mode only works with directory mode */
     if (mode == MODE_FILES && daemon_mode) {
+        if (watch_only) {
+            fprintf(stderr, "Error: --watch-only requires directory targets, not individual files\n");
+            return 1;
+        }
         daemon_mode = 0;  /* Silently disable for file mode */
+    }
+
+    /* --watch-only and --once are incompatible */
+    if (watch_only && !daemon_mode) {
+        fprintf(stderr, "Error: --watch-only and --once are incompatible\n");
+        return 1;
     }
 
     /* PREFLIGHT VALIDATION */
@@ -440,7 +457,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         }
     }
 
-    if (!quiet_init && !silent) {
+    if (!quiet_init && !silent && !watch_only) {
         if (mode == MODE_DIRECTORIES) {
             printf("Indexing files in directories:");
             for (int i = 0; i < target_count; i++) {
@@ -470,7 +487,8 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
 
     /* Initialize database */
     CodeIndexDatabase db;
-    if (db_init(&db, db_file) != SQLITE_OK) {
+    /* watch-only: seed DB schema is already correct; skip migrations */
+    if ((watch_only ? db_open_watch_only(&db, db_file) : db_init(&db, db_file)) != SQLITE_OK) {
         fprintf(stderr, "Failed to initialize database\n");
         filter_free_regex(filter);
         free(filter);
@@ -519,7 +537,15 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         return 1;
     }
 
+    if (watch_only) {
+        if (!silent) {
+            printf("Skipping initial index (--watch-only). Watching for file changes...\n");
+        }
+    }
+
     int total_files_processed = 0;
+
+    if (!watch_only) {
 
     /* Begin transaction for better performance */
     if (db_begin_transaction(&db) != SQLITE_OK) {
@@ -628,13 +654,23 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         printf("Indexing complete: %d files processed\n", total_files_processed);
     }
 
+    } /* end if (!watch_only) */
+
     /* Enter daemon mode if enabled and in directory mode */
     if (daemon_mode && mode == MODE_DIRECTORIES) {
-        /* Setup signal handlers for graceful shutdown */
-        signal(SIGINT, signal_handler);
-        signal(SIGTERM, signal_handler);
+        /* Setup signal handlers for graceful shutdown.
+         * SA_RESTART is intentionally NOT set: select() must return EINTR so
+         * the daemon loop can check keep_running and exit cleanly on SIGTERM/SIGINT.
+         * signal() on Linux sets SA_RESTART by default, which would cause select()
+         * to restart instead of returning EINTR, trapping the daemon indefinitely. */
+        struct sigaction sa;
+        sa.sa_handler = signal_handler;
+        sa.sa_flags = 0;  /* no SA_RESTART */
+        sigemptyset(&sa.sa_mask);
+        sigaction(SIGINT, &sa, NULL);
+        sigaction(SIGTERM, &sa, NULL);
 
-        if (!silent) {
+        if (!silent && !watch_only) {
             printf("Watching for file changes (Press Ctrl+C to stop)...\n");
         }
 

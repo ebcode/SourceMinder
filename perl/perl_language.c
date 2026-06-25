@@ -235,7 +235,7 @@ static void index_sigil_node(TSNode node, const char *source_code,
                              const char *directory, const char *filename,
                              ParseResult *result, SymbolFilter *filter,
                              const char *modifier, const char *definition,
-                             ContextType ctx) {
+                             const char *source_location, ContextType ctx) {
     /* Find the varname child */
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; i++) {
@@ -251,7 +251,8 @@ static void index_sigil_node(TSNode node, const char *source_code,
             TSNode inner = find_inner_sigil(child);
             if (!ts_node_is_null(inner)) {
                 index_sigil_node(inner, source_code, directory, filename,
-                                 result, filter, modifier, definition, ctx);
+                                 result, filter, modifier, definition,
+                                 source_location, ctx);
             }
             break;
         }
@@ -277,7 +278,7 @@ static void index_sigil_node(TSNode node, const char *source_code,
 
         int line = (int)ts_node_start_point(node).row + 1;
         add_entry(result, varname, line, ctx,
-                  directory, filename, NULL,
+                  directory, filename, source_location,
                   &(ExtColumns){ .modifier = modifier, .definition = definition,
                                  .type = sigil_type });
         break;
@@ -485,6 +486,20 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
         }
     }
 
+    /* The defining statement is the span of each binding: the enclosing
+     * assignment (`my %plan = (...)`) when present, else the declaration itself
+     * (`my $x;`). Lets -e expand a multi-line declaration to its full statement
+     * rather than falling back to just the first line. */
+    char var_location[SOURCE_LOCATION_MAX_LENGTH];
+    {
+        TSNode span_node = node;
+        if (!ts_node_is_null(parent) &&
+            ts_node_symbol(parent) == perl_symbols.assignment_expression) {
+            span_node = parent;
+        }
+        format_source_location(span_node, var_location, sizeof(var_location));
+    }
+
     /* Walk all children looking for scalar/array/hash nodes */
     for (uint32_t i = 0; i < child_count; i++) {
         TSNode child = ts_node_child(node, i);
@@ -499,7 +514,7 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
                     if (filter_should_index(filter, varname)) {
                         int vline = (int)ts_node_start_point(child).row + 1;
                         add_entry(result, varname, vline, ctx,
-                                  directory, filename, NULL,
+                                  directory, filename, var_location,
                                   &(ExtColumns){.modifier = modifier, .definition = "1",
                                                 .type = decl_type_override});
                     }
@@ -525,14 +540,14 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
                         if (filter_should_index(filter, varname)) {
                             int vline = (int)ts_node_start_point(child).row + 1;
                             add_entry(result, varname, vline, CONTEXT_FUNCTION,
-                                      directory, filename, NULL,
+                                      directory, filename, var_location,
                                       &(ExtColumns){.modifier = modifier, .definition = "1",
                                                     .type = PERL_TYPE_SCALAR});
                         }
                     }
                 } else {
                     index_sigil_node(child, source_code, directory, filename,
-                                     result, filter, modifier, "1", ctx);
+                                     result, filter, modifier, "1", var_location, ctx);
                 }
             }
         }
@@ -554,7 +569,7 @@ static void handle_parameter(TSNode node, const char *source_code,
             sym == perl_symbols.array  ||
             sym == perl_symbols.hash) {
             index_sigil_node(child, source_code, directory, filename,
-                             result, filter, "", "1", CONTEXT_ARGUMENT);
+                             result, filter, "", "1", NULL, CONTEXT_ARGUMENT);
         } else {
             visit_node(child, source_code, directory, filename, result, filter);
         }
@@ -1412,7 +1427,7 @@ static void visit_node(TSNode node, const char *source_code,
             return;
         }
         index_sigil_node(node, source_code, directory, filename,
-                         result, filter, "", "0", CONTEXT_VARIABLE);
+                         result, filter, "", "0", NULL, CONTEXT_VARIABLE);
         return;
     }
 

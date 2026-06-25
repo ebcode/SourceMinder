@@ -181,6 +181,42 @@ int db_init(CodeIndexDatabase *db, const char *db_path) {
     return SQLITE_OK;
 }
 
+int db_open_watch_only(CodeIndexDatabase *db, const char *db_path) {
+    db->insert_stmt = NULL;
+
+    int rc = sqlite3_open(db_path, &db->db);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db->db));
+        return rc;
+    }
+
+    sqlite3_busy_timeout(db->db, 5000);
+
+    const char *insert_sql =
+        "INSERT INTO code_index ("
+        "symbol, directory, filename, line, context, full_symbol, source_location"
+#define COLUMN(name, ...) ", " #name
+#define INT_COLUMN(name, ...) ", " #name
+#include "column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+        ") VALUES (?, ?, ?, ?, ?, ?, ?"
+#define COLUMN(...) ", ?"
+#define INT_COLUMN(...) ", ?"
+#include "column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+        ")";
+
+    rc = sqlite3_prepare_v2(db->db, insert_sql, -1, &db->insert_stmt, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Failed to prepare INSERT statement: %s\n", sqlite3_errmsg(db->db));
+        return rc;
+    }
+
+    return SQLITE_OK;
+}
+
 int db_enable_concurrent_writes(CodeIndexDatabase *db) {
     char *err_msg = NULL;
     int rc;

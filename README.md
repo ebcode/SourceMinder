@@ -140,7 +140,7 @@ qi '\--help'               # Literal: finds "--help" string
 - Browse a project's vocabulary (like a book index)
 - Find symbols by context (classes, functions, variables, etc.)
 - Track relationships with parent symbols (e.g., `obj.method()`)
-- Filter by access modifiers (public, private, protected)
+- Filter by access modifiers (public, private, protected; Rust uses literal `pub`, `pub(crate)`)
 - Query with SQL wildcards for partial matches
 
 **qi vs grep** — see [docs/QI_VS_GREP.md](docs/QI_VS_GREP.md) for a full comparison. In short: use `qi` as the default for code navigation (symbols, structure, precise filtering); use `grep` for literal text, regex, and non-code files.
@@ -329,7 +329,7 @@ The indexer:
 - Skips folders in `<language>/config/ignore_files.txt`
 - Extracts symbols via tree-sitter AST parsing
 - Tracks parent symbols for member expressions (e.g., `this.target.getBounds()`)
-- Captures access modifiers (public, private, protected)
+- Captures access modifiers (public, private, protected; Rust uses literal `pub`, `pub(crate)`)
 - Filters noise (stopwords, keywords, punctuation, short symbols, pure numbers)
 - Stores relative paths from current working directory
 

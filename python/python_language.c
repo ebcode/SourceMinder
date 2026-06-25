@@ -642,6 +642,39 @@ static void handle_string(TSNode node, const char *source_code,
                          int line) {
     /* Extract words only from string_content nodes (literal parts), not interpolations */
     uint32_t child_count = ts_node_child_count(node);
+
+    /* Index the full string literal text for prefixed strings (b'Hello',
+     * f'world', r'\\n', rb'raw bytes', etc.) so qi can distinguish prefix
+     * types. Plain unprefixed strings are word-split only (below). */
+    if (child_count > 0) {
+        TSNode first_child = ts_node_child(node, 0);
+        if (strcmp(ts_node_type(first_child), "string_start") == 0) {
+            uint32_t start_len = ts_node_end_byte(first_child) - ts_node_start_byte(first_child);
+            if (start_len > 1 && start_len < 16) {
+                char start_text[16];
+                safe_extract_node_text(source_code, first_child, start_text, sizeof(start_text), filename);
+                if (strpbrk(start_text, "bBrRfFtTuU")) {
+                    uint32_t literal_len = ts_node_end_byte(node) - ts_node_start_byte(node);
+                    if (literal_len == 0) {
+                        /* empty prefixed string, nothing to index */
+                    } else if (literal_len >= SYMBOL_MAX_LENGTH) {
+                        TSPoint pt = ts_node_start_point(node);
+                        fprintf(stderr, "WARNING: skipping oversized prefixed string (%u bytes) at %s:%u\n",
+                                literal_len, filename, pt.row + 1);
+                    } else {
+                        char full_literal[SYMBOL_MAX_LENGTH];
+                        safe_extract_node_text(source_code, node, full_literal, sizeof(full_literal), filename);
+                        if (filter_should_index(filter, full_literal)) {
+                            add_entry(result, full_literal, line,
+                                     CONTEXT_STRING, directory, filename, NULL,
+                                     NO_EXTENSIBLE_COLUMNS);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     for (uint32_t i = 0; i < child_count; i++) {
         TSNode child = ts_node_child(node, i);
         TSSymbol child_sym = ts_node_symbol(child);

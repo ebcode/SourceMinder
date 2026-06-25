@@ -141,14 +141,41 @@ def run_one(arm: str, rid: str, instance: str, model: str, subset: str | None,
         cmd += ["--subset", subset]
 
     board(f"{arm:<16} {rid}  {datetime.now():%H:%M:%S}  starting  -> {log}")
+    label = f"{arm} {rid}"
     started_at = datetime.now(timezone.utc).isoformat()
     with log.open("w") as fh:
-        # stdin=DEVNULL so the agent runs unattended: InteractiveAgent prompts
-        # `New step limit:` via input() when limits are hit; with no TTY that
-        # raises EOFError and the rep terminates instead of hanging forever.
-        # (Mirrors the Verified run_one.py invocation.)
-        rc = subprocess.run(cmd, stdout=fh, stderr=subprocess.STDOUT,
-                            stdin=subprocess.DEVNULL).returncode
+        proc = subprocess.Popen(cmd, stdout=fh, stderr=subprocess.STDOUT,
+                                stdin=subprocess.DEVNULL)
+
+        # Watchdog: warn on stderr when the agent produces no output for >1 min.
+        # The agent writes to the log file only when it has something to say
+        # (API responses, command output), so a stalled log's mtime means the
+        # agent is stuck (hung API, infinite loop with no print, etc.).
+        stop_watchdog = threading.Event()
+        state = {"last_mtime": log.stat().st_mtime if log.exists() else 0}
+
+        def _watchdog() -> None:
+            minutes = 0
+            while not stop_watchdog.is_set():
+                if stop_watchdog.wait(60):
+                    return
+                cur = log.stat().st_mtime if log.exists() else 0
+                if cur == state["last_mtime"]:
+                    minutes += 1
+                    print(f"\n-- {label}: agent hasn't responded in "
+                          f"{minutes} minute(s)\n", file=sys.stderr, flush=True)
+                else:
+                    minutes = 0
+                    state["last_mtime"] = cur
+
+        watcher = threading.Thread(target=_watchdog, daemon=True)
+        watcher.start()
+        try:
+            rc = proc.wait()
+        finally:
+            stop_watchdog.set()
+            watcher.join(timeout=1)
+
     finished_at = datetime.now(timezone.utc).isoformat()
 
     summary = ""
