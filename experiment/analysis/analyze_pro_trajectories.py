@@ -87,11 +87,33 @@ def analyze_one(path: Path) -> dict | None:
     # qi-usage quality rollups (per shared lib.cmds detectors): -p adoption and
     # the three misuse markers, counted per qi sub-command across the run.
     qi_parent_n = qi_dotted_n = qi_quoted_n = qi_abs_n = qi_verbose_n = 0
+    # Format-tax accounting: assistant turns whose `content` field was empty, and
+    # of those, the ones whose action we recovered from reasoning_content. Robust
+    # across eras: post-fix runs carry extra["content_source"]=="reasoning_content"
+    # (content is already folded, so it is NOT blank); pre-fix runs are inferred
+    # from blank content + a reasoning_content body. See FORMAT_TAX.md.
+    empty_content_n = reasoning_recovered_n = 0
     model = ""
 
     for msg in messages:
         if msg.get("role") == "assistant":
-            mm = BASH_RE.search(str(msg.get("content", "")))
+            extra_a = msg.get("extra") if isinstance(msg.get("extra"), dict) else {}
+            content_a = str(msg.get("content", ""))
+            blank = not content_a.strip()
+            if blank:
+                empty_content_n += 1
+            src = extra_a.get("content_source")
+            if src == "reasoning_content":          # post-fix: explicitly tagged
+                reasoning_recovered_n += 1
+            elif src is None and blank:             # pre-fix: infer from blank + fenced reasoning
+                resp_a = extra_a.get("response") or {}
+                try:
+                    rc = resp_a["choices"][0]["message"].get("reasoning_content") or ""
+                except (KeyError, IndexError, TypeError, AttributeError):
+                    rc = ""
+                if BASH_RE.search(rc):  # a recoverable command actually lived in reasoning
+                    reasoning_recovered_n += 1
+            mm = BASH_RE.search(content_a)
             if mm:
                 block = mm.group(1)
                 dq, dg, dr = cmds.count_tools(block)
@@ -156,6 +178,11 @@ def analyze_one(path: Path) -> dict | None:
         "qi_quoted_phrase": qi_quoted_n,
         "qi_abs_path": qi_abs_n,
         "qi_verbose_calls": qi_verbose_n,
+        "empty_content_turns": empty_content_n,
+        "reasoning_recovered_turns": reasoning_recovered_n,
+        "reasoning_recovered_rate": (
+            round(reasoning_recovered_n / len(prompt_toks), 4) if prompt_toks else 0.0
+        ),
         "submitted": bool(submission),
         "patch_chars": len(submission),
         "patch_lines": patch_lines,
@@ -176,6 +203,11 @@ def summarize(rows: list[dict]) -> None:
         qi = sum(r["qi_invocations"] for r in arm_rows)
         grep = sum(r["grep_invocations"] for r in arm_rows)
         print(f"  {'qi / grep invocations':28s} {qi} / {grep}")
+        rr = sum(r["reasoning_recovered_turns"] for r in arm_rows)
+        tt = sum(r["turn_count"] for r in arm_rows)
+        rate = (100 * rr / tt) if tt else 0.0
+        print(f"  {'reasoning-recovered turns':28s} {rr}/{tt} = {rate:.1f}%  "
+              f"(format tax; pre-fix=lost+retried, post-fix=recovered)")
 
 
 def main() -> int:

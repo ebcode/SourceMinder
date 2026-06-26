@@ -63,12 +63,16 @@ agent:
     |------|---------|
     | Jump to a function/class definition | `qi NAME -i func -e --raw` |
     | See definition + all metadata at once | `qi NAME -i func -e --raw -v` |
+    | See code around any match (not just definitions) | `qi NAME -C 3 -x noise` |
     | Find all call sites | `qi NAME --usage -l 20` |
+    | Where a symbol is imported | `qi NAME -i imp` |
     | Browse a file's structure | `qi -f FILE --toc` |
     | Disambiguate same name in different places | `qi NAME -v` (reveals PAR, SCOPE, TYPE) |
     | All members of a class/type | `qi '*' -p TypeName` |
     | One method on a type | `qi METHOD -p TypeName -i func` |
-    | Symbols used inside a function | `qi '*' -w FuncName -i call` |
+    | How an object is used (methods called on it) | `qi '*' -i call -p OBJ -l 20` |
+    | What a function does with X (read its internals) | `qi X --within FUNCNAME -x noise` |
+    | Symbols used inside a function | `qi '*' --within FuncName -i call` |
     | All decorated functions (Python: @decorator) | `qi '%' -i func -c '@%'` |
     | Async functions (Python, JS, TS, Go) | `qi '%' -i func -m async` |
     | Keyword, punctuation, regex, or text pattern | `grep -rn 'pattern' .` |
@@ -105,6 +109,9 @@ agent:
     # 4. Text search — for anything qi can't find
     grep -rn 'pattern' path/
     ```
+
+    `-e` expands **definitions** (functions/classes). For a call site, usage, import,
+    or any non-definition match, use `-C N` to see the surrounding lines instead.
 
     **BATCH INDEPENDENT LOOKUPS:**
     ```bash
@@ -155,7 +162,7 @@ agent:
     1. As a first step, it might be a good idea to find and read code relevant to the <pr_description>
     2. Create a script to reproduce the error and execute it to confirm the error
     3. Edit the sourcecode of the repo to resolve the issue
-    4. Rerun your reproduce script to confirm the error is fixed. **If tests still fail after an edit, go BACK TO QI before trying another fix — don't guess. Use qi to verify your understanding of the code you changed and what calls it.**
+    4. Rerun your reproduce script to confirm the error is fixed. **If tests still fail after an edit, go BACK TO QI before trying another fix — don't guess.** Verify your understanding: `qi NAME --usage` (what calls the code you changed) and `qi X --within NAME` (what NAME does with X internally).
     5. Think about edgecases and make sure your fix handles them as well
     Your thinking should be thorough and so it's fine if it's very long.
 
