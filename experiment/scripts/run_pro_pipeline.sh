@@ -29,7 +29,7 @@
 # analyze_pro_stats (Step 8) runs last as the final per-batch summary.
 #
 # All outputs land under experiment/results/pro_runs/<batch>/.
-# Pro analog of run_pipeline.sh; the Verified pipeline + scripts are untouched.
+# Descended from the retired Verified pipeline (run_pipeline.sh, removed 2026-07-06).
 set -euo pipefail
 
 BATCH="${1:?Usage: $0 <batch> [--logs DIR | --batch-id ID [--model M]] [--run-prefix P] [--workers N] [--no-charts]}"

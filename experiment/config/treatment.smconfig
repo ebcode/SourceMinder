@@ -1,3 +1,0 @@
-# CLI flags still override these; lines are prepended to argv.
-[qi]
--q

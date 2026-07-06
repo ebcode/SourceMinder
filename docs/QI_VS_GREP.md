@@ -29,19 +29,19 @@ This excludes comments and strings by default, reducing false positives signific
 Find functions, variables, types, and calls with context awareness.
 
 ```bash
-./qi database              # Find all references
-./qi init% -i func         # Only function definitions
-./qi malloc -i call        # Only function calls
-./qi RowData -i type       # Struct/type definitions
+qi database              # Find all references
+qi init% -i func         # Only function definitions
+qi malloc -i call        # Only function calls
+qi RowData -i type       # Struct/type definitions
 ```
 
 ### 2. Full Definitions with -e
 View entire function/struct bodies without opening files.
 
 ```bash
-./qi db_init --def -e                    # Show full function
-./qi % -i func -m static -e --limit 5    # All static functions
-./qi User -i type -e                     # Complete struct definition
+qi db_init --def -e                    # Show full function
+qi % -i func -m static -e --limit 5    # All static functions
+qi User -i type -e                     # Complete struct definition
 ```
 
 **Key feature:** `-e` expands definitions—one of qi's most powerful capabilities.
@@ -50,13 +50,13 @@ View entire function/struct bodies without opening files.
 Target exact symbol types with metadata filters impossible in grep.
 
 ```bash
-./qi % -i func -m static --limit 10      # Find static functions
-./qi % -i arg -t "int" --limit 10        # Find int arguments
-./qi getUserById --def                   # Definition only
-./qi getUserById --usage                 # Usages only
-./qi % -i func -p UserManager            # Functions in specific class
-./qi count -p patterns                   # Find patterns->count member access
-./qi init -p 'User%'                     # All init methods on User objects
+qi % -i func -m static --limit 10      # Find static functions
+qi % -i arg -t "int" --limit 10        # Find int arguments
+qi getUserById --def                   # Definition only
+qi getUserById --usage                 # Usages only
+qi % -i func -p UserManager            # Functions in specific class
+qi count -p patterns                   # Find patterns->count member access
+qi init -p 'User%'                     # All init methods on User objects
 ```
 
 **Filters:** `-t` (type), `-m` (modifier), `-s` (scope), `-p` (parent), `--def`, `--usage`, `--within`
@@ -67,37 +67,37 @@ Target exact symbol types with metadata filters impossible in grep.
 Show surrounding lines like grep, but with symbol highlighting and all qi filters.
 
 ```bash
-./qi fprintf -i call -C 3     # 3 lines context
-./qi malloc -A 5 --limit 5    # 5 lines after
-./qi init -i func -B 2        # 2 lines before
+qi fprintf -i call -C 3     # 3 lines context
+qi malloc -A 5 --limit 5    # 5 lines after
+qi init -i func -B 2        # 2 lines before
 ```
 
 ### 5. File Filtering
 Narrow searches to specific files or directories with SQL LIKE patterns.
 
 ```bash
-./qi user -f %.c            # Only .c files
-./qi user -f src/%          # Only src/ directory
-./qi user -f database.c     # Specific file
-./qi user -f shared/%.c     # .c files in shared/
+qi user -f %.c            # Only .c files
+qi user -f src/%          # Only src/ directory
+qi user -f database.c     # Specific file
+qi user -f shared/%.c     # .c files in shared/
 ```
 
 ### 6. Files-Only Output
 Faster and cleaner than `grep -l`.
 
 ```bash
-./qi database --files                     # List files with symbol
-./qi fprintf -i call --files              # Files with calls
-./qi % -i func -m static -f %.c --files   # Combined filters
+qi database --files                     # List files with symbol
+qi fprintf -i call --files              # Files with calls
+qi % -i func -m static -f %.c --files   # Combined filters
 ```
 
 ### 7. Multi-Symbol Search
 Find lines with multiple symbols (order-independent).
 
 ```bash
-./qi fprintf stderr --and          # Both symbols on same line
-./qi malloc NULL --and             # Memory checks
-./qi SELECT transaction --and      # SQL patterns
+qi fprintf stderr --and          # Both symbols on same line
+qi malloc NULL --and             # Memory checks
+qi SELECT transaction --and      # SQL patterns
 ```
 
 **Note:** Shows each symbol separately, not combined.
@@ -106,19 +106,19 @@ Find lines with multiple symbols (order-independent).
 Navigate codebases by symbol types and relationships.
 
 ```bash
-./qi % -i imp --limit 50       # All imports
-./qi % -i func --limit 20      # All functions
-./qi % -f database.c           # All symbols in file
-./qi % -i class --limit 20     # All classes
+qi % -i imp --limit 50       # All imports
+qi % -i func --limit 20      # All functions
+qi % -f database.c           # All symbols in file
+qi % -i class --limit 20     # All classes
 ```
 
 ### 9. Wildcard Searches
 SQL LIKE patterns (`%`, `_`) for flexible symbol matching.
 
 ```bash
-./qi get% -i func       # Functions starting with "get"
-./qi %Error             # Symbols ending with "Error"
-./qi %user% --limit 20  # Symbols containing "user"
+qi get% -i func       # Functions starting with "get"
+qi %Error             # Symbols ending with "Error"
+qi %user% --limit 20  # Symbols containing "user"
 ```
 
 ---
@@ -167,7 +167,7 @@ grep -E "initializ(e|ing|ed)" *.c      # Variations
 
 **qi for Discovery → grep for Details**
 ```bash
-./qi initialize -i func                      # Find function
+qi initialize -i func                        # Find function
 grep -C 10 "initialize()" database.c         # See full context
 ```
 
@@ -179,7 +179,7 @@ grep -n "Database connection failed" *.c     # Find error
 
 **qi for Structure → grep for Comments**
 ```bash
-./qi database_connect --def -e               # Function definition
+qi database_connect --def -e                           # Function definition
 grep -B 5 "database_connect" database.c | grep "^/\*"  # Documentation
 ```
 
@@ -189,42 +189,42 @@ grep -B 5 "database_connect" database.c | grep "^/\*"  # Documentation
 
 **Member Access (Parent Filter):**
 ```bash
-./qi count -p patterns                   # Find patterns->count or patterns.count
-./qi 'field%' -p 'config%'               # All fields on config objects
-./qi directory -p 'file_filter%'         # file_filter->patterns[i].directory
-./qi '*' -p UserManager --limit 20       # All members of UserManager
+qi count -p patterns                   # Find patterns->count or patterns.count
+qi 'field%' -p 'config%'               # All fields on config objects
+qi directory -p 'file_filter%'         # file_filter->patterns[i].directory
+qi '*' -p UserManager --limit 20       # All members of UserManager
 ```
 
 **Type-Based Refactoring:**
 ```bash
-./qi % -i arg -t 'OldType%' -f %.c       # Find old type usage (refactor target)
-./qi % -i var -t 'int *'                 # All int pointer variables
-./qi % -t 'uint32_t' --limit 20          # All uint32_t usage
+qi % -i arg -t 'OldType%' -f %.c       # Find old type usage (refactor target)
+qi % -i var -t 'int *'                 # All int pointer variables
+qi % -t 'uint32_t' --limit 20          # All uint32_t usage
 ```
 
 **Scoped Searching:**
 ```bash
-./qi malloc --within handle_request      # malloc only in handle_request
-./qi fprintf --within 'debug%'           # fprintf in debug functions
-./qi % -i var --within main              # Variables in main
+qi malloc --within handle_request      # malloc only in handle_request
+qi fprintf --within 'debug%'           # fprintf in debug functions
+qi % -i var --within main              # Variables in main
 ```
 
 **Combining Filters:**
 ```bash
-./qi % -i func -m static -f shared/%.c --limit 10    # Static funcs in shared/
-./qi % -i arg -t 'int *' -m static                   # Static int pointer args
-./qi count -p patterns -C 3                          # Show patterns.count with context
+qi % -i func -m static -f shared/%.c --limit 10    # Static funcs in shared/
+qi % -i arg -t 'int *' -m static                   # Static int pointer args
+qi count -p patterns -C 3                          # Show patterns.count with context
 ```
 
 **Two-Step Workflow:**
 ```bash
-./qi auth --limit 10                    # Quick discovery
-./qi auth -i func -f auth.c -C 5        # Detailed exploration
+qi auth --limit 10                    # Quick discovery
+qi auth -i func -f auth.c -C 5        # Detailed exploration
 ```
 
 **Understanding Schema:**
 ```bash
-./qi fprintf -v --limit 3               # Show all metadata columns
+qi fprintf -v --limit 3               # Show all metadata columns
 # Output: LINE | SYM | PAR | SCOPE | MOD | CLUE | NS | TYPE | D | CTX
 ```
 
