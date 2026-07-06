@@ -72,7 +72,7 @@ ContextType string_to_context(const char *str) {
     if (strcmp(str, "LABEL") == 0) return CONTEXT_LABEL;
     if (strcmp(str, "GOTO") == 0) return CONTEXT_GOTO;
     if (strcmp(str, "MACRO") == 0) return CONTEXT_MACRO;
-    return CONTEXT_CLASS; /* default */
+    return CONTEXT_INVALID; /* unrecognized name - caller must check */
 }
 
 int db_init(CodeIndexDatabase *db, const char *db_path) {

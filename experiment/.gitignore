@@ -28,5 +28,5 @@ results/
 # covered by the root *.db ignore. Ignore the transient WAL sidecars.
 eval_results.db-wal
 eval_results.db-shm
-logs
 vendor
+

@@ -5,10 +5,12 @@
 #   bash experiment/scripts/run_pro_pipeline.sh <batch> [options]
 #
 # Options:
-#   --run-prefix P   only include runs whose run_id starts with P (scopes a rep
-#                    batch, e.g. 'oldprompt_'); matches run_pro_reps.py --run-id-prefix
-#   --workers N      parallel Docker eval workers (default: 5)
-#   --no-charts      skip matplotlib rendering (headless envs)
+#   --run-prefix P      only include runs whose run_id starts with P (scopes a rep
+#                       batch, e.g. 'oldprompt_'); matches run_pro_reps.py --run-id-prefix
+#   --workers N         parallel Docker eval workers (default: 5)
+#   --no-charts         skip matplotlib rendering (headless envs)
+#   --skip-patch-evals  skip Step 2 (evaluate_pro_patches); use when eval was
+#                       already run separately before invoking the pipeline
 #
 # Locating the input logs (default: logs/pro_pilot/). For runs produced with
 # run_pro_reps.py --batch-id, the logs live under logs/<model>/<batch-id>/; point
@@ -19,7 +21,12 @@
 #                              model_dir() slug run_pro_reps.py uses.
 #
 # Steps: analyze_pro_trajectories -> evaluate_pro_patches -> merge_results
-#        -> analyze_pro_stats
+#        -> wall_time -> extract_qi_commands -> report_qi_commands
+#        -> analyze_pro_eval_granular -> analyze_pro_stats (final)
+# Steps 4-7 are non-fatal (|| true). wall_time (Step 4) runs before
+# analyze_pro_stats so its wall_time.csv feeds the final summary.
+# extract_qi_commands (Step 5) runs before report_qi_commands (Step 6).
+# analyze_pro_stats (Step 8) runs last as the final per-batch summary.
 #
 # All outputs land under experiment/results/pro_runs/<batch>/.
 # Pro analog of run_pipeline.sh; the Verified pipeline + scripts are untouched.
@@ -34,14 +41,16 @@ CHARTS_FLAG=""
 LOGS_OVERRIDE=""
 BATCH_ID=""
 MODEL="deepseek/deepseek-v4-flash"
+SKIP_PATCH_EVALS=""
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --run-prefix) RUN_PREFIX="$2"; shift 2 ;;
-        --workers)    WORKERS="$2"; shift 2 ;;
-        --no-charts)  CHARTS_FLAG="--no-charts"; shift ;;
-        --logs)       LOGS_OVERRIDE="$2"; shift 2 ;;
-        --batch-id)   BATCH_ID="$2"; shift 2 ;;
-        --model)      MODEL="$2"; shift 2 ;;
+        --run-prefix)       RUN_PREFIX="$2"; shift 2 ;;
+        --workers)          WORKERS="$2"; shift 2 ;;
+        --no-charts)        CHARTS_FLAG="--no-charts"; shift ;;
+        --logs)             LOGS_OVERRIDE="$2"; shift 2 ;;
+        --batch-id)         BATCH_ID="$2"; shift 2 ;;
+        --model)            MODEL="$2"; shift 2 ;;
+        --skip-patch-evals) SKIP_PATCH_EVALS="1"; shift ;;
         *) echo "Unknown option: $1" >&2; exit 2 ;;
     esac
 done
@@ -87,16 +96,41 @@ echo "=== analyze_pro_trajectories ==="
     --logs "$LOGS_DIR" --dir "$OUT_DIR" "${PREFIX_ARGS[@]}"
 
 echo ""
-echo "=== evaluate_pro_patches ==="
-"$PYTHON" "$ANALYSIS/evaluate_pro_patches.py" \
-    --logs "$LOGS_DIR" --dir "$OUT_DIR" --workers "$WORKERS" "${PREFIX_ARGS[@]}"
+if [[ -n "$SKIP_PATCH_EVALS" ]]; then
+    echo "=== evaluate_pro_patches (SKIPPED via --skip-patch-evals) ==="
+else
+    echo "=== evaluate_pro_patches ==="
+    "$PYTHON" "$ANALYSIS/evaluate_pro_patches.py" \
+        --logs "$LOGS_DIR" --dir "$OUT_DIR" --workers "$WORKERS" "${PREFIX_ARGS[@]}"
+fi
 
 echo ""
 echo "=== merge_results (reused from the Verified pipeline) ==="
 "$PYTHON" "$ANALYSIS/merge_results.py" --dir "$OUT_DIR"
 
 echo ""
-echo "=== analyze_pro_stats ==="
+echo "=== wall_time (from the ledger; non-fatal) ==="
+# Runs before analyze_pro_stats so its wall_time.csv can feed the final summary.
+# Ledger key is run_pro_reps.py --batch-id; prefer it, fall back to positional.
+"$PYTHON" "$ANALYSIS/wall_time.py" --batch "${BATCH_ID:-$BATCH}" --dir "$OUT_DIR" || true
+
+echo ""
+echo "=== extract_qi_commands (non-fatal) ==="
+"$PYTHON" "$ANALYSIS/extract_qi_commands.py" \
+    --logs "$LOGS_DIR" --out "$OUT_DIR/qi_commands.csv" || true
+
+echo ""
+echo "=== report_qi_commands (non-fatal) ==="
+"$PYTHON" "$ANALYSIS/report_qi_commands.py" \
+    --csv "$OUT_DIR/qi_commands.csv" || true
+
+echo ""
+echo "=== analyze_pro_eval_granular (non-fatal) ==="
+"$PYTHON" "$ANALYSIS/analyze_pro_eval_granular.py" \
+    --csv "$OUT_DIR/eval_results.csv" || true
+
+echo ""
+echo "=== analyze_pro_stats (final summary) ==="
 "$PYTHON" "$ANALYSIS/analyze_pro_stats.py" --dir "$OUT_DIR" $CHARTS_FLAG
 
 echo ""

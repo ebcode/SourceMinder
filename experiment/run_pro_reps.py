@@ -155,17 +155,20 @@ def run_one(arm: str, rid: str, instance: str, model: str, subset: str | None,
         state = {"last_mtime": log.stat().st_mtime if log.exists() else 0}
 
         def _watchdog() -> None:
-            minutes = 0
+            intervals = 0
             while not stop_watchdog.is_set():
-                if stop_watchdog.wait(60):
+                if stop_watchdog.wait(30):
                     return
                 cur = log.stat().st_mtime if log.exists() else 0
                 if cur == state["last_mtime"]:
-                    minutes += 1
-                    print(f"\n-- {label}: agent hasn't responded in "
-                          f"{minutes} minute(s)\n", file=sys.stderr, flush=True)
+                    intervals += 1
+                    elapsed = intervals * 0.5  # minutes
+                    hint = (" (rate-limit backoff -- do not interrupt)"
+                            if elapsed <= 10 else "")
+                    print(f"\n-- {label}: no output for {elapsed:.1f} min{hint}\n",
+                          file=sys.stderr, flush=True)
                 else:
-                    minutes = 0
+                    intervals = 0
                     state["last_mtime"] = cur
 
         watcher = threading.Thread(target=_watchdog, daemon=True)

@@ -36,7 +36,7 @@ tmp/*
 !tmp/*.*
 */grammar_version.h
 token-science
-ai-log
 tmp/cachegrind*
 __pycache__
 test.parquet
+run_pro_ledger.jsonl

@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Extract one row per shell command from mini-swe-agent trajectories.
+"""Extract one row per shell command from SWE-bench Pro trajectories.
 
-This is the per-COMMAND companion to analyze_trajectories.py (which is
-per-run). Each assistant action is paired to its tool output via
-``tool_call_id`` and written to a CSV: one row per command the agent ran, with
-the size of the resulting output and -- for qi commands -- which flags were
-used. Aggregation/reporting lives in report_qi_commands.py; this script only
-produces the raw table so you can slice it yourself.
+Each assistant action is paired to its tool output and written to a CSV: one
+row per command the agent ran, with the size of the resulting output and -- for
+qi commands -- which flags were used. Aggregation/reporting lives in
+report_qi_commands.py; this script only produces the raw table so you can slice
+it yourself.
+
+Trajectory format: the command is a ```bash block inside the assistant
+message's markdown content, and its output is the NEXT ``role == "user"``
+message (the action_observation_template, wrapping <returncode>).
 
 Output columns:
   arm, instance, run_id, model, batch_id   -- provenance (from the path)
@@ -15,18 +18,16 @@ Output columns:
   command                                  -- the full shell command string
   output_chars, output_tokens_approx       -- size of the paired tool output
   returncode, is_error                     -- parsed from <returncode>N</returncode>
-  qi_pure                                  -- 1 if a qi command with no grep/read/pipe
+  qi_pure                                  -- 1 if the action is only qi (+ echo separators)
   qi_limit, qi_limit_per_file, qi_toc, qi_expand, qi_include, qi_exclude,
   qi_within, qi_and, qi_def, qi_usage, qi_raw, qi_parent, qi_file, qi_type,
   qi_modifier, qi_scope                          -- flag present (1/0), qi rows only
   qi_dotted_name, qi_quoted_phrase, qi_abs_path  -- misuse markers (1/0), qi rows only
 
-Defaults to the prompt_study batch.
-
 Usage:
-  python3 experiment/analysis/extract_qi_commands.py
-  python3 experiment/analysis/extract_qi_commands.py --batch prompt_study
-  python3 experiment/analysis/extract_qi_commands.py --logs experiment/logs --out /tmp/cmds.csv
+  experiment/.venv_pro/bin/python experiment/analysis/extract_qi_commands.py \\
+      --logs experiment/logs/deepseek--deepseek-v4-flash/pro_pilot_ansible_n40 \\
+      --out  experiment/results/pro_runs/<batch>/qi_commands.csv
 """
 from __future__ import annotations
 
@@ -39,8 +40,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # -> experiment/
-from lib import cmds, paths
-from lib.trajmeta import infer_path_meta
+from lib import cmds, paths  # noqa: E402
+from analysis.analyze_pro_trajectories import (  # noqa: E402
+    BASH_RE, norm_model, parse_run_id,
+)
 
 # Tool output is not API-counted; approximate at ~4 chars/token to stay
 # consistent with analyze_trajectories.py.
@@ -76,6 +79,7 @@ QI_FLAG_COLS = list(QI_FLAGS)
 QI_ANTIPATTERN_COLS = ["qi_dotted_name", "qi_quoted_phrase", "qi_abs_path"]
 
 _RC_RE = re.compile(r"<returncode>(-?\d+)</returncode>")
+_TIMEOUT_RE = re.compile(r"timed out and has been killed")
 # qi prints "Found N matches" on a hit and "No results" on a miss. Captured for
 # the zero-result rate (a qi call that found nothing = the model searched for a
 # symbol that doesn't exist). Empty for non-search qi (e.g. --toc) and errors.
@@ -120,9 +124,11 @@ def _primary_tool(cmd: str) -> str:
 
 
 def _qi_pure(cmd: str) -> bool:
-    """True when output is attributable to qi alone (no grep/read, no pipe)."""
-    qi, grep, read = cmds.count_tools(cmd)
-    return bool(qi) and grep == 0 and read == 0 and "|" not in cmd
+    """True when output is attributable to qi alone: the action's segments are
+    only qi and echo separators (no grep/read/ls/pipe/other program). echo is a
+    no-op the agent prints between qi outputs; anything else adds foreign output.
+    See cmds.only_qi_and_echo."""
+    return cmds.only_qi_and_echo(cmd)
 
 
 def _returncode(output: str) -> int | None:
@@ -166,16 +172,15 @@ def _qi_miss_kind(output: str, count: int | None) -> str:
 
 
 def build_command_row(meta: dict, turn_idx: int, cmd_idx: int,
-                      command: str, output: str) -> dict:
+                      command: str, output: str,
+                      forced_rc: int | None = None) -> dict:
     """Build one per-command CSV row from a command + its tool output.
 
-    ``meta`` carries provenance: arm, instance, run_id, model, batch_id. Shared
-    by the Verified extractor (here) and the Pro extractor
-    (extract_pro_qi_commands.py) so both emit an identical schema -- the only
-    thing that differs between them is how the trajectory is parsed into
-    (command, output) pairs."""
+    ``meta`` carries provenance: arm, instance, run_id, model, batch_id.
+    ``forced_rc`` overrides the returncode parsed from output (used for timeout
+    events where the harness omits the <returncode> tag)."""
     tool = _primary_tool(command)
-    rc = _returncode(output)
+    rc = forced_rc if forced_rc is not None else _returncode(output)
     res = _qi_result_count(output) if tool == "qi" else None
     tokset = set(_tokens(command)) if tool == "qi" else set()
 
@@ -210,12 +215,38 @@ def build_command_row(meta: dict, turn_idx: int, cmd_idx: int,
     return row
 
 
-# Column order for the per-command CSV; shared with extract_pro_qi_commands.py
-# so the reporter reads either experiment's output unchanged.
+# Column order for the per-command CSV.
 CSV_FIELDS = ["arm", "instance", "run_id", "model", "batch_id", "turn_idx",
               "cmd_idx", "tool", "command", "output_chars",
               "output_tokens_approx", "returncode", "is_error", "qi_pure",
               "qi_results", "qi_miss_kind", *QI_FLAG_COLS, *QI_ANTIPATTERN_COLS]
+
+
+def _pro_model(messages: list[dict], data: dict) -> str:
+    """Normalized model id from the API's per-message accounting (Pro
+    trajectories carry it under extra.response), falling back to the config."""
+    for m in messages:
+        extra = m.get("extra")
+        if isinstance(extra, dict):
+            resp = extra.get("response")
+            if isinstance(resp, dict) and resp.get("model"):
+                return norm_model(resp["model"])
+    cfg = data.get("info", {}).get("config", {}).get("model", {})
+    return norm_model(cfg.get("model_name", ""))
+
+
+def _arm_instance_batch(path: Path) -> tuple[str, str, str]:
+    """arm/instance/batch from the path. Pro nests as
+    logs/<model>/<batch>/<arm>/<instance>/<file> (named batch) or
+    logs/pro_pilot/<arm>/<instance>/<file>; both put the instance dir directly
+    inside the arm dir, which is how we read it back."""
+    instance = path.parent.name
+    arm = path.parent.parent.name
+    above = path.parent.parent.parent.name
+    batch = "" if above in ("logs", "pro_pilot") else above
+    if above == "pro_pilot":
+        batch = "pro_pilot"
+    return arm, instance, batch
 
 
 def rows_for(path: Path) -> list[dict]:
@@ -226,41 +257,48 @@ def rows_for(path: Path) -> list[dict]:
         return []
 
     messages = data.get("messages", [])
-    model, batch, arm, instance = infer_path_meta(path)
-    meta = {"arm": arm, "instance": instance, "model": model, "batch_id": batch,
-            "run_id": path.name.replace(".traj.json", "")}
-
-    # Pair outputs to actions by tool_call_id (turns can issue several commands).
-    out_by_id = {
-        m.get("tool_call_id"): str(m.get("content", ""))
-        for m in messages
-        if m.get("role") == "tool"
+    arm, instance, batch = _arm_instance_batch(path)
+    meta = {
+        "arm": arm,
+        "instance": instance,
+        "batch_id": batch,
+        "model": _pro_model(messages, data),
+        "run_id": parse_run_id(path, instance),
     }
 
     out: list[dict] = []
     for turn_idx, msg in enumerate(messages):
-        extra = msg.get("extra")
-        if not isinstance(extra, dict):
+        if msg.get("role") != "assistant":
             continue
-        for cmd_idx, action in enumerate(extra.get("actions") or []):
-            if not isinstance(action, dict):
-                continue
-            command = action.get("command", "") or ""
-            output = out_by_id.get(action.get("tool_call_id"), "")
-            out.append(build_command_row(meta, turn_idx, cmd_idx, command, output))
+        m = BASH_RE.search(str(msg.get("content", "")))
+        if not m:
+            continue
+        command = m.group(1).strip()
+        output = ""
+        forced_rc = None
+        nxt = messages[turn_idx + 1] if turn_idx + 1 < len(messages) else None
+        if nxt and nxt.get("role") == "user":
+            nxt_content = str(nxt.get("content", ""))
+            if "<returncode>" in nxt_content:
+                output = nxt_content
+            elif _TIMEOUT_RE.search(nxt_content):
+                # Harness killed the command: no <returncode> tag, but the
+                # partial output is still shown to the agent. Use 124 (the
+                # standard timeout exit code) so is_error fires correctly.
+                output = nxt_content
+                forced_rc = 124
+        out.append(build_command_row(meta, turn_idx, 0, command, output, forced_rc))
     return out
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--logs", type=Path, default=paths.LOGS_DIR,
-                    help=f"directory of *.traj.json files (default: {paths.LOGS_DIR})")
-    ap.add_argument("--batch", default="prompt_study", metavar="BATCH_ID",
-                    help="filter to this batch id (from the path); "
-                         "'' for all (default: prompt_study)")
-    ap.add_argument("--out", type=Path, default=None,
-                    help="output CSV (default: results/runs/<batch>/qi_commands.csv)")
+    ap.add_argument("--logs", type=Path, default=paths.LOGS_DIR / "pro_pilot",
+                    help=f"directory of Pro *.traj.json files "
+                         f"(default: {paths.LOGS_DIR / 'pro_pilot'})")
+    ap.add_argument("--out", type=Path, required=True,
+                    help="output CSV (e.g. results/pro_runs/<batch>/qi_commands.csv)")
     args = ap.parse_args()
 
     logs_dir = Path(args.logs)
@@ -276,17 +314,12 @@ def main() -> int:
     rows: list[dict] = []
     for p in traj_files:
         rows.extend(rows_for(p))
-    if args.batch:
-        rows = [r for r in rows if r["batch_id"] == args.batch]
     if not rows:
-        print(f"No commands found (batch={args.batch!r}).", file=sys.stderr)
+        print("No commands found.", file=sys.stderr)
         return 1
 
-    out_path = args.out or (paths.new_run_dir(batch_id=args.batch or "all")
-                            / "qi_commands.csv")
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with out_path.open("w", newline="") as f:
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with args.out.open("w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=CSV_FIELDS)
         writer.writeheader()
         writer.writerows(rows)
@@ -294,7 +327,7 @@ def main() -> int:
     n_runs = len({(r["model"], r["arm"], r["instance"], r["run_id"]) for r in rows})
     n_qi = sum(1 for r in rows if r["tool"] == "qi")
     print(f"Wrote {len(rows)} command(s) from {n_runs} run(s) "
-          f"({n_qi} qi) -> {out_path}")
+          f"({n_qi} qi) -> {args.out}")
     return 0
 
 

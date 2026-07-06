@@ -23,6 +23,7 @@
 #include "constants.h"
 
 typedef enum {
+    CONTEXT_INVALID = -1,   /* unknown/unrecognized context name (keeps CONTEXT_CLASS at 0) */
     CONTEXT_CLASS,
     CONTEXT_INTERFACE,
     CONTEXT_FUNCTION,

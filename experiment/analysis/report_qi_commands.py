@@ -22,8 +22,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # -> experiment/
-from lib import paths
 from analysis.extract_qi_commands import QI_FLAG_COLS, QI_ANTIPATTERN_COLS
+from lib import cmds
 
 
 def _median(vals: list[float]):
@@ -53,6 +53,7 @@ def load(csv_path: Path) -> list[dict]:
                   "output_tokens_approx", "qi_pure"):
             r[k] = int(r[k]) if r[k] not in ("", None) else 0
         r["is_error"] = int(r["is_error"]) if r["is_error"] not in ("", None) else None
+        r["returncode"] = int(r["returncode"]) if r.get("returncode") not in ("", None) else None
         r["qi_results"] = int(r["qi_results"]) if r.get("qi_results") not in ("", None) else None
         # r.get(): tolerate CSVs written before these columns existed.
         for k in (*QI_FLAG_COLS, *QI_ANTIPATTERN_COLS):
@@ -78,11 +79,11 @@ def report_arm(arm: str, rows: list[dict], p) -> None:
         p(f"  per run: {len(rows)/n_runs:.1f} commands, {len(qi)/n_runs:.1f} qi, "
           f"{len(grep)/n_runs:.1f} grep")
 
-    # 2. qi output response size (clean qi-only commands)
+    # 2. qi output response size (clean qi-only actions; batched qi split per-call)
     pure = [r for r in qi if r["qi_pure"]]
-    sizes = [r["output_tokens_approx"] for r in pure]
-    p("\n--- qi output size (qi_pure commands, tokens ~= chars/4) ---")
-    p(f"  n_pure={len(pure)} of {len(qi)} qi commands")
+    sizes = _percall(pure)  # per-call: batched qi actions split output evenly
+    p("\n--- qi output size (qi_pure = only qi + echo; per-call, tokens ~= chars/4) ---")
+    p(f"  n_pure={len(pure)} action(s) of {len(qi)} qi; {len(sizes)} qi call(s)")
     p(f"  mean={_fmt(statistics.mean(sizes)) if sizes else 'n/a'}  "
       f"median={_fmt(_median(sizes))}  p90={_fmt(_pct(sizes, 0.9))}  "
       f"max={_fmt(max(sizes) if sizes else None)}")
@@ -147,6 +148,39 @@ def _successful(rows: list[dict], tool: str, pure: bool = False) -> list[dict]:
     return [r for r in out if r["qi_pure"]] if pure else out
 
 
+# Sub-call counters per tool: how many invocations of the tool one action holds,
+# so a batched homogeneous action divides its combined output across its calls.
+_SUBCOUNT = {
+    "qi": lambda c: len(cmds.qi_subcommands(c)),
+    "grep": lambda c: cmds.count_tools(c)[1],
+    "cat": cmds.count_cat,
+    "sed_read": cmds.count_sed_read,
+}
+
+
+def _homog(rows: list[dict], tool: str) -> list[dict]:
+    """Successful actions whose sole content source is `tool` (the homogeneous
+    gate, computed live from the command so a stale qi_pure column can't skew it).
+    tool in {'qi','grep','cat','sed_read'}. This is the basis the explore charts
+    use, so report and chart agree."""
+    return [r for r in rows if r["is_error"] == 0
+            and cmds.only_tool_and_echo(r["command"], tool)]
+
+
+def _percall(rows: list[dict], tool: str = "qi") -> list[float]:
+    """Per-call output tokens for homogeneous `tool` actions. A batched action
+    (``tool a; echo; tool b``) shares one combined output blob, so it contributes
+    N entries of output/N -- the mean is then call-weighted and the median
+    reflects per-call sizes, not per-action. Pass already-filtered homogeneous
+    rows (e.g. _homog(rs, tool))."""
+    counter = _SUBCOUNT[tool]
+    vals: list[float] = []
+    for r in rows:
+        n = max(1, counter(r["command"]))
+        vals.extend([r["output_tokens_approx"] / n] * n)
+    return vals
+
+
 def _qi_kind(r: dict) -> str:
     if r["qi_toc"]:
         return "toc"
@@ -178,14 +212,28 @@ def essentials(by_arm: dict[str, list[dict]], p) -> None:
     def read(rs): return [r for r in rs if r["tool"] == "read"]
     def nruns(rs): return len(_run_groups(rs))
 
+    def mixed(rs):  # actions with BOTH qi and grep in one bash block: classified
+        # tool=qi + qi_pure=0, so their output is in NEITHER total-output line.
+        out = []
+        for r in rs:
+            q, g, _ = cmds.count_tools(r["command"])
+            if q >= 1 and g >= 1:
+                out.append(r)
+        return out
+
     def scored(rs):  # qi calls with a parseable returncode
         return [r for r in qi(rs) if r["is_error"] is not None]
 
     line("runs", lambda rs: str(nruns(rs)))
     line("qi calls", lambda rs: str(len(qi(rs))))
     line("grep calls", lambda rs: str(len(grep(rs))))
+    line("total cat calls", lambda rs: str(sum(cmds.count_cat(r["command"]) for r in rs)))
+    line("total sed-read calls", lambda rs: str(sum(cmds.count_sed_read(r["command"]) for r in rs)))
+    line("total sed-edit calls", lambda rs: str(sum(cmds.count_sed_edit(r["command"]) for r in rs)))
     line("qi calls / run",
          lambda rs: _fmt(len(qi(rs)) / nruns(rs), 1) if nruns(rs) else "n/a")
+    line("grep calls / run",
+         lambda rs: _fmt(len(grep(rs)) / nruns(rs), 1) if nruns(rs) else "n/a")
     line("qi / grep ratio",
          lambda rs: _fmt(len(qi(rs)) / len(grep(rs)), 2) if grep(rs) else "n/a")
     line("qi share of exploration",
@@ -194,20 +242,37 @@ def essentials(by_arm: dict[str, list[dict]], p) -> None:
     line("% runs using qi",
          lambda rs: (f"{sum(1 for g in _run_groups(rs).values() if any(r['tool']=='qi' for r in g))/nruns(rs):.0%}"
                      if nruns(rs) else "n/a"))
-    line("mean qi output/call* (tok)",
-         lambda rs: (_fmt(statistics.mean([r["output_tokens_approx"] for r in _successful(rs, "qi", pure=True)]))
-                     if _successful(rs, "qi", pure=True) else "n/a"))
-    line("median qi output/call* (tok)",
-         lambda rs: _fmt(_median([r["output_tokens_approx"] for r in _successful(rs, "qi", pure=True)])))
-    line("mean grep output/call* (tok)",
-         lambda rs: (_fmt(statistics.mean([r["output_tokens_approx"] for r in _successful(rs, "grep")]))
-                     if _successful(rs, "grep") else "n/a"))
-    line("total qi output / run (tok)",
-         lambda rs: (_fmt(sum(r["output_tokens_approx"] for r in _successful(rs, "qi", pure=True)) / nruns(rs))
+    # Per-tool output size + volume, all on the SAME basis as the explore charts:
+    # SUCCESSFUL, HOMOGENEOUS actions (sole content source = that tool), with
+    # per-call division so a batched action reports per-call, not per-action.
+    _TOOLS = (("qi", "qi"), ("grep", "grep"), ("cat", "cat"), ("sed-read", "sed_read"))
+    for _lbl, _t in _TOOLS:
+        line(f"mean {_lbl} output/call* (tok)",
+             lambda rs, t=_t: (_fmt(statistics.mean(_percall(_homog(rs, t), t)))
+                               if _homog(rs, t) else "n/a"))
+    for _lbl, _t in _TOOLS:
+        line(f"median {_lbl} output/call* (tok)",
+             lambda rs, t=_t: (_fmt(_median(_percall(_homog(rs, t), t)))
+                               if _homog(rs, t) else "n/a"))
+    for _lbl, _t in _TOOLS:
+        line(f"total {_lbl} output / run (tok)",
+             lambda rs, t=_t: (_fmt(sum(r["output_tokens_approx"] for r in _homog(rs, t)) / nruns(rs))
+                               if nruns(rs) else "n/a"))
+    line("mixed qi+grep actions",
+         lambda rs: str(len(mixed(rs))))
+    line("mixed qi+grep output/run (tok)",  # excluded from BOTH totals above
+         lambda rs: (_fmt(sum(r["output_tokens_approx"] for r in mixed(rs) if r["is_error"] == 0) / nruns(rs))
                      if nruns(rs) else "n/a"))
     line("qi error rate",
          lambda rs: (f"{sum(1 for r in scored(rs) if r['is_error'])/len(scored(rs)):.0%}"
                      if scored(rs) else "n/a"))
+
+    def grep_scored(rs):  # grep calls with a parseable returncode
+        return [r for r in grep(rs) if r["returncode"] is not None]
+
+    line("grep error rate",  # genuine errors only (rc>=2); grep rc==1 is a zero-result
+         lambda rs: (f"{sum(1 for r in grep_scored(rs) if r['returncode'] >= 2)/len(grep_scored(rs)):.0%}"
+                     if grep_scored(rs) else "n/a"))
 
     def searched(rs):  # qi search calls with a parseable match count
         return [r for r in qi(rs) if r["qi_results"] is not None]
@@ -215,6 +280,9 @@ def essentials(by_arm: dict[str, list[dict]], p) -> None:
     line("qi zero-result rate",
          lambda rs: (f"{sum(1 for r in searched(rs) if r['qi_results'] == 0)/len(searched(rs)):.0%}"
                      if searched(rs) else "n/a"))
+    line("grep zero-result rate",  # grep rc==1 = no lines matched
+         lambda rs: (f"{sum(1 for r in grep_scored(rs) if r['returncode'] == 1)/len(grep_scored(rs)):.0%}"
+                     if grep_scored(rs) else "n/a"))
     line("limit-flag adoption (% qi)",
          lambda rs: (f"{sum(1 for r in qi(rs) if r['qi_limit'] or r['qi_limit_per_file'])/len(qi(rs)):.0%}"
                      if qi(rs) else "n/a"))
@@ -228,8 +296,11 @@ def essentials(by_arm: dict[str, list[dict]], p) -> None:
     line("quoted-phrase misuse (% qi)", lambda rs: qi_rate(rs, "qi_quoted_phrase"))
     line("abs-path -f filter (% qi)", lambda rs: qi_rate(rs, "qi_abs_path"))
     line("-v / --verbose adoption (% qi)", lambda rs: qi_rate(rs, "qi_verbose"))
-    p("\n  * output/call = SUCCESSFUL calls only (errors return tiny outputs);")
-    p("    qi uses qi_pure (no compound/pipe) so output isn't mis-attributed.")
+    p("\n  * output/call = SUCCESSFUL, HOMOGENEOUS actions only (sole content")
+    p("    source = that tool, plus echo/pass-through filters; errors excluded). A")
+    p("    batched action (tool a; echo; tool b) splits its combined output evenly")
+    p("    across its calls, so this is per-call, not per-action. Actions mixing")
+    p("    tools (see 'mixed' below) contribute to no per-tool total.")
 
 
 def output_by_type(by_arm: dict[str, list[dict]], p) -> None:
@@ -507,8 +578,7 @@ def cross_model(rows: list[dict], p) -> None:
          lambda rs: (f"{len(qi(rs))/(len(qi(rs))+len(grep(rs))+len(read(rs))):.0%}"
                      if (len(qi(rs)) + len(grep(rs)) + len(read(rs))) else "n/a")),
         ("mean qi output/call (tok)",
-         lambda rs: (_fmt(statistics.mean([r["output_tokens_approx"]
-                                           for r in _successful(rs, "qi", pure=True)]))
+         lambda rs: (_fmt(statistics.mean(_percall(_successful(rs, "qi", pure=True))))
                      if _successful(rs, "qi", pure=True) else "n/a")),
         ("qi zero-result rate",
          lambda rs: (f"{sum(1 for r in searched(rs) if r['qi_results'] == 0)/len(searched(rs)):.0%}"
@@ -562,12 +632,10 @@ def report_block(rows: list[dict], p) -> None:
 
 
 def main() -> int:
-    default_csv = paths.new_run_dir(batch_id="prompt_study") / "qi_commands.csv"
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--csv", type=Path, default=default_csv,
-                    help=f"per-command CSV from extract_qi_commands.py "
-                         f"(default: {default_csv})")
+    ap.add_argument("--csv", type=Path, required=True,
+                    help="per-command CSV from extract_qi_commands.py")
     ap.add_argument("--model", default=None, metavar="SUBSTR",
                     help="only report models whose id contains SUBSTR "
                          "(e.g. v4-pro); default: every model in the CSV")
@@ -593,7 +661,7 @@ def main() -> int:
     rows = [r for r in rows if r["model"] in models]
     out = []
     p = out.append
-    p(f"qi command report -- {args.csv}")
+    p(f"qi command report (Pro) -- {args.csv}")
     p("\nDESCRIPTIVE ONLY: few runs per arm; read medians as direction.")
     if args.cross_model:
         cross_model(rows, p)

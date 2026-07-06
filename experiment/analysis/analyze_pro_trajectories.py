@@ -133,8 +133,8 @@ def analyze_one(path: Path) -> dict | None:
                 u = resp["usage"]
                 prompt_toks.append(u.get("prompt_tokens", 0))
                 completion_toks.append(u.get("completion_tokens", 0))
-                reasoning_toks += (u.get("completion_tokens_details") or {}).get("reasoning_tokens", 0)
-                cached_toks += (u.get("prompt_tokens_details") or {}).get("cached_tokens", 0)
+                reasoning_toks += ((u.get("completion_tokens_details") or {}).get("reasoning_tokens") or 0)
+                cached_toks += ((u.get("prompt_tokens_details") or {}).get("cached_tokens") or 0)
                 model = model or resp.get("model", "")
 
     if not prompt_toks:
@@ -154,11 +154,18 @@ def analyze_one(path: Path) -> dict | None:
     stats = info.get("model_stats", {}) or {}
     submission = (info.get("submission") or "").strip()
     files_touched, patch_lines = _patch_stats(submission)
+    # Sibling run log lives at the batch root as <arm>_<run_id>.log (path is
+    # logs/<arm>/<instance>/<file>, so parents[2] is the batch root). Size in KB
+    # feeds the cross-instance log_size_range chart; "" when the log is absent.
+    run_id = parse_run_id(path, instance_id)
+    log_file = path.parents[2] / f"{arm}_{run_id}.log"
+    log_size_kb = (round(log_file.stat().st_size / 1024.0, 1)
+                   if log_file.is_file() else "")
     return {
         "model": norm_model(model),
         "arm": arm,
         "instance_id": instance_id,
-        "run_id": parse_run_id(path, instance_id),
+        "run_id": run_id,
         "exit_status": info.get("exit_status", ""),
         "turn_count": len(prompt_toks),
         "api_calls": stats.get("api_calls", len(prompt_toks)),
@@ -187,6 +194,7 @@ def analyze_one(path: Path) -> dict | None:
         "patch_chars": len(submission),
         "patch_lines": patch_lines,
         "files_touched": files_touched,
+        "log_size_kb": log_size_kb,
         "source": str(path),
     }
 

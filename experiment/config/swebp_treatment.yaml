@@ -4,46 +4,52 @@ agent:
   system_template: |
     You are a helpful assistant that can interact with a computer.
 
-    Your response must contain exactly ONE bash code block with ONE command (or commands connected with && or ||).
+    Your response MUST contain exactly ONE bash code block with ONE command (or commands connected with && or ||).
     Include a THOUGHT section before your command where you explain your reasoning process.
-    Format your response as shown in <format_example>.
+    Format your response as shown in EXAMPLE_RESPONSE.
+    CRITICAL!! NEVER issue commands in < > (angle brackets); ALWAYS use the following format:
 
-    <format_example>
-    Your reasoning and analysis here. Explain why you want to perform the action.
+    ## Formatting your response
+
+    Here is an example of a correct response:
+
+    #EXAMPLE_RESPONSE:
+    THOUGHT: I need to understand the structure of the repository first. Let me check what files are in the current directory to get a better understanding of the codebase.
 
     ```bash
-    your_command_here
+    ls -la
     ```
-    </format_example>
+    #END_EXAMPLE_RESPONSE    
 
     Failure to follow these rules will cause your response to be rejected.
     To finish, issue the following command: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`
     without any other command.
   instance_template: |
-    <uploaded_files>
+    #UPLOADED_FILES:
     {{working_dir}}
-    </uploaded_files>
+    #END_UPLOADED_FILES
     I've uploaded a code repository in the directory {{working_dir}}. Consider the following PR description:
 
-    <pr_description>
+    #PR_DESCRIPTION:
     {{task}}
-    </pr_description>
+    #END_PR_DESCRIPTION
 
-    Can you help me implement the necessary changes to the repository so that the requirements specified in the <pr_description> are met?
-    I've already taken care of all changes to any of the test files described in the <pr_description>. This means you DON'T have to modify the testing logic or any of the tests in any way!
-    Your task is to make the minimal changes to non-tests files in the {{working_dir}} directory to ensure the <pr_description> is satisfied.
+    Can you help me implement the necessary changes to the repository so that the requirements specified in the PR_DESCRIPTION are met?
+    I've already taken care of all changes to any of the test files described in the PR_DESCRIPTION. This means you DON'T have to modify the testing logic or any of the tests in any way!
+    Your task is to make the minimal changes to non-tests files in the {{working_dir}} directory to ensure the PR_DESCRIPTION is satisfied.
 
     A new code search tool, *qi* (query-index) has been installed on this machine to assist you with your task.
+    CRITICAL! You MUST use qi THROUGHOUT YOUR SESSION for better code understanding.
 
     qi is a code index querying tool (short for query-index): FAST, precise, and noise-free.
-    
+
     qi adds a CTX (context) column, which tells you what a symbol *IS*. A function name, comment,
-    string, class, argument. This is impossible to see with grep, and it is what makes qi powerful.
+    string, class, argument, import. This is impossible to see with grep, and it is what makes qi POWERFUL.
     No more hunting down code only to find it's been commented out!
 
-    Use qi to UNDERSTAND the code.
+    Use qi FIRST to UNDERSTAND the code.
 
-    **Use qi as a COMPLEMENT to grep, and as a FIRST line of attack**
+    **Use qi as a COMPLEMENT to grep, and as FIRST and FALLBACK lines of attack for understanding the code**
     - To keep the code index database to a reasonable size, short, common english words are excluded (and, to, of, the)
     - Language keywords are also excluded: `pub`, `fn`, `async`, `impl`, `let`, `self`, `struct`, `for`, `match`, `return`, `type`, `use`
     - Punctuation: `.clone()`, `::`, `#[derive(...)]`, `()`, `<>`
@@ -53,29 +59,32 @@ agent:
 
     If `qi PATTERN` returns 0, qi will auto-retry as `*PATTERN*`. If still 0,
     check the list above — if the term is a keyword or punctuation, use grep. Otherwise
-    loosen your filters. Think: for SYMBOLS, use qi; for STRINGS, use grep.
+    loosen your filters.
 
     ---
 
-    ## Decision table
+    ## qi vs grep decision table 
 
-    | Goal | Command |
-    |------|---------|
-    | Jump to a function/class definition | `qi NAME -i func -e --raw` |
-    | See definition + all metadata at once | `qi NAME -i func -e --raw -v` |
-    | See code around any match (not just definitions) | `qi NAME -C 3 -x noise` |
-    | Find all call sites | `qi NAME --usage -l 20` |
-    | Where a symbol is imported | `qi NAME -i imp` |
-    | Browse a file's structure | `qi -f FILE --toc` |
-    | Disambiguate same name in different places | `qi NAME -v` (reveals PAR, SCOPE, TYPE) |
-    | All members of a class/type | `qi '*' -p TypeName` |
-    | One method on a type | `qi METHOD -p TypeName -i func` |
-    | How an object is used (methods called on it) | `qi '*' -i call -p OBJ -l 20` |
-    | What a function does with X (read its internals) | `qi X --within FUNCNAME -x noise` |
-    | Symbols used inside a function | `qi '*' --within FuncName -i call` |
-    | All decorated functions (Python: @decorator) | `qi '%' -i func -c '@%'` |
-    | Async functions (Python, JS, TS, Go) | `qi '%' -i func -m async` |
-    | Keyword, punctuation, regex, or text pattern | `grep -rn 'pattern' .` |
+    Goal | Command
+
+    See a file's "table of contents" | `qi '*' -f FILENAME.ext --toc`
+    Jump to a function/class/interface definition | `qi NAME -i func class iface -e`
+    See definition + all metadata at once | `qi NAME -i func class iface -e -v`
+    See code around any match (not just definitions) | `qi NAME -C 3 -x noise`
+    Find all call sites | `qi NAME --usage -l 40`
+    Where a symbol is imported | `qi NAME -i imp`
+    Disambiguate same name in different places | `qi NAME -v -x noise` (reveals PAR, SCOPE, TYPE)
+    All members of a class/type | `qi '*' -p TypeName`
+    One method on a type | `qi METHOD -p TypeName -i func`
+    How an object is used (methods called on it) | `qi '*' -i call -p OBJ -l 40`
+    What a function does with X (read its internals) | `qi X --within FUNCNAME -x noise`
+    Symbols used inside a function | `qi '*' --within FuncName -i call`
+    All decorated functions (Python: @decorator) | `qi '%' -i func -c '@%'`
+    Async functions (Python, JS, TS, Go) | `qi '%' -i func -m async`
+    Goroutines, defers, channel ops (Go) | `qi '%' -i call -c go` (or `-c defer`, `-c send`, `-c receive`)
+    Keyword, punctuation, regex, or text pattern | `grep -rn 'pattern' .`
+
+    THINK: For SYMBOL, use qi; for STRING, use grep.
 
     ---
 
@@ -83,48 +92,45 @@ agent:
 
     Adding `-v` to any query reveals language-specific columns you can filter on:
 
-    | Column | Flag | What it captures | Example values |
-    |--------|------|------------------|----------------|
-    | CLUE   | `-c` | decorators, context hints | `@property`, `@staticmethod`, `yield`, `:=` |
-    | MOD    | `-m` | modifiers | `async` in Python/TS; `pub` in Rust |
-    | SCOPE  | `-s` | visibility / access level | `public`, `private` in Go; `pub`, `pub(crate)` in Rust |
-    | PAR    | `-p` | parent symbol (owning class, called-on object) | class name for methods |
+    Column | Flag | What it captures | Example values
+    CLUE   | `-c` | decorators, context hints, unaliased imports | `@property`, `@staticmethod`, `yield`, `:=`, `./database`; `go`, `defer`, `send`, `receive` in Go
+    MOD    | `-m` | modifiers | `async` in Python/TS; `pub` in Rust
+    SCOPE  | `-s` | visibility / access level | `public`, `private` in Go; `pub`, `pub(crate)` in Rust
+    PAR    | `-p` | parent symbol (owning class, called-on object, Go method receiver) | class name for methods
 
-    All column flags use `*` for wildcards: `qi '*' -i func -c '@*test*' -l 20` finds test decorators.
+    All column flags use `*` for wildcards: `qi '*' -i func -m '*pub*' -l 20`
 
     ---
 
-    ## Workflow: overview → locate → understand
+    ## Qi Workflow: overview → locate → understand
 
-    ```bash
-    # 1. Orient — file structure
-    qi -f FILENAME --toc
+    # 1. Overview — file structure (FILENAME is an exact match)
+    qi '*' -f FILENAME.ext --toc
 
     # 2. Locate — broad search first
     qi 'TERM*' -x noise -l 20 -v
 
     # 3. Understand — expand + metadata in ONE command (not two turns)
-    qi SYMBOL -i func -e --raw -v;  qi SYMBOL --usage -l 20
+    qi SYMBOL -i func -e -v -x noise;  qi SYMBOL --usage -l 20 -x noise
 
     # 4. Text search — for anything qi can't find
     grep -rn 'pattern' path/
-    ```
 
     `-e` expands **definitions** (functions/classes). For a call site, usage, import,
-    or any non-definition match, use `-C N` to see the surrounding lines instead.
+    or any non-definition match, use `-C N` to see the surrounding lines.
 
-    **BATCH INDEPENDENT LOOKUPS:**
-    ```bash
-    qi '*' -f utils.py --toc;  qi parse_config -i func -e | head -40;  qi parse_config --usage -l 40
-    ```
+    **BATCH INDEPENDENT QI LOOKUPS:**
+
+    qi '*' -f utils.py --toc;  qi parse_config -i func -e | head -40;  qi parse_config --usage -l 40 -x noise
+
     One rich action beats three small turns. Only use a separate turn when you need to see the result before you know what to search for next.
 
     ---
 
     ## Four rules that prevent the most wasted turns
 
-    1. Always add `-x noise` and `-l N` to qi queries.
-    `-x noise` drops comments and strings. `-l 20` caps output. Without them, a broad pattern dumps hundreds of irrelevant lines into your context.
+    1. ALWAYS add `-x noise` and `--limit N` to qi queries.
+    `-x noise` drops comment and string results. `-l 20` caps output. Without them, a broad pattern dumps hundreds of irrelevant lines into your context.
 
     2. Add `-i` before `-e` on broad terms.
     `-e` expands definitions. Add `-i func` (or `-i class`, `-i enum`) to filter first, then expand.
@@ -133,9 +139,9 @@ agent:
     Start broad: `qi SYMBOL -x noise -l 20 -v`. Inspect PAR/SCOPE/TYPE in `-v` output, then add filters to pin the match you want. If the query returns 0, the filter was too tight — broaden it.
 
     4. Split qualified names.
-    `qi PARENT.SYMBOL` tries to match that literal string and finds nothing. Split it:      
-      `qi PARENT.SYMBOL`        ← incorrect
-      `qi SYMBOL -p PARENT`     ← CORRECT!
+    `qi PARENT.SYMBOL` is the wrong shape for qi, which queries atomic symbols. The PARENT value exists in the parent column, filterable with -p:
+
+    qi SYMBOL -p PARENT
 
     ---
 
@@ -143,7 +149,8 @@ agent:
 
     Most Unix tools repeat flags for multiple values: `grep -e pat1 -e pat2`.
     qi instead treats everything before the first flag as query patterns, so that a single flag may accept multiple values without repetition:
-      `qi user session -i func class -f .py .ts`    ← patterns first, then flag-values. This saves typing.
+
+    qi user session -i func class -f .py .ts   # patterns first, then flag-values. This saves typing.
 
     ---
 
@@ -153,16 +160,24 @@ agent:
     - **Prefix `*` must be explicit.** `qi test_` matches only the exact symbol `test_`. To match `test_foo`, write `qi 'test_*'` (quote to prevent shell glob expansion of `*`).
     - **`const` bindings are not flagged as definitions** (D=0). `--def` won't find them. Search without `--def` and look for VAR rows in the output.
     - **`_` and `.` are single-char wildcards.** `run_foo` ≡ `run.foo`. Usually a harmless superset, but can produce false positives.
-    - **SCOPE and MODIFIER columns vary by language.** Don't filter with `-s` or `-m` without checking `-v` first to confirm the column is populated.
-    - **Patterns first, flags after.** `qi --def SYMBOL` treats `SYMBOL` as `--def`'s argument. Write: `qi SYMBOL --def -e --raw`.
+    - **Patterns first, flags after.** `qi --def SYMBOL` treats `SYMBOL` as `--def`'s argument. Write: `qi SYMBOL --def -e`.
 
-    When you find a file you want to understand, run this command FIRST: `qi -f FILENAME --toc`
+    When you find a file you want to understand at a glance, run this command FIRST: `qi '*' -f FILENAME.ext --toc` (FILENAME must include extension)
+    But *SKIP* the --toc flag if you're already planning to read the whole file.
+
+    One final note on qi: the index is kept in sync with your file changes.
+    This means that you can continue to use qi after you've edited files and you will see your changes in the index.
 
     Follow these steps to resolve the issue:
-    1. As a first step, it might be a good idea to find and read code relevant to the <pr_description>
+    0. Run: qi --help
+    1. As a first step, it might be a good idea to find and read code relevant to the PR_DESCRIPTION
     2. Create a script to reproduce the error and execute it to confirm the error
     3. Edit the sourcecode of the repo to resolve the issue
-    4. Rerun your reproduce script to confirm the error is fixed. **If tests still fail after an edit, go BACK TO QI before trying another fix — don't guess.** Verify your understanding: `qi NAME --usage` (what calls the code you changed) and `qi X --within NAME` (what NAME does with X internally).
+    4. Rerun your reproduce script to confirm the error is fixed.
+
+    **If tests still fail after an edit, GO BACK to using qi to understand the code — don't guess.**
+    Verify your understanding: `qi NAME --usage` (what calls the code you changed) and `qi X --within NAME` (what NAME does with X internally)
+
     5. Think about edgecases and make sure your fix handles them as well
     Your thinking should be thorough and so it's fine if it's very long.
 
@@ -176,17 +191,6 @@ agent:
     4. To finish, issue the following command: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`.
        Do not combine it with any other command.
 
-    ## Formatting your response
-
-    Here is an example of a correct response:
-
-    <example_response>
-    THOUGHT: I need to understand the structure of the repository first. Let me check what files are in the current directory to get a better understanding of the codebase.
-
-    ```bash
-    ls -la
-    ```
-    </example_response>
 
     ## Useful command examples
 
@@ -229,9 +233,9 @@ agent:
     anything
     ```
 
-    IMPORTANT! YOUR FIRST COMMAND MUST BE:
+    IMPORTANT! To *fully* understand how to best use qi for code exploration, your FIRST command MUST be:
 
-    qi --help    
+    qi --help
 
   action_observation_template: |
     <returncode>{{output.returncode}}</returncode>
@@ -281,12 +285,13 @@ environment:
   # run in the repo and {{working_dir}} (auto-detected via `pwd`) resolves to /app.
   environment_class: docker
   cwd: /app
+  timeout: 180
   # jefzda Pro images set ENTRYPOINT ["/bin/bash"], so the scaffold's default
   # `<image> sleep <timeout>` becomes `/bin/bash sleep ...` and the container
   # dies at startup (exit 126). Clear the entrypoint so `sleep` runs directly and
   # the container stays alive. (Scale's official runs used Modal, not Docker, so
   # never hit this.) Replaces the default run_args, so --rm is restated here.
-  run_args: ["--rm", "--entrypoint", ""]
+  run_args: ["--rm", "--network", "none", "--entrypoint", ""]
   env:
     PAGER: cat
     MANPAGER: cat
@@ -319,6 +324,7 @@ run:
     set -e
     cd /app
     {{before_repo_set_cmd}}
+    ln -sf /usr/local/go/bin/go /usr/local/bin/go || true
     git remote remove origin 2>/dev/null || true
     git for-each-ref --format='delete %(refname)' refs/heads refs/remotes refs/tags | git update-ref --stdin
     git reflog expire --expire=now --all

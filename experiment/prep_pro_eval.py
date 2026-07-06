@@ -26,10 +26,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 EXPERIMENT_DIR = Path(__file__).resolve().parent
 DEFAULT_SUBSET = str(EXPERIMENT_DIR / "data" / "swebench_pro")
+
+sys.path.insert(0, str(EXPERIMENT_DIR))
 
 # Columns swe_bench_pro_eval.py reads from the raw sample (see create_entryscript
 # and the scoring in main()). Dockerfiles come from the eval repo on disk, not here.
@@ -63,7 +66,7 @@ def main() -> int:
     ap.add_argument("--split", default="test")
     args = ap.parse_args()
 
-    from datasets import load_dataset
+    from lib.pro_dataset import load_pro_dataset
 
     patches = load_predictions(Path(args.preds))
     if not patches:
@@ -71,7 +74,7 @@ def main() -> int:
         return 1
     print(f"{len(patches)} prediction(s) loaded")
 
-    ds = load_dataset(args.subset, split=args.split)
+    ds = load_pro_dataset(args.subset, split=args.split)
     by_id = {r["instance_id"]: r for r in ds}
 
     out_dir = Path(args.out_dir)

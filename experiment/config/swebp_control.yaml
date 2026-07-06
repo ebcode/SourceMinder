@@ -4,37 +4,42 @@ agent:
   system_template: |
     You are a helpful assistant that can interact with a computer.
 
-    Your response must contain exactly ONE bash code block with ONE command (or commands connected with && or ||).
+    Your response MUST contain exactly ONE bash code block with ONE command (or commands connected with && or ||).
     Include a THOUGHT section before your command where you explain your reasoning process.
-    Format your response as shown in <format_example>.
+    Format your response as shown in EXAMPLE_RESPONSE.
+    CRITICAL!! NEVER issue commands in < > (angle brackets); ALWAYS use the following format:
 
-    <format_example>
-    Your reasoning and analysis here. Explain why you want to perform the action.
+    ## Formatting your response
+
+    Here is an example of a correct response:
+
+    #EXAMPLE_RESPONSE:
+    THOUGHT: I need to understand the structure of the repository first. Let me check what files are in the current directory to get a better understanding of the codebase.
 
     ```bash
-    your_command_here
+    ls -la
     ```
-    </format_example>
+    #END_EXAMPLE_RESPONSE    
 
     Failure to follow these rules will cause your response to be rejected.
     To finish, issue the following command: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`
     without any other command.
   instance_template: |
-    <uploaded_files>
+    #UPLOADED_FILES:
     {{working_dir}}
-    </uploaded_files>
+    #END_UPLOADED_FILES
     I've uploaded a code repository in the directory {{working_dir}}. Consider the following PR description:
 
-    <pr_description>
+    #PR_DESCRIPTION:
     {{task}}
-    </pr_description>
+    #END_PR_DESCRIPTION
 
-    Can you help me implement the necessary changes to the repository so that the requirements specified in the <pr_description> are met?
-    I've already taken care of all changes to any of the test files described in the <pr_description>. This means you DON'T have to modify the testing logic or any of the tests in any way!
-    Your task is to make the minimal changes to non-tests files in the {{working_dir}} directory to ensure the <pr_description> is satisfied.
-    
+    Can you help me implement the necessary changes to the repository so that the requirements specified in the PR_DESCRIPTION are met?
+    I've already taken care of all changes to any of the test files described in the PR_DESCRIPTION. This means you DON'T have to modify the testing logic or any of the tests in any way!
+    Your task is to make the minimal changes to non-tests files in the {{working_dir}} directory to ensure the PR_DESCRIPTION is satisfied.
+
     Follow these steps to resolve the issue:
-    1. As a first step, it might be a good idea to find and read code relevant to the <pr_description>
+    1. As a first step, it might be a good idea to find and read code relevant to the PR_DESCRIPTION
     2. Create a script to reproduce the error and execute it to confirm the error
     3. Edit the sourcecode of the repo to resolve the issue
     4. Rerun your reproduce script and confirm that the error is fixed!
@@ -50,18 +55,6 @@ agent:
        Only prefix a `cd` when you need a *DIFFERENT* directory for that one command: `MY_ENV_VAR=MY_VALUE cd /other/path && ...`. You can also write/load environment variables from files.
     4. To finish, issue the following command: `echo COMPLETE_TASK_AND_SUBMIT_FINAL_OUTPUT`.
        Do not combine it with any other command.
-
-    ## Formatting your response
-
-    Here is an example of a correct response:
-
-    <example_response>
-    THOUGHT: I need to understand the structure of the repository first. Let me check what files are in the current directory to get a better understanding of the codebase.
-
-    ```bash
-    ls -la
-    ```
-    </example_response>
 
     ## Useful command examples
 
@@ -103,6 +96,7 @@ agent:
     ```bash
     anything
     ```
+
   action_observation_template: |
     <returncode>{{output.returncode}}</returncode>
     {% if output.output | length < 10000 -%}
@@ -151,12 +145,13 @@ environment:
   # run in the repo and {{working_dir}} (auto-detected via `pwd`) resolves to /app.
   environment_class: docker
   cwd: /app
+  timeout: 180
   # jefzda Pro images set ENTRYPOINT ["/bin/bash"], so the scaffold's default
   # `<image> sleep <timeout>` becomes `/bin/bash sleep ...` and the container
   # dies at startup (exit 126). Clear the entrypoint so `sleep` runs directly and
   # the container stays alive. (Scale's official runs used Modal, not Docker, so
   # never hit this.) Replaces the default run_args, so --rm is restated here.
-  run_args: ["--rm", "--entrypoint", ""]
+  run_args: ["--rm", "--network", "none", "--entrypoint", ""]
   env:
     PAGER: cat
     MANPAGER: cat
@@ -187,6 +182,7 @@ run:
     set -e
     cd /app
     {{before_repo_set_cmd}}
+    ln -sf /usr/local/go/bin/go /usr/local/bin/go || true
     git remote remove origin 2>/dev/null || true
     git for-each-ref --format='delete %(refname)' refs/heads refs/remotes refs/tags | git update-ref --stdin
     git reflog expire --expire=now --all

@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import traceback
 from pathlib import Path
@@ -332,12 +333,12 @@ def main() -> int:
     args = parser.parse_args()
 
     load_env_file(ENV_FILE)
+    # Enable litellm debug output so rate-limit retries appear in the log.
+    os.environ.setdefault("LITELLM_LOG", "DEBUG")
 
     # Imports happen after arg parsing so --help works without the Pro venv.
     try:
         import yaml
-        from datasets import load_dataset
-        from minisweagent.agents.interactive import InteractiveAgent
         from minisweagent.models import get_model
         from minisweagent.run.extra.swebench import DATASET_MAPPING, get_sb_environment
         from minisweagent.run.utils.save import save_traj
@@ -346,6 +347,11 @@ def main() -> int:
               f"  {EXPERIMENT_DIR}/.venv_pro/bin/python {Path(__file__).name} ...",
               file=sys.stderr)
         return 2
+
+    sys.path.insert(0, str(EXPERIMENT_DIR))
+    from lib.pro_dataset import load_pro_dataset
+    from lib.guarded_agent import GuardedInteractiveAgent
+    from lib.patch_files import diff_files
 
     config_path = Path(args.config) if args.config else \
         EXPERIMENT_DIR / "config" / f"{args.arm}.yaml"
@@ -357,7 +363,7 @@ def main() -> int:
     dataset_path = DATASET_MAPPING.get(args.subset, args.subset)
     print(f"Loading {dataset_path} split={args.split} ...", flush=True)
     instances = {inst["instance_id"]: inst
-                 for inst in load_dataset(dataset_path, split=args.split)}
+                 for inst in load_pro_dataset(dataset_path, split=args.split)}
     if args.instance not in instances:
         print(f"ERROR: instance {args.instance!r} not in dataset", file=sys.stderr)
         return 1
@@ -388,12 +394,15 @@ def main() -> int:
             # already-on-disk files, so the reconcile is what makes qi see them.
             reconcile_startup_changes(env, indexer_name)
             daemon_stop = start_indexer_daemon(env, indexer_name)
-    agent = InteractiveAgent(
+    agent = GuardedInteractiveAgent(
         get_model(args.model, config.get("model", {})),
         env,
         **({"mode": "yolo"} | config.get("agent", {})),
     )
 
+    print(f"Agent starting: {args.model}  arm={args.arm}  "
+          f"(first API call may take 1-5 min under rate-limit backoff -- "
+          f"do not interrupt)", file=sys.stderr, flush=True)
     exit_status, result, patch, extra_info = None, None, "", None
     patch_recovered = False
     try:
@@ -416,6 +425,21 @@ def main() -> int:
         daemon_stop()
         if patch_recovered:
             extra_info = {**(extra_info or {}), "patch_recovered": True}
+        # A patch whose files are entirely a subset of test_patch's files means
+        # no non-test source file was touched -- the agent was told not to edit
+        # tests, so a real fix can't look like this. Confirmed on
+        # tutanota-fbdb72a2bd rep01: a hallucinated session (see
+        # lib/guarded_agent.py) terminated after step 1 and the "patch" turned
+        # out to be nothing but the container startup's test_patch checkout.
+        suspect_test_only_patch = False
+        if patch:
+            patch_touched = diff_files(patch)
+            test_touched = diff_files(instance.get("test_patch") or "")
+            suspect_test_only_patch = bool(patch_touched) and patch_touched <= test_touched
+            if suspect_test_only_patch:
+                print(f"\nWARNING: submitted patch touches only test_patch files "
+                      f"({sorted(patch_touched)}) -- likely no real fix was made",
+                      file=sys.stderr)
         save_traj(agent, traj_path, exit_status=exit_status, result=patch or result,
                   extra_info=extra_info)
         # .pred in the format gather_patches.py expects (JSON w/ model_patch).
@@ -424,6 +448,7 @@ def main() -> int:
             "model_patch": patch or "",
             "model_name_or_path": args.model,
             "patch_recovered": patch_recovered,
+            "suspect_test_only_patch": suspect_test_only_patch,
         }) + "\n")
         treatment_cleanup()
 

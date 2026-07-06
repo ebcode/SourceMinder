@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import re
 import sys
 from pathlib import Path
@@ -41,14 +42,34 @@ HF_DATASET = "ScaleAI/SWE-bench_Pro"
 HF_SPLIT = "test"
 IMAGE_NAMESPACE = "jefzda/sweap-images"
 
+
+def _decode_json_string(s: str) -> str:
+    """If *s* is a JSON-encoded string (surrounded by double-quotes with
+    \\n / \\t / \\uXXXX escape sequences), decode it to a plain string.
+    Otherwise return the original.
+
+    The upstream SWE-bench Pro dataset stores problem_statement, requirements,
+    and interface as JSON strings, which means newlines appear as literal ``\\n``
+    in the raw data.  The downstream agent must see real newlines.
+    """
+    s = s.strip()
+    if s.startswith('"') and s.endswith('"'):
+        try:
+            return json.loads(s)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            pass
+    return s
+
+
 # The official Pro scaffold (scaleapi/mini-swe-agent) folds three dataset fields
 # into the single problem_statement it shows the agent. Format byte-verified
 # against vendor/swebench_pro_mini/data/swebench_pro_mini_example_instances.yaml:
 #   {problem_statement}\n\nRequirements:\n{requirements}\n\nNew interfaces introduced:\n{interface}
 def compose_problem_statement(problem_statement: str, requirements: str,
                               interface: str) -> str:
-    return (f"{problem_statement}\n\nRequirements:\n{requirements}"
-            f"\n\nNew interfaces introduced:\n{interface}")
+    return (f"{_decode_json_string(problem_statement)}\n\n"
+            f"Requirements:\n{_decode_json_string(requirements)}"
+            f"\n\nNew interfaces introduced:\n{_decode_json_string(interface)}")
 
 OUT_DATASET_DIR = paths.DATA_DIR / "swebench_pro"
 OUT_PARQUET = OUT_DATASET_DIR / "test.parquet"

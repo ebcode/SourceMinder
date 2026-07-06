@@ -244,12 +244,13 @@ environment:
   # run in the repo and {{working_dir}} (auto-detected via `pwd`) resolves to /app.
   environment_class: docker
   cwd: /app
+  timeout: 180
   # jefzda Pro images set ENTRYPOINT ["/bin/bash"], so the scaffold's default
   # `<image> sleep <timeout>` becomes `/bin/bash sleep ...` and the container
   # dies at startup (exit 126). Clear the entrypoint so `sleep` runs directly and
   # the container stays alive. (Scale's official runs used Modal, not Docker, so
   # never hit this.) Replaces the default run_args, so --rm is restated here.
-  run_args: ["--rm", "--entrypoint", ""]
+  run_args: ["--rm", "--network", "none", "--entrypoint", ""]
   env:
     PAGER: cat
     MANPAGER: cat

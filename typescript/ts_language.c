@@ -113,6 +113,10 @@ static struct {
     TSSymbol pair;
     TSSymbol template_substitution;
     TSSymbol class_body;
+    TSSymbol generator_function;
+    TSSymbol generator_function_declaration;
+    TSSymbol shorthand_property_identifier_pattern;
+    TSSymbol pair_pattern;
 } ts_symbols;
 
 /* Removed: Now using safe_extract_node_text() from shared/string_utils.h */
@@ -226,6 +230,10 @@ static void init_ts_symbols(const TSLanguage *language) {
     ts_symbols.pair = ts_language_symbol_for_name(language, "pair", 4, true);
     ts_symbols.template_substitution = ts_language_symbol_for_name(language, "template_substitution", 21, true);
     ts_symbols.class_body = ts_language_symbol_for_name(language, "class_body", 10, true);
+    ts_symbols.generator_function = ts_language_symbol_for_name(language, "generator_function", 18, true);
+    ts_symbols.generator_function_declaration = ts_language_symbol_for_name(language, "generator_function_declaration", 30, true);
+    ts_symbols.shorthand_property_identifier_pattern = ts_language_symbol_for_name(language, "shorthand_property_identifier_pattern", 37, true);
+    ts_symbols.pair_pattern = ts_language_symbol_for_name(language, "pair_pattern", 12, true);
 }
 
 static void visit_node(TSNode node, const char *source_code, const char *directory,
@@ -1079,21 +1087,43 @@ static void handle_import_statement(TSNode node, const char *source_code, const 
                                     int line) {
     /* Query-based approach - replaces 4 nested loops with declarative pattern matching */
     const char *query_string =
+        /* Plain named import: import { A } → capture A */
         "(import_statement"
         "  (import_clause"
         "    (named_imports"
         "      (import_specifier"
-        "        name: (identifier) @importname))))"
+        "        !alias"
+        "        (identifier) @importdirect))))"
         "\n"
+        /* Aliased named import: import { A as B } → capture B (local name) */
         "(import_statement"
         "  (import_clause"
         "    (named_imports"
         "      (import_specifier"
-        "        !name"
-        "        (identifier) @importdirect))))";
+        "        alias: (identifier) @importalias))))"
+        "\n"
+        /* Default import: import X from 'mod' → capture X */
+        "(import_statement"
+        "  (import_clause"
+        "    (identifier) @importdefault))";
 
     TSQuery *query = compile_query(tree_sitter_typescript(), &import_query, query_string);
     if (!query) return;
+
+    /* Extract module path from source: field — same for all bindings in this statement */
+    char mod_path[SYMBOL_MAX_LENGTH];
+    mod_path[0] = '\0';
+    TSNode source_node = ts_node_child_by_field_name(node, "source", 6);
+    if (!ts_node_is_null(source_node)) {
+        uint32_t sc = ts_node_child_count(source_node);
+        for (uint32_t i = 0; i < sc; i++) {
+            TSNode frag = ts_node_child(source_node, i);
+            if (ts_node_symbol(frag) == ts_symbols.string_fragment) {
+                safe_extract_node_text(source_code, frag, mod_path, sizeof(mod_path), filename);
+                break;
+            }
+        }
+    }
 
     TSQueryCursor *cursor = ts_query_cursor_new();
     ts_query_cursor_exec(cursor, query, node);
@@ -1107,7 +1137,8 @@ static void handle_import_statement(TSNode node, const char *source_code, const 
             get_capture_text(source_code, capture.node, symbol, sizeof(symbol), filename);
 
             if (filter_should_index(filter, symbol)) {
-                add_entry(result, symbol, line, CONTEXT_IMPORT, directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
+                add_entry(result, symbol, line, CONTEXT_IMPORT, directory, filename, NULL,
+                    &(ExtColumns){.clue = mod_path[0] ? mod_path : NULL});
             }
         }
     }
@@ -1705,49 +1736,180 @@ static void handle_method_definition(TSNode node, const char *source_code, const
     }
 }
 
+/* Returns true if sym is a function-valued expression: arrow, function expr, or generator. */
+static int is_function_value(TSSymbol sym) {
+    return sym == ts_symbols.arrow_function ||
+           sym == ts_symbols.function_expression ||
+           sym == ts_symbols.generator_function;
+}
+
+/* Returns true if node is a call_expression whose callee is the identifier "require". */
+static int is_require_call(TSNode node, const char *source_code, const char *filename) {
+    if (ts_node_symbol(node) != ts_symbols.call_expression) return 0;
+    TSNode callee = ts_node_child_by_field_name(node, "function", 8);
+    if (ts_node_is_null(callee) || ts_node_symbol(callee) != ts_symbols.identifier) return 0;
+    /* Short-circuit: "require" is exactly 7 bytes; any longer identifier is not it */
+    uint32_t len = ts_node_end_byte(callee) - ts_node_start_byte(callee);
+    if (len != 7) return 0;
+    char name[8];
+    safe_extract_node_text(source_code, callee, name, sizeof(name), filename);
+    return strcmp(name, "require") == 0;
+}
+
+/* Extracts parameters and body from a function/arrow/generator node without
+ * emitting a lambda row.  Used by A1/A2/A3 to index body contents after the
+ * binding itself has been emitted as FUNC. */
+static void handle_function_body(TSNode fn_node, const char *source_code,
+                                  const char *directory, const char *filename,
+                                  ParseResult *result, SymbolFilter *filter) {
+    TSNode params = ts_node_child_by_field_name(fn_node, "parameters", 10);
+    extract_parameters(params, source_code, directory, filename, result, filter, 1);
+    TSNode body = ts_node_child_by_field_name(fn_node, "body", 4);
+    if (!ts_node_is_null(body)) {
+        process_children(body, source_code, directory, filename, result, filter);
+    }
+}
+
+/* Extract the string literal argument from a require('...') call into out.
+ * Leaves out[0] == '\0' if the argument is non-literal (dynamic require). */
+static void extract_require_path(TSNode call_node, const char *source_code,
+                                  char *out, size_t out_size, const char *filename) {
+    out[0] = '\0';
+    TSNode args = ts_node_child_by_field_name(call_node, "arguments", 9);
+    if (ts_node_is_null(args)) return;
+    uint32_t count = ts_node_named_child_count(args);
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode arg = ts_node_named_child(args, i);
+        if (ts_node_symbol(arg) == ts_symbols.string) {
+            uint32_t sc = ts_node_child_count(arg);
+            for (uint32_t j = 0; j < sc; j++) {
+                TSNode frag = ts_node_child(arg, j);
+                if (ts_node_symbol(frag) == ts_symbols.string_fragment) {
+                    safe_extract_node_text(source_code, frag, out, out_size, filename);
+                    return;
+                }
+            }
+        }
+    }
+}
+
+/* Walk an object_pattern and emit context for each binding name.
+ * Handles shorthand { a, b } and renamed { a: local } patterns.
+ * clue is stored on each emitted row (e.g. the module path for IMP rows). */
+static void extract_pattern_bindings(TSNode pattern, const char *source_code,
+                                      const char *directory, const char *filename,
+                                      ParseResult *result, SymbolFilter *filter,
+                                      int line, ContextType context, const char *clue) {
+    uint32_t count = ts_node_child_count(pattern);
+    char sym[SYMBOL_MAX_LENGTH];
+    for (uint32_t i = 0; i < count; i++) {
+        TSNode child = ts_node_child(pattern, i);
+        TSSymbol csym = ts_node_symbol(child);
+        if (csym == ts_symbols.shorthand_property_identifier_pattern) {
+            /* { meta, foo } — binding name is the node text */
+            safe_extract_node_text(source_code, child, sym, sizeof(sym), filename);
+            if (filter_should_index(filter, sym)) {
+                add_entry(result, sym, line, context, directory, filename, NULL,
+                    &(ExtColumns){.clue = clue});
+            }
+        } else if (csym == ts_symbols.pair_pattern) {
+            /* { bar: localBar } — binding name is the value field */
+            TSNode value = ts_node_child_by_field_name(child, "value", 5);
+            if (!ts_node_is_null(value) && ts_node_symbol(value) == ts_symbols.identifier) {
+                safe_extract_node_text(source_code, value, sym, sizeof(sym), filename);
+                if (filter_should_index(filter, sym)) {
+                    add_entry(result, sym, line, context, directory, filename, NULL,
+                        &(ExtColumns){.clue = clue});
+                }
+            }
+        }
+    }
+}
+
 static void handle_variable_declaration(TSNode node, const char *source_code, const char *directory,
                                         const char *filename, ParseResult *result, SymbolFilter *filter,
                                         int line) {
     char symbol[SYMBOL_MAX_LENGTH];
     char type_str[SYMBOL_MAX_LENGTH];
     char location[SOURCE_LOCATION_MAX_LENGTH];
-    TSNode declarator = ts_node_child_by_field_name(node, "declarator", 10);
-    if (ts_node_is_null(declarator)) {
-        /* Try to find variable_declarator child */
-        uint32_t child_count = ts_node_child_count(node);
-        for (uint32_t i = 0; i < child_count; i++) {
-            TSNode child = ts_node_child(node, i);
-            if (ts_node_symbol(child) == ts_symbols.variable_declarator) {
-                TSNode name_node = ts_node_child_by_field_name(child, "name", 4);
-                if (!ts_node_is_null(name_node)) {
-                    TSSymbol name_sym = ts_node_symbol(name_node);
-                    /* Skip destructuring patterns - they're not meaningful symbol names */
-                    if (name_sym == ts_symbols.array_pattern || name_sym == ts_symbols.object_pattern) {
-                        continue;
-                    }
-                    safe_extract_node_text(source_code, name_node, symbol, sizeof(symbol), filename);
 
-                    /* Extract type annotation if present */
-                    type_str[0] = '\0';
-                    TSNode type_annotation = ts_node_child_by_field_name(child, "type", 4);
-                    if (!ts_node_is_null(type_annotation)) {
-                        extract_type_from_annotation(type_annotation, source_code, type_str, sizeof(type_str), filename);
-                    }
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        if (ts_node_symbol(child) != ts_symbols.variable_declarator) continue;
 
-                    if (filter_should_index(filter, symbol)) {
-                        /* Extract source location for full variable declaration */
-                        format_source_location(node, location, sizeof(location));
+        TSNode name_node  = ts_node_child_by_field_name(child, "name",  4);
+        TSNode value_node = ts_node_child_by_field_name(child, "value", 5);
+        if (ts_node_is_null(name_node)) continue;
 
-                        add_entry(result, symbol, line, CONTEXT_VARIABLE, directory, filename, location,
-                            &(ExtColumns){.type = type_str[0] ? type_str : NULL, .definition = "1"});
-                    }
+        TSSymbol name_sym = ts_node_symbol(name_node);
+
+        /* Destructuring patterns: object_pattern or array_pattern */
+        if (name_sym == ts_symbols.array_pattern || name_sym == ts_symbols.object_pattern) {
+            if (!ts_node_is_null(value_node) && is_require_call(value_node, source_code, filename)) {
+                /* C1: const { a, b } = require('…') → each binding becomes IMP */
+                if (name_sym == ts_symbols.object_pattern) {
+                    char mod_path[SYMBOL_MAX_LENGTH];
+                    extract_require_path(value_node, source_code, mod_path, sizeof(mod_path), filename);
+                    extract_pattern_bindings(name_node, source_code, directory, filename,
+                                             result, filter, line, CONTEXT_IMPORT,
+                                             mod_path[0] ? mod_path : NULL);
                 }
+                /* Emit module path as STR */
+                process_children(value_node, source_code, directory, filename, result, filter);
+            } else if (!ts_node_is_null(value_node)) {
+                /* Plain destructuring — traverse value for nested calls/strings */
+                process_children(value_node, source_code, directory, filename, result, filter);
+            }
+            continue;
+        }
+
+        safe_extract_node_text(source_code, name_node, symbol, sizeof(symbol), filename);
+
+        if (!ts_node_is_null(value_node)) {
+            TSSymbol value_sym = ts_node_symbol(value_node);
+
+            if (is_function_value(value_sym)) {
+                /* A1: const x = () => {} / function(){} / function*(){} → FUNC */
+                if (filter_should_index(filter, symbol)) {
+                    format_source_location(value_node, location, sizeof(location));
+                    add_entry(result, symbol, line, CONTEXT_FUNCTION, directory, filename, location,
+                        &(ExtColumns){.definition = "1"});
+                }
+                handle_function_body(value_node, source_code, directory, filename, result, filter);
+                continue;
+            }
+
+            if (is_require_call(value_node, source_code, filename)) {
+                /* C1: const x = require('…') → IMP with module path as clue */
+                if (filter_should_index(filter, symbol)) {
+                    char mod_path[SYMBOL_MAX_LENGTH];
+                    extract_require_path(value_node, source_code, mod_path, sizeof(mod_path), filename);
+                    add_entry(result, symbol, line, CONTEXT_IMPORT, directory, filename, NULL,
+                        &(ExtColumns){.clue = mod_path[0] ? mod_path : NULL});
+                }
+                /* Emit module path as STR */
+                process_children(value_node, source_code, directory, filename, result, filter);
+                continue;
             }
         }
-    }
 
-    /* Process children to traverse into the value (RHS) where lambdas may be */
-    process_children(node, source_code, directory, filename, result, filter);
+        /* Plain variable — VAR with type annotation */
+        type_str[0] = '\0';
+        TSNode type_annotation = ts_node_child_by_field_name(child, "type", 4);
+        if (!ts_node_is_null(type_annotation)) {
+            extract_type_from_annotation(type_annotation, source_code, type_str, sizeof(type_str), filename);
+        }
+        if (filter_should_index(filter, symbol)) {
+            format_source_location(node, location, sizeof(location));
+            add_entry(result, symbol, line, CONTEXT_VARIABLE, directory, filename, location,
+                &(ExtColumns){.type = type_str[0] ? type_str : NULL, .definition = "1"});
+        }
+        /* Traverse value for nested calls, strings, etc. */
+        if (!ts_node_is_null(value_node)) {
+            process_children(value_node, source_code, directory, filename, result, filter);
+        }
+    }
 }
 
 static void handle_property_signature(TSNode node, const char *source_code, const char *directory,
@@ -1934,9 +2096,17 @@ static void handle_assignment_expression(TSNode node, const char *source_code, c
                                          int line) {
     char symbol[SYMBOL_MAX_LENGTH];
     char parent[SYMBOL_MAX_LENGTH];
+    TSNode right_node = ts_node_child_by_field_name(node, "right", 5);
+    int rhs_is_function = 0;
+    int first_lhs = 1;
 
     if (g_debug) {
         fprintf(stderr, "[DEBUG] handle_assignment_expression: called at line %d\n", line);
+    }
+
+    /* A2: check once up front if the RHS is a function value */
+    if (!ts_node_is_null(right_node)) {
+        rhs_is_function = is_function_value(ts_node_symbol(right_node));
     }
 
     /* Get the left side of the assignment */
@@ -1997,45 +2167,57 @@ static void handle_assignment_expression(TSNode node, const char *source_code, c
             }
         }
 
-        /* Index this property */
+            /* Index this property — outermost LHS becomes FUNC when RHS is a function (A2) */
         if (filter_should_index(filter, symbol)) {
-            if (g_debug) {
-                fprintf(stderr, "[DEBUG] handle_assignment_expression: INDEXING LHS '%s' as PROP at line %d parent='%s'\n",
-                        symbol, line, parent[0] ? parent : "(none)");
+            if (rhs_is_function && first_lhs) {
+                if (g_debug) {
+                    fprintf(stderr, "[DEBUG] handle_assignment_expression: INDEXING LHS '%s' as FUNC at line %d parent='%s'\n",
+                            symbol, line, parent[0] ? parent : "(none)");
+                }
+                char loc[SOURCE_LOCATION_MAX_LENGTH];
+                format_source_location(right_node, loc, sizeof(loc));
+                add_entry(result, symbol, line, CONTEXT_FUNCTION, directory, filename, loc,
+                    &(ExtColumns){.parent = parent[0] ? parent : NULL, .definition = "1"});
+            } else {
+                if (g_debug) {
+                    fprintf(stderr, "[DEBUG] handle_assignment_expression: INDEXING LHS '%s' as PROP at line %d parent='%s'\n",
+                            symbol, line, parent[0] ? parent : "(none)");
+                }
+                add_entry(result, symbol, line, CONTEXT_PROPERTY, directory, filename, NULL,
+                    &(ExtColumns){.parent = parent[0] ? parent : NULL, .definition = "1"});
             }
-            add_entry(result, symbol, line, CONTEXT_PROPERTY, directory, filename, NULL,
-                &(ExtColumns){.parent = parent[0] ? parent : NULL, .definition = "1"});
         }
 
+        first_lhs = 0;
         /* Move up the chain */
         current = object_node;
     }
 
-    /* Index the RHS identifier if it's a simple identifier (parameter usage) */
-    TSNode right_node = ts_node_child_by_field_name(node, "right", 5);
-    if (!ts_node_is_null(right_node)) {
-        const char *right_type = ts_node_type(right_node);
-        if (right_type && strcmp(right_type, "identifier") == 0) {
-            char rhs_symbol[SYMBOL_MAX_LENGTH];
-            safe_extract_node_text(source_code, right_node, rhs_symbol, sizeof(rhs_symbol), filename);
-
-            if (filter_should_index(filter, rhs_symbol)) {
-                if (g_debug) {
-                    fprintf(stderr, "[DEBUG] handle_assignment_expression: INDEXING RHS '%s' as VAR at line %d\n",
-                            rhs_symbol, line);
+    if (rhs_is_function) {
+        /* A2: process function body without emitting an anonymous LAM */
+        handle_function_body(right_node, source_code, directory, filename, result, filter);
+    } else {
+        /* Index the RHS identifier if it's a simple identifier (parameter usage) */
+        if (!ts_node_is_null(right_node)) {
+            const char *right_type = ts_node_type(right_node);
+            if (right_type && strcmp(right_type, "identifier") == 0) {
+                char rhs_symbol[SYMBOL_MAX_LENGTH];
+                safe_extract_node_text(source_code, right_node, rhs_symbol, sizeof(rhs_symbol), filename);
+                if (filter_should_index(filter, rhs_symbol)) {
+                    if (g_debug) {
+                        fprintf(stderr, "[DEBUG] handle_assignment_expression: INDEXING RHS '%s' as VAR at line %d\n",
+                                rhs_symbol, line);
+                    }
+                    add_entry(result, rhs_symbol, line, CONTEXT_VARIABLE,
+                        directory, filename, NULL, &(ExtColumns){.definition = "0"});
                 }
-                add_entry(result, rhs_symbol, line, CONTEXT_VARIABLE,
-                    directory, filename, NULL, &(ExtColumns){.definition = "0"});
             }
         }
+        if (g_debug) {
+            fprintf(stderr, "[DEBUG] handle_assignment_expression: calling process_children with skip at line %d\n", line);
+        }
+        process_children(node, source_code, directory, filename, result, filter);
     }
-
-    /* Process children to index RHS (e.g., function calls, complex expressions) */
-    /* Skip identifier and member_expression children since we already indexed them above */
-    if (g_debug) {
-        fprintf(stderr, "[DEBUG] handle_assignment_expression: calling process_children with skip at line %d\n", line);
-    }
-    process_children(node, source_code, directory, filename, result, filter);
 }
 
 static void handle_shorthand_property_identifier(TSNode node, const char *source_code, const char *directory,
@@ -2056,20 +2238,31 @@ static void handle_pair(TSNode node, const char *source_code, const char *direct
                         const char *filename, ParseResult *result, SymbolFilter *filter,
                         int line) {
     char symbol[SYMBOL_MAX_LENGTH];
+    char location[SOURCE_LOCATION_MAX_LENGTH];
 
-    /* Extract the property name from pair syntax: { name: 'value' } */
+    /* Extract the property name from pair syntax: { name: value } */
     TSNode key_node = ts_node_child_by_field_name(node, "key", 3);
-    if (!ts_node_is_null(key_node)) {
-        const char *key_type = ts_node_type(key_node);
+    if (ts_node_is_null(key_node)) return;
 
-        /* Only index property_identifier keys, not computed/string keys */
-        if (key_type && strcmp(key_type, "property_identifier") == 0) {
-            safe_extract_node_text(source_code, key_node, symbol, sizeof(symbol), filename);
+    const char *key_type = ts_node_type(key_node);
+    /* Only index property_identifier keys, not computed/string keys */
+    if (!key_type || strcmp(key_type, "property_identifier") != 0) return;
 
-            if (filter_should_index(filter, symbol)) {
-                add_entry(result, symbol, line, CONTEXT_PROPERTY, directory, filename, NULL,
-                    &(ExtColumns){.definition = "0"});
-            }
+    safe_extract_node_text(source_code, key_node, symbol, sizeof(symbol), filename);
+
+    TSNode value_node = ts_node_child_by_field_name(node, "value", 5);
+    if (!ts_node_is_null(value_node) && is_function_value(ts_node_symbol(value_node))) {
+        /* A3: { prop: () => {} } or { prop: function(){} } → FUNC */
+        if (filter_should_index(filter, symbol)) {
+            format_source_location(value_node, location, sizeof(location));
+            add_entry(result, symbol, line, CONTEXT_FUNCTION, directory, filename, location,
+                &(ExtColumns){.definition = "1"});
+        }
+        handle_function_body(value_node, source_code, directory, filename, result, filter);
+    } else {
+        if (filter_should_index(filter, symbol)) {
+            add_entry(result, symbol, line, CONTEXT_PROPERTY, directory, filename, NULL,
+                &(ExtColumns){.definition = "0"});
         }
     }
 }
@@ -2196,7 +2389,8 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
         handle_return_statement(node, source_code, directory, filename, result, filter, line);
         return;
     }
-    if (node_sym == ts_symbols.function_declaration) {
+    if (node_sym == ts_symbols.function_declaration ||
+        node_sym == ts_symbols.generator_function_declaration) {
         handle_function_declaration(node, source_code, directory, filename, result, filter, line);
         return;
     }
@@ -2255,9 +2449,10 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
         handle_arrow_function(node, source_code, directory, filename, result, filter, line);
         return;
     }
-    if (node_sym == ts_symbols.function_expression) {
+    if (node_sym == ts_symbols.function_expression ||
+        node_sym == ts_symbols.generator_function) {
         if (g_debug) {
-            fprintf(stderr, "[DEBUG] visit_node: calling handler for function_expression\n");
+            fprintf(stderr, "[DEBUG] visit_node: calling handler for function_expression/generator_function\n");
         }
         handle_function_expression(node, source_code, directory, filename, result, filter, line);
         return;

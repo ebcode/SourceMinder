@@ -188,6 +188,15 @@ static const char* display_context(const char *context_type, int compact) {
     return context_to_string(type, 0);
 }
 
+/* Print an "unrecognized context type" error with the accepted names, for a
+ * bad -i/-x argument. `flag` is "-i" or "-x"; `given` is the user's raw arg. */
+static void report_invalid_context(const char *flag, const char *given) {
+    fprintf(stderr, "Error: unrecognized context type '%s' for %s.\n", given, flag);
+    fprintf(stderr, "Valid types: class iface func arg var exc type prop com str file "
+                    "imp exp call ns enum case trait lam label goto macro\n");
+    fprintf(stderr, "Note: Go structs index as 'class', interfaces as 'iface'.\n");
+}
+
 /* Flag presence bits */
 typedef enum {
     FLAG_COLUMNS = 1 << 0,
@@ -530,6 +539,17 @@ typedef struct {
     char *alternatives;  /* its split terms re-quoted and space-joined: 'Renew' 'Session' */
     const char *sep;     /* the separator form the user typed: "\\|" or "|" */
 } AltWarning;
+
+/* Records a dotted qualified name (e.g. "Some.function") captured from the
+ * ORIGINAL argv token at parse time -- before convert_wildcards rewrites '.'
+ * to the '_' LIKE wildcard, which would be indistinguishable from a snake_case
+ * symbol. Drives the qualified-name auto-retry / Tip in print_results_by_file. */
+typedef struct {
+    int active;                        /* a dotted qualified name was captured */
+    char original[SYMBOL_MAX_LENGTH];  /* the token as entered, e.g. "Some.function" */
+    char qualifier[SYMBOL_MAX_LENGTH]; /* before the last dot, e.g. "Some" */
+    char symbol[SYMBOL_MAX_LENGTH];    /* after the last dot, e.g. "function" */
+} QualifiedName;
 
 /* Capture warning data for the first split term only (keep the message focused
  * on one example). `original` is the term as entered; `segs`/`nseg` are its raw
@@ -1043,13 +1063,16 @@ static int build_common_filters(SqlQueryBuilder *builder,
         if (sql_append(builder, ")") != 0) return -1;
     }
 
-    /* X-Macro: Add extensible column filters (using LIKE for pattern matching) */
+    /* X-Macro: Add extensible column filters (using LIKE for pattern matching).
+     * TEXT columns use leading+trailing wildcards so -p Server matches *Server,
+     * ServerImpl, etc. without the caller needing to know language-specific
+     * prefixes/suffixes. INT_COLUMN (is_definition) keeps exact match. */
 #define COLUMN(name, ...) \
     if (filters && filters->name.count > 0) { \
         if (sql_append(builder, " AND (") != 0) return -1; \
         for (int i = 0; i < filters->name.count; i++) { \
             char *escaped_value = sqlite3_mprintf("%q", filters->name.values[i]); \
-            int ret = sql_append(builder, "%s" #name " LIKE '%s' ESCAPE '\\'", \
+            int ret = sql_append(builder, "%s" #name " LIKE '%%%s%%' ESCAPE '\\'", \
                 i > 0 ? " OR " : "", escaped_value); \
             sqlite3_free(escaped_value); \
             if (ret != 0) return -1; \
@@ -2475,37 +2498,67 @@ static void diagnose_filter_exclusion(CodeIndexDatabase *db, PatternList *patter
     int n_no_exclude = (exclude->count > 0 && !has_within)
         ? get_total_count(db, patterns, include, &no_ctx, filters, file_filter, within_ranges, line_range, debug) : 0;
 
-    /* Build the culprit list for narrowing guesses (-i / -f). */
-    char culprits[32] = "";
-    int recovered = 0;
-    if (n_no_include > 0) {
-        snprintf(culprits, sizeof(culprits), "-i");
-        recovered = n_no_include;
+    /* Build per-flag culprit list: each entry is a filter that, cleared alone,
+     * recovers results. Sorted by count descending so the most impactful comes first. */
+    typedef struct { char flag[6]; int count; } CulpritEntry;
+    CulpritEntry culprits[12];
+    int n_culprits = 0;
+
+    if (n_no_include > 0)
+        culprits[n_culprits++] = (CulpritEntry){"-i", n_no_include};
+    if (n_no_file > 0)
+        culprits[n_culprits++] = (CulpritEntry){"-f", n_no_file};
+
+#define COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) \
+    if (filters->name.count > 0 && !has_within) { \
+        QueryFilters no_col = *filters; \
+        no_col.name.count = 0; \
+        int n = get_total_count(db, patterns, include, exclude, &no_col, \
+                                file_filter, within_ranges, line_range, debug); \
+        if (n > 0) \
+            culprits[n_culprits++] = (CulpritEntry){"-" #short_flag, n}; \
     }
-    if (n_no_file > 0) {
-        if (culprits[0]) {
-            strncat(culprits, " and -f", sizeof(culprits) - strlen(culprits) - 1);
-        } else {
-            snprintf(culprits, sizeof(culprits), "-f");
-        }
-        if (n_no_file > recovered) recovered = n_no_file;
-    }
+#define INT_COLUMN COLUMN
+#include "shared/column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+
+    for (int i = 0; i < n_culprits - 1; i++)
+        for (int j = i + 1; j < n_culprits; j++)
+            if (culprits[j].count > culprits[i].count) {
+                CulpritEntry tmp = culprits[i]; culprits[i] = culprits[j]; culprits[j] = tmp;
+            }
 
     const char *pat = patterns->patterns[0];
     int single = (patterns->count == 1);
 
-    if (culprits[0]) {
-        /* A narrowing guess hid real matches: name it, leave -x untouched. */
-        if (single) {
+    if (n_culprits == 1) {
+        /* Single culprit: keep the existing terse style. */
+        if (single)
             printf("'%s': %d %s excluded by %s. Re-run without %s to see them.\n",
-                   pat, recovered, recovered == 1 ? "match" : "matches", culprits, culprits);
-        } else {
+                   pat, culprits[0].count, culprits[0].count == 1 ? "match" : "matches",
+                   culprits[0].flag, culprits[0].flag);
+        else
             printf("Matches exist but were excluded by %s. Re-run without %s to see them.\n",
-                   culprits, culprits);
-        }
-        if (n_no_file > 0) {
+                   culprits[0].flag, culprits[0].flag);
+        if (n_no_file > 0)
             print_file_filter_hint(db, patterns, include, exclude, filters, within_ranges, line_range, debug);
+    } else if (n_culprits > 1) {
+        /* Multiple culprits: total count, then each flag's independent recovery count. */
+        if (single) {
+            int total = count_pattern_matches(db, pat);
+            printf("'%s': %d %s excluded by filters",
+                   pat, total, total == 1 ? "match" : "matches");
+        } else {
+            printf("Matches excluded by multiple filters");
         }
+        for (int i = 0; i < n_culprits; i++)
+            printf("; remove %s to show %d %s",
+                   culprits[i].flag, culprits[i].count,
+                   culprits[i].count == 1 ? "match" : "matches");
+        printf(".\n");
+        if (n_no_file > 0)
+            print_file_filter_hint(db, patterns, include, exclude, filters, within_ranges, line_range, debug);
     } else if (n_no_exclude > 0) {
         /* Only clearing -x recovers matches. */
         if (single) {
@@ -2531,10 +2584,63 @@ static void diagnose_filter_exclusion(CodeIndexDatabase *db, PatternList *patter
     }
 }
 
+/* If `pattern` looks like a qualified name -- identifier chars with a literal
+ * dot that has a word char on both sides, and no % wildcard -- split it at the
+ * LAST dot into `qualifier` (the identifier immediately before the dot) and
+ * `symbol` (everything after). `qi Some.function` -> qualifier "Some", symbol
+ * "function"; `qi a.b.c` -> qualifier "b", symbol "c". Returns 1 on match.
+ * `.` is a single-char LIKE wildcard, so a dotted pattern is almost always a
+ * qualified name a user typed grep-style rather than an intentional wildcard.
+ * Both sides must be >= MIN_SYMBOL_LENGTH: the indexer does not store 1-char
+ * symbols, so a shorter side could never match and the retry would be futile. */
+static int split_qualified_name(const char *pattern, char *qualifier, size_t qsz,
+                                char *symbol, size_t ssz) {
+    /* An explicit wildcard (* or %) means the user meant a wildcard, not a
+     * qualified name -- don't second-guess them. Runs on the ORIGINAL token
+     * (before convert_wildcards turns '.'->'_' and '*'->'%'). */
+    if (!pattern || strchr(pattern, '%') || strchr(pattern, '*')) return 0;
+    const char *dot = strrchr(pattern, '.');
+    if (!dot || dot == pattern || dot[1] == '\0') return 0;  /* no dot, or leading/trailing */
+    /* Require a word char on both sides of the dot (a qualified-name separator). */
+    if (!isalnum((unsigned char)dot[-1]) && dot[-1] != '_') return 0;
+    if (!isalnum((unsigned char)dot[1]) && dot[1] != '_') return 0;
+    /* qualifier = the identifier segment immediately before the dot */
+    const char *qstart = dot;
+    while (qstart > pattern && (isalnum((unsigned char)qstart[-1]) || qstart[-1] == '_')) qstart--;
+    size_t qlen = (size_t)(dot - qstart);
+    size_t slen = strlen(dot + 1);
+    if (qlen < MIN_SYMBOL_LENGTH || slen < MIN_SYMBOL_LENGTH) return 0;  /* 1-char sides never indexed */
+    if (qlen >= qsz || slen >= ssz) return 0;
+    memcpy(qualifier, qstart, qlen);
+    qualifier[qlen] = '\0';
+    memcpy(symbol, dot + 1, slen);
+    symbol[slen] = '\0';
+    return 1;
+}
+
+/* Count rows matching `symbol` restricted to a qualifier on one column:
+ * parent_symbol when use_namespace==0, namespace when 1. The ambient filters
+ * (include/exclude/file/within) are preserved; a shallow copy of *filters gets
+ * the single qualifier value appended to the (guaranteed-empty) target column. */
+static int count_qualified(CodeIndexDatabase *db, const char *symbol, const char *qualifier,
+                           int use_namespace,
+                           ContextTypeList *include, ContextTypeList *exclude,
+                           QueryFilters *filters, FileFilterList *file_filter,
+                           WithinRangeList *within_ranges, int line_range, int debug) {
+    PatternList pl = { .count = 1 };
+    pl.patterns[0] = (char *)symbol;
+    QueryFilters f = *filters;  /* shallow copy; we only append to an empty column */
+    if (use_namespace)
+        f.namespace.values[f.namespace.count++] = (char *)qualifier;
+    else
+        f.parent_symbol.values[f.parent_symbol.count++] = (char *)qualifier;
+    return get_total_count(db, &pl, include, exclude, &f, file_filter, within_ranges, line_range, debug);
+}
+
 /* HOST_ONLY: mixes indexed querying with terminal rendering and host-backed source expansion. */
 static void print_results_by_file(CodeIndexDatabase *db, PatternList *patterns,
                                   ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
-                                  WithinRangeList *within_ranges, int limit, int limit_per_file, int compact, int line_range, int expand, int context_before, int context_after, int debug, int show_all_columns, int raw, int quiet, const FileExtensions *known_exts) {
+                                  WithinRangeList *within_ranges, int limit, int limit_per_file, int compact, int line_range, int expand, int context_before, int context_after, int debug, int show_all_columns, int raw, int quiet, const FileExtensions *known_exts, const QualifiedName *qn) {
 
     /* Two-step proximity search for line_range > 0 */
     if (line_range > 0 && patterns->count > 1) {
@@ -2596,6 +2702,43 @@ retry_query:
          * successful wildcard retry gotos past the trailing verdict, so it no
          * longer prints a misleading "No results" before its matches.) */
         sqlite3_finalize(stmt);
+
+        /* Qualified-name recovery: `qi Some.function` -> retry as
+         * `qi function -p Some` (then `-ns Some`). A dotted pattern is almost
+         * always a qualified name typed grep-style; `.` is only a single-char
+         * wildcard, so the literal search rarely matches what the user meant.
+         * We auto-retry with whichever dimension recovers (parent preferred),
+         * mirroring the `%word%` auto-retry, so new users get results without
+         * having to know -p/-ns. Runs BEFORE the wildcard retry so a real
+         * qualified match wins over coincidental `SomeXfunction` noise, and
+         * before symbol_filter is allocated so the goto leaks nothing.
+         * Skipped when -p/-ns are already set (the user knows the shape). */
+        if (qn && qn->active && patterns->count == 1 &&
+            filters->parent_symbol.count == 0 && filters->namespace.count == 0) {
+            int use_ns = 0;
+            int n = count_qualified(db, qn->symbol, qn->qualifier, 0, include, exclude,
+                                    filters, file_filter, within_ranges, line_range, debug);
+            if (n == 0) {
+                int n_ns = count_qualified(db, qn->symbol, qn->qualifier, 1, include, exclude,
+                                           filters, file_filter, within_ranges, line_range, debug);
+                if (n_ns > 0) { use_ns = 1; n = n_ns; }
+            }
+            if (n > 0) {
+                const char *flag = use_ns ? "-ns" : "-p";
+                printf("Retrying as qualified name: qi %s %s %s\n\n", qn->symbol, flag, qn->qualifier);
+                /* Rewrite the query in place: pattern -> the after-dot symbol,
+                 * qualifier -> a parent/namespace filter, then re-run. */
+                free(patterns->patterns[0]);
+                patterns->patterns[0] = safe_strdup_ctx(qn->symbol, "Failed to allocate memory for qualified symbol");
+                if (use_ns)
+                    filters->namespace.values[filters->namespace.count++] =
+                        safe_strdup_ctx(qn->qualifier, "Failed to allocate memory for namespace filter");
+                else
+                    filters->parent_symbol.values[filters->parent_symbol.count++] =
+                        safe_strdup_ctx(qn->qualifier, "Failed to allocate memory for parent filter");
+                goto retry_query;
+            }
+        }
 
         /* Initialize filter to check if patterns are valid symbols */
         SymbolFilter symbol_filter;
@@ -2802,6 +2945,17 @@ retry_query:
     /* Print summary statistics */
     if (!raw) print_summary_stats(db, patterns, include, exclude, filters, file_filter, within_ranges,
                        line_range, total_count, limit, quiet, debug);
+
+    /* Results exist but the pattern looks like a qualified name: the `.` was
+     * treated as a single-char wildcard, so these matches are coincidental
+     * rather than the qualified name the user likely meant. Teach the canonical
+     * form (no probe -- keep the success path cheap). The guard is false after a
+     * qualified-name auto-retry, since the pattern no longer holds a dot. */
+    if (!raw && qn && qn->active && patterns->count == 1 &&
+        filters->parent_symbol.count == 0 && filters->namespace.count == 0) {
+        printf("\nTip: '.' matched as a single-char wildcard. For the qualified name "
+               "%s, try: qi %s -p %s\n", qn->original, qn->symbol, qn->qualifier);
+    }
 }
 
 static void print_context_types(void) {
@@ -2987,6 +3141,9 @@ int main(int argc, char *argv[]) {
     /* Records the first grep-style alternation split, for the educational
      * warning emitted after parsing; .original stays NULL if none occurred. */
     AltWarning alt_warning = { 0 };
+    /* First dotted qualified name typed as a single bare pattern, captured from
+     * the original token before '.' is rewritten to the '_' LIKE wildcard. */
+    QualifiedName qname = { 0 };
     int limit = 0;
     int limit_per_file = 0;  /* Limit results per file */
     int verbose = 0;
@@ -3064,6 +3221,16 @@ int main(int argc, char *argv[]) {
                     goto cleanup;
                 }
                 patterns.count++;
+                /* Capture a dotted qualified name from the ORIGINAL token (segs[s]
+                 * still has its '.'), only for the first bare single-term pattern.
+                 * The retry/Tip is gated on patterns->count==1 at query time, so a
+                 * second pattern harmlessly disables it. */
+                if (nseg == 1 && patterns.count == 1 && !qname.active &&
+                    split_qualified_name(segs[s], qname.qualifier, sizeof(qname.qualifier),
+                                         qname.symbol, sizeof(qname.symbol))) {
+                    snprintf(qname.original, sizeof(qname.original), "%s", segs[s]);
+                    qname.active = 1;
+                }
             } else {
                 fprintf(stderr, "Warning: Maximum pattern limit (%d) reached. Ignoring: %s\n",
                         MAX_PATTERNS, segs[s]);
@@ -3173,7 +3340,13 @@ int main(int argc, char *argv[]) {
                     char type_upper[CONTEXT_TYPE_MAX_LENGTH];
                     snprintf(type_upper, sizeof(type_upper), "%s", argv[i + 1]);
                     to_upper(type_upper);
-                    include.types[include.count++] = string_to_context(type_upper);
+                    ContextType ctx = string_to_context(type_upper);
+                    if (ctx == CONTEXT_INVALID) {
+                        report_invalid_context("-i", argv[i + 1]);
+                        retval = 1;
+                        goto cleanup;
+                    }
+                    include.types[include.count++] = ctx;
                 }
                 i++;
             }
@@ -3210,7 +3383,13 @@ int main(int argc, char *argv[]) {
                                     MAX_CONTEXT_TYPES);
                         }
                     } else {
-                        exclude.types[exclude.count++] = string_to_context(type_upper);
+                        ContextType ctx = string_to_context(type_upper);
+                        if (ctx == CONTEXT_INVALID) {
+                            report_invalid_context("-x", argv[i + 1]);
+                            retval = 1;
+                            goto cleanup;
+                        }
+                        exclude.types[exclude.count++] = ctx;
                     }
                 }
                 i++;
@@ -3955,7 +4134,7 @@ int main(int argc, char *argv[]) {
     if (files_only) {
         print_files_only(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, line_range, debug);
     } else {
-        print_results_by_file(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, limit_per_file, compact, line_range, expand, context_before, context_after, debug, show_all_columns, raw_mode, quiet, &known_extensions);
+        print_results_by_file(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, limit_per_file, compact, line_range, expand, context_before, context_after, debug, show_all_columns, raw_mode, quiet, &known_extensions, &qname);
     }
 
 cleanup:
