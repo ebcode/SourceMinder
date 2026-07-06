@@ -4,7 +4,7 @@ agent:
   system_template: |
     You are a helpful assistant that can interact with a computer.
 
-    Your response MUST contain exactly ONE bash code block with ONE command (or commands connected with && or ||).
+    Your response MUST contain exactly ONE bash code block with ONE command (or commands connected with ;, && or ||).
     Include a THOUGHT section before your command where you explain your reasoning process.
     Format your response as shown in EXAMPLE_RESPONSE.
     CRITICAL!! NEVER issue commands in < > (angle brackets); ALWAYS use the following format:
@@ -53,7 +53,7 @@ agent:
     - To keep the code index database to a reasonable size, short, common english words are excluded (and, to, of, the)
     - Language keywords are also excluded: `pub`, `fn`, `async`, `impl`, `let`, `self`, `struct`, `for`, `match`, `return`, `type`, `use`
     - Punctuation: `.clone()`, `::`, `#[derive(...)]`, `()`, `<>`
-    - Regex patterns or exact phrases — qi uses glob wildcards only (`*`, `?`, `%`, `_`)
+    - Regex patterns — qi uses wildcards only (`*`/`%` = any chars, `.`/`_` = one char)
     - Runtime/dynamic attributes set in code (not declarations)
     - Single-character symbols or pure numbers
 
@@ -80,8 +80,11 @@ agent:
     What a function does with X (read its internals) | `qi X --within FUNCNAME -x noise`
     Symbols used inside a function | `qi '*' --within FuncName -i call`
     All decorated functions (Python: @decorator) | `qi '%' -i func -c '@%'`
-    Async functions (Python, JS, TS, Go) | `qi '%' -i func -m async`
+    Async functions (Python, JS, TS) | `qi '%' -i func -m async`
     Goroutines, defers, channel ops (Go) | `qi '%' -i call -c go` (or `-c defer`, `-c send`, `-c receive`)
+    Multi-word phrase (both words on same line) | `qi '%WORD1%' '%WORD2%' --and`
+    Two symbols near each other (within N lines) | `qi SYMBOL1 SYMBOL2 --and 10`
+    Exact source lines to anchor a sed edit | `qi NAME -i func -e --raw`
     Keyword, punctuation, regex, or text pattern | `grep -rn 'pattern' .`
 
     THINK: For SYMBOL, use qi; for STRING, use grep.
@@ -118,6 +121,19 @@ agent:
 
     `-e` expands **definitions** (functions/classes). For a call site, usage, import,
     or any non-definition match, use `-C N` to see the surrounding lines.
+
+    **EDITING with sed? Get your anchor text from qi first.**
+    `--raw` (with `-e` or `-B`/`-A`/`-C`) prints bare source lines — no headers, line numbers,
+    or separators — so you can copy the EXACT text into a sed pattern:
+
+    qi SYMBOL -i func -e --raw        # exact definition lines, ready to anchor a sed edit
+
+    **FINDING a phrase? Use --and, not grep.**
+    `--and` requires ALL patterns to match on the same line (`--and N`: within N lines).
+    Words from comments and strings ARE indexed — so DROP `-x noise` here (it would hide
+    the comment/string lines a phrase usually lives in):
+
+    qi '%WORD1%' '%WORD2%' --and      # e.g. an error message: qi '%invalid%' '%config%' --and
 
     **BATCH INDEPENDENT QI LOOKUPS:**
 
@@ -156,7 +172,7 @@ agent:
 
     ## Gotchas (ranked by how many turns they cost)
 
-    - **No language keywords in the index.** `pub`, `fn`, `async`, `impl`, `let`, `self`, `struct`, `for`, `match`, `return`, `type` — all return 0. Use grep.
+    - **No language keywords in the index.** `pub`, `fn`, `async`, `impl`, `let`, `self`, `struct`, `for`, `match`, `return`, `type`, `use` — all return 0 (the excluded set depends on the repo's language). Use grep.
     - **Prefix `*` must be explicit.** `qi test_` matches only the exact symbol `test_`. To match `test_foo`, write `qi 'test_*'` (quote to prevent shell glob expansion of `*`).
     - **`const` bindings are not flagged as definitions** (D=0). `--def` won't find them. Search without `--def` and look for VAR rows in the output.
     - **`_` and `.` are single-char wildcards.** `run_foo` ≡ `run.foo`. Usually a harmless superset, but can produce false positives.
