@@ -1413,8 +1413,8 @@ static void visit_expression(
 
                 if (clue && filter_should_index(filter, symbol)) {
                     TSPoint point = ts_node_start_point(operand);
-                    int line = (int)(point.row + 1);
-                    add_entry(result, symbol, line, CONTEXT_VARIABLE,
+                    int operand_line = (int)(point.row + 1);
+                    add_entry(result, symbol, operand_line, CONTEXT_VARIABLE,
                             directory, filename, NULL, &(ExtColumns){.clue = clue});
                 }
             } else {

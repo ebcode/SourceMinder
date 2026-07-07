@@ -141,7 +141,7 @@ static int ensure_file_list_capacity(FileList *list) {
         return -1;
     }
 
-    char **new_files = realloc(list->files, new_capacity * sizeof(char*));
+    char **new_files = realloc(list->files, (size_t)new_capacity * sizeof(char*));
     if (!new_files) {
         /* Allocation failure - fatal error */
         return -1;

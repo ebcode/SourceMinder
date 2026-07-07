@@ -41,3 +41,4 @@ tmp/cachegrind*
 __pycache__
 test.parquet
 run_pro_ledger.jsonl
+dist/

@@ -1984,7 +1984,7 @@ int parser_init(RustParser *parser, SymbolFilter *filter) {
     if (!parser->parser) return -1;
 
     const TSLanguage *language = tree_sitter_rust();
-    if (!ts_parser_set_language(parser->parser, (TSLanguage*)language)) {
+    if (!ts_parser_set_language(parser->parser, language)) {
         ts_parser_delete(parser->parser);
         return -1;
     }

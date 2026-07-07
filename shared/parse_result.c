@@ -65,7 +65,7 @@ static int ensure_capacity(ParseResult *result) {
         return -1;
     }
 
-    IndexEntry *new_entries = realloc(result->entries, new_capacity * sizeof(IndexEntry));
+    IndexEntry *new_entries = realloc(result->entries, (size_t)new_capacity * sizeof(IndexEntry));
     if (!new_entries) {
         /* Memory allocation failure - caller will handle fatal error */
         return -1;

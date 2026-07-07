@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdint.h>
 #include <sys/stat.h>
 
 #if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
@@ -1367,8 +1368,6 @@ static int lookup_within_definitions(CodeIndexDatabase *db, WithinFilter *within
         return 0;  /* No within filter, nothing to do */
     }
 
-    int found_count = 0;
-
     /* Look up each symbol separately */
     for (int sym_idx = 0; sym_idx < within_filter->count; sym_idx++) {
         const char *symbol = within_filter->symbols[sym_idx];
@@ -1431,7 +1430,6 @@ static int lookup_within_definitions(CodeIndexDatabase *db, WithinFilter *within
                 range->line_end = end_line;
                 within_ranges->count++;
                 symbol_found = 1;
-                found_count++;
 
                 if (debug) {
                     fprintf(stderr, "DEBUG: Found definition: %s/%s lines %d-%d\n",
@@ -2131,7 +2129,7 @@ static int execute_proximity_to_temp_table(CodeIndexDatabase *db, PatternList *p
 
     /* Pre-compile per-pattern EXISTS check statements (fixes #4 wildcard bug, #5 perf) */
     int num_secondaries = patterns->count - 1;
-    sqlite3_stmt **check_stmts = calloc(num_secondaries, sizeof(sqlite3_stmt *));
+    sqlite3_stmt **check_stmts = calloc((size_t)num_secondaries, sizeof(sqlite3_stmt *));
     if (!check_stmts) {
         sqlite3_finalize(anchor_stmt);
         free_sql_builder(&range_builder);
@@ -2627,13 +2625,15 @@ static int count_qualified(CodeIndexDatabase *db, const char *symbol, const char
                            ContextTypeList *include, ContextTypeList *exclude,
                            QueryFilters *filters, FileFilterList *file_filter,
                            WithinRangeList *within_ranges, int line_range, int debug) {
+    /* The casts below borrow const strings into non-const struct fields that
+     * are only read, never written; going via uintptr_t keeps -Wcast-qual quiet. */
     PatternList pl = { .count = 1 };
-    pl.patterns[0] = (char *)symbol;
+    pl.patterns[0] = (char *)(uintptr_t)symbol;
     QueryFilters f = *filters;  /* shallow copy; we only append to an empty column */
     if (use_namespace)
-        f.namespace.values[f.namespace.count++] = (char *)qualifier;
+        f.namespace.values[f.namespace.count++] = (char *)(uintptr_t)qualifier;
     else
-        f.parent_symbol.values[f.parent_symbol.count++] = (char *)qualifier;
+        f.parent_symbol.values[f.parent_symbol.count++] = (char *)(uintptr_t)qualifier;
     return get_total_count(db, &pl, include, exclude, &f, file_filter, within_ranges, line_range, debug);
 }
 

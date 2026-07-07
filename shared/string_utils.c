@@ -21,13 +21,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
-/* Windows: backtrace not available */
-#define HAS_BACKTRACE 0
-#else
+#if defined(__GLIBC__) || defined(__APPLE__)
 #include <execinfo.h>  /* For backtrace() */
 #include <unistd.h>    /* For readlink() */
 #define HAS_BACKTRACE 1
+#else
+/* execinfo.h/backtrace() are glibc/macOS extensions; not available on
+ * Windows or musl (static release builds) */
+#define HAS_BACKTRACE 0
 #endif
 
 size_t strnlength(const char *s, size_t n)
@@ -154,7 +155,7 @@ void safe_extract_node_text(const char *source_code, TSNode node, char *buffer,
             fprintf(stderr, "  (backtrace_symbols failed)\n");
         }
 #else
-        fprintf(stderr, "\n(Stack trace not available on Windows)\n");
+        fprintf(stderr, "\n(Stack trace not available on this platform)\n");
 #endif
 
         fprintf(stderr, "======================================\n");

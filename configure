@@ -600,12 +600,15 @@ $(BUILD_DIR)/qi: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(QUERY_OBJ)
 
 # ── Static binaries (Linux only): `make static` ───────────────────────────────
 # Links fully self-contained build/<tool>-static binaries for use inside
-# SWE-bench Docker containers, reusing the same objects as the normal build.
-# Canned recipe: enforce Linux, static-link $^ into $@, then verify no dyn deps.
+# SWE-bench Docker containers and release tarballs (release.sh), reusing the
+# same objects as the normal build.
+# Canned recipe: enforce Linux, static-link $^ into $@, then verify no dyn
+# deps. On a static binary, glibc ldd says "not a dynamic executable"; musl
+# ldd (Alpine release builds) says "Not a valid dynamic program".
 define static_link
 	@test "$(UNAME_S)" = "Linux" || { echo "ERROR: 'make static' is supported on Linux only (got $(UNAME_S))"; exit 1; }
 	$(CC) $(CFLAGS) -o $@ $^ $(STATIC_LDFLAGS)
-	@ldd $@ 2>&1 | grep -q "not a dynamic executable" && echo "OK: $@ is fully static ($$(du -h $@ | cut -f1))" || { echo "ERROR: $@ has dynamic dependencies:"; ldd $@; exit 1; }
+	@ldd $@ 2>&1 | grep -qiE "not a dynamic executable|not a valid dynamic program" && echo "OK: $@ is fully static ($$(du -h $@ | cut -f1))" || { echo "ERROR: $@ has dynamic dependencies:"; ldd $@; exit 1; }
 endef
 
 $(BUILD_DIR)/index-c-static: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(C_TREE_SITTER_OBJ) $(C_LANGUAGE_OBJ) $(C_MAIN_OBJ) | $(BUILD_DIR)

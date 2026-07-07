@@ -54,17 +54,17 @@ static int add_entry_to_file(FileToc **files, int *file_count, int *last_idx, co
 static char *build_toc_query(const TocConfig *config) {
     static char query[8192];
     char *pos = query;
-    int remaining = sizeof(query);
+    size_t remaining = sizeof(query);
     int written;
 
 #define TOC_APPEND(...) do { \
     written = snprintf(pos, remaining, __VA_ARGS__); \
-    if (written < 0 || written >= remaining) { \
+    if (written < 0 || (size_t)written >= remaining) { \
         fprintf(stderr, "Error: TOC query exceeds %zu-byte buffer\n", sizeof(query)); \
         return NULL; \
     } \
     pos += written; \
-    remaining -= written; \
+    remaining -= (size_t)written; \
 } while (0)
 
     /* Base query - filter to relevant definition types only */
