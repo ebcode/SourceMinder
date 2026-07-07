@@ -4,17 +4,13 @@
 
 2. Add guides for php, typescript, perl, and rust
 
-3. Performance: Add multithreading to index files in parallel
+3. Test against larger codebases. (Tested against llvm-project, ~30k files, gives 7.2GB index, slow to query.)
 
-4. Add --rows flag (or similar) to show only results, no help text, tips, or filtering info
+4. Instrument queries (perf).
 
-5. Json-formatted output. (LLMs keep suggesting it.)
+5. Automated tests. Gold output snapshots to prevent regressions.
 
-6. Test against larger codebases. (Tested against llvm-project, ~30k files, gives 7.2GB index, slow to query.)
-
-7. Instrument queries (perf).
-
-8. Automated tests. Gold output snapshots to prevent regressions.
+6. Performance: Add multithreading to index files in parallel
 
 ## Not on the roadmap (yet)
 
@@ -24,3 +20,5 @@
 
 1. Call graph functionality (which functions call this function, aka: dependency graph) -- there are better tools for this available. Keep this tool simple.
 
+  1.1 The one-way call graph -- "Which functions does this function call?" (callees) -- is accomplished with: qi % -i call --within <function>.
+      A --callees flag could be a useful shorthand for the above. And if it had a --depth flag, you could do: qi <function> --callees --depth 3. This might be worth investigating.

@@ -451,7 +451,7 @@ else
 endif
 
 # Shared source files
-SHARED_SRC = shared/database.c shared/filter.c shared/file_walker.c shared/file_watcher.c shared/validation.c shared/comment_utils.c shared/string_utils.c shared/file_opener.c shared/indexer_main.c shared/extensions.c shared/parse_result.c shared/file_utils.c shared/paths.c shared/toc.c shared/debug.c shared/version.c shared/sql_builder.c shared/abi_check.c shared/preflight_report.c shared/interactive.c shared/embedded_config.c
+SHARED_SRC = shared/database.c shared/filter.c shared/file_walker.c shared/file_watcher.c shared/validation.c shared/comment_utils.c shared/string_utils.c shared/file_opener.c shared/indexer_main.c shared/extensions.c shared/parse_result.c shared/file_utils.c shared/paths.c shared/toc.c shared/debug.c shared/version.c shared/sql_builder.c shared/preflight_report.c shared/embedded_config.c
 SHARED_OBJ = $(SHARED_SRC:.c=.o)
 
 # On MSYS2, we need to build tree-sitter from source (package only has CLI, no library)

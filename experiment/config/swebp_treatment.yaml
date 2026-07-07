@@ -50,16 +50,16 @@ agent:
     Use qi FIRST to UNDERSTAND the code.
 
     **Use qi as a COMPLEMENT to grep, and as FIRST and FALLBACK lines of attack for understanding the code**
-    - To keep the code index database to a reasonable size, short, common english words are excluded (and, to, of, the)
+
+    To keep the code index to a reasonable size, it does not contain any of the following:
+    - short, common english words are excluded (and, to, of, the)
     - Language keywords are also excluded: `pub`, `fn`, `async`, `impl`, `let`, `self`, `struct`, `for`, `match`, `return`, `type`, `use`
-    - Punctuation: `.clone()`, `::`, `#[derive(...)]`, `()`, `<>`
-    - Regex patterns — qi uses wildcards only (`*`/`%` = any chars, `.`/`_` = one char)
-    - Runtime/dynamic attributes set in code (not declarations)
+    - Punctuation is excluded: `.clone()`, `::`, `#[derive(...)]`, `()`, `<>, `...`
+    - Runtime/dynamic attributes set in code (not declarations) are excluded
     - Single-character symbols or pure numbers
 
-    If `qi PATTERN` returns 0, qi will auto-retry as `*PATTERN*`. If still 0,
-    check the list above — if the term is a keyword or punctuation, use grep. Otherwise
-    loosen your filters.
+    If `qi SYMBOL` returns 0, qi will auto-retry as `*SYMBOL*`. If still 0,
+    check the list above — if the term is a language keyword or contains punctuation, use grep. Otherwise, loosen your filters.
 
     ---
 
@@ -77,17 +77,17 @@ agent:
     All members of a class/type | `qi '*' -p TypeName`
     One method on a type | `qi METHOD -p TypeName -i func`
     How an object is used (methods called on it) | `qi '*' -i call -p OBJ -l 40`
-    What a function does with X (read its internals) | `qi X --within FUNCNAME -x noise`
-    Symbols used inside a function | `qi '*' --within FuncName -i call`
-    All decorated functions (Python: @decorator) | `qi '%' -i func -c '@%'`
-    Async functions (Python, JS, TS) | `qi '%' -i func -m async`
-    Goroutines, defers, channel ops (Go) | `qi '%' -i call -c go` (or `-c defer`, `-c send`, `-c receive`)
-    Multi-word phrase (both words on same line) | `qi '%WORD1%' '%WORD2%' --and`
-    Two symbols near each other (within N lines) | `qi SYMBOL1 SYMBOL2 --and 10`
+    What a function does with SYMBOL (read its internals) | `qi SYMBOL --within FUNCNAME -x noise`
+    What functions does this function call | `qi '*' -i call --within FUNCNAME`
+    All decorated functions (Python: @decorator) | `qi '*' -i func -c '@'`
+    Async functions (Python, JS, TS) | `qi '*' -i func -m async`
+    Goroutines, defers, channel ops (Go) | `qi '*' -i call -c go` (or `-c defer`, `-c send`, `-c receive`)
+    Multi-word fuzzy phrase (all words on same line) | `qi '*WORD-1*' '*WORD-2*' '*WORD-3*' --and`
+    Two exact symbols near each other (within 10 lines) | `qi SYMBOL1 SYMBOL2 --and 10`
     Exact source lines to anchor a sed edit | `qi NAME -i func -e --raw`
     Keyword, punctuation, regex, or text pattern | `grep -rn 'pattern' .`
 
-    THINK: For SYMBOL, use qi; for STRING, use grep.
+    THINK: For SYMBOLs, use qi; for STRINGs, use grep.
 
     ---
 

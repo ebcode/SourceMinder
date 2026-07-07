@@ -30,7 +30,6 @@
 #include "extensions.h"
 #include "parse_result.h"
 #include "version.h"
-#include "interactive.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -277,7 +276,7 @@ static void print_usage(const IndexerConfig *config) {
     printf("  %s ./src --silent           # Completely silent\n", config->name);
     printf("\n");
 
-    printf("Tip: Use --once to disable daemon mode and run a single indexing pass\n");
+    printf("Tip: Use --once to disable daemon mode and run a single indexing pass.\n");
     printf("\n");
 
     printf("Options:\n");
@@ -285,8 +284,7 @@ static void print_usage(const IndexerConfig *config) {
     printf("      --watch-only               skip initial indexing; watch and re-index on changes\n");
     printf("      --quiet-init               suppress initial indexing output (still shows re-index messages)\n");
     printf("      --silent                   suppress all output (initial + re-index messages)\n");
-    printf("      --verbose                  show preflight checks and validation\n");
-    printf("      --troubleshoot             diagnose tree-sitter ABI and library issues, then exit\n");
+    printf("      --verbose                  show preflight checks and validation\n");    
     printf("      --show-config              show effective config files and their sources, then exit\n");
     printf("      --exclude-dir DIR...       exclude directories (can specify multiple)\n");
     printf("  -f, --db-file PATH             database file location (default: code-index.db)\n");
@@ -346,8 +344,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     int quiet_init = 0;
     int silent = 0;
     int verbose = 0;
-    int debug = 0;
-    int troubleshoot = 0;
+    int debug = 0;    
     int show_config = 0;
     int daemon_mode = 1;  /* Daemon mode enabled by default */
     int watch_only = 0;
@@ -369,8 +366,6 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
             silent = 1;
         } else if (strcmp(argv[i], "--verbose") == 0) {
             verbose = 1;
-        } else if (strcmp(argv[i], "--troubleshoot") == 0) {
-            troubleshoot = 1;
         } else if (strcmp(argv[i], "--show-config") == 0) {
             show_config = 1;
         } else if (strcmp(argv[i], "--debug") == 0) {
@@ -410,25 +405,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
             return 1;
         }
     }
-
-    /* --troubleshoot implies --verbose */
-    if (troubleshoot) verbose = 1;
-
-    /* --troubleshoot: run full preflight diagnostics and exit (no targets needed) */
-    if (troubleshoot) {
-        PreflightReport report = {0};
-        preflight_validation_start(config->data_dir, verbose, &report);
-        if (config->get_language)
-            check_abi_version(config->get_language, config->name, config->grammar_dir, verbose, 1, &report);
-        preflight_validation_end(&report, verbose);
-        if (report.error_count > 0 &&
-            report.suggested_grammar_tag[0] != '\0' &&
-            config->grammar_dir &&
-            STDIN_IS_TTY())
-            offer_grammar_downgrade(config->grammar_dir, report.suggested_grammar_tag);
-        return 0;
-    }
-
+    
     /* --show-config: print effective config contents and sources, then exit
      * (no targets needed) */
     if (show_config) {
@@ -478,8 +455,6 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     {
         PreflightReport report = {0};
         preflight_validation_start(config->data_dir, verbose, &report);
-        if (config->get_language)
-            check_abi_version(config->get_language, config->name, config->grammar_dir, verbose, 0, &report);
         if (preflight_validation_end(&report, verbose) != 0)
             return EXIT_FAILURE;
     }
