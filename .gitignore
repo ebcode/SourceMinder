@@ -1,5 +1,6 @@
 Makefile
 config.h
+shared/embedded_config.c
 code-index.db
 code-index.db*
 index.db

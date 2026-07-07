@@ -451,7 +451,7 @@ else
 endif
 
 # Shared source files
-SHARED_SRC = shared/database.c shared/filter.c shared/file_walker.c shared/file_watcher.c shared/validation.c shared/comment_utils.c shared/string_utils.c shared/file_opener.c shared/indexer_main.c shared/extensions.c shared/parse_result.c shared/file_utils.c shared/paths.c shared/toc.c shared/debug.c shared/version.c shared/sql_builder.c shared/abi_check.c shared/preflight_report.c shared/interactive.c
+SHARED_SRC = shared/database.c shared/filter.c shared/file_walker.c shared/file_watcher.c shared/validation.c shared/comment_utils.c shared/string_utils.c shared/file_opener.c shared/indexer_main.c shared/extensions.c shared/parse_result.c shared/file_utils.c shared/paths.c shared/toc.c shared/debug.c shared/version.c shared/sql_builder.c shared/abi_check.c shared/preflight_report.c shared/interactive.c shared/embedded_config.c
 SHARED_OBJ = $(SHARED_SRC:.c=.o)
 
 # On MSYS2, we need to build tree-sitter from source (package only has CLI, no library)
@@ -544,6 +544,19 @@ all: $(BUILD_DIR)@ALL_TARGETS@@SYMLINK_TARGETS@
 # Create build directory
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+
+# Embedded default config data: generated from the config/*.txt files so
+# installed binaries work without /usr/share/sourceminder. Files on disk
+# always override the built-in defaults (see resolve_data_file in paths.c).
+EMBED_CONFIG_TOOL = $(BUILD_DIR)/embed-config
+EMBEDDED_CONFIG_SRC = shared/embedded_config.c
+EMBEDDED_CONFIG_INPUTS = $(wildcard shared/config/*.txt) $(wildcard c/config/*.txt) $(wildcard go/config/*.txt) $(wildcard perl/config/*.txt) $(wildcard php/config/*.txt) $(wildcard python/config/*.txt) $(wildcard rust/config/*.txt) $(wildcard typescript/config/*.txt)
+
+$(EMBED_CONFIG_TOOL): tools/embed-config.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS) -o $@ tools/embed-config.c
+
+$(EMBEDDED_CONFIG_SRC): $(EMBED_CONFIG_TOOL) $(EMBEDDED_CONFIG_INPUTS)
+	$(EMBED_CONFIG_TOOL) $@ $(EMBEDDED_CONFIG_INPUTS)
 
 # C indexer
 $(BUILD_DIR)/index-c: $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(C_TREE_SITTER_OBJ) $(C_LANGUAGE_OBJ) $(C_MAIN_OBJ)
@@ -682,6 +695,7 @@ $(TS_GRAMMAR_DIR)/src/%.o: $(TS_GRAMMAR_DIR)/src/%.c
 clean:
 	rm -f $(SHARED_OBJ) $(TREE_SITTER_LIB_OBJ) $(C_TREE_SITTER_OBJ) $(C_LANGUAGE_OBJ) $(C_MAIN_OBJ) $(GO_TREE_SITTER_OBJ) $(GO_LANGUAGE_OBJ) $(GO_MAIN_OBJ) $(PERL_TREE_SITTER_OBJ) $(PERL_LANGUAGE_OBJ) $(PERL_MAIN_OBJ) $(PHP_TREE_SITTER_OBJ) $(PHP_LANGUAGE_OBJ) $(PHP_MAIN_OBJ) $(PYTHON_TREE_SITTER_OBJ) $(PYTHON_LANGUAGE_OBJ) $(PYTHON_MAIN_OBJ) $(RUST_TREE_SITTER_OBJ) $(RUST_LANGUAGE_OBJ) $(RUST_MAIN_OBJ) $(TS_TREE_SITTER_OBJ) $(TS_LANGUAGE_OBJ) $(TS_MAIN_OBJ) $(QUERY_OBJ)
 	rm -rf $(BUILD_DIR)
+	rm -f $(EMBEDDED_CONFIG_SRC)
 	rm -f index-c index-go index-perl index-php index-python index-rust index-ts qi
 
 install: all install-data

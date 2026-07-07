@@ -216,3 +216,21 @@ const char *skip_leading_char(const char *str, char ch) {
     }
     return str;
 }
+
+int next_config_line(const char **cursor, char *buf, size_t bufsize) {
+    const char *p = *cursor;
+    if (!p || *p == '\0' || bufsize == 0) {
+        return 0;
+    }
+
+    size_t i = 0;
+    while (*p != '\0' && *p != '\n' && i < bufsize - 1) {
+        buf[i++] = *p++;
+    }
+    if (*p == '\n') {
+        p++;
+    }
+    buf[i] = '\0';
+    *cursor = p;
+    return 1;
+}

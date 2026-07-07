@@ -20,6 +20,7 @@
 #include "string_utils.h"
 #include "paths.h"
 #include "constants.h"
+#include "embedded_config.h"
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
@@ -57,6 +58,34 @@ static int load_file_extensions(FileExtensions *exts, const char *config_path) {
     return 0;
 }
 
+/* Same parsing as load_file_extensions, from an embedded buffer */
+static int load_file_extensions_from_string(FileExtensions *exts, const char *data) {
+    exts->count = 0;
+
+    if (!data) {
+        return -1;
+    }
+
+    char line[LINE_BUFFER_SMALL];
+    while (next_config_line(&data, line, sizeof(line)) && exts->count < MAX_FILE_EXTENSIONS) {
+        size_t len = strnlength(line, sizeof(line));
+        while (len > 0 && isspace(line[len - 1])) {
+            line[--len] = '\0';
+        }
+
+        if (len == 0) continue;
+
+        if (line[0] == '.') {
+            size_t copy_len = strnlength(line, FILE_EXTENSION_MAX_LENGTH - 1);
+            memcpy(exts->extensions[exts->count], line, copy_len);
+            exts->extensions[exts->count][copy_len] = '\0';
+            exts->count++;
+        }
+    }
+
+    return 0;
+}
+
 static int load_word_list(WordSet *set, const char *filepath) {
     FILE *fp = safe_fopen(filepath, "r", 0);
     if (!fp) {
@@ -82,6 +111,27 @@ static int load_word_list(WordSet *set, const char *filepath) {
     }
 
     fclose(fp);
+    return 0;
+}
+
+/* Same parsing as load_word_list, from an embedded buffer */
+static int load_word_list_from_string(WordSet *set, const char *data) {
+    if (!data) {
+        return -1;
+    }
+
+    set->count = 0;
+    char line[WORD_MAX_LENGTH];
+
+    while (next_config_line(&data, line, sizeof(line)) && set->count < MAX_FILTER_WORDS) {
+        if (line[0] == '\0') {
+            continue;
+        }
+
+        snprintf(set->words[set->count], WORD_MAX_LENGTH, "%s", line);
+        set->count++;
+    }
+
     return 0;
 }
 
@@ -120,6 +170,34 @@ static int load_regex_patterns(RegexSet *set, const char *filepath) {
     return 0;
 }
 
+/* Same parsing as load_regex_patterns, from an embedded buffer */
+static int load_regex_patterns_from_string(RegexSet *set, const char *data) {
+    if (!data) {
+        return -1;
+    }
+
+    set->count = 0;
+    char line[LINE_BUFFER_LARGE];
+
+    while (next_config_line(&data, line, sizeof(line)) && set->count < MAX_REGEX_PATTERNS) {
+        if (line[0] == '\0' || line[0] == '#') {
+            continue;
+        }
+
+        int ret = regcomp(&set->patterns[set->count], line, REG_EXTENDED | REG_NOSUB);
+        if (ret != 0) {
+            char error_buf[ERROR_MESSAGE_BUFFER];
+            regerror(ret, &set->patterns[set->count], error_buf, sizeof(error_buf));
+            fprintf(stderr, "Warning: Failed to compile regex '%s': %s\n", line, error_buf);
+            continue;
+        }
+
+        set->count++;
+    }
+
+    return 0;
+}
+
 static int is_in_set(WordSet *set, const char *word) {
     for (int i = 0; i < set->count; i++) {
         if (strcmp(set->words[i], word) == 0) {
@@ -142,13 +220,18 @@ int filter_init(SymbolFilter *filter, const char *lang_data_dir) {
     char path[LINE_BUFFER_LARGE];
     char resolved_path[PATH_MAX_LENGTH];
 
+    /* Each config file is looked up on disk first (resolve_data_file); the
+     * embedded built-in defaults are strictly a last resort, so a file on
+     * disk always wins. */
+
     /* Load file extensions (language-specific) */
     snprintf(path, sizeof(path), "%s/%s", lang_data_dir, FILE_EXTENSIONS_FILENAME);
     if (resolve_data_file(path, resolved_path, sizeof(resolved_path)) == 0) {
         if (load_file_extensions(&filter->file_extensions, resolved_path) != 0) {
             filter->file_extensions.count = 0;
         }
-    } else {
+    } else if (load_file_extensions_from_string(&filter->file_extensions,
+                                                embedded_config_get(path)) != 0) {
         filter->file_extensions.count = 0;
     }
 
@@ -158,7 +241,8 @@ int filter_init(SymbolFilter *filter, const char *lang_data_dir) {
         if (load_word_list(&filter->ignore_dirs, resolved_path) != 0) {
             filter->ignore_dirs.count = 0;
         }
-    } else {
+    } else if (load_word_list_from_string(&filter->ignore_dirs,
+                                          embedded_config_get(path)) != 0) {
         filter->ignore_dirs.count = 0;
     }
 
@@ -168,7 +252,8 @@ int filter_init(SymbolFilter *filter, const char *lang_data_dir) {
         if (load_word_list(&filter->stopwords, resolved_path) != 0) {
             filter->stopwords.count = 0;
         }
-    } else {
+    } else if (load_word_list_from_string(&filter->stopwords,
+                                          embedded_config_get(path)) != 0) {
         filter->stopwords.count = 0;
     }
 
@@ -178,7 +263,8 @@ int filter_init(SymbolFilter *filter, const char *lang_data_dir) {
         if (load_word_list(&filter->ts_keywords, resolved_path) != 0) {
             filter->ts_keywords.count = 0;
         }
-    } else {
+    } else if (load_word_list_from_string(&filter->ts_keywords,
+                                          embedded_config_get(path)) != 0) {
         filter->ts_keywords.count = 0;
     }
 
@@ -188,7 +274,8 @@ int filter_init(SymbolFilter *filter, const char *lang_data_dir) {
         if (load_regex_patterns(&filter->regex_patterns, resolved_path) != 0) {
             filter->regex_patterns.count = 0;
         }
-    } else {
+    } else if (load_regex_patterns_from_string(&filter->regex_patterns,
+                                               embedded_config_get(path)) != 0) {
         filter->regex_patterns.count = 0;
     }
 

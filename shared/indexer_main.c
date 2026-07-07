@@ -17,7 +17,9 @@
  */
 #include "indexer_main.h"
 #include "database.h"
+#include "embedded_config.h"
 #include "filter.h"
+#include "paths.h"
 #include "file_walker.h"
 #include "file_watcher.h"
 #include "validation.h"
@@ -222,6 +224,45 @@ static void load_config_file(int *argc_ptr, char ***argv_ptr, int cli_flags) {
     *argv_ptr = new_argv;
 }
 
+/* Print one config file's effective contents, with its source: the resolved
+ * on-disk file, or the built-in defaults plus where an override can be placed */
+static void print_config_entry(const char *dir, const char *filename) {
+    char path[PATH_MAX_LENGTH];
+    char resolved[PATH_MAX_LENGTH];
+    snprintf(path, sizeof(path), "%s/%s", dir, filename);
+
+    if (resolve_data_file(path, resolved, sizeof(resolved)) == 0) {
+        printf("=== %s === [ %s ]\n", filename, resolved);
+        FILE *f = safe_fopen(resolved, "r", 0);
+        if (f) {
+            char line[LINE_BUFFER_LARGE];
+            while (fgets(line, sizeof(line), f)) {
+                fputs(line, stdout);
+            }
+            fclose(f);
+        }
+    } else {
+        char override_path[PATH_MAX_LENGTH];
+        get_install_data_path(path, override_path, sizeof(override_path));
+        const char *data = embedded_config_get(path);
+        if (data) {
+            printf("=== %s === [ built-in. override: %s ]\n", filename, override_path);
+            fputs(data, stdout);
+        } else {
+            printf("=== %s === [ not found. create: %s ]\n", filename, override_path);
+        }
+    }
+    printf("\n");
+}
+
+static void show_effective_config(const char *lang_data_dir) {
+    print_config_entry(SHARED_CONFIG_DIR, STOPWORDS_FILENAME);
+    print_config_entry(lang_data_dir, KEYWORDS_FILENAME);
+    print_config_entry(lang_data_dir, FILE_EXTENSIONS_FILENAME);
+    print_config_entry(lang_data_dir, IGNORE_FILES_FILENAME);
+    print_config_entry(SHARED_CONFIG_DIR, REGEX_PATTERNS_FILENAME);
+}
+
 static void print_usage(const IndexerConfig *config) {
     printf("Usage: %s <directories...> [OPTIONS]\n", config->name);
     printf("   or: %s <files...> [OPTIONS]\n", config->name);
@@ -246,6 +287,7 @@ static void print_usage(const IndexerConfig *config) {
     printf("      --silent                   suppress all output (initial + re-index messages)\n");
     printf("      --verbose                  show preflight checks and validation\n");
     printf("      --troubleshoot             diagnose tree-sitter ABI and library issues, then exit\n");
+    printf("      --show-config              show effective config files and their sources, then exit\n");
     printf("      --exclude-dir DIR...       exclude directories (can specify multiple)\n");
     printf("  -f, --db-file PATH             database file location (default: code-index.db)\n");
     printf("      --echo MESSAGE             print message and continue (for testing)\n");
@@ -306,6 +348,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     int verbose = 0;
     int debug = 0;
     int troubleshoot = 0;
+    int show_config = 0;
     int daemon_mode = 1;  /* Daemon mode enabled by default */
     int watch_only = 0;
     ExcludeDirs exclude_dirs = { .count = 0 };
@@ -328,6 +371,8 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
             verbose = 1;
         } else if (strcmp(argv[i], "--troubleshoot") == 0) {
             troubleshoot = 1;
+        } else if (strcmp(argv[i], "--show-config") == 0) {
+            show_config = 1;
         } else if (strcmp(argv[i], "--debug") == 0) {
             debug = 1;
         } else if (strcmp(argv[i], "--echo") == 0) {
@@ -359,6 +404,10 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
             if (target_count < MAX_TARGETS) {
                 targets[target_count++] = argv[i];
             }
+        } else {
+            fprintf(stderr, "Error: unknown option '%s'\n", argv[i]);
+            fprintf(stderr, "Run '%s --help' for usage.\n", config->name);
+            return 1;
         }
     }
 
@@ -377,6 +426,13 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
             config->grammar_dir &&
             STDIN_IS_TTY())
             offer_grammar_downgrade(config->grammar_dir, report.suggested_grammar_tag);
+        return 0;
+    }
+
+    /* --show-config: print effective config contents and sources, then exit
+     * (no targets needed) */
+    if (show_config) {
+        show_effective_config(config->data_dir);
         return 0;
     }
 
@@ -697,7 +753,8 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         for (int i = 0; i < target_count; i++) {
             if (file_watcher_add_directory(watcher, targets[i],
                                           ext_ptrs,
-                                          extensions->count) != 0) {
+                                          extensions->count,
+                                          &exclude_dirs, ignore_dirs) != 0) {
                 fprintf(stderr, "Warning: Failed to watch directory: %s\n", targets[i]);
             }
         }

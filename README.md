@@ -280,7 +280,9 @@ index-ts ./src & index-c ./lib & index-php ./app &
 
 Config files (file extensions, ignored folders, stopwords, keywords) live under
 `<language>/config/` locally and `/usr/local/share/sourceminder/<language>/config/`
-system-wide. See [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
+system-wide. Every binary also carries built-in defaults compiled in at build
+time, used only when no config file is found on disk — so the tools work even
+with nothing installed. See [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
 **Recommended:** set qi defaults in `~/.smconfig` so every query skips comment/string noise:
 

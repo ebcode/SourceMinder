@@ -284,3 +284,23 @@ int resolve_data_file(const char *relative_path, char *out_path, size_t out_size
     /* File not found in any location */
     return -1;
 }
+
+void get_install_data_path(const char *relative_path, char *out_path, size_t out_size) {
+    if (!relative_path || !out_path || out_size == 0) {
+        return;
+    }
+
+#if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
+    /* Windows: relative to the executable (typical layout, works outside MSYS2) */
+    char exe_dir[PATH_MAX_LENGTH];
+    if (get_executable_dir(exe_dir, sizeof(exe_dir)) == 0) {
+        snprintf(out_path, out_size, "%s/../%s", exe_dir, relative_path);
+    } else {
+        snprintf(out_path, out_size, "/ucrt64/share/sourceminder/%s", relative_path);
+    }
+#elif defined(__APPLE__)
+    snprintf(out_path, out_size, "/usr/local/share/sourceminder/%s", relative_path);
+#else
+    snprintf(out_path, out_size, "/usr/share/sourceminder/%s", relative_path);
+#endif
+}
