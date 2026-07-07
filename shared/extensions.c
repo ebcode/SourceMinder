@@ -99,7 +99,7 @@ static int dir_exists(const char *path) {
 }
 
 /* HOST_ONLY: discovers extension metadata from language config files on the
- * local filesystem, falling back to the embedded built-in defaults. */
+ * local filesystem, falling back to embedded built-in defaults. */
 int load_all_language_extensions(FileExtensions *all_exts) {
     all_exts->count = 0;
 
@@ -118,7 +118,7 @@ int load_all_language_extensions(FileExtensions *all_exts) {
             loaded = (load_extensions_from_file(path, all_exts) == 0);
         }
 
-        /* Fall back to the embedded defaults (disk always wins) */
+        /* Fall back to embedded defaults */
         if (!loaded) {
             load_extensions_from_string(embedded_config_get(path), all_exts);
         }

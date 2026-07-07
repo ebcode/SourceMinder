@@ -110,15 +110,12 @@ LINE | SYM     | CTX
 491  | db_init | CALL
 ```
 
-The **CTX** column is what makes qi powerful: `FUNC` is the definition, `CALL` rows are
-the call sites. No more hunting down code only to find it's commented out.
-
 **4. Drill down:**
 
 ```
 qi db_init -i func -e             # Expand the full definition inline
 qi db_init --usage -C 3           # Call sites with 3 lines of context
-qi malloc --within db_init        # What db_init does with malloc internally
+qi '*' -i call --within db_init   # What db_init calls
 ```
 
 **5. Keep the index fresh** while you work:
@@ -156,13 +153,13 @@ Run `qi --list-types` for the complete list.
 
 ```
 qi user -i func var            # Only functions or variables
-qi user -x noise               # Exclude comments and strings (-x comment string)
+qi user -x noise               # Exclude comments and strings (-x com str)
 ```
 
 ### Symbol metadata: filterable columns
 
 Every symbol also carries metadata you can filter on (add `-v` to see all columns).
-These filters are fuzzy by default — `-m stat` matches `static` — see Matching semantics below.
+Unlike the exact search patterns, these filters are fuzzy by default — `-m stat` matches `static` — see Matching semantics below.
 
 | Concept | Flag | Meaning | Example |
 |---------|------|---------|---------|

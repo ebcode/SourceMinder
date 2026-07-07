@@ -9,6 +9,7 @@ ENABLE_PHP=0
 ENABLE_PYTHON=0
 ENABLE_RUST=0
 ENABLE_TS=0
+PORTABLE=0
 CC="${CC:-gcc}"
 
 # Detect OS for platform-specific commands
@@ -54,6 +55,9 @@ Language Options (all disabled by default):
   --disable-typescript Disable TypeScript indexer
 
 Other Options:
+  --portable           Build for any CPU of the target architecture
+                       (omits -march=native -mtune=native; use for
+                       distributable/release binaries)
   --help               Show this help message
   CC=compiler          Specify C compiler (default: gcc)
 
@@ -120,6 +124,9 @@ while [ $# -gt 0 ]; do
             ;;
         --disable-typescript)
             ENABLE_TS=0
+            ;;
+        --portable)
+            PORTABLE=1
             ;;
         --help)
             show_help
@@ -398,8 +405,9 @@ else
     EXE_EXT =
 endif
 
-# Base flags for release and debug
-BASE_CFLAGS_RELEASE = -O3 -march=native -mtune=native -funroll-loops -std=c11 -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE $(INCLUDE_PATHS)
+# Base flags for release and debug. ARCH_CFLAGS is empty for --portable
+# builds (distributable binaries must run on any CPU of the architecture).
+BASE_CFLAGS_RELEASE = -O3@ARCH_CFLAGS@ -funroll-loops -std=c11 -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE $(INCLUDE_PATHS)
 BASE_CFLAGS_DEBUG = -g -O0 -std=c11 -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE $(INCLUDE_PATHS)
 
 # Default to release build
@@ -770,13 +778,21 @@ tests/run-tests: tests/run-tests.c
 EOF_MAKEFILE
 
 # Substitute variables in Makefile
+if [ $PORTABLE -eq 1 ]; then
+    ARCH_CFLAGS=""
+else
+    ARCH_CFLAGS=" -march=native -mtune=native"
+fi
+
 if [ "$UNAME_S" = "Darwin" ]; then
     sed -i '' "s|@CC@|$CC|g" Makefile
+    sed -i '' "s|@ARCH_CFLAGS@|$ARCH_CFLAGS|g" Makefile
     sed -i '' "s|@ALL_TARGETS@|$ALL_TARGETS|g" Makefile
     sed -i '' "s|@SYMLINK_TARGETS@|$SYMLINK_TARGETS|g" Makefile
     sed -i '' "s|@STATIC_TARGETS@|$STATIC_TARGETS|g" Makefile
 else
     sed -i "s|@CC@|$CC|g" Makefile
+    sed -i "s|@ARCH_CFLAGS@|$ARCH_CFLAGS|g" Makefile
     sed -i "s|@ALL_TARGETS@|$ALL_TARGETS|g" Makefile
     sed -i "s|@SYMLINK_TARGETS@|$SYMLINK_TARGETS|g" Makefile
     sed -i "s|@STATIC_TARGETS@|$STATIC_TARGETS|g" Makefile
@@ -869,6 +885,11 @@ echo "Configuration complete!"
 echo ""
 echo "Build configuration:"
 echo "  C compiler: $CC"
+if [ $PORTABLE -eq 1 ]; then
+    echo "  CPU tuning: portable (generic $(uname -m))"
+else
+    echo "  CPU tuning: native (this machine only; use --portable for distributable binaries)"
+fi
 echo "  Languages enabled:"
 [ $ENABLE_C -eq 1 ] && echo "    - C"
 [ $ENABLE_GO -eq 1 ] && echo "    - Go"

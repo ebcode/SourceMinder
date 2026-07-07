@@ -221,8 +221,7 @@ int filter_init(SymbolFilter *filter, const char *lang_data_dir) {
     char resolved_path[PATH_MAX_LENGTH];
 
     /* Each config file is looked up on disk first (resolve_data_file); the
-     * embedded built-in defaults are strictly a last resort, so a file on
-     * disk always wins. */
+     * embedded built-in defaults are a fallback for the static binaries. */
 
     /* Load file extensions (language-specific) */
     snprintf(path, sizeof(path), "%s/%s", lang_data_dir, FILE_EXTENSIONS_FILENAME);
