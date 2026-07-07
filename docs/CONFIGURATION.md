@@ -4,8 +4,17 @@
 
 - **Installed system-wide:** `/usr/local/share/sourceminder/<language>/config/`
 - **Local development:** `<language>/config/` (in the project directory)
+- **Built-in defaults:** compiled into every binary at build time
 
-The indexer checks both locations (local takes precedence).
+The search order is: `$INDEXER_DATA_DIR`, then the local directory, then the
+system-wide directory, then the built-in defaults. A config file on disk
+always overrides the built-in copy — the defaults only apply when no file is
+found, so a bare binary works with no config files installed at all.
+
+Run `index-<language> --show-config` to print the effective contents of every
+config file along with its source — either the on-disk file being read (so you
+know which file to edit) or `built-in` plus the path where an override can be
+placed.
 
 ## File Extensions
 

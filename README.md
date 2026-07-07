@@ -1,459 +1,301 @@
 # SourceMinder
 
-Multi-language code indexer (written in C11) for semantic search, built on SQLite and tree-sitter.
+Multi-language code indexer and querent, built on SQLite and tree-sitter, written in C11.
 
-**Languages currently implemented:** C, Go, Perl, PHP, Python, TypeScript
+qi (query-index) is a semantic search tool; it tells you where, and, more usefully, *what* a symbol is.
+
+**Languages currently implemented:** C, Go, Perl, PHP, Python, Rust, TypeScript
 
 **Database:** Creates `code-index.db` in current working directory
 
 **Note:** This tool is designed for indexing **source code** (functions, classes, variables, ...),
 not prose or documentation files (`.md`, `.txt`, `.log`, ...).
-While you can index any text file, the tool extracts code symbols and won't be useful for natural language text.
+
+**For Programmers:** Coming up to speed on an unfamiliar codebase is often one of the most time-consuming
+tasks. IDE's have long provided a "Structure" or "Outline" view of a file, so that you can see a list
+of functions, and quickly navigate to them. qi's --toc flag provides a similar view from the command line.
+In addition, the CTX (context) column in search results shows you *how* the result is being used on that line.
+I can't count the number of times I've searched for relevant code, only to find that the code was commented
+out. SourceMinder solves that problem.
+
+**For LLMs:** qi is a faster, more token-efficient alternative to grep + cat for code navigation.
+`--toc` is a file's "table of contents" overview,
+`-e` shows (expands) full definitions without opening the file, and 
+`--raw` prints exact source lines (hides line #:) to anchor edits.
 
 ## Build & Install
 
 ### Prerequisites
 
 On an apt-based Linux (like Debian), install the following dependencies.
-MacOS users, see MACOS_SETUP.md. Windows users, see MSYS2_SETUP.md
+MacOS users, see MACOS_SETUP.md. Windows users, see MSYS2_SETUP.md.
 I have not yet tested on non-apt Linux, so any help here would be appreciated.
 
-```bash
+```
 apt install libtree-sitter-dev libtree-sitter0.25 libsqlite3-dev
 ```
+
 **Note:** You may need to change libtree-sitter0.25 to libtree-sitter0, or some other version, depending on your system.
 
-Clone the repo
+Clone the repo:
 
-```bash
+```
 git clone https://github.com/ebcode/SourceMinder.git && cd SourceMinder
 ```
 
 Clone the tree-sitter grammars (at least one):
 
-```bash
+```
 git clone https://github.com/tree-sitter/tree-sitter-c.git
 git clone https://github.com/tree-sitter/tree-sitter-go.git
 git clone https://github.com/tree-sitter-perl/tree-sitter-perl.git
 git clone https://github.com/tree-sitter/tree-sitter-php.git
 git clone https://github.com/tree-sitter/tree-sitter-python.git
+git clone https://github.com/tree-sitter/tree-sitter-rust.git
 git clone https://github.com/tree-sitter/tree-sitter-typescript.git
 ```
 
-### Configure
+### Configure, Compile & Install
 
 Select which languages you want to build (all disabled by default):
 
-```bash
+```
 ./configure --enable-all                                 # All languages (recommended for testing)
 ./configure --enable-c --enable-typescript --enable-php  # Specific languages
 ./configure --enable-all --disable-php                   # All but PHP
 CC=clang ./configure --enable-c                          # Custom compiler, only C
 ```
 
-### Compile & Install
-
-```bash
+```
 make                    # Build indexers and query tool
 sudo make install       # Install to /usr/local/bin
 ```
 
-**Installed binaries:** `index-c`, `index-ts`, `index-php`, `index-go`, `index-python`, `index-perl`, `qi`
+**Installed binaries:** `index-c`, `index-go`, `index-perl`, `index-php`, `index-python`, `index-rust`, `index-ts`, `qi`
 **Config files:** `/usr/local/share/sourceminder/<language>/config/`
 
+## Five-Minute Tour
 
-## Quick Reference
+**1. Index a codebase** (SourceMinder itself, here):
 
-| Flag | Purpose | Example |
-|------|---------|---------|
-| `-i <type...>` | Include context types (OR) | `qi user -i func var prop` |
-| `-x <type...>` | Exclude context types (OR) | `qi user -x comment string` |
-| `--list-types` | Display full list of context types | `qi --list-types` |
-| `-x noise` | Exclude comments & strings | `qi user -x noise` |
-| `-f <pattern...>` | Filter by file paths (OR) | `qi user -f .c .h` or `qi user -f src/* lib/*` |
-| `-p <pattern>` | Filter by parent symbol | `qi count -p patterns` finds `patterns->count` |
-| `--parent-type <pattern...>` | Filter by parent's declared type | `qi % -i prop --parent-type IndexerConfig` finds fields of any `IndexerConfig` variable |
-| `-t <pattern>` | Filter by type annotation | `qi '*' -i arg -t 'int *'` finds int pointer args |
-| `-m <pattern>` | Filter by modifier | `qi '*' -i func -m static` finds static functions |
-| `-s <pattern>` | Filter by scope | `qi '*' -s public` finds public members |
-| `-e` | Expand full definitions | `qi getUserById -i func -e` |
-| `-C <n>` | Show n context lines | `qi user -C 3` |
-| `-A <n>` | Show n lines after | `qi user -A 5` |
-| `-B <n>` | Show n lines before | `qi user -B 5` |
-| `--and` | Multi-pattern same-line | `qi fprintf stderr --and` |
-| `--and <n>` | Multi-pattern within n lines | `qi malloc free --and 10` |
-| `--def` | Only definitions | `qi getUserById --def` |
-| `--usage` | Only usages | `qi User --usage` |
-| `--within <sym>` | Search within function/class | `qi malloc --within handle_request` |
-| `--limit <n>` | Limit results | `qi '*' --limit 20` |
-| `--toc` | Table of contents | `qi '*' -f file.c --toc` |
-| `--columns` | Custom columns | `qi user --columns line symbol context parent` |
-| `-v` | Verbose (all columns) | `qi user -v` |
-| `--full` | Full context names | `qi user --full` |
-| `--raw` | Bare source lines only (no headers, line numbers, separators, or stats); use with `-e` or `-B`/`-A` | `qi new -f file.pl -e --raw` |
-
-**IMPORTANT: Multi-Value Arguments (Non-Standard UNIX Pattern)**
-
-Unlike most UNIX tools, `qi` accepts **multiple values** for both the main pattern and subsequent flags:
-
-```bash
-# Multiple search patterns (OR logic)
-qi user session token --limit 20             # Find user OR session OR token
-
-# Multiple context types (OR logic)
-qi user -i func var prop                   # Functions OR variables OR properties
-
-# Multiple file patterns (OR logic)
-qi symbol -f file1.c file2.c utils.h         # In any of these files
-qi malloc -f *.c *.h                         # All .c OR .h files
-
-# Combine multiple values across arguments
-qi malloc free -i func call -f memory.c allocator.c buffer.c
 ```
-
-**Comparison with standard UNIX tools:**
-- Standard: `grep -f pattern.txt file.c`      (one file per `-f`)
-- qi: `qi symbol -f file1.c file2.c file3.c`  (multiple files per `-f`)
-
-**Pattern wildcards:**
-- `*` = any characters (e.g., `*Manager`, `get*`, `*user*`)
-- `.` = single character (e.g., `.etUser` matches `getUser`, `setUser`)
-- No wildcards = exact match (case-insensitive)
-- Note: `%` and `_` also work (SQL LIKE syntax) but `*` and `.` are recommended
-
-**Escaping special characters:**
-- `\*` = literal asterisk (e.g., `operator\*` finds `operator*`)
-- `\.` = literal period (e.g., `file\.c` finds `file.c`)
-- `\--flag` = search for flag-like symbols (e.g., `\--help` finds `--help`)
-
-Examples:
-```bash
-qi 'get*' -i func          # Wildcard: finds getUser, getData, etc.
-qi 'get\*' -i func         # Literal: finds "get*" symbol if it exists
-qi '.etUser'               # Wildcard: finds getUser, setUser (. = single char)
-qi '\--help'               # Literal: finds "--help" string
-```
-
-## Why Use This?
-
-**For Developers:**
-- Browse a project's vocabulary (like a book index)
-- Find symbols by context (classes, functions, variables, etc.)
-- Track relationships with parent symbols (e.g., `obj.method()`)
-- Filter by access modifiers (public, private, protected)
-- Query with SQL wildcards for partial matches
-
-**qi vs grep** — see [docs/QI_VS_GREP.md](docs/QI_VS_GREP.md) for a full comparison. In short: use `qi` as the default for code navigation (symbols, structure, precise filtering); use `grep` for literal text, regex, and non-code files.
-
-**For Claude Code:**
-- Faster workflow than grep + Read for code navigation
-- Saves tokens with compact output
-- Relative paths work directly with Read/Edit tools
-- Use `qi -f file.c --toc` before Read tool to understand structure
-- Use `-e` to see full definitions without Read tool
-
-## Getting Started
-
-**Step 1: Index the SourceMinder codebase**
-```bash
 index-c . --once --verbose
 ```
 
-**Step 2: Query (single and multiple patterns)**
-```bash
-qi -f shared/indexer-main.c --toc       # Table-of-Contents output
-qi handle_import_statement              # Exact match
-qi '*user*'                             # Contains "user"
-qi '*' -i func --def --limit 10         # First 10 function definitions (quote single * to prevent shell expansion)
+**2. Get a file's overview — always start here:**
 
-# Multiple patterns (OR logic)
-qi malloc free calloc                   # Find any of these
-qi user session token -i var --limit 20 # Variables named user/session/token
+```
+qi '*' -f shared/indexer_main.c --toc
 ```
 
-**Step 3: View code**
-```bash
-qi getUserById -i func -e               # Expand full function
-qi getUserById -i func call -e -C 3     # Expand full function, and show context around call sites
+**3. Find a symbol:**
+
+```
+qi db_init -x noise
 ```
 
-**Step 4: Background daemon**
-```bash
-index-c . &           # Watch for changes
 ```
+Searching for: db_init
+Excluding context types: COM STR
 
-### Understanding Output
-
-```bash
-qi 'symbol' --limit-per-file 1 --limit 5
-```
-
-Output:
-```
-Searching for: symbol
-
-LINE | SYM    | CTX 
------+--------+-----
+LINE | SYM     | CTX
+-----+---------+-----
 ./query-index.c:
-67   | symbol | COM 
+4005 | db_init | CALL
 
-./benchmark/struct-layout-optimized.c:
-26   | symbol | PROP
+./shared/database.c:
+78   | db_init | FUNC
 
-./benchmark/struct-layout-original.c:
-17   | symbol | PROP
-
-./c/c_language.c:
-23   | Symbol | COM 
-
-./go/go_language.c:
-83   | Symbol | COM 
-
-Found 351 matches (showing first 5)
-Result breakdown: ARG (162), COM (68), VAR (52), STR (37), PROP (32)
-Tip: Use -i <context> to narrow results
-
+./shared/indexer_main.c:
+491  | db_init | CALL
 ```
 
-- **LINE**: Line number
-- **SYM**:  The matched symbol (as it appears in the source)
-- **CTX**:  Where/how the symbol appears (context)
-- Informational notes at the end 
+**4. Drill down:**
 
-
-## Context Types Reference
-
-Understanding context types is key to effective filtering:
-
-| Type | Short | Definition | Example |
-|------|-------|------------|---------|
-| `class` | - | Class declarations | `class UserManager { }` |
-| `interface` | `iface` | Interface declarations | `interface Storable { }` |
-| `function` | `func` | Functions and methods | `function getUserById() { }` |
-| `argument` | `arg` | Function parameters | `function foo(userId: string)` |
-| `variable` | `var` | Variables and constants | `const cursor = ...` |
-| `property` | `prop` | Class properties | `this.name = "Alice"` |
-| `type` | - | Type definitions/annotations | `type UserID = string` |
-| `import` | `imp` | Imported symbols | `import { User } from ...` |
-| `export` | `exp` | Exported symbols | `export { User }` |
-| `call` | - | Function/method calls | `getUserById(123)` |
-| `lambda` | - | Lambda/arrow functions | `(x) => x * 2` |
-| `enum` | - | Enum declarations | `enum Status { }` |
-| `case` | - | Enum cases | `Active = 1` |
-| `namespace` | `ns` | Namespace declarations | `namespace Utils { }` |
-| `trait` | - | Trait declarations | `trait Serializable { }` (PHP) |
-| `comment` | `com` | Words from comments | `// display user info` |
-| `string` | `str` | Words from string literals | `"user name"` |
-| `filename` | `file` | Filename without extension | File named `user.ts` |
-
-**Usage:**
-```bash
-qi user -i func var            # Include Functions OR variables
-qi user -x comment string      # Exclude comments AND strings
-qi user -x noise               # Shorthand for -x comment string
-qi user -i func var -x comment # Combine include and exclude
 ```
+qi db_init -i func -e             # Expand the full definition inline
+qi db_init --usage -C 3           # Call sites with 3 lines of context
+qi '*' -i call --within db_init   # What db_init calls
+```
+
+**5. Keep the index fresh** while you work:
+
+```
+index-c ./src &                   # Daemon: watches for changes, re-indexes
+index-c ./src --once              # Or: index once and exit (CI, one-off analysis)
+```
+
+## Core Concepts
+
+### What a symbol is: context types (`-i` include / `-x` exclude)
+
+| Type | Short | Example |
+|------|-------|---------|
+| `function` | `func` | `function getUserById() { }` |
+| `class` | - | `class UserManager { }` |
+| `interface` | `iface` | `interface Storable { }` |
+| `argument` | `arg` | `function foo(userId: string)` |
+| `variable` | `var` | `const cursor = ...` |
+| `property` | `prop` | `this.name = "Alice"` |
+| `type` | - | `type UserID = string` |
+| `macro` | - | `#define MAX_LEN 256` |
+| `import` / `export` | `imp` / `exp` | `import { User } from ...` |
+| `call` | - | `getUserById(123)` |
+| `lambda` | - | `(x) => x * 2` |
+| `enum` / `case` | - | `enum Status { Active = 1 }` |
+| `namespace` | `ns` | `namespace Utils { }` |
+| `trait` | - | `trait Serializable { }` (PHP, Rust) |
+| `comment` | `com` | words from comments |
+| `string` | `str` | words from string literals |
+| `filename` | `file` | file named `user.ts` |
+
+Run `qi --list-types` for the complete list.
+
+```
+qi user -i func var            # Only functions or variables
+qi user -x noise               # Exclude comments and strings (-x com str)
+```
+
+### Symbol metadata: filterable columns
+
+Every symbol also carries metadata you can filter on (add `-v` to see all columns).
+Unlike the exact search patterns, these filters are fuzzy by default — `-m stat` matches `static` — see Matching semantics below.
+
+| Concept | Flag | Meaning | Example |
+|---------|------|---------|---------|
+| **Parent** | `-p` | Containing type, receiver, or accessed object | `qi count -p patterns` finds `patterns->count` |
+| **Type** | `-t` | Type annotation | `qi '*' -i arg -t 'int *'` |
+| **Modifier** | `-m` | Behavioral annotation | `-m static`, `-m async`, `-m const` |
+| **Scope** | `-s` | Visibility | `-s public`; Rust uses literal `pub`, `pub(crate)` |
+| **Clue** | `-c` | How a symbol is used | `-c '@property'` (decorators), `-c go` (goroutines) |
+| **Definition** | `--def` / `--usage` | Definitions vs. usages | `qi getUserById --def` |
+
+See [docs/ADVANCED_USAGE.md](docs/ADVANCED_USAGE.md) for depth on each filter.
+
+### Matching semantics: exact symbols, fuzzy filters
+
+Patterns are case-insensitive. The **symbol pattern** is exact by default — add
+wildcards to fuzz it: `*` or `%` = any characters, `.` or `_` = one character.
+If an exact pattern finds nothing, qi auto-retries as `*PATTERN*`.
+
+The **metadata filters** (`-p`, `-t`, `-m`, `-s`, `-c`) are the opposite: fuzzy
+by default (values are auto-wrapped in `%`), so `-m stat` matches `static` and
+`-p pattern` matches `patterns`. (`-f` file filtering has its own path-matching
+rules and is neither.)
+
+```
+qi 'get*' -i func          # getUser, getData, ... (quote * to prevent shell expansion)
+qi '.etUser'               # getUser, setUser
+qi 'get\*'                 # Escape for a literal: finds the symbol "get*"
+qi '\--help'               # Escape a leading dash: finds "--help"
+```
+
+### Why qi is non-standard (developer ergonomics)
+
+Most Unix tools repeat flags for multiple values: `grep -e pat1 -e pat2`.
+qi instead treats everything before the first flag as search patterns (OR logic),
+so that a single flag may accept multiple values without repetition — this saves typing:
+
+```
+qi malloc free calloc                        # Any of these symbols
+qi user -i func var prop                     # Any of these contexts
+qi symbol -f file1.c file2.c utils.h         # Any of these files
+qi fprintf stderr --and                      # AND: all patterns on the same line
+qi malloc free --and 10                      # AND: within 10 lines of each other
+```
+
+Because SourceMinder was designed specifically to work with both human and AI
+users, some decisions were made to accommodate an AI-assisted workflow. The
+exact/fuzzy asymmetry is one of them: a searcher usually knows the symbol name
+*exactly* (they just read it in the output), but only *approximately* knows
+metadata values — was the modifier `static` or `static inline`? Exact-matching
+filters turn those guesses into zero-match dead ends; fuzzy filters turn them
+into hits.
+
+## Everyday Flags
+
+| Flag | Purpose | Example |
+|------|---------|---------|
+| `-e` | Expand full definitions | `qi getUserById -i func -e` |
+| `-C` / `-A` / `-B <n>` | Context lines (around/after/before) | `qi user -C 3` |
+| `--toc` | File table of contents | `qi '*' -f file.c --toc` |
+| `--within <sym>` | Search inside a function/class | `qi malloc --within handle_request` |
+| `--and [n]` | All patterns on same line (or within n lines) | `qi fprintf stderr --and` |
+| `--limit <n>`, `-lpf <n>` | Cap results (total, per file) | `qi '*' --limit 20` |
+| `--files` | List matching files only (like `grep -l`) | `qi database --files` |
+| `--raw` | Bare source lines (with `-e`/`-A`/`-B`/`-C`) — exact text for edit anchors | `qi db_init -i func -e --raw` |
+| `-v` | All metadata columns | `qi user -v` |
+| `-q` | Drop banner/footer chrome | `qi user -q` |
+
+This is the everyday subset — `qi --help` is the complete, always-current reference.
+
+## When to Use qi vs grep
+
+qi is a symbol navigator; grep is a text finder. The golden rule:
+
+> **Symbol? Use qi. Text? Use grep.**
+
+```
+Looking for CODE SYMBOLS (function, variable, class, type)?    → qi
+Exploring CODE STRUCTURE (imports, relationships)?             → qi
+Two or more terms appearing within a given line range?         → qi --and [N]
+Need REGEX patterns or complex text matching?                  → grep
+Searching NON-CODE FILES (markdown, config, logs)?             → grep
+```
+
+When in doubt, try qi first — it's easier to fall back to grep than to wade
+through grep noise for code symbols. See [docs/QI_VS_GREP.md](docs/QI_VS_GREP.md)
+for the full comparison and hybrid workflows.
 
 ## Indexing
 
-### Folder Mode vs File Mode
+**Folder mode** (recommended): `index-c ./src ./lib` recursively indexes matching
+files, respects per-language ignore lists, and runs as a daemon watching for
+changes. Add `--once` to index and exit instead (CI, one-off analysis). Stop a
+daemon with `kill`/`killall`.
 
-**Folder Mode** (recommended for projects):
-- Recursively indexes all matching files
-- Respects ignore lists in `<language>/config/ignore_files.txt`
-- Runs in daemon by default, watching for changes
-- Use for: Active development on a codebase
+**File mode:** `index-c main.c utils.c` indexes exactly those files, ignores
+ignore lists, and always runs once.
 
-```bash
-index-c ./src ./lib
+**Options:** `--once`, `--silent`, `--quiet-init` (quiet initial pass, noisy on
+changes), `--verbose`, `--exclude-dir DIR [DIR...]`.
+
+**What gets indexed:** files matching `<language>/config/file-extensions.txt`,
+minus folders in the ignore list. Symbols are extracted via tree-sitter AST
+parsing, with parent tracking (`this.target.getBounds()`), access modifiers, and
+noise filtering (stopwords, language keywords, short symbols, pure numbers).
+Paths are stored relative to the current working directory.
+
+**Concurrent indexing:** multiple language indexers can run in parallel on the
+same database — SQLite WAL mode is enabled automatically on first run.
+
 ```
-
-**File Mode** (for specific files):
-- Indexes only the specified files
-- Ignores ignore lists
-- Runs once and exits (no daemon)
-- Use for: One-off indexing, testing, or specific file updates
-
-```bash
-index-c main.c utils.c helper.c
+index-ts ./src & index-c ./lib & index-php ./app &
 ```
-
-### Daemon Management
-
-**Start daemon:**
-```bash
-index-c ./src &               # Background process
-index-c ./src --silent &      # Silent
-```
-
-**One-time indexing:**
-```bash
-index-c ./src --once          # Index once and exit
-```
-
-**Stop daemon:**
-```bash
-ps aux | grep index-c           # Find process ID
-kill <PID>                      # Kill it
-killall index-c index-ts        # Or kill all indexers
-```
-
-**When to use:**
-- **Daemon**: Active development - auto-updates as you edit
-- **--once**: CI/CD pipelines, one-time analysis, manual control
-
-### Indexer Options
-
-```bash
-index-<language> <folders...> [options]
-```
-
-**Options:**
-- `--once` - Run once and exit (no daemon)
-- `--silent` - Silence output
-- `--quiet-init` - Quiet initial indexing, noisy re-indexing on file change
-- `--verbose` - Show preflight checks and progress
-- `--exclude-dir DIR [DIR...]` - Exclude additional folders
-
-**Examples:**
-```bash
-index-c ./src --verbose --once
-index-c ./src ./lib --quiet-init &
-index-c ../ --exclude-dir build dist node_modules
-```
-
-### What Gets Indexed
-
-The indexer:
-- Scans files matching `<language>/config/file-extensions.txt`
-- Skips folders in `<language>/config/ignore_files.txt`
-- Extracts symbols via tree-sitter AST parsing
-- Tracks parent symbols for member expressions (e.g., `this.target.getBounds()`)
-- Captures access modifiers (public, private, protected)
-- Filters noise (stopwords, keywords, punctuation, short symbols, pure numbers)
-- Stores relative paths from current working directory
-
-### Concurrent Indexing (WAL Mode)
-
-Multiple language indexers can run in parallel without database locks:
-
-```bash
-index-ts ./src &
-index-c ./lib &
-index-php ./app &
-```
-
-SQLite WAL mode is enabled automatically on first run.
-
-## Querying
-
-### Basic Queries
-
-```bash
-qi <pattern...> [options]    # One or more patterns (logical OR)
-```
-
-**Single pattern matching** (wildcard syntax):
-```bash
-qi cursor              # Exact: cursor
-qi '*manager'          # Ends with Manager
-qi 'get*'              # Starts with get
-qi '*session*'         # Contains session
-qi _etuser             # Matches: getUser, setUser
-```
-
-**Multiple pattern matching** (OR logic - finds any match):
-```bash
-qi malloc free calloc                  # Find any of these functions
-qi user session token --limit 30       # Find user OR session OR token
-qi '*error' '*Exception' '*Fail*'      # Any error-related symbols
-```
-
-### Context & File Filtering
-
-```bash
-qi '*manager' -i class iface   # Only classes or interfaces
-qi user -x noise               # Exclude comments and strings
-qi user -f .c .h               # .c OR .h files
-qi user -f src/                # All files in src/
-qi user -f src/* lib/*         # Multiple directories
-```
-
-### Definition vs Usage
-
-```bash
-qi getUserById --def           # Only definitions
-qi User --usage                # Only usages
-```
-
-### Multi-Pattern AND
-
-Find lines where **ALL** patterns co-occur:
-
-```bash
-qi fprintf err_msg --and        # Both on same line
-qi malloc free --and 10         # Both within 10 lines of each other
-```
-
-### Viewing Code
-
-```bash
-qi getUserById -i func -e       # Expand complete function definition
-qi cursor -C 2                  # 2 lines before and after
-qi cursor -A 5                  # 5 lines after
-```
-
-### Table of Contents
-
-```bash
-qi -f database.c --toc              # All definitions in file
-qi -f c_language.c --toc -i func    # Only functions
-```
-
-Output:
-```
-database.c:
-
-IMPORTS: sqlite3.h, stdio.h, stdlib.h, string.h
-
-FUNCTIONS:
-  init_database (15-45)
-  execute_query (47-89)
-  close_database (91-98)
-
-TYPES:
-  DatabaseConfig (5-12)
-```
-
-### Limit Results
-
-```bash
-qi user --limit 10                    # First 10 matches
-qi '*' --limit-per-file 3 --limit 10  # First 3 per file, up to 10 total
-```
-
-### Common Workflows
-
-```bash
-# Discover → explore → expand
-qi '*' -f query-index.c --toc              # 1. Explore file structure
-qi '*user*' -i func --def --limit 10       # 2. Find interesting functions
-qi validateUser -i func -e                 # 3. See implementation
-qi validateUser --usage -C 3               # 4. Find usage examples
-```
-
-## Advanced Filtering
-
-qi also supports power-user filters for parent-symbol, type annotation, modifier, and scope-based queries, plus scoped search within a specific function or class. See [docs/ADVANCED_USAGE.md](docs/ADVANCED_USAGE.md) for details.
 
 ## Configuration
 
-Config files (file extensions, ignored folders, stopwords, keywords) live under `<language>/config/` locally and `/usr/local/share/sourceminder/<language>/config/` system-wide. See [docs/CONFIGURATION.md](docs/CONFIGURATION.md) for the full reference.
+Config files (file extensions, ignored folders, stopwords, keywords) live under
+`<language>/config/` locally and `/usr/local/share/sourceminder/<language>/config/`
+system-wide. Every binary also carries built-in defaults compiled in at build
+time, used only when no config file is found on disk — so the tools work even
+with nothing installed. See [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
-## Performance & Best Practices
+**Recommended:** set qi defaults in `~/.smconfig` so every query skips comment/string noise:
 
-For index-size expectations, query-performance tips, and recommended workflows, see [docs/PERFORMANCE.md](docs/PERFORMANCE.md).
+```
+[qi]
+-x noise
+-q
+```
 
-## Troubleshooting
+CLI flags always override config-file defaults.
 
-Database-locked errors, missing symbols, build issues, and debugging tips are covered in [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+## Going Further
+
+- [docs/GENERAL_GUIDE.md](docs/GENERAL_GUIDE.md) — newcomer-friendly qi workflow guide
+- Language guides: [C](docs/C_GUIDE.md) · [Go](docs/GO_GUIDE.md) · [Python](docs/PYTHON_GUIDE.md) · [Rust](docs/RUST_GUIDE.md)
+- [docs/ADVANCED_USAGE.md](docs/ADVANCED_USAGE.md) — parent/type/modifier/scope filters, `--within`, combining filters
+- [docs/QI_VS_GREP.md](docs/QI_VS_GREP.md) — when to use which, hybrid workflows
+- [docs/PERFORMANCE.md](docs/PERFORMANCE.md) — index sizes, query performance, best practices
+- [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — locked databases, missing symbols, build issues

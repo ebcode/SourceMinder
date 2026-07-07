@@ -16,12 +16,21 @@
  * along with SourceMinder. If not, see <https://www.gnu.org/licenses/>.
  */
 #include "file_watcher.h"
+#include "file_walker.h"
 #include "constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+
+/* Directories matching --exclude-dir or the ignored-folders config must not
+ * be watched, mirroring the skip logic in file_walker.c */
+static int watch_dir_skipped(const char *path, const char *name,
+                             const ExcludeDirs *exclude_dirs, const WordSet *ignore_dirs) {
+    return exclude_dirs_match(path, name, exclude_dirs) != NULL ||
+           is_path_ignored(path, name, ignore_dirs);
+}
 
 #if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
 /* ============================================================================
@@ -47,6 +56,8 @@ struct FileWatcher {
     int watch_capacity;                        /* Capacity of watches array */
     char extensions[MAX_FILE_EXTENSIONS][FILE_EXTENSION_MAX_LENGTH];  /* File extensions */
     int extension_count;                       /* Number of extensions */
+    const ExcludeDirs *exclude_dirs;           /* --exclude-dir patterns (borrowed) */
+    const WordSet *ignore_dirs;                /* ignored-folders config patterns (borrowed) */
 };
 
 /* Check if filename has valid extension */
@@ -161,6 +172,10 @@ static int add_watch_recursive(FileWatcher *watcher, const char *directory) {
         char path[4096];
         snprintf(path, sizeof(path), "%s/%s", directory, entry->d_name);
 
+        if (watch_dir_skipped(path, entry->d_name, watcher->exclude_dirs, watcher->ignore_dirs)) {
+            continue;
+        }
+
         struct stat st;
         if (stat(path, &st) == 0 && S_ISDIR(st.st_mode)) {
             add_watch_recursive(watcher, path);
@@ -181,8 +196,12 @@ FileWatcher* file_watcher_init(void) {
 }
 
 int file_watcher_add_directory(FileWatcher *watcher, const char *directory,
-                                const char **extensions, int extension_count) {
+                                const char **extensions, int extension_count,
+                                const ExcludeDirs *exclude_dirs, const WordSet *ignore_dirs) {
     if (!watcher || !directory) return -1;
+
+    watcher->exclude_dirs = exclude_dirs;
+    watcher->ignore_dirs = ignore_dirs;
 
     /* Copy extensions */
     watcher->extension_count = extension_count < MAX_FILE_EXTENSIONS ? extension_count : MAX_FILE_EXTENSIONS;
@@ -261,7 +280,9 @@ int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
                     if ((notify->Action == FILE_ACTION_ADDED ||
                          notify->Action == FILE_ACTION_RENAMED_NEW_NAME) &&
                         path_is_directory(filepath)) {
-                        add_watch_recursive(watcher, filepath);
+                        if (!watch_dir_skipped(filepath, filename, watcher->exclude_dirs, watcher->ignore_dirs)) {
+                            add_watch_recursive(watcher, filepath);
+                        }
                         if (notify->NextEntryOffset == 0) break;
                         notify = (FILE_NOTIFY_INFORMATION *)((char *)notify + notify->NextEntryOffset);
                         continue;
@@ -367,6 +388,8 @@ struct FileWatcher {
     int extension_count;                       /* Number of extensions */
     char roots[MAX_WATCH_DIRS][4096];          /* Root directories to rescan */
     int root_count;                            /* Number of root directories */
+    const ExcludeDirs *exclude_dirs;           /* --exclude-dir patterns (borrowed) */
+    const WordSet *ignore_dirs;                /* ignored-folders config patterns (borrowed) */
 };
 
 /* Check if filename has valid extension */
@@ -515,6 +538,9 @@ static int sync_directory_recursive(FileWatcher *watcher, const char *directory,
         }
 
         if (S_ISDIR(st.st_mode)) {
+            if (watch_dir_skipped(path, entry->d_name, watcher->exclude_dirs, watcher->ignore_dirs)) {
+                continue;
+            }
             sync_directory_recursive(watcher, path, events, event_count, max_events);
         } else if (S_ISREG(st.st_mode) &&
                    has_valid_extension_array(path, watcher->extensions, watcher->extension_count)) {
@@ -577,8 +603,12 @@ FileWatcher* file_watcher_init(void) {
 }
 
 int file_watcher_add_directory(FileWatcher *watcher, const char *directory,
-                                const char **extensions, int extension_count) {
+                                const char **extensions, int extension_count,
+                                const ExcludeDirs *exclude_dirs, const WordSet *ignore_dirs) {
     if (!watcher || !directory) return -1;
+
+    watcher->exclude_dirs = exclude_dirs;
+    watcher->ignore_dirs = ignore_dirs;
 
     /* Copy extensions */
     watcher->extension_count = extension_count < MAX_FILE_EXTENSIONS ? extension_count : MAX_FILE_EXTENSIONS;
@@ -720,6 +750,8 @@ struct FileWatcher {
     int watch_count;                           /* Number of watches */
     char extensions[MAX_FILE_EXTENSIONS][FILE_EXTENSION_MAX_LENGTH];  /* Copied file extensions */
     int extension_count;                       /* Number of extensions */
+    const ExcludeDirs *exclude_dirs;           /* --exclude-dir patterns (borrowed) */
+    const WordSet *ignore_dirs;                /* ignored-folders config patterns (borrowed) */
 };
 
 /* Check if filename has valid extension */
@@ -782,6 +814,9 @@ static int add_watch_recursive(FileWatcher *watcher, const char *directory) {
 
         /* Check if directory */
         if (entry->d_type == DT_DIR) {
+            if (watch_dir_skipped(path, entry->d_name, watcher->exclude_dirs, watcher->ignore_dirs)) {
+                continue;
+            }
             add_watch_recursive(watcher, path);
         }
     }
@@ -825,8 +860,12 @@ FileWatcher* file_watcher_init(void) {
 }
 
 int file_watcher_add_directory(FileWatcher *watcher, const char *directory,
-                                const char **extensions, int extension_count) {
+                                const char **extensions, int extension_count,
+                                const ExcludeDirs *exclude_dirs, const WordSet *ignore_dirs) {
     if (!watcher || !directory) return -1;
+
+    watcher->exclude_dirs = exclude_dirs;
+    watcher->ignore_dirs = ignore_dirs;
 
     /* Copy extensions to avoid pointer issues */
     watcher->extension_count = extension_count < MAX_FILE_EXTENSIONS ? extension_count : MAX_FILE_EXTENSIONS;
@@ -905,7 +944,8 @@ int file_watcher_wait(FileWatcher *watcher, FileEvent *events, int max_events) {
             snprintf(filepath, sizeof(filepath), "%s/%s", dir, event->name);
 
             if (event->mask & IN_ISDIR) {
-                if (event->mask & (IN_CREATE | IN_MOVED_TO)) {
+                if ((event->mask & (IN_CREATE | IN_MOVED_TO)) &&
+                    !watch_dir_skipped(filepath, event->name, watcher->exclude_dirs, watcher->ignore_dirs)) {
                     add_watch_recursive(watcher, filepath);
                 }
                 last_event_time = current_time_ms();

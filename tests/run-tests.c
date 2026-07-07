@@ -49,6 +49,7 @@ static const Language languages[] = {
     {"php", "php", "./index-php"},
     {"go", "go", "./index-go"},
     {"python", "py", "./index-python"},
+    {"rust", "rs", "./index-rust"},
     {NULL, NULL, NULL}
 };
 

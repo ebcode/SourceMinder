@@ -210,7 +210,12 @@ static void init_go_symbols(const TSLanguage *language) {
     go_symbols.channel_type = ts_language_symbol_for_name(language, "channel_type", 12, true);
     go_symbols.function_type = ts_language_symbol_for_name(language, "function_type", 13, true);
     go_symbols.generic_type = ts_language_symbol_for_name(language, "generic_type", 12, true);
-    go_symbols.union_type = ts_language_symbol_for_name(language, "union_type", 10, true);
+    /* tree-sitter-go >= 0.25 renamed union_type to type_elem; try the new
+     * name first, fall back to the old one for older grammars. */
+    go_symbols.union_type = ts_language_symbol_for_name(language, "type_elem", 9, true);
+    if (go_symbols.union_type == 0) {
+        go_symbols.union_type = ts_language_symbol_for_name(language, "union_type", 10, true);
+    }
     go_symbols.negated_type = ts_language_symbol_for_name(language, "negated_type", 12, true);
     go_symbols.parenthesized_type = ts_language_symbol_for_name(language, "parenthesized_type", 18, true);
 
@@ -236,7 +241,12 @@ static void init_go_symbols(const TSLanguage *language) {
     go_symbols.function_declaration = ts_language_symbol_for_name(language, "function_declaration", 20, true);
     go_symbols.func_literal = ts_language_symbol_for_name(language, "func_literal", 12, true);
     go_symbols.method_declaration = ts_language_symbol_for_name(language, "method_declaration", 18, true);
-    go_symbols.method_spec = ts_language_symbol_for_name(language, "method_spec", 11, true);
+    /* tree-sitter-go >= 0.25 renamed method_spec to method_elem; try the new
+     * name first, fall back to the old one for older grammars. */
+    go_symbols.method_spec = ts_language_symbol_for_name(language, "method_elem", 11, true);
+    if (go_symbols.method_spec == 0) {
+        go_symbols.method_spec = ts_language_symbol_for_name(language, "method_spec", 11, true);
+    }
     go_symbols.field_declaration = ts_language_symbol_for_name(language, "field_declaration", 17, true);
     go_symbols.var_declaration = ts_language_symbol_for_name(language, "var_declaration", 15, true);
     go_symbols.const_declaration = ts_language_symbol_for_name(language, "const_declaration", 17, true);
@@ -1131,7 +1141,27 @@ static void handle_type_spec(TSNode node, const char *source_code, const char *d
         safe_extract_node_text(source_code, name_node, type_name, sizeof(type_name), filename);
         get_package(node, source_code, package_buf, sizeof(package_buf), filename);
 
+        /* Choose the context label from the underlying type definition: a
+         * struct is class-like (matches Rust/Python/TS), so index it as
+         * CONTEXT_CLASS to make `-i class` work on Go structs; an interface is
+         * CONTEXT_INTERFACE. Aliases and other defined types stay CONTEXT_TYPE. */
+        TSNode type_def = ts_node_child(node, 1);
+        int type_context = CONTEXT_TYPE;
+        if (!ts_node_is_null(type_def)) {
+            const char *td = ts_node_type(type_def);
+            if (strcmp(td, "struct_type") == 0) {
+                type_context = CONTEXT_CLASS;
+            } else if (strcmp(td, "interface_type") == 0) {
+                type_context = CONTEXT_INTERFACE;
+            }
+        }
+
         if (type_name[0] && filter_should_index(filter, type_name)) {
+            /* Extract source location for the full type definition (so -e can
+             * expand the struct/interface body, like funcs and vars). */
+            char location[SOURCE_LOCATION_MAX_LENGTH];
+            format_source_location(node, location, sizeof(location));
+
             ExtColumns ext = {
                 .parent = NULL,
                 .scope = get_scope_from_name(type_name),
@@ -1141,12 +1171,11 @@ static void handle_type_spec(TSNode node, const char *source_code, const char *d
                 .type = NULL,
                 .definition = "1"
             };
-            add_entry(result, type_name, line, CONTEXT_TYPE,
-                     directory, filename, NULL, &ext);
+            add_entry(result, type_name, line, type_context,
+                     directory, filename, location, &ext);
         }
 
         /* Process the type definition (struct_type, interface_type, etc.) */
-        TSNode type_def = ts_node_child(node, 1);
         if (!ts_node_is_null(type_def)) {
             const char *type_def_type = ts_node_type(type_def);
             if (strcmp(type_def_type, "struct_type") == 0) {
@@ -1203,6 +1232,10 @@ static void handle_type_alias(TSNode node, const char *source_code, const char *
         }
 
         if (alias_name[0] && filter_should_index(filter, alias_name)) {
+            /* Extract source location for the full alias declaration. */
+            char location[SOURCE_LOCATION_MAX_LENGTH];
+            format_source_location(node, location, sizeof(location));
+
             ExtColumns ext = {
                 .parent = NULL,
                 .scope = get_scope_from_name(alias_name),
@@ -1213,7 +1246,7 @@ static void handle_type_alias(TSNode node, const char *source_code, const char *
                 .definition = "1"
             };
             add_entry(result, alias_name, line, CONTEXT_TYPE,
-                     directory, filename, NULL, &ext);
+                     directory, filename, location, &ext);
         }
     }
 }
@@ -1541,9 +1574,26 @@ static void handle_method_spec(TSNode node, const char *source_code, const char 
             }
         }
 
+        /* Enclosing interface name: method_elem -> interface_type -> type_spec,
+         * whose first child is the type_identifier naming the interface. */
+        char iface_name[SYMBOL_MAX_LENGTH] = "";
+        TSNode ancestor = ts_node_parent(node);
+        while (!ts_node_is_null(ancestor)) {
+            if (ts_node_symbol(ancestor) == go_symbols.type_spec) {
+                TSNode iface_node = ts_node_child(ancestor, 0);
+                if (!ts_node_is_null(iface_node) &&
+                    strcmp(ts_node_type(iface_node), "type_identifier") == 0) {
+                    safe_extract_node_text(source_code, iface_node, iface_name,
+                                           sizeof(iface_name), filename);
+                }
+                break;
+            }
+            ancestor = ts_node_parent(ancestor);
+        }
+
         if (method_name[0] && filter_should_index(filter, method_name)) {
             ExtColumns ext = {
-                .parent = NULL,  /* TODO: Could extract parent interface name if needed */
+                .parent = iface_name[0] ? iface_name : NULL,
                 .scope = get_scope_from_name(method_name),
                 .modifier = NULL,
                 .clue = "interface",
@@ -1561,11 +1611,21 @@ static void handle_method_spec(TSNode node, const char *source_code, const char 
 static void handle_var_declaration(TSNode node, const char *source_code, const char *directory,
                                     const char *filename, ParseResult *result, SymbolFilter *filter,
                                     int line) {
+    (void)line;  /* Unused - each var_spec gets its own line number */
     /* Find var_spec children */
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; i++) {
         TSNode child = ts_node_child(node, i);
         const char *child_type = ts_node_type(child);
+
+        /* tree-sitter-go >= 0.25 wraps parenthesized var blocks in a
+         * var_spec_list; recurse so the var_spec loop sees the specs
+         * either way. */
+        if (strcmp(child_type, "var_spec_list") == 0) {
+            handle_var_declaration(child, source_code, directory, filename,
+                                   result, filter, line);
+            continue;
+        }
 
         if (strcmp(child_type, "var_spec") == 0) {
             /* Extract variable name and type */
@@ -1604,9 +1664,11 @@ static void handle_var_declaration(TSNode node, const char *source_code, const c
                 }
 
                 if (var_name[0] && filter_should_index(filter, var_name)) {
-                    /* Extract source location for full variable declaration */
+                    /* Extract source location for this var_spec; using the
+                     * whole declaration would pin every var in a block to
+                     * the block's opening line. */
                     char location[SOURCE_LOCATION_MAX_LENGTH];
-                    format_source_location(node, location, sizeof(location));
+                    format_source_location(child, location, sizeof(location));
 
                     ExtColumns ext = {
                         .parent = NULL,
@@ -1617,7 +1679,8 @@ static void handle_var_declaration(TSNode node, const char *source_code, const c
                         .type = var_type[0] ? var_type : NULL,
                         .definition = "1"
                     };
-                    add_entry(result, var_name, line, CONTEXT_VARIABLE,
+                    int spec_line = (int)ts_node_start_point(child).row + 1;
+                    add_entry(result, var_name, spec_line, CONTEXT_VARIABLE,
                              directory, filename, location, &ext);
                 }
             }
@@ -1647,8 +1710,15 @@ static void handle_var_declaration(TSNode node, const char *source_code, const c
                 }
             }
 
-            /* Process children to index symbols in computed expressions */
-            process_children(child, source_code, directory, filename, result, filter);
+            /* Process children to index symbols in computed expressions,
+             * skipping the name identifier already recorded as a definition */
+            for (uint32_t j = 0; j < spec_children; j++) {
+                TSNode spec_child = ts_node_child(child, j);
+                if (!ts_node_is_null(name_node) && ts_node_eq(spec_child, name_node)) {
+                    continue;
+                }
+                visit_node(spec_child, source_code, directory, filename, result, filter);
+            }
             g_initializer_parent[0] = '\0';
         }
     }
@@ -1678,6 +1748,7 @@ static int contains_iota(TSNode node, const char *source_code) {
 static void handle_const_declaration(TSNode node, const char *source_code, const char *directory,
                                       const char *filename, ParseResult *result, SymbolFilter *filter,
                                       int line) {
+    (void)line;  /* Unused - each const_spec gets its own line number */
     /* Find const_spec children */
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; i++) {
@@ -1727,9 +1798,11 @@ static void handle_const_declaration(TSNode node, const char *source_code, const
                         clue = "iota";
                     }
 
-                    /* Extract source location for full const declaration */
+                    /* Extract source location for this const_spec; using the
+                     * whole declaration would pin every const in a block to
+                     * the block's opening line. */
                     char location[SOURCE_LOCATION_MAX_LENGTH];
-                    format_source_location(node, location, sizeof(location));
+                    format_source_location(child, location, sizeof(location));
 
                     ExtColumns ext = {
                         .parent = NULL,
@@ -1740,13 +1813,21 @@ static void handle_const_declaration(TSNode node, const char *source_code, const
                         .type = const_type[0] ? const_type : NULL,
                         .definition = "1"
                     };
-                    add_entry(result, const_name, line, CONTEXT_VARIABLE,
+                    int spec_line = (int)ts_node_start_point(child).row + 1;
+                    add_entry(result, const_name, spec_line, CONTEXT_VARIABLE,
                              directory, filename, location, &ext);
                 }
             }
 
-            /* Process children to index symbols in computed expressions */
-            process_children(child, source_code, directory, filename, result, filter);
+            /* Process children to index symbols in computed expressions,
+             * skipping the name identifier already recorded as a definition */
+            for (uint32_t j = 0; j < spec_children; j++) {
+                TSNode spec_child = ts_node_child(child, j);
+                if (!ts_node_is_null(name_node) && ts_node_eq(spec_child, name_node)) {
+                    continue;
+                }
+                visit_node(spec_child, source_code, directory, filename, result, filter);
+            }
         }
     }
 }

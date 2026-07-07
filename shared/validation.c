@@ -19,6 +19,7 @@
 
 #include "validation.h"
 #include "preflight_report.h"
+#include "embedded_config.h"
 #include "file_opener.h"
 #include "string_utils.h"
 #include "paths.h"
@@ -257,6 +258,8 @@ int preflight_validation_start(const char *lang_data_dir, int verbose,
         else
             preflight_report_add(report, PF_OK, "stopwords.txt (%zu words)",
                                  result.actual_value);
+    } else if (embedded_config_get(filepath)) {
+        preflight_report_add(report, PF_OK, "stopwords.txt (built-in defaults)");
     } else {
         preflight_report_add(report, PF_ERROR,
                              "Cannot find required file: %s", filepath);
@@ -270,6 +273,8 @@ int preflight_validation_start(const char *lang_data_dir, int verbose,
         else
             preflight_report_add(report, PF_OK, "keywords.txt (%zu words)",
                                  result.actual_value);
+    } else if (embedded_config_get(filepath)) {
+        preflight_report_add(report, PF_OK, "keywords.txt (built-in defaults)");
     } else {
         preflight_report_add(report, PF_ERROR,
                              "Cannot find required file: %s", filepath);
@@ -283,6 +288,8 @@ int preflight_validation_start(const char *lang_data_dir, int verbose,
         else
             preflight_report_add(report, PF_OK, "file-extensions.txt (%zu extensions)",
                                  result.actual_value);
+    } else if (embedded_config_get(filepath)) {
+        preflight_report_add(report, PF_OK, "file-extensions.txt (built-in defaults)");
     } else {
         preflight_report_add(report, PF_ERROR,
                              "Cannot find required file: %s", filepath);
@@ -301,6 +308,8 @@ int preflight_validation_start(const char *lang_data_dir, int verbose,
                 preflight_report_add(report, PF_OK, "ignore_files.txt (%zu entries)",
                                      result.actual_value);
         }
+    } else if (embedded_config_get(filepath)) {
+        preflight_report_add(report, PF_OK, "ignore_files.txt (built-in defaults)");
     } else {
         preflight_report_add(report, PF_WARNING,
                              "ignore_files.txt not found (optional, using empty list)");
@@ -317,6 +326,8 @@ int preflight_validation_start(const char *lang_data_dir, int verbose,
                 preflight_report_add(report, PF_OK, "regex-patterns.txt (%zu patterns)",
                                      result.actual_value);
         }
+    } else if (embedded_config_get(filepath)) {
+        preflight_report_add(report, PF_OK, "regex-patterns.txt (built-in defaults)");
     } else {
         preflight_report_add(report, PF_WARNING,
                              "regex-patterns.txt not found (optional, using empty list)");

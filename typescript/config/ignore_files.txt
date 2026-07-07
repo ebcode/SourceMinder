@@ -2,6 +2,7 @@ node_modules
 dist
 tmp
 benchmark
+build
 tree-sitter-c
 tree-sitter-go
 tree-sitter-perl

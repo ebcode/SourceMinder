@@ -92,6 +92,18 @@ char *try_strdup_ctx(const char *str, const char *err_msg);
  */
 const char *skip_leading_char(const char *str, char ch);
 
+/* Read successive lines from an in-memory buffer
+ * Copies the next newline-terminated line from *cursor into buf with the
+ * newline stripped, truncating like fgets when a line exceeds bufsize-1
+ * (the remainder is returned by the following call). Advances *cursor.
+ * Parameters:
+ *   cursor  - Pointer to current position in the buffer (may point to NULL)
+ *   buf     - Destination for the line
+ *   bufsize - Size of buf
+ * Returns: 1 if a line was produced, 0 at end of input
+ */
+int next_config_line(const char **cursor, char *buf, size_t bufsize);
+
 /* Fast single-character string comparison
  * Compare a string to a single character followed by null terminator.
  * Faster than strcmp for single-character strings.

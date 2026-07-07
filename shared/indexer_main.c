@@ -17,7 +17,9 @@
  */
 #include "indexer_main.h"
 #include "database.h"
+#include "embedded_config.h"
 #include "filter.h"
+#include "paths.h"
 #include "file_walker.h"
 #include "file_watcher.h"
 #include "validation.h"
@@ -28,7 +30,6 @@
 #include "extensions.h"
 #include "parse_result.h"
 #include "version.h"
-#include "interactive.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -100,6 +101,7 @@ static int reindex_single_file(void *parser, ParserParseFunc parser_parse,
 #define FLAG_DB_FILE     (1 << 4)
 #define FLAG_EXCLUDE_DIR (1 << 5)
 #define FLAG_ECHO        (1 << 6)
+#define FLAG_WATCH_ONLY  (1 << 7)
 
 /* Scan CLI arguments to detect which flags are present (before config loading) */
 static int scan_cli_flags(int argc, char *argv[]) {
@@ -112,6 +114,7 @@ static int scan_cli_flags(int argc, char *argv[]) {
         else if (strcmp(argv[i], "--db-file") == 0 || strcmp(argv[i], "-f") == 0) flags |= FLAG_DB_FILE;
         else if (strcmp(argv[i], "--exclude-dir") == 0) flags |= FLAG_EXCLUDE_DIR;
         else if (strcmp(argv[i], "--echo") == 0) flags |= FLAG_ECHO;
+        else if (strcmp(argv[i], "--watch-only") == 0) flags |= FLAG_WATCH_ONLY;
     }
     return flags;
 }
@@ -125,6 +128,7 @@ static int should_skip_config_line(const char *line, int cli_flags) {
     if ((cli_flags & FLAG_DB_FILE) && (strstr(line, "--db-file") == line || strstr(line, "-f") == line)) return 1;
     if ((cli_flags & FLAG_EXCLUDE_DIR) && strstr(line, "--exclude-dir") == line) return 1;
     if ((cli_flags & FLAG_ECHO) && strstr(line, "--echo") == line) return 1;
+    if ((cli_flags & FLAG_WATCH_ONLY) && strstr(line, "--watch-only") == line) return 1;
     return 0;
 }
 
@@ -219,6 +223,45 @@ static void load_config_file(int *argc_ptr, char ***argv_ptr, int cli_flags) {
     *argv_ptr = new_argv;
 }
 
+/* Print one config file's effective contents, with its source: the resolved
+ * on-disk file, or the built-in defaults plus where an override can be placed */
+static void print_config_entry(const char *dir, const char *filename) {
+    char path[PATH_MAX_LENGTH];
+    char resolved[PATH_MAX_LENGTH];
+    snprintf(path, sizeof(path), "%s/%s", dir, filename);
+
+    if (resolve_data_file(path, resolved, sizeof(resolved)) == 0) {
+        printf("=== %s === [ %s ]\n", filename, resolved);
+        FILE *f = safe_fopen(resolved, "r", 0);
+        if (f) {
+            char line[LINE_BUFFER_LARGE];
+            while (fgets(line, sizeof(line), f)) {
+                fputs(line, stdout);
+            }
+            fclose(f);
+        }
+    } else {
+        char override_path[PATH_MAX_LENGTH];
+        get_install_data_path(path, override_path, sizeof(override_path));
+        const char *data = embedded_config_get(path);
+        if (data) {
+            printf("=== %s === [ built-in. override: %s ]\n", filename, override_path);
+            fputs(data, stdout);
+        } else {
+            printf("=== %s === [ not found. create: %s ]\n", filename, override_path);
+        }
+    }
+    printf("\n");
+}
+
+static void show_effective_config(const char *lang_data_dir) {
+    print_config_entry(SHARED_CONFIG_DIR, STOPWORDS_FILENAME);
+    print_config_entry(lang_data_dir, KEYWORDS_FILENAME);
+    print_config_entry(lang_data_dir, FILE_EXTENSIONS_FILENAME);
+    print_config_entry(lang_data_dir, IGNORE_FILES_FILENAME);
+    print_config_entry(SHARED_CONFIG_DIR, REGEX_PATTERNS_FILENAME);
+}
+
 static void print_usage(const IndexerConfig *config) {
     printf("Usage: %s <directories...> [OPTIONS]\n", config->name);
     printf("   or: %s <files...> [OPTIONS]\n", config->name);
@@ -233,15 +276,16 @@ static void print_usage(const IndexerConfig *config) {
     printf("  %s ./src --silent           # Completely silent\n", config->name);
     printf("\n");
 
-    printf("Tip: Use --once to disable daemon mode and run a single indexing pass\n");
+    printf("Tip: Use --once to disable daemon mode and run a single indexing pass.\n");
     printf("\n");
 
     printf("Options:\n");
     printf("      --once                     run once and exit (disable daemon mode)\n");
+    printf("      --watch-only               skip initial indexing; watch and re-index on changes\n");
     printf("      --quiet-init               suppress initial indexing output (still shows re-index messages)\n");
     printf("      --silent                   suppress all output (initial + re-index messages)\n");
-    printf("      --verbose                  show preflight checks and validation\n");
-    printf("      --troubleshoot             diagnose tree-sitter ABI and library issues, then exit\n");
+    printf("      --verbose                  show preflight checks and validation\n");    
+    printf("      --show-config              show effective config files and their sources, then exit\n");
     printf("      --exclude-dir DIR...       exclude directories (can specify multiple)\n");
     printf("  -f, --db-file PATH             database file location (default: code-index.db)\n");
     printf("      --echo MESSAGE             print message and continue (for testing)\n");
@@ -300,9 +344,10 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     int quiet_init = 0;
     int silent = 0;
     int verbose = 0;
-    int debug = 0;
-    int troubleshoot = 0;
+    int debug = 0;    
+    int show_config = 0;
     int daemon_mode = 1;  /* Daemon mode enabled by default */
+    int watch_only = 0;
     ExcludeDirs exclude_dirs = { .count = 0 };
     char *targets[MAX_TARGETS];
     int target_count = 0;
@@ -313,14 +358,16 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--once") == 0) {
             daemon_mode = 0;
+        } else if (strcmp(argv[i], "--watch-only") == 0) {
+            watch_only = 1;
         } else if (strcmp(argv[i], "--quiet-init") == 0) {
             quiet_init = 1;
         } else if (strcmp(argv[i], "--silent") == 0) {
             silent = 1;
         } else if (strcmp(argv[i], "--verbose") == 0) {
             verbose = 1;
-        } else if (strcmp(argv[i], "--troubleshoot") == 0) {
-            troubleshoot = 1;
+        } else if (strcmp(argv[i], "--show-config") == 0) {
+            show_config = 1;
         } else if (strcmp(argv[i], "--debug") == 0) {
             debug = 1;
         } else if (strcmp(argv[i], "--echo") == 0) {
@@ -352,24 +399,17 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
             if (target_count < MAX_TARGETS) {
                 targets[target_count++] = argv[i];
             }
+        } else {
+            fprintf(stderr, "Error: unknown option '%s'\n", argv[i]);
+            fprintf(stderr, "Run '%s --help' for usage.\n", config->name);
+            return 1;
         }
     }
-
-    /* --troubleshoot implies --verbose */
-    if (troubleshoot) verbose = 1;
-
-    /* --troubleshoot: run full preflight diagnostics and exit (no targets needed) */
-    if (troubleshoot) {
-        PreflightReport report = {0};
-        preflight_validation_start(config->data_dir, verbose, &report);
-        if (config->get_language)
-            check_abi_version(config->get_language, config->name, config->grammar_dir, verbose, 1, &report);
-        preflight_validation_end(&report, verbose);
-        if (report.error_count > 0 &&
-            report.suggested_grammar_tag[0] != '\0' &&
-            config->grammar_dir &&
-            STDIN_IS_TTY())
-            offer_grammar_downgrade(config->grammar_dir, report.suggested_grammar_tag);
+    
+    /* --show-config: print effective config contents and sources, then exit
+     * (no targets needed) */
+    if (show_config) {
+        show_effective_config(config->data_dir);
         return 0;
     }
 
@@ -398,15 +438,23 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
 
     /* Daemon mode only works with directory mode */
     if (mode == MODE_FILES && daemon_mode) {
+        if (watch_only) {
+            fprintf(stderr, "Error: --watch-only requires directory targets, not individual files\n");
+            return 1;
+        }
         daemon_mode = 0;  /* Silently disable for file mode */
+    }
+
+    /* --watch-only and --once are incompatible */
+    if (watch_only && !daemon_mode) {
+        fprintf(stderr, "Error: --watch-only and --once are incompatible\n");
+        return 1;
     }
 
     /* PREFLIGHT VALIDATION */
     {
         PreflightReport report = {0};
         preflight_validation_start(config->data_dir, verbose, &report);
-        if (config->get_language)
-            check_abi_version(config->get_language, config->name, config->grammar_dir, verbose, 0, &report);
         if (preflight_validation_end(&report, verbose) != 0)
             return EXIT_FAILURE;
     }
@@ -440,7 +488,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         }
     }
 
-    if (!quiet_init && !silent) {
+    if (!quiet_init && !silent && !watch_only) {
         if (mode == MODE_DIRECTORIES) {
             printf("Indexing files in directories:");
             for (int i = 0; i < target_count; i++) {
@@ -470,7 +518,8 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
 
     /* Initialize database */
     CodeIndexDatabase db;
-    if (db_init(&db, db_file) != SQLITE_OK) {
+    /* watch-only: seed DB schema is already correct; skip migrations */
+    if ((watch_only ? db_open_watch_only(&db, db_file) : db_init(&db, db_file)) != SQLITE_OK) {
         fprintf(stderr, "Failed to initialize database\n");
         filter_free_regex(filter);
         free(filter);
@@ -519,7 +568,15 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         return 1;
     }
 
+    if (watch_only) {
+        if (!silent) {
+            printf("Skipping initial index (--watch-only). Watching for file changes...\n");
+        }
+    }
+
     int total_files_processed = 0;
+
+    if (!watch_only) {
 
     /* Begin transaction for better performance */
     if (db_begin_transaction(&db) != SQLITE_OK) {
@@ -628,13 +685,23 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         printf("Indexing complete: %d files processed\n", total_files_processed);
     }
 
+    } /* end if (!watch_only) */
+
     /* Enter daemon mode if enabled and in directory mode */
     if (daemon_mode && mode == MODE_DIRECTORIES) {
-        /* Setup signal handlers for graceful shutdown */
-        signal(SIGINT, signal_handler);
-        signal(SIGTERM, signal_handler);
+        /* Setup signal handlers for graceful shutdown.
+         * SA_RESTART is intentionally NOT set: select() must return EINTR so
+         * the daemon loop can check keep_running and exit cleanly on SIGTERM/SIGINT.
+         * signal() on Linux sets SA_RESTART by default, which would cause select()
+         * to restart instead of returning EINTR, trapping the daemon indefinitely. */
+        struct sigaction sa;
+        sa.sa_handler = signal_handler;
+        sa.sa_flags = 0;  /* no SA_RESTART */
+        sigemptyset(&sa.sa_mask);
+        sigaction(SIGINT, &sa, NULL);
+        sigaction(SIGTERM, &sa, NULL);
 
-        if (!silent) {
+        if (!silent && !watch_only) {
             printf("Watching for file changes (Press Ctrl+C to stop)...\n");
         }
 
@@ -661,7 +728,8 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         for (int i = 0; i < target_count; i++) {
             if (file_watcher_add_directory(watcher, targets[i],
                                           ext_ptrs,
-                                          extensions->count) != 0) {
+                                          extensions->count,
+                                          &exclude_dirs, ignore_dirs) != 0) {
                 fprintf(stderr, "Warning: Failed to watch directory: %s\n", targets[i]);
             }
         }
@@ -721,6 +789,20 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
 
                 if (should_skip) {
                     continue;  /* Skip ignored files */
+                }
+
+                /* Check --exclude-dir: DELETED still cleans up stale rows */
+                const char *excl_basename = strrchr(events[i].filepath, '/');
+                excl_basename = excl_basename ? excl_basename + 1 : events[i].filepath;
+                const char *matched_excl = exclude_dirs_match(events[i].filepath, excl_basename, &exclude_dirs);
+                if (matched_excl && events[i].type != FILE_EVENT_DELETED) {
+                    if (!silent) {
+                        const char *verb = (events[i].type == FILE_EVENT_MODIFIED)
+                            ? "Registered change" : "Registered new file";
+                        printf("%s: %s, but not indexed due to --exclude-dir %s\n",
+                               verb, events[i].filepath, matched_excl);
+                    }
+                    continue;
                 }
 
                 if (events[i].type == FILE_EVENT_DELETED) {

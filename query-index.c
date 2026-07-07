@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdint.h>
 #include <sys/stat.h>
 
 #if defined(_WIN32) || defined(__MINGW32__) || defined(__MINGW64__)
@@ -188,6 +189,15 @@ static const char* display_context(const char *context_type, int compact) {
     return context_to_string(type, 0);
 }
 
+/* Print an "unrecognized context type" error with the accepted names, for a
+ * bad -i/-x argument. `flag` is "-i" or "-x"; `given` is the user's raw arg. */
+static void report_invalid_context(const char *flag, const char *given) {
+    fprintf(stderr, "Error: unrecognized context type '%s' for %s.\n", given, flag);
+    fprintf(stderr, "Valid types: class iface func arg var exc type prop com str file "
+                    "imp exp call ns enum case trait lam label goto macro\n");
+    fprintf(stderr, "Note: Go structs index as 'class', interfaces as 'iface'.\n");
+}
+
 /* Flag presence bits */
 typedef enum {
     FLAG_COLUMNS = 1 << 0,
@@ -220,7 +230,7 @@ static int scan_cli_flags(int argc, char *argv[]) {
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--columns") == 0) flags |= FLAG_COLUMNS;
         else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--verbose") == 0) flags |= FLAG_VERBOSE;
-        else if (strcmp(argv[i], "--limit") == 0) flags |= FLAG_LIMIT;
+        else if (strcmp(argv[i], "--limit") == 0 || strcmp(argv[i], "-l") == 0) flags |= FLAG_LIMIT;
         else if (strcmp(argv[i], "--files") == 0) flags |= FLAG_FILES_ONLY;
         else if (strcmp(argv[i], "--db-file") == 0) flags |= FLAG_DB_FILE;
         else if (strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--include-context") == 0) flags |= FLAG_INCLUDE;
@@ -247,7 +257,7 @@ static int scan_cli_flags(int argc, char *argv[]) {
 static int should_skip_config_line(const char *line, int cli_flags) {
     if ((cli_flags & FLAG_COLUMNS) && strstr(line, "--columns") == line) return 1;
     if ((cli_flags & FLAG_VERBOSE) && (strstr(line, "-v") == line || strstr(line, "--verbose") == line)) return 1;
-    if ((cli_flags & FLAG_LIMIT) && strstr(line, "--limit") == line) return 1;
+    if ((cli_flags & FLAG_LIMIT) && (strstr(line, "--limit") == line || strstr(line, "-l") == line)) return 1;
     if ((cli_flags & FLAG_FILES_ONLY) && strstr(line, "--files") == line) return 1;
     if ((cli_flags & FLAG_DB_FILE) && strstr(line, "--db-file") == line) return 1;
     if ((cli_flags & FLAG_INCLUDE) && (strstr(line, "-i") == line || strstr(line, "--include-context") == line)) return 1;
@@ -482,6 +492,95 @@ static void convert_wildcards(const char *pattern, char *output, size_t output_s
     output[j] = '\0';
 }
 
+/* Split a term on the alternation operator '|' (the grep-ism '\|' is also
+ * accepted). Writes up to max_out newly-allocated segments into out[] and
+ * returns the count; empty segments produced by a leading, trailing, or
+ * doubled separator are dropped. The caller owns and must free each segment.
+ * '|' is never a valid identifier character or a qi wildcard, so the split is
+ * unambiguous. */
+static int split_alternation(const char *term, char *out[], int max_out) {
+    int count = 0;
+    const char *seg_start = term;
+    const char *p = term;
+    while (count < max_out) {
+        int sep_len = 0;
+        if (p[0] == '\\' && p[1] == '|') {
+            sep_len = 2;
+        } else if (p[0] == '|') {
+            sep_len = 1;
+        }
+        if (sep_len > 0 || *p == '\0') {
+            size_t len = (size_t)(p - seg_start);
+            if (len > 0) {
+                char seg[SYMBOL_MAX_LENGTH];
+                if (len >= sizeof(seg)) {
+                    len = sizeof(seg) - 1;
+                }
+                memcpy(seg, seg_start, len);
+                seg[len] = '\0';
+                out[count++] = safe_strdup_ctx(seg,
+                    "Failed to allocate memory for alternation segment");
+            }
+            if (*p == '\0') {
+                break;
+            }
+            p += sep_len;
+            seg_start = p;
+        } else {
+            p++;
+        }
+    }
+    return count;
+}
+
+/* Records the first grep-style alternation that was split, so a single warning
+ * can be emitted (with the user's actual terms) after all args are parsed. */
+typedef struct {
+    char *original;      /* the offending term as entered, e.g. "Renew\|Session" */
+    char *alternatives;  /* its split terms re-quoted and space-joined: 'Renew' 'Session' */
+    const char *sep;     /* the separator form the user typed: "\\|" or "|" */
+} AltWarning;
+
+/* Records a dotted qualified name (e.g. "Some.function") captured from the
+ * ORIGINAL argv token at parse time -- before convert_wildcards rewrites '.'
+ * to the '_' LIKE wildcard, which would be indistinguishable from a snake_case
+ * symbol. Drives the qualified-name auto-retry / Tip in print_results_by_file. */
+typedef struct {
+    int active;                        /* a dotted qualified name was captured */
+    char original[SYMBOL_MAX_LENGTH];  /* the token as entered, e.g. "Some.function" */
+    char qualifier[SYMBOL_MAX_LENGTH]; /* before the last dot, e.g. "Some" */
+    char symbol[SYMBOL_MAX_LENGTH];    /* after the last dot, e.g. "function" */
+} QualifiedName;
+
+/* Capture warning data for the first split term only (keep the message focused
+ * on one example). `original` is the term as entered; `segs`/`nseg` are its raw
+ * split alternatives. Echoes the separator form the user actually used. */
+static void capture_alt_warning(const char *original, char *const segs[], int nseg,
+                                AltWarning *w) {
+    if (w->original != NULL) {
+        return;  /* already captured an earlier term */
+    }
+    w->sep = strstr(original, "\\|") ? "\\|" : "|";
+    w->original = safe_strdup_ctx(original,
+        "Failed to allocate memory for alternation warning");
+
+    /* Build "'seg0' 'seg1' ...": two quotes per term, a space between, plus NUL. */
+    size_t cap = 1;
+    for (int i = 0; i < nseg; i++) {
+        cap += strlen(segs[i]) + 3;
+    }
+    char *buf = malloc(cap);
+    if (!buf) {
+        fprintf(stderr, "Failed to allocate memory for alternation warning\n");
+        exit(1);
+    }
+    size_t pos = 0;
+    for (int i = 0; i < nseg; i++) {
+        pos += (size_t)snprintf(buf + pos, cap - pos, "%s'%s'", i ? " " : "", segs[i]);
+    }
+    w->alternatives = buf;
+}
+
 /* Check if a word matches any regex pattern in the regex-patterns file */
 /*
 static int matches_regex_filter(const char *word, const char *filepath) {
@@ -651,8 +750,8 @@ static void setup_default_columns(int verbose, QueryFilters *filters, ShowColumn
     active_columns[num_active_columns++] = (ActiveColumn){find_column_by_name("context"), 1};
 }
 
-static void print_table_header(int compact) {
-    printf("\n");
+static void print_table_header(int compact, int quiet) {
+    if (!quiet) printf("\n");
 
     /* Print header row */
     for (int i = 0; i < num_active_columns; i++) {
@@ -670,19 +769,21 @@ static void print_table_header(int compact) {
     }
     printf("\n");
 
-    /* Print separator line */
-    for (int i = 0; i < num_active_columns; i++) {
-        if (!active_columns[i].enabled) continue;
-        if (i > 0) printf("-+-");
+    /* Print separator line (decoration; suppressed in quiet mode) */
+    if (!quiet) {
+        for (int i = 0; i < num_active_columns; i++) {
+            if (!active_columns[i].enabled) continue;
+            if (i > 0) printf("-+-");
 
-        ColumnSpec *spec = active_columns[i].spec;
-        if (!spec) continue;
-        int width = spec->width > 0 ? spec->width : 24;  /* default width for variable columns */
-        for (int j = 0; j < width; j++) {
-            printf("-");
+            ColumnSpec *spec = active_columns[i].spec;
+            if (!spec) continue;
+            int width = spec->width > 0 ? spec->width : 24;  /* default width for variable columns */
+            for (int j = 0; j < width; j++) {
+                printf("-");
+            }
         }
+        printf("\n");
     }
-    printf("\n");
 }
 
 static void print_table_row(RowData *data, int compact) {
@@ -713,8 +814,8 @@ static void print_table_row(RowData *data, int compact) {
 }
 
 /* Print header for all-columns mode */
-static void print_all_columns_header(void) {
-    printf("\n");
+static void print_all_columns_header(int quiet) {
+    if (!quiet) printf("\n");
 
     /* Print internal column headers */
     printf("%-24s | %-16s | %-4s | %-20s | %-3s | %-24s | %-20s",
@@ -726,12 +827,14 @@ static void print_all_columns_header(void) {
     }
     printf("\n");
 
-    /* Print separator line */
-    printf("------------------------+------------------+------+----------------------+-----+--------------------------+----------------------");
-    for (int i = 0; column_registry[i].name != NULL; i++) {
-        printf("+-------------");
+    /* Print separator line (decoration; suppressed in quiet mode) */
+    if (!quiet) {
+        printf("------------------------+------------------+------+----------------------+-----+--------------------------+----------------------");
+        for (int i = 0; column_registry[i].name != NULL; i++) {
+            printf("+-------------");
+        }
+        printf("\n");
     }
-    printf("\n");
 }
 
 /* Print all columns (internal + extensible) - used for --columns all */
@@ -961,13 +1064,16 @@ static int build_common_filters(SqlQueryBuilder *builder,
         if (sql_append(builder, ")") != 0) return -1;
     }
 
-    /* X-Macro: Add extensible column filters (using LIKE for pattern matching) */
+    /* X-Macro: Add extensible column filters (using LIKE for pattern matching).
+     * TEXT columns use leading+trailing wildcards so -p Server matches *Server,
+     * ServerImpl, etc. without the caller needing to know language-specific
+     * prefixes/suffixes. INT_COLUMN (is_definition) keeps exact match. */
 #define COLUMN(name, ...) \
     if (filters && filters->name.count > 0) { \
         if (sql_append(builder, " AND (") != 0) return -1; \
         for (int i = 0; i < filters->name.count; i++) { \
             char *escaped_value = sqlite3_mprintf("%q", filters->name.values[i]); \
-            int ret = sql_append(builder, "%s" #name " LIKE '%s' ESCAPE '\\'", \
+            int ret = sql_append(builder, "%s" #name " LIKE '%%%s%%' ESCAPE '\\'", \
                 i > 0 ? " OR " : "", escaped_value); \
             sqlite3_free(escaped_value); \
             if (ret != 0) return -1; \
@@ -1262,8 +1368,6 @@ static int lookup_within_definitions(CodeIndexDatabase *db, WithinFilter *within
         return 0;  /* No within filter, nothing to do */
     }
 
-    int found_count = 0;
-
     /* Look up each symbol separately */
     for (int sym_idx = 0; sym_idx < within_filter->count; sym_idx++) {
         const char *symbol = within_filter->symbols[sym_idx];
@@ -1326,7 +1430,6 @@ static int lookup_within_definitions(CodeIndexDatabase *db, WithinFilter *within
                 range->line_end = end_line;
                 within_ranges->count++;
                 symbol_found = 1;
-                found_count++;
 
                 if (debug) {
                     fprintf(stderr, "DEBUG: Found definition: %s/%s lines %d-%d\n",
@@ -1763,7 +1866,7 @@ static void get_context_summary(CodeIndexDatabase *db, PatternList *patterns,
         }
     }
 
-    printf("Result breakdown: ");
+    printf("Results CTX Totals: ");
     int first = 1;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         const char *context_full = (const char *)sqlite3_column_text(stmt, 0);
@@ -1780,7 +1883,7 @@ static void get_context_summary(CodeIndexDatabase *db, PatternList *patterns,
         printf("%s (%d)", context_compact, count);
         first = 0;
     }
-    printf("\nTip: Use -i <context> to narrow results\n");
+    printf("\nTip: Use -i CTX to narrow results\n");
 
     sqlite3_finalize(stmt);
     free_sql_builder(&builder);
@@ -2026,7 +2129,7 @@ static int execute_proximity_to_temp_table(CodeIndexDatabase *db, PatternList *p
 
     /* Pre-compile per-pattern EXISTS check statements (fixes #4 wildcard bug, #5 perf) */
     int num_secondaries = patterns->count - 1;
-    sqlite3_stmt **check_stmts = calloc(num_secondaries, sizeof(sqlite3_stmt *));
+    sqlite3_stmt **check_stmts = calloc((size_t)num_secondaries, sizeof(sqlite3_stmt *));
     if (!check_stmts) {
         sqlite3_finalize(anchor_stmt);
         free_sql_builder(&range_builder);
@@ -2218,15 +2321,37 @@ static void print_expansion_or_context(const char *filepath, int line,
     /* Print expanded definition or context lines if requested
      * Note: is_definition is an INT_COLUMN (int), not COLUMN (const char *),
      * so compare directly to 1, not strcmp(is_definition, "1") */
-    if (expand && is_definition == 1 &&
-        source_location && source_location[0] != '\0') {
-        /* Expand full definition for is_definition=1 entries */
+    if (expand && is_definition == 1) {
+        /* Expand the definition. Two kinds of row share is_definition=1:
+         *   - Body-bearing definitions (functions, structs, enums, impls, ...)
+         *     carry a full source span and expand to their whole body.
+         *   - Body-less definition sites (let/$x bindings, struct fields, enum
+         *     variants, parameters, imports) are legitimate definitions too --
+         *     `$x = 1;` is where $x is defined -- but the indexer records no
+         *     span for them yet, so fall back to showing the single defining
+         *     line at this row's location.
+         * Either way -e shows the actual source text. A missing span is an
+         * expected, permanent property of these rows, never evidence of a stale
+         * index, so we do not warn or guess about freshness. */
         int start_line, start_column, end_line, end_column;
-        if (parse_source_location(source_location, &start_line, &start_column,
-                                 &end_line, &end_column) == 0) {
-            print_lines_range(filepath, start_line, end_line, start_column, end_column, raw);
-            if (!raw) printf("--\n");  /* Closing separator after definition */
+        int have_span = source_location && source_location[0] != '\0' &&
+            parse_source_location(source_location, &start_line, &start_column,
+                                 &end_line, &end_column) == 0;
+        if (!have_span) {
+            start_line = end_line = line;  /* fall back to the defining line */
         }
+        /* Always whole-line mode (-1 columns): print the complete lines the
+         * definition spans, preserving leading indentation. Column-precise
+         * trimming would slice the indentation off the first line, leaving it
+         * misaligned against the rest of the body. */
+        if (context_before > 0 || context_after > 0) {
+            int ctx_start = start_line - context_before;
+            if (ctx_start < 1) ctx_start = 1;
+            print_lines_range(filepath, ctx_start, end_line + context_after, -1, -1, raw);
+        } else {
+            print_lines_range(filepath, start_line, end_line, -1, -1, raw);
+        }
+        if (!raw) printf("--\n");  /* Closing separator after definition */
     } else if (context_before > 0 || context_after > 0) {
         /* Fall back to context lines for non-definitions or when expand not set */
         print_context_lines(filepath, line, patterns->patterns, patterns->count,
@@ -2261,11 +2386,20 @@ static int build_query_sql(SqlQueryBuilder *builder, PatternList *patterns,
 static void print_summary_stats(CodeIndexDatabase *db, PatternList *patterns,
                                 ContextTypeList *include, ContextTypeList *exclude,
                                 QueryFilters *filters, FileFilterList *file_filter,
-                                WithinRangeList *within_ranges, int line_range, int total_count, int limit, int debug) {
+                                WithinRangeList *within_ranges, int line_range, int total_count, int limit, int quiet, int debug) {
     /* Get actual total if limit was hit */
     int actual_total = total_count;
     if (limit > 0 && total_count >= limit) {
         actual_total = get_total_count(db, patterns, include, exclude, filters, file_filter, within_ranges, line_range, debug);
+    }
+
+    /* Quiet mode: emit nothing except a terse notice when a limit clipped
+     * results, so the agent still knows the output was truncated. */
+    if (quiet) {
+        if (limit > 0 && total_count >= limit) {
+            printf("... %d matches, showing %d\n", actual_total, limit);
+        }
+        return;
     }
 
     char match_word[16];
@@ -2286,10 +2420,227 @@ static void print_summary_stats(CodeIndexDatabase *db, PatternList *patterns,
     }
 }
 
+/* Print the actual file paths where matches live (ignoring the -f filter).
+ * Used in the -f exclusion diagnostic to tell the user where to look. */
+static void print_file_filter_hint(CodeIndexDatabase *db, PatternList *patterns,
+                                   ContextTypeList *include, ContextTypeList *exclude,
+                                   QueryFilters *filters,
+                                   WithinRangeList *within_ranges, int line_range, int debug) {
+    FileFilterList no_files = {0};
+
+    int total_files = get_total_file_count(db, patterns, include, exclude, filters, &no_files, within_ranges, line_range, debug);
+    if (total_files <= 0) return;
+
+    SqlQueryBuilder builder;
+    if (init_sql_builder(&builder) != 0) return;
+
+    if (sql_append(&builder, "SELECT DISTINCT directory, filename FROM code_index WHERE (") != 0 ||
+        build_query_filters(&builder, patterns, include, exclude, filters, &no_files, within_ranges, line_range, debug) != 0 ||
+        sql_append(&builder, " ORDER BY directory, filename LIMIT 3") != 0) {
+        free_sql_builder(&builder);
+        return;
+    }
+
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db->db, builder.sql, -1, &stmt, NULL) != SQLITE_OK) {
+        free_sql_builder(&builder);
+        return;
+    }
+    free_sql_builder(&builder);
+
+    if (line_range < 0) {
+        for (int i = 0; i < patterns->count; i++) {
+            sqlite3_bind_text(stmt, i + 1, patterns->patterns[i], -1, SQLITE_STATIC);
+        }
+    }
+
+    int shown = 0;
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        const char *dir  = (const char *)sqlite3_column_text(stmt, 0);
+        const char *file = (const char *)sqlite3_column_text(stmt, 1);
+        if (shown == 0) { printf("  Match found at: "); }
+        else            { printf("                  "); }
+        printf("%s%s\n", dir ? dir : "", file ? file : "");
+        shown++;
+    }
+    sqlite3_finalize(stmt);
+
+    if (total_files > shown) {
+        printf("                  ... plus %d other %s\n",
+               total_files - shown, total_files - shown == 1 ? "file" : "files");
+    }
+}
+
+/* When every match was excluded by filters, find WHICH filter is responsible
+ * so the user drops the right one instead of all of them. Re-counts with each
+ * narrowing filter (-i include, -f file) cleared in turn, keeping the others.
+ * -x (exclude) is special: clearing it would re-add what the user deliberately
+ * removed, so when only clearing -x recovers matches we suggest a positive
+ * include (-i com str, which overrides -x noise) rather than dropping -x.
+ * --within redefines what a match is, so when it is active we fall back to the
+ * generic message. */
+static void diagnose_filter_exclusion(CodeIndexDatabase *db, PatternList *patterns,
+                                      ContextTypeList *include, ContextTypeList *exclude,
+                                      QueryFilters *filters, FileFilterList *file_filter,
+                                      WithinRangeList *within_ranges, int line_range, int debug) {
+    ContextTypeList no_ctx = {0};
+    FileFilterList no_files = {0};
+    int has_within = (within_ranges && within_ranges->count > 0);
+
+    /* Count with exactly one filter cleared; the others (including -x) stay,
+     * so each count isolates that one filter's effect. */
+    int n_no_include = (include->count > 0 && !has_within)
+        ? get_total_count(db, patterns, &no_ctx, exclude, filters, file_filter, within_ranges, line_range, debug) : 0;
+    int n_no_file = (file_filter->count > 0 && !has_within)
+        ? get_total_count(db, patterns, include, exclude, filters, &no_files, within_ranges, line_range, debug) : 0;
+    int n_no_exclude = (exclude->count > 0 && !has_within)
+        ? get_total_count(db, patterns, include, &no_ctx, filters, file_filter, within_ranges, line_range, debug) : 0;
+
+    /* Build per-flag culprit list: each entry is a filter that, cleared alone,
+     * recovers results. Sorted by count descending so the most impactful comes first. */
+    typedef struct { char flag[6]; int count; } CulpritEntry;
+    CulpritEntry culprits[12];
+    int n_culprits = 0;
+
+    if (n_no_include > 0)
+        culprits[n_culprits++] = (CulpritEntry){"-i", n_no_include};
+    if (n_no_file > 0)
+        culprits[n_culprits++] = (CulpritEntry){"-f", n_no_file};
+
+#define COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) \
+    if (filters->name.count > 0 && !has_within) { \
+        QueryFilters no_col = *filters; \
+        no_col.name.count = 0; \
+        int n = get_total_count(db, patterns, include, exclude, &no_col, \
+                                file_filter, within_ranges, line_range, debug); \
+        if (n > 0) \
+            culprits[n_culprits++] = (CulpritEntry){"-" #short_flag, n}; \
+    }
+#define INT_COLUMN COLUMN
+#include "shared/column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+
+    for (int i = 0; i < n_culprits - 1; i++)
+        for (int j = i + 1; j < n_culprits; j++)
+            if (culprits[j].count > culprits[i].count) {
+                CulpritEntry tmp = culprits[i]; culprits[i] = culprits[j]; culprits[j] = tmp;
+            }
+
+    const char *pat = patterns->patterns[0];
+    int single = (patterns->count == 1);
+
+    if (n_culprits == 1) {
+        /* Single culprit: keep the existing terse style. */
+        if (single)
+            printf("'%s': %d %s excluded by %s. Re-run without %s to see them.\n",
+                   pat, culprits[0].count, culprits[0].count == 1 ? "match" : "matches",
+                   culprits[0].flag, culprits[0].flag);
+        else
+            printf("Matches exist but were excluded by %s. Re-run without %s to see them.\n",
+                   culprits[0].flag, culprits[0].flag);
+        if (n_no_file > 0)
+            print_file_filter_hint(db, patterns, include, exclude, filters, within_ranges, line_range, debug);
+    } else if (n_culprits > 1) {
+        /* Multiple culprits: total count, then each flag's independent recovery count. */
+        if (single) {
+            int total = count_pattern_matches(db, pat);
+            printf("'%s': %d %s excluded by filters",
+                   pat, total, total == 1 ? "match" : "matches");
+        } else {
+            printf("Matches excluded by multiple filters");
+        }
+        for (int i = 0; i < n_culprits; i++)
+            printf("; remove %s to show %d %s",
+                   culprits[i].flag, culprits[i].count,
+                   culprits[i].count == 1 ? "match" : "matches");
+        printf(".\n");
+        if (n_no_file > 0)
+            print_file_filter_hint(db, patterns, include, exclude, filters, within_ranges, line_range, debug);
+    } else if (n_no_exclude > 0) {
+        /* Only clearing -x recovers matches. */
+        if (single) {
+            printf("'%s': %d %s excluded by -x. Remove -x to see them.\n",
+                   pat, n_no_exclude, n_no_exclude == 1 ? "match" : "matches");
+        } else {
+            printf("%d result%s excluded by -x. Remove -x to see them.\n",
+                   n_no_exclude, n_no_exclude == 1 ? "" : "s");
+        }
+    } else {
+        /* No single filter explains it -- a combination did. Suggest unfiltered. */
+        if (single) {
+            printf("'%s' has %d matches, all excluded by filters.\n",
+                   pat, count_pattern_matches(db, pat));
+        } else {
+            printf("All patterns exist, but all matches were excluded by filters.\n");
+        }
+        printf("Re-run without filters to see them:\n  qi");
+        for (int i = 0; i < patterns->count; i++) {
+            printf(" %s", patterns->patterns[i]);
+        }
+        printf("\n");
+    }
+}
+
+/* If `pattern` looks like a qualified name -- identifier chars with a literal
+ * dot that has a word char on both sides, and no % wildcard -- split it at the
+ * LAST dot into `qualifier` (the identifier immediately before the dot) and
+ * `symbol` (everything after). `qi Some.function` -> qualifier "Some", symbol
+ * "function"; `qi a.b.c` -> qualifier "b", symbol "c". Returns 1 on match.
+ * `.` is a single-char LIKE wildcard, so a dotted pattern is almost always a
+ * qualified name a user typed grep-style rather than an intentional wildcard.
+ * Both sides must be >= MIN_SYMBOL_LENGTH: the indexer does not store 1-char
+ * symbols, so a shorter side could never match and the retry would be futile. */
+static int split_qualified_name(const char *pattern, char *qualifier, size_t qsz,
+                                char *symbol, size_t ssz) {
+    /* An explicit wildcard (* or %) means the user meant a wildcard, not a
+     * qualified name -- don't second-guess them. Runs on the ORIGINAL token
+     * (before convert_wildcards turns '.'->'_' and '*'->'%'). */
+    if (!pattern || strchr(pattern, '%') || strchr(pattern, '*')) return 0;
+    const char *dot = strrchr(pattern, '.');
+    if (!dot || dot == pattern || dot[1] == '\0') return 0;  /* no dot, or leading/trailing */
+    /* Require a word char on both sides of the dot (a qualified-name separator). */
+    if (!isalnum((unsigned char)dot[-1]) && dot[-1] != '_') return 0;
+    if (!isalnum((unsigned char)dot[1]) && dot[1] != '_') return 0;
+    /* qualifier = the identifier segment immediately before the dot */
+    const char *qstart = dot;
+    while (qstart > pattern && (isalnum((unsigned char)qstart[-1]) || qstart[-1] == '_')) qstart--;
+    size_t qlen = (size_t)(dot - qstart);
+    size_t slen = strlen(dot + 1);
+    if (qlen < MIN_SYMBOL_LENGTH || slen < MIN_SYMBOL_LENGTH) return 0;  /* 1-char sides never indexed */
+    if (qlen >= qsz || slen >= ssz) return 0;
+    memcpy(qualifier, qstart, qlen);
+    qualifier[qlen] = '\0';
+    memcpy(symbol, dot + 1, slen);
+    symbol[slen] = '\0';
+    return 1;
+}
+
+/* Count rows matching `symbol` restricted to a qualifier on one column:
+ * parent_symbol when use_namespace==0, namespace when 1. The ambient filters
+ * (include/exclude/file/within) are preserved; a shallow copy of *filters gets
+ * the single qualifier value appended to the (guaranteed-empty) target column. */
+static int count_qualified(CodeIndexDatabase *db, const char *symbol, const char *qualifier,
+                           int use_namespace,
+                           ContextTypeList *include, ContextTypeList *exclude,
+                           QueryFilters *filters, FileFilterList *file_filter,
+                           WithinRangeList *within_ranges, int line_range, int debug) {
+    /* The casts below borrow const strings into non-const struct fields that
+     * are only read, never written; going via uintptr_t keeps -Wcast-qual quiet. */
+    PatternList pl = { .count = 1 };
+    pl.patterns[0] = (char *)(uintptr_t)symbol;
+    QueryFilters f = *filters;  /* shallow copy; we only append to an empty column */
+    if (use_namespace)
+        f.namespace.values[f.namespace.count++] = (char *)(uintptr_t)qualifier;
+    else
+        f.parent_symbol.values[f.parent_symbol.count++] = (char *)(uintptr_t)qualifier;
+    return get_total_count(db, &pl, include, exclude, &f, file_filter, within_ranges, line_range, debug);
+}
+
 /* HOST_ONLY: mixes indexed querying with terminal rendering and host-backed source expansion. */
 static void print_results_by_file(CodeIndexDatabase *db, PatternList *patterns,
                                   ContextTypeList *include, ContextTypeList *exclude, QueryFilters *filters, FileFilterList *file_filter,
-                                  WithinRangeList *within_ranges, int limit, int limit_per_file, int compact, int line_range, int expand, int context_before, int context_after, int debug, int show_all_columns, int raw, const FileExtensions *known_exts) {
+                                  WithinRangeList *within_ranges, int limit, int limit_per_file, int compact, int line_range, int expand, int context_before, int context_after, int debug, int show_all_columns, int raw, int quiet, const FileExtensions *known_exts, const QualifiedName *qn) {
 
     /* Two-step proximity search for line_range > 0 */
     if (line_range > 0 && patterns->count > 1) {
@@ -2340,13 +2691,54 @@ retry_query:
     char current_file[PATH_MAX_LENGTH] = "";
     int total_count = 0;
     int current_file_count = 0;  /* Track results in current file for --limit-per-file */
+    int n_skipped_expand = 0;    /* Non-definition rows skipped by -e in raw mode */
 
     /* Check if there are any results before printing header */
     int first_result = sqlite3_step(stmt);
     if (first_result != SQLITE_ROW) {
-        /* No results found - provide diagnostics */
+        /* No results: run diagnostics first and print the blunt "No results"
+         * verdict LAST (below), so the actionable line -- e.g. "'x' has N
+         * matches but all were excluded by filters" -- leads instead. (A
+         * successful wildcard retry gotos past the trailing verdict, so it no
+         * longer prints a misleading "No results" before its matches.) */
         sqlite3_finalize(stmt);
-        printf("No results\n");
+
+        /* Qualified-name recovery: `qi Some.function` -> retry as
+         * `qi function -p Some` (then `-ns Some`). A dotted pattern is almost
+         * always a qualified name typed grep-style; `.` is only a single-char
+         * wildcard, so the literal search rarely matches what the user meant.
+         * We auto-retry with whichever dimension recovers (parent preferred),
+         * mirroring the `%word%` auto-retry, so new users get results without
+         * having to know -p/-ns. Runs BEFORE the wildcard retry so a real
+         * qualified match wins over coincidental `SomeXfunction` noise, and
+         * before symbol_filter is allocated so the goto leaks nothing.
+         * Skipped when -p/-ns are already set (the user knows the shape). */
+        if (qn && qn->active && patterns->count == 1 &&
+            filters->parent_symbol.count == 0 && filters->namespace.count == 0) {
+            int use_ns = 0;
+            int n = count_qualified(db, qn->symbol, qn->qualifier, 0, include, exclude,
+                                    filters, file_filter, within_ranges, line_range, debug);
+            if (n == 0) {
+                int n_ns = count_qualified(db, qn->symbol, qn->qualifier, 1, include, exclude,
+                                           filters, file_filter, within_ranges, line_range, debug);
+                if (n_ns > 0) { use_ns = 1; n = n_ns; }
+            }
+            if (n > 0) {
+                const char *flag = use_ns ? "-ns" : "-p";
+                printf("Retrying as qualified name: qi %s %s %s\n\n", qn->symbol, flag, qn->qualifier);
+                /* Rewrite the query in place: pattern -> the after-dot symbol,
+                 * qualifier -> a parent/namespace filter, then re-run. */
+                free(patterns->patterns[0]);
+                patterns->patterns[0] = safe_strdup_ctx(qn->symbol, "Failed to allocate memory for qualified symbol");
+                if (use_ns)
+                    filters->namespace.values[filters->namespace.count++] =
+                        safe_strdup_ctx(qn->qualifier, "Failed to allocate memory for namespace filter");
+                else
+                    filters->parent_symbol.values[filters->parent_symbol.count++] =
+                        safe_strdup_ctx(qn->qualifier, "Failed to allocate memory for parent filter");
+                goto retry_query;
+            }
+        }
 
         /* Initialize filter to check if patterns are valid symbols */
         SymbolFilter symbol_filter;
@@ -2363,6 +2755,7 @@ retry_query:
 
         /* Check each pattern individually to see which ones matched */
         int all_patterns_matched = 1;
+        int show_verdict = 1;  /* cleared when a branch already reports the count */
         for (int i = 0; i < patterns->count; i++) {
             int count = count_pattern_matches(db, patterns->patterns[i]);
             if (count == 0) {
@@ -2386,7 +2779,7 @@ retry_query:
                                         patterns->patterns[i] = safe_strdup_ctx(wildcard_pattern, "Failed to allocate memory for wildcard pattern");
                                         goto retry_query;
                                     } else {
-                                        printf("No partial matches found for '*%s*' either.", patterns->patterns[i]);
+                                        printf("No partial matches found for '*%s*'.", patterns->patterns[i]);
                                     }
                                 }
                                 break;
@@ -2424,16 +2817,19 @@ retry_query:
             if (line_range >= 0) {
                 printf("No lines contain ALL patterns together.\n");
             } else if (has_any_filters(include, exclude, filters, file_filter)) {
-                printf("All matches were excluded by filters.\n");
-                printf("Try without filters to see if symbols exist:\n  qi");
-
-                for (int i = 0; i < patterns->count; i++) {
-                    printf(" %s", patterns->patterns[i]);
-                }
-                printf("\n");
+                /* Name the responsible filter so the user drops the right one,
+                 * instead of the blunt "No results" that sends them to grep. */
+                diagnose_filter_exclusion(db, patterns, include, exclude, filters,
+                                          file_filter, within_ranges, line_range, debug);
+                show_verdict = 0;  /* the diagnostic already reports the count */
             }
         }
 
+        /* The blunt verdict, last -- after the diagnostics that explain it.
+         * Skipped when the filtered-miss branch already reported the count. */
+        if (show_verdict) {
+            printf("0 matches\n");
+        }
         warn_unknown_extensions(file_filter, known_exts);
         return;
     }
@@ -2441,9 +2837,9 @@ retry_query:
     /* Print table header only if we have results */
     if (!raw) {
         if (show_all_columns) {
-            print_all_columns_header();
+            print_all_columns_header(quiet);
         } else {
-            print_table_header(compact);
+            print_table_header(compact, quiet);
         }
     }
 
@@ -2519,6 +2915,8 @@ retry_query:
         print_expansion_or_context(filepath, line, source_location, is_definition,
                                   expand, context_before, context_after, patterns, raw);
 
+        if (expand && is_definition != 1) n_skipped_expand++;
+
         total_count++;
         current_file_count++;  /* Increment per-file counter */
 
@@ -2529,9 +2927,35 @@ retry_query:
 
     sqlite3_finalize(stmt);
 
+    /* Warn when -e skipped non-expandable rows (usages, not definitions).
+     * In raw mode these rows produce no output at all, which looks like a bug. */
+    if (expand && n_skipped_expand > 0) {
+        if (n_skipped_expand == total_count) {
+            fprintf(stderr, "No expandable definitions found: all %d result%s %s not a definition. "
+                    "Try -i func/class to narrow, or remove -e.\n",
+                    n_skipped_expand, n_skipped_expand == 1 ? "" : "s",
+                    n_skipped_expand == 1 ? "is" : "are");
+        } else {
+            fprintf(stderr, "%d result%s not expanded (not a definition). "
+                    "Try -i func/class to narrow.\n",
+                    n_skipped_expand, n_skipped_expand == 1 ? "" : "s");
+        }
+    }
+
     /* Print summary statistics */
     if (!raw) print_summary_stats(db, patterns, include, exclude, filters, file_filter, within_ranges,
-                       line_range, total_count, limit, debug);
+                       line_range, total_count, limit, quiet, debug);
+
+    /* Results exist but the pattern looks like a qualified name: the `.` was
+     * treated as a single-char wildcard, so these matches are coincidental
+     * rather than the qualified name the user likely meant. Teach the canonical
+     * form (no probe -- keep the success path cheap). The guard is false after a
+     * qualified-name auto-retry, since the pattern no longer holds a dot. */
+    if (!raw && qn && qn->active && patterns->count == 1 &&
+        filters->parent_symbol.count == 0 && filters->namespace.count == 0) {
+        printf("\nTip: '.' matched as a single-char wildcard. For the qualified name "
+               "%s, try: qi %s -p %s\n", qn->original, qn->symbol, qn->qualifier);
+    }
 }
 
 static void print_context_types(void) {
@@ -2609,8 +3033,8 @@ static void show_help_compact(void) {
     printf("      --usage                    usages only\n");
     printf("      --lines LINE|START-END     filter line/range\n");
     printf("  -w, --within SYMBOL...         search inside definitions\n");
-    printf("      --limit NUM                limit matches\n");
-    printf("      --limit-per-file NUM       limit matches per file\n");
+    printf("  -l, --limit NUM                limit matches\n");
+    printf("  -lpf, --limit-per-file NUM     limit matches per file\n");
     printf("\n");
 
     printf("Display:\n");
@@ -2640,6 +3064,7 @@ static void show_help_compact(void) {
     printf("  -v, --verbose                  all columns\n");
     printf("      --full                     full column names\n");
     printf("      --raw                      source only; useful with -e/-A/-B\n");
+    printf("  -q, --quiet                    drop banner/footer/rule chrome; keep header + rows\n");
     printf("\n");
 
     printf("Database:\n");
@@ -2648,10 +3073,9 @@ static void show_help_compact(void) {
     printf("\n");
 
     printf("Types: func class macro var arg type prop call imp com str file; use --list-types for all.\n");
-    printf("Patterns: exact by default; wildcards: * any, . one char. %% and _ also work.\n");
+    printf("Patterns: case-insensitive, exact by default; wildcards: %% or * any chars, _ or . one char (* needs shell quoting).\n");
     printf("Escape leading flags: qi '\\--help'. Prefer prefix patterns like get* for speed.\n");
     printf("Config: ~/%s, [qi] section; CLI flags override config.\n", CONFIG_FILENAME);
-    printf("More examples: README.md, docs/C_GUIDE.md, docs/QI_VS_GREP.md\n");
 }
 
 /* HOST_ONLY: CLI entry point depends on argv parsing, filesystem checks, environment, and terminal output. */
@@ -2714,6 +3138,12 @@ int main(int argc, char *argv[]) {
     }
 
     PatternList patterns = { .count = 0 };
+    /* Records the first grep-style alternation split, for the educational
+     * warning emitted after parsing; .original stays NULL if none occurred. */
+    AltWarning alt_warning = { 0 };
+    /* First dotted qualified name typed as a single bare pattern, captured from
+     * the original token before '.' is rewritten to the '_' LIKE wildcard. */
+    QualifiedName qname = { 0 };
     int limit = 0;
     int limit_per_file = 0;  /* Limit results per file */
     int verbose = 0;
@@ -2729,6 +3159,7 @@ int main(int argc, char *argv[]) {
     int context_after = 0;
     int debug = 0;  /* Debug mode - show SQL queries */
     int raw_mode = 0;  /* Raw mode - suppress all non-source output */
+    int quiet = 0;     /* Quiet mode - drop banner + footer + separator-rule chrome; keep header row and match rows */
     int def_only = 0;
     int usage_only = 0;
     const char *db_file = "code-index.db";  /* Default database location */
@@ -2765,26 +3196,46 @@ int main(int argc, char *argv[]) {
     /* Parse pattern arguments (before flags) */
     int i = 1;
     while (i < argc && argv[i][0] != '-') {
-        if (patterns.count < MAX_PATTERNS) {
-            /* Strip leading backslash if present (escape for patterns starting with '-') */
-            const char *pattern = argv[i];
-            /* Skip leading backslash ONLY if it's escaping a dash (for searching "-flag" symbols)
-             * Don't skip for wildcard escaping like \* or \. */
-            if (pattern[0] == '\\' && pattern[1] == '-') {
-                pattern++;  /* Skip the leading backslash */
+        /* Strip leading backslash if present (escape for patterns starting with '-')
+         * Skip leading backslash ONLY if it's escaping a dash (for searching "-flag"
+         * symbols). Don't skip for wildcard escaping like \* or \. */
+        const char *pattern = argv[i];
+        if (pattern[0] == '\\' && pattern[1] == '-') {
+            pattern++;  /* Skip the leading backslash */
+        }
+        /* Split grep-style alternation 'A|B' (or 'A\|B') into separate OR'd terms. */
+        char *segs[MAX_PATTERNS];
+        int nseg = split_alternation(pattern, segs, MAX_PATTERNS);
+        if (nseg > 1) {
+            capture_alt_warning(pattern, segs, nseg, &alt_warning);
+        }
+        for (int s = 0; s < nseg; s++) {
+            if (patterns.count < MAX_PATTERNS) {
+                /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) */
+                char converted_pattern[SYMBOL_MAX_LENGTH];
+                convert_wildcards(segs[s], converted_pattern, sizeof(converted_pattern));
+                patterns.patterns[patterns.count] = try_strdup_ctx(converted_pattern, "Failed to allocate memory for pattern");
+                if (!patterns.patterns[patterns.count]) {
+                    for (int r = s; r < nseg; r++) free(segs[r]);
+                    retval = 1;
+                    goto cleanup;
+                }
+                patterns.count++;
+                /* Capture a dotted qualified name from the ORIGINAL token (segs[s]
+                 * still has its '.'), only for the first bare single-term pattern.
+                 * The retry/Tip is gated on patterns->count==1 at query time, so a
+                 * second pattern harmlessly disables it. */
+                if (nseg == 1 && patterns.count == 1 && !qname.active &&
+                    split_qualified_name(segs[s], qname.qualifier, sizeof(qname.qualifier),
+                                         qname.symbol, sizeof(qname.symbol))) {
+                    snprintf(qname.original, sizeof(qname.original), "%s", segs[s]);
+                    qname.active = 1;
+                }
+            } else {
+                fprintf(stderr, "Warning: Maximum pattern limit (%d) reached. Ignoring: %s\n",
+                        MAX_PATTERNS, segs[s]);
             }
-            /* Convert shell-style wildcards (*) to SQL LIKE wildcards (%) */
-            char converted_pattern[SYMBOL_MAX_LENGTH];
-            convert_wildcards(pattern, converted_pattern, sizeof(converted_pattern));
-            patterns.patterns[patterns.count] = try_strdup_ctx(converted_pattern, "Failed to allocate memory for pattern");
-            if (!patterns.patterns[patterns.count]) {
-                retval = 1;
-                goto cleanup;
-            }
-            patterns.count++;
-        } else {
-            fprintf(stderr, "Warning: Maximum pattern limit (%d) reached. Ignoring: %s\n",
-                    MAX_PATTERNS, argv[i]);
+            free(segs[s]);
         }
         i++;
     }
@@ -2860,6 +3311,9 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "--raw") == 0) {
             raw_mode = 1;
         }
+        else if (strcmp(argv[i], "-q") == 0 || strcmp(argv[i], "--quiet") == 0) {
+            quiet = 1;
+        }
         else if (strcmp(argv[i], "--files") == 0) {
             files_only = 1;
         }
@@ -2886,7 +3340,13 @@ int main(int argc, char *argv[]) {
                     char type_upper[CONTEXT_TYPE_MAX_LENGTH];
                     snprintf(type_upper, sizeof(type_upper), "%s", argv[i + 1]);
                     to_upper(type_upper);
-                    include.types[include.count++] = string_to_context(type_upper);
+                    ContextType ctx = string_to_context(type_upper);
+                    if (ctx == CONTEXT_INVALID) {
+                        report_invalid_context("-i", argv[i + 1]);
+                        retval = 1;
+                        goto cleanup;
+                    }
+                    include.types[include.count++] = ctx;
                 }
                 i++;
             }
@@ -2923,7 +3383,13 @@ int main(int argc, char *argv[]) {
                                     MAX_CONTEXT_TYPES);
                         }
                     } else {
-                        exclude.types[exclude.count++] = string_to_context(type_upper);
+                        ContextType ctx = string_to_context(type_upper);
+                        if (ctx == CONTEXT_INVALID) {
+                            report_invalid_context("-x", argv[i + 1]);
+                            retval = 1;
+                            goto cleanup;
+                        }
+                        exclude.types[exclude.count++] = ctx;
                     }
                 }
                 i++;
@@ -2952,13 +3418,20 @@ int main(int argc, char *argv[]) {
                  strcmp(argv[i], "-" #short_flag) == 0) { \
             show_columns.name = 1; \
             while (i + 1 < argc && argv[i + 1][0] != '-') { \
-                if (filters.name.count < MAX_CONTEXT_TYPES) { \
-                    char converted_value[SYMBOL_MAX_LENGTH]; \
-                    convert_wildcards(argv[i + 1], converted_value, sizeof(converted_value)); \
-                    filters.name.values[filters.name.count++] = safe_strdup_ctx(converted_value, "Failed to allocate memory for " #long_flag " filter"); \
-                } else { \
-                    fprintf(stderr, "Warning: Maximum filter limit (%d) reached for --%s. Ignoring: %s\n", \
-                            MAX_CONTEXT_TYPES, #long_flag, argv[i + 1]); \
+                /* Split grep-style alternation 'A|B' into separate OR'd values. */ \
+                char *fsegs[MAX_CONTEXT_TYPES]; \
+                int fnseg = split_alternation(argv[i + 1], fsegs, MAX_CONTEXT_TYPES); \
+                if (fnseg > 1) capture_alt_warning(argv[i + 1], fsegs, fnseg, &alt_warning); \
+                for (int fs = 0; fs < fnseg; fs++) { \
+                    if (filters.name.count < MAX_CONTEXT_TYPES) { \
+                        char converted_value[SYMBOL_MAX_LENGTH]; \
+                        convert_wildcards(fsegs[fs], converted_value, sizeof(converted_value)); \
+                        filters.name.values[filters.name.count++] = safe_strdup_ctx(converted_value, "Failed to allocate memory for " #long_flag " filter"); \
+                    } else { \
+                        fprintf(stderr, "Warning: Maximum filter limit (%d) reached for --%s. Ignoring: %s\n", \
+                                MAX_CONTEXT_TYPES, #long_flag, fsegs[fs]); \
+                    } \
+                    free(fsegs[fs]); \
                 } \
                 i++; \
             } \
@@ -2985,13 +3458,20 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "--parent-type") == 0) {
             show_columns.parent_symbol = 1;
             while (i + 1 < argc && argv[i + 1][0] != '-') {
-                if (filters.parent_type.count < MAX_CONTEXT_TYPES) {
-                    char converted_value[SYMBOL_MAX_LENGTH];
-                    convert_wildcards(argv[i + 1], converted_value, sizeof(converted_value));
-                    filters.parent_type.values[filters.parent_type.count++] = safe_strdup_ctx(converted_value, "Failed to allocate memory for parent-type filter");
-                } else {
-                    fprintf(stderr, "Warning: Maximum filter limit (%d) reached for --parent-type. Ignoring: %s\n",
-                            MAX_CONTEXT_TYPES, argv[i + 1]);
+                /* Split grep-style alternation 'A|B' into separate OR'd values. */
+                char *fsegs[MAX_CONTEXT_TYPES];
+                int fnseg = split_alternation(argv[i + 1], fsegs, MAX_CONTEXT_TYPES);
+                if (fnseg > 1) capture_alt_warning(argv[i + 1], fsegs, fnseg, &alt_warning);
+                for (int fs = 0; fs < fnseg; fs++) {
+                    if (filters.parent_type.count < MAX_CONTEXT_TYPES) {
+                        char converted_value[SYMBOL_MAX_LENGTH];
+                        convert_wildcards(fsegs[fs], converted_value, sizeof(converted_value));
+                        filters.parent_type.values[filters.parent_type.count++] = safe_strdup_ctx(converted_value, "Failed to allocate memory for parent-type filter");
+                    } else {
+                        fprintf(stderr, "Warning: Maximum filter limit (%d) reached for --parent-type. Ignoring: %s\n",
+                                MAX_CONTEXT_TYPES, fsegs[fs]);
+                    }
+                    free(fsegs[fs]);
                 }
                 i++;
             }
@@ -3069,7 +3549,7 @@ int main(int argc, char *argv[]) {
             db_file = argv[i + 1];
             i++;
         }
-        else if (strcmp(argv[i], "--limit") == 0 && i + 1 < argc) {
+        else if ((strcmp(argv[i], "--limit") == 0 || strcmp(argv[i], "-l") == 0) && i + 1 < argc) {
             char *endptr;
             errno = 0;
             long val = strtol(argv[i + 1], &endptr, 10);
@@ -3082,7 +3562,7 @@ int main(int argc, char *argv[]) {
             limit = (int)val;
             i++;
         }
-        else if (strcmp(argv[i], "--limit-per-file") == 0 && i + 1 < argc) {
+        else if ((strcmp(argv[i], "--limit-per-file") == 0 || strcmp(argv[i], "-lpf") == 0) && i + 1 < argc) {
             char *endptr;
             errno = 0;
             long val = strtol(argv[i + 1], &endptr, 10);
@@ -3255,6 +3735,21 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Run 'qi --help' for a list of valid options.\n");
             retval = 1;
             goto cleanup;
+        }
+    }
+
+    /* Educate when grep-style alternation '|' (or '\|') was split into OR'd
+     * terms, echoing the user's actual terms and separator form. Goes to
+     * stderr so it survives -q, which only strips stdout chrome. */
+    if (alt_warning.original != NULL) {
+        fprintf(stderr,
+            "qi: '%s' contains grep-style %s alternation; searching for %s instead.\n"
+            "    Pass symbols as separate arguments: qi %s\n",
+            alt_warning.original, alt_warning.sep,
+            alt_warning.alternatives, alt_warning.alternatives);
+        if (line_range >= 0) {
+            fprintf(stderr,
+                "    --and [N] is used to find matches within a certain number of lines from eachother (0 by default).\n");
         }
     }
 
@@ -3529,8 +4024,8 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /* Print header (suppressed in raw mode) */
-    if (!raw_mode) {
+    /* Print header (suppressed in raw and quiet modes) */
+    if (!raw_mode && !quiet) {
         printf("Searching for:");
         for (int j = 0; j < patterns.count; j++) {
             printf(" %s", patterns.patterns[j]);
@@ -3639,13 +4134,17 @@ int main(int argc, char *argv[]) {
     if (files_only) {
         print_files_only(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, line_range, debug);
     } else {
-        print_results_by_file(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, limit_per_file, compact, line_range, expand, context_before, context_after, debug, show_all_columns, raw_mode, &known_extensions);
+        print_results_by_file(&db, &patterns, &include, &exclude, &filters, &file_filter, &within_ranges, limit, limit_per_file, compact, line_range, expand, context_before, context_after, debug, show_all_columns, raw_mode, quiet, &known_extensions, &qname);
     }
 
 cleanup:
     /* Cleanup: free all allocated memory (safe to call even if some allocations failed)
      * Note: free(NULL) is a no-op, so we don't need to check each pointer */
     db_close(&db);
+
+    /* Free alternation-warning capture */
+    free(alt_warning.original);
+    free(alt_warning.alternatives);
 
     /* Free allocated patterns */
     for (int j = 0; j < patterns.count; j++) {

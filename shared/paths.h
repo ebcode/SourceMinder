@@ -71,4 +71,17 @@ int resolve_shared_data_dir(char *out_path, size_t out_size);
  */
 int resolve_data_file(const char *relative_path, char *out_path, size_t out_size);
 
+/**
+ * Build the platform's system install path for a data file, without
+ * checking whether it exists.
+ *
+ * This is where a file can be placed to override the built-in defaults
+ * (used by --show-config to tell the user where to put one).
+ *
+ * @param relative_path Relative path to file (e.g., "shared/config/stopwords.txt")
+ * @param out_path Output buffer for the install path
+ * @param out_size Size of output buffer
+ */
+void get_install_data_path(const char *relative_path, char *out_path, size_t out_size);
+
 #endif /* PATHS_H */

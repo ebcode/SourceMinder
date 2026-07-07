@@ -80,8 +80,8 @@ COLUMN(parent_symbol, TEXT, COL_TYPE_STRING, 8, "PARENT",    "PAR",   parent,   
 /* OOP-specific columns - only when OOP languages are enabled */
 #if ENABLED(TYPESCRIPT) || ENABLED(PHP) || ENABLED(GO) || ENABLED(PYTHON) || ENABLED(PERL) || ENABLED(RUST)
 COLUMN(scope,         TEXT, COL_TYPE_STRING, 8,  "SCOPE",     "SCOPE", scope,     s, SCOPE_MAX_LENGTH, \
-       "filter by scope (public, private, protected)", \
-       "qi '*' -s public  (public members)")
+       "filter by scope (public, private, protected; Rust: pub, pub(crate))", \
+       "qi '*' -s public  (public members; Rust uses -s pub)")
 COLUMN(namespace,     TEXT, COL_TYPE_STRING, 10, "NAMESPACE", "NS",    namespace, ns, SYMBOL_MAX_LENGTH, \
        "filter by namespace", \
        "qi User -ns MyApp")

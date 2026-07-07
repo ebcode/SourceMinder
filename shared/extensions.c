@@ -17,6 +17,7 @@
  */
 #include "extensions.h"
 #include "constants.h"
+#include "embedded_config.h"
 #include "file_opener.h"
 #include "string_utils.h"
 #include <stdio.h>
@@ -25,6 +26,35 @@
 #include <ctype.h>
 #include <dirent.h>
 #include <sys/stat.h>
+
+/**
+ * Trim, validate, dedupe, and append one extension line.
+ */
+static void add_extension_line(FileExtensions *exts, char *line, size_t line_size) {
+    /* Remove trailing newline and whitespace */
+    size_t len = strnlength(line, line_size);
+    while (len > 0 && isspace(line[len - 1])) {
+        line[--len] = '\0';
+    }
+
+    /* Skip empty lines */
+    if (len == 0) return;
+
+    /* Ensure extension starts with . */
+    if (line[0] == '.') {
+        /* Check for duplicates before adding */
+        for (int i = 0; i < exts->count; i++) {
+            if (strcmp(exts->extensions[i], line) == 0) {
+                return;
+            }
+        }
+
+        size_t copy_len = strnlength(line, FILE_EXTENSION_MAX_LENGTH - 1);
+        memcpy(exts->extensions[exts->count], line, copy_len);
+        exts->extensions[exts->count][copy_len] = '\0';
+        exts->count++;
+    }
+}
 
 /**
  * Load extensions from a single file-extensions.txt file.
@@ -37,36 +67,26 @@ static int load_extensions_from_file(const char *filepath, FileExtensions *exts)
 
     char line[LINE_BUFFER_SMALL];
     while (fgets(line, sizeof(line), f) && exts->count < MAX_FILE_EXTENSIONS) {
-        /* Remove trailing newline and whitespace */
-        size_t len = strnlength(line, sizeof(line));
-        while (len > 0 && isspace(line[len - 1])) {
-            line[--len] = '\0';
-        }
-
-        /* Skip empty lines */
-        if (len == 0) continue;
-
-        /* Ensure extension starts with . */
-        if (line[0] == '.') {
-            /* Check for duplicates before adding */
-            int duplicate = 0;
-            for (int i = 0; i < exts->count; i++) {
-                if (strcmp(exts->extensions[i], line) == 0) {
-                    duplicate = 1;
-                    break;
-                }
-            }
-
-            if (!duplicate) {
-                size_t copy_len = strnlength(line, FILE_EXTENSION_MAX_LENGTH - 1);
-                memcpy(exts->extensions[exts->count], line, copy_len);
-                exts->extensions[exts->count][copy_len] = '\0';
-                exts->count++;
-            }
-        }
+        add_extension_line(exts, line, sizeof(line));
     }
 
     fclose(f);
+    return 0;
+}
+
+/**
+ * Load extensions from an embedded config buffer (see embedded_config.h).
+ */
+static int load_extensions_from_string(const char *data, FileExtensions *exts) {
+    if (!data) {
+        return -1;
+    }
+
+    char line[LINE_BUFFER_SMALL];
+    while (next_config_line(&data, line, sizeof(line)) && exts->count < MAX_FILE_EXTENSIONS) {
+        add_extension_line(exts, line, sizeof(line));
+    }
+
     return 0;
 }
 
@@ -78,22 +98,29 @@ static int dir_exists(const char *path) {
     return (stat(path, &st) == 0 && S_ISDIR(st.st_mode));
 }
 
-/* HOST_ONLY: discovers extension metadata from language config files on the local filesystem. */
+/* HOST_ONLY: discovers extension metadata from language config files on the
+ * local filesystem, falling back to embedded built-in defaults. */
 int load_all_language_extensions(FileExtensions *all_exts) {
     all_exts->count = 0;
 
     /* List of language directories to check */
-    const char *lang_dirs[] = {"c", "typescript", "php", "go", "python", NULL};
+    const char *lang_dirs[] = {"c", "typescript", "php", "go", "perl", "python", "rust", NULL};
 
     /* Try to load from each language's config directory */
     for (int i = 0; lang_dirs[i] != NULL; i++) {
         char path[PATH_MAX_LENGTH];
         snprintf(path, sizeof(path), "%s/%s/%s", lang_dirs[i], CONFIG_DIR, FILE_EXTENSIONS_FILENAME);
 
+        int loaded = 0;
         /* Check if language directory exists first */
         if (dir_exists(lang_dirs[i])) {
             /* Try to load extensions (silently skip if file doesn't exist) */
-            load_extensions_from_file(path, all_exts);
+            loaded = (load_extensions_from_file(path, all_exts) == 0);
+        }
+
+        /* Fall back to embedded defaults */
+        if (!loaded) {
+            load_extensions_from_string(embedded_config_get(path), all_exts);
         }
     }
 

@@ -6,7 +6,7 @@ from typing import List, ClassVar
 
 @dataclass
 class Point:
-    """Basic dataclass."""
+    """Basic dataclass!."""
     xx: float
     yy: float
 

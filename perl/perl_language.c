@@ -37,6 +37,9 @@ static int g_debug = 0;
 /* Byte position of a scalar already indexed as filehandle; skipped in visit_node to avoid re-indexing as scalar */
 static uint32_t g_skip_scalar_start = UINT32_MAX;
 
+/* Current package name, set by handle_package_statement, cleared per file */
+static char g_current_package[SYMBOL_MAX_LENGTH] = "";
+
 /* Pre-looked-up node type IDs for fast dispatch */
 static struct {
     /* Variables */
@@ -232,7 +235,7 @@ static void index_sigil_node(TSNode node, const char *source_code,
                              const char *directory, const char *filename,
                              ParseResult *result, SymbolFilter *filter,
                              const char *modifier, const char *definition,
-                             ContextType ctx) {
+                             const char *source_location, ContextType ctx) {
     /* Find the varname child */
     uint32_t child_count = ts_node_child_count(node);
     for (uint32_t i = 0; i < child_count; i++) {
@@ -248,7 +251,8 @@ static void index_sigil_node(TSNode node, const char *source_code,
             TSNode inner = find_inner_sigil(child);
             if (!ts_node_is_null(inner)) {
                 index_sigil_node(inner, source_code, directory, filename,
-                                 result, filter, modifier, definition, ctx);
+                                 result, filter, modifier, definition,
+                                 source_location, ctx);
             }
             break;
         }
@@ -274,7 +278,7 @@ static void index_sigil_node(TSNode node, const char *source_code,
 
         int line = (int)ts_node_start_point(node).row + 1;
         add_entry(result, varname, line, ctx,
-                  directory, filename, NULL,
+                  directory, filename, source_location,
                   &(ExtColumns){ .modifier = modifier, .definition = definition,
                                  .type = sigil_type });
         break;
@@ -482,6 +486,20 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
         }
     }
 
+    /* The defining statement is the span of each binding: the enclosing
+     * assignment (`my %plan = (...)`) when present, else the declaration itself
+     * (`my $x;`). Lets -e expand a multi-line declaration to its full statement
+     * rather than falling back to just the first line. */
+    char var_location[SOURCE_LOCATION_MAX_LENGTH];
+    {
+        TSNode span_node = node;
+        if (!ts_node_is_null(parent) &&
+            ts_node_symbol(parent) == perl_symbols.assignment_expression) {
+            span_node = parent;
+        }
+        format_source_location(span_node, var_location, sizeof(var_location));
+    }
+
     /* Walk all children looking for scalar/array/hash nodes */
     for (uint32_t i = 0; i < child_count; i++) {
         TSNode child = ts_node_child(node, i);
@@ -496,7 +514,7 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
                     if (filter_should_index(filter, varname)) {
                         int vline = (int)ts_node_start_point(child).row + 1;
                         add_entry(result, varname, vline, ctx,
-                                  directory, filename, NULL,
+                                  directory, filename, var_location,
                                   &(ExtColumns){.modifier = modifier, .definition = "1",
                                                 .type = decl_type_override});
                     }
@@ -522,14 +540,14 @@ static void handle_variable_declaration(TSNode node, const char *source_code,
                         if (filter_should_index(filter, varname)) {
                             int vline = (int)ts_node_start_point(child).row + 1;
                             add_entry(result, varname, vline, CONTEXT_FUNCTION,
-                                      directory, filename, NULL,
+                                      directory, filename, var_location,
                                       &(ExtColumns){.modifier = modifier, .definition = "1",
                                                     .type = PERL_TYPE_SCALAR});
                         }
                     }
                 } else {
                     index_sigil_node(child, source_code, directory, filename,
-                                     result, filter, modifier, "1", ctx);
+                                     result, filter, modifier, "1", var_location, ctx);
                 }
             }
         }
@@ -551,7 +569,7 @@ static void handle_parameter(TSNode node, const char *source_code,
             sym == perl_symbols.array  ||
             sym == perl_symbols.hash) {
             index_sigil_node(child, source_code, directory, filename,
-                             result, filter, "", "1", CONTEXT_ARGUMENT);
+                             result, filter, "", "1", NULL, CONTEXT_ARGUMENT);
         } else {
             visit_node(child, source_code, directory, filename, result, filter);
         }
@@ -571,6 +589,7 @@ static void handle_package_statement(TSNode node, const char *source_code,
         if (ts_node_symbol(child) == perl_symbols.package_name) {
             char name[SYMBOL_MAX_LENGTH];
             safe_extract_node_text(source_code, child, name, sizeof(name), filename);
+            snprintf(g_current_package, sizeof(g_current_package), "%s", name);
             if (filter_should_index(filter, name)) {
                 add_entry(result, name, line, CONTEXT_NAMESPACE,
                           directory, filename, NULL, &(ExtColumns){.definition = "1"});
@@ -596,7 +615,9 @@ static void handle_subroutine_declaration(TSNode node, const char *source_code,
             safe_extract_node_text(source_code, child, name, sizeof(name), filename);
             if (filter_should_index(filter, name)) {
                 add_entry(result, name, line, CONTEXT_FUNCTION,
-                          directory, filename, location, &(ExtColumns){.definition = "1"});
+                          directory, filename, location,
+                          &(ExtColumns){.definition = "1",
+                                        .namespace = g_current_package[0] ? g_current_package : NULL});
             }
             break;
         }
@@ -1406,7 +1427,7 @@ static void visit_node(TSNode node, const char *source_code,
             return;
         }
         index_sigil_node(node, source_code, directory, filename,
-                         result, filter, "", "0", CONTEXT_VARIABLE);
+                         result, filter, "", "0", NULL, CONTEXT_VARIABLE);
         return;
     }
 
@@ -1603,6 +1624,9 @@ int parser_parse_file(PerlParser *parser, const char *filepath,
         add_entry(result, filename_no_ext, 1, CONTEXT_FILENAME,
                   directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
     }
+
+    /* Reset per-file state */
+    g_current_package[0] = '\0';
 
     /* Walk the AST */
     TSNode root = ts_tree_root_node(tree);

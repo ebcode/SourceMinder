@@ -102,6 +102,11 @@ int print_lines_range(const char *filepath, int start_line, int end_line,
             if (raw) {
                 /* Raw mode: print full lines without line number prefix or column trimming */
                 printf("%s", line);
+            } else if (start_column < 0) {
+                /* Whole-line mode (start_column sentinel < 0): print full lines
+                 * with line numbers and no column trimming. Used when -e expands
+                 * a definition together with surrounding -C/-A/-B context. */
+                printf("%d:%s", current_line, line);
             } else {
                 /* Handle column boundaries */
                 if (current_line == start_line && current_line == end_line) {

@@ -92,7 +92,9 @@ qi understands these Go-specific contexts:
 |---------|--------------|-------------|
 | `function` | `func` | Function and method definitions |
 | `variable` | `var` | Variables, constants, parameters |
-| `type` | `type` | Structs, interfaces, type aliases |
+| `class` | `class` | Structs |
+| `interface` | `iface` | Interfaces |
+| `type` | `type` | Type aliases, type parameters |
 | `property` | `prop` | Struct fields |
 | `call` | `call` | Function calls |
 | `import` | `imp` | Import statements |
@@ -154,13 +156,13 @@ qi uses "clues" to indicate how a symbol is being used:
 
 ```bash
 # Find struct definition
-./qi "User" -i type
+./qi "User" -i class
 
 # Find interface definition
-./qi "Handler" -i type
+./qi "Handler" -i iface
 
-# Find all types in a package
-./qi "%" -i type -f "pkg/auth/%"
+# Find all types in a package (structs + interfaces + aliases)
+./qi "%" -i class iface type -f "pkg/auth/%"
 
 # Find struct fields
 ./qi "%" -i prop -p "User"
@@ -339,7 +341,7 @@ qi uses "clues" to indicate how a symbol is being used:
 
 ```bash
 # Find interface definitions
-./qi "%er" -i type  # Common Go interface naming
+./qi "%er" -i iface  # Common Go interface naming
 
 # Find interface methods
 ./qi "%" -i func -p "Handler"
@@ -374,8 +376,8 @@ qi uses "clues" to indicate how a symbol is being used:
 ./qi "%" -i func --columns line,symbol,type | grep "\["
 
 # Find uses of generic types
-./qi "List" -i type
-./qi "Map" -i type
+./qi "List" -i class
+./qi "Map" -i class
 ```
 
 ---
@@ -405,7 +407,7 @@ qi 'main' 'init' 'run' -i func
 
 # 4. See implementations with -e
 qi 'main' -i func -e
-qi 'Server' -i type -e
+qi 'Server' -i class -e
 ```
 
 **Why TOC first?**
@@ -490,7 +492,7 @@ qi "processRequest" -i call -C 5
 
 ```bash
 # 1. Find type definition
-./qi "User" -i type -C 20
+./qi "User" -i class -C 20
 
 # 2. Find all fields
 ./qi "%" -i prop -p "User"
@@ -715,7 +717,7 @@ qi '%' -c send --limit-per-file 2
 ./qi "%" -i func -f "%/handler.go"   # All handler.go files
 
 # Multiple patterns (combine with multiple -f flags)
-./qi "Config" -i type -f "%config.go" -f "%settings.go"
+./qi "Config" -i class -f "%config.go" -f "%settings.go"
 ```
 
 ### Excluding Noise
@@ -769,13 +771,13 @@ qi '%' -c send --limit-per-file 2
 
 ```bash
 # Wildcard at start
-./qi "%Manager" -i type      # Ends with Manager
+./qi "%Manager" -i class      # Ends with Manager
 
 # Wildcard at end
 ./qi "Get%" -i func          # Starts with Get
 
 # Wildcard in middle
-./qi "HTTP%Client" -i type   # Contains HTTP and ends with Client
+./qi "HTTP%Client" -i class   # Contains HTTP and ends with Client
 
 # Match anything
 ./qi "%" -i func             # All functions
@@ -798,12 +800,12 @@ qi '%' -c send --limit-per-file 2
 ./qi "%Handler" -i func
 
 # Interfaces (often end in 'er')
-./qi "%er" -i type
-./qi "%able" -i type
+./qi "%er" -i iface
+./qi "%able" -i iface
 
 # Error types
 ./qi "Err%" -i var
-./qi "%Error" -i type
+./qi "%Error" -i class
 
 # Test functions
 ./qi "Test%" -i func -f "%_test.go"
@@ -858,7 +860,8 @@ comm -23 <(./qi "%" -i func --columns symbol | tail -n +2 | sort -u) \
 # Verify context types
 ./qi "%" -i func --limit 5
 ./qi "%" -i var --limit 5
-./qi "%" -i type --limit 5
+./qi "%" -i class --limit 5
+./qi "%" -i iface --limit 5
 
 # Check available columns
 ./qi "test" --columns invalid_column   # Shows available columns in error
@@ -1094,7 +1097,7 @@ qi "symbol" -x noise           # Exclude comments/strings
 ```bash
 qi '*' -f 'file.go' --toc      # Always start with TOC
 qi "func" -i func -e           # See implementations with -e
-qi "Type" -i type -e           # Expand type definitions
+qi "Type" -i class -e           # Expand struct definitions (-i iface for interfaces)
 ```
 
 **Level 3: Go-Specific Patterns**
@@ -1349,4 +1352,4 @@ go doc http.Client
 
 ---
 
-*This guide covers qi version with Go-specific clue support (go, defer, send, receive, select). Last updated: December 2025.*
+*This guide covers qi version with Go-specific clue support (go, defer, send, receive, select) and distinct struct (`class`) / interface (`iface`) contexts. Last updated: July 2026.*

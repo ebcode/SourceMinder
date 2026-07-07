@@ -45,7 +45,8 @@ int parse_source_location(const char *source_location, int *start_line, int *sta
  *   filepath     - Path to source file
  *   start_line   - Starting line number (1-indexed)
  *   end_line     - Ending line number (1-indexed)
- *   start_column - Starting column (0-indexed)
+ *   start_column - Starting column (0-indexed); pass -1 to print whole lines
+ *                  with no column trimming (end_column is then ignored)
  *   end_column   - Ending column (0-indexed)
  * Returns: 0 on success, -1 on error
  */

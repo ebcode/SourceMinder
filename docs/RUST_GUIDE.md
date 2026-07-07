@@ -1,6 +1,12 @@
 # Rust Developer's Guide to qi
 
-A practical guide for using qi to search and analyze Rust codebases. This guide focuses on Rust-specific patterns and workflows that leverage qi's semantic understanding of Rust code.
+A practical guide for using qi to search and analyze Rust codebases. It focuses on
+Rust-specific patterns: visibility, modifiers, traits and impl blocks, pattern
+matching, async/unsafe, macros, and FFI.
+
+Every query in this guide works against the example sources in
+`scratch/sources/rust/` — index them with `./index-rust scratch/sources/rust --once`
+to follow along.
 
 ---
 
@@ -11,15 +17,15 @@ A practical guide for using qi to search and analyze Rust codebases. This guide 
 3. [Finding Definitions](#finding-definitions)
 4. [Visibility & Modifiers](#visibility--modifiers)
 5. [Traits & Impl Blocks](#traits--impl-blocks)
-6. [Pattern Matching](#pattern-matching)
-7. [Async & Unsafe](#async--unsafe)
-8. [Macros & FFI](#macros--ffi)
-9. [Modules & Imports](#modules--imports)
-10. [Common Workflows](#common-workflows)
-11. [Power User Combinations](#power-user-combinations)
+6. [Enums & Pattern Matching](#enums--pattern-matching)
+7. [Structs & Construction Sites](#structs--construction-sites)
+8. [Async & Unsafe](#async--unsafe)
+9. [Macros & FFI](#macros--ffi)
+10. [Modules & Imports](#modules--imports)
+11. [Common Workflows](#common-workflows)
 12. [Advanced Queries](#advanced-queries)
-13. [Tips & Tricks](#tips--tricks)
-14. [Real-World Examples](#real-world-examples)
+13. [Troubleshooting & Pitfalls](#troubleshooting--pitfalls)
+14. [Quick Reference](#quick-reference)
 
 ---
 
@@ -28,171 +34,154 @@ A practical guide for using qi to search and analyze Rust codebases. This guide 
 ### Index Your Rust Project
 
 ```bash
-# Index current directory
-./index-rust .
+# Index current directory (runs as a daemon, watching for changes)
+index-rust .
 
-# Index a Cargo project's source tree
-./index-rust ./src
+# Index once and exit
+index-rust ./src --once
 
 # Index multiple crates in a workspace
-./index-rust ./crates/core ./crates/cli ./crates/server
+index-rust ./crates/core ./crates/cli ./crates/server
 ```
 
-The indexer automatically skips `target/`, `.cargo/`, `vendor/`, and similar build directories (configured in `rust/config/ignore_files.txt`).
+The indexer skips `target/` and other build directories listed in
+`rust/config/ignore_files.txt`.
 
-### First Five Queries for a New Project
-
-If you know nothing about a Rust codebase, run these in order:
+### First Five Queries on a New Codebase
 
 ```bash
-# 1. Discover the source layout
-qi '*' -i file -f 'src/'
+# 1. Map the entry points' structure
+qi % -f src/lib.rs --toc
+qi % -f src/main.rs --toc
 
-# 2. Map the entry points' structure
-qi '*' -f 'src/lib.rs' --toc
-qi '*' -f 'src/main.rs' --toc
+# 2. The public API surface
+qi % -s pub --def -i func class enum trait --limit 40
 
-# 3. Expand the key types you saw in the TOC
-qi 'Config' 'AppError' 'Service' -i class -e
+# 3. The trait landscape (the type system's backbone)
+qi % -i trait --def
 
-# 4. Understand the trait landscape (the type system's backbone)
-qi '*' -i trait --def
+# 4. Expand the key types you saw
+qi Config AppError -i class enum -e
 
 # 5. Walk the main entry point
-qi '%' --within 'main' -x noise --limit 30
+qi % --within main -x noise --limit 30
 ```
 
-This reveals: what files exist → what the crate exposes → what the core types look like → what traits govern behavior → what the program actually does at startup.
+This reveals: what the crate exposes → what traits govern behavior → what the
+core types look like → what the program does at startup.
 
-### Basic Search
+### The Core Loop
 
 ```bash
-# Find all uses of a symbol
-qi "User"
-
-# Find function definition
-qi "parse_config" -i func
-
-# Find with full definition
-qi "parse_config" -i func -e
-
-# Exclude comments and string-literal words
-qi "error" -x noise
+qi % -f file.rs --toc            # 1. structure first
+qi handle_request -i func -e     # 2. read a definition inline
+qi handle_request -i call -C 3   # 3. find and inspect callers
+qi token --within handle_request # 4. explore inside a function
 ```
 
-### Your First Steps with qi (Recommended Workflow)
-
-**Start with structure, then drill down:**
-
-```bash
-# 1. Get file overview (always start here!)
-qi '*' -f 'lib.rs' --toc
-
-# 2. See a specific function's implementation
-qi "handle_request" -i func -e
-
-# 3. Find where it's called from
-qi "handle_request" -i call --limit 20
-
-# 4. Understand what happens inside
-qi 'token' --within 'handle_request' -x noise
-
-# 5. Explore async/unsafe usage
-qi '%' -i func -m async --within 'handle_request'
-```
-
-**Why this order?**
-- `--toc` gives you the map (types, functions, imports)
-- `-e` shows you the code (full definitions inline)
-- `--within` reveals what a function does
-- `-s pub` finds the public API surface
-- `-m async`, `-m unsafe` find Rust-specific code
-
-This is **way more efficient** than reading files or using grep!
+`--toc` gives you the map, `-e` shows the code without opening the file,
+`--within` respects function boundaries (no false matches from neighbors).
 
 ---
 
 ## Core Concepts
 
-### Context Types
+### Context Types (CTX column)
 
-qi understands these Rust-specific contexts:
-
-| Context | Abbreviation | Description |
-|---------|--------------|-------------|
-| `function` | `func` | `fn` definitions (free, method, signature, macro_rules) |
-| `argument` | `arg` | Function parameters |
-| `variable` | `var` | `let`, `const`, `static` bindings; pattern bindings |
-| `property` | `prop` | Struct/union fields |
-| `class` | `class` | `struct`, `union`, and `impl` blocks |
-| `enum` | `enum` | `enum` type definitions |
-| `case` | `case` | Enum variants |
-| `trait` | `trait` | `trait` definitions |
+| Context | Short | Rust constructs |
+|---------|-------|-----------------|
+| `function` | `func` | `fn` definitions: free functions, methods, trait signatures, FFI declarations |
+| `argument` | `arg` | Function parameters; identifier arguments at call sites (clue = callee) |
+| `variable` | `var` | `let` / `const` / `static` bindings; pattern bindings (match arms, if-let, for) |
+| `property` | `prop` | Struct and enum-variant fields; field accesses (`self.name`) and initializers |
+| `class` | `class` | `struct`, `union`, `impl` blocks; struct-literal and pattern-constructor usages |
+| `enum` | `enum` | `enum` definitions |
+| `case` | `case` | Enum variants; scoped variant references in patterns (`Shape::Circle =>`) |
+| `trait` | `trait` | `trait` definitions; trait bounds, supertraits, where clauses, derive contents |
+| `type` | `type` | `type` aliases and associated types (incl. GATs) |
 | `namespace` | `ns` | `mod` declarations |
-| `import` | `imp` | `use` items (including re-exports) |
-| `call` | `call` | Function calls, method calls, macro invocations |
-| `lambda` | `lambda` | Closure expressions |
-| `type` | `type` | `type` aliases |
+| `import` | `imp` | `use` items (incl. `pub use` re-exports) and `extern crate` |
+| `call` | `call` | Function, method, and macro calls |
+| `lambda` | `lambda` | Closures (indexed as `<closure>` alongside their binding) |
+| `macro` | `macro` | `macro_rules!` definitions |
 | `comment` | `com` | Words from comments |
 | `string` | `str` | Words from string literals |
 | `filename` | `file` | Filename without extension |
 
-### Scope (Visibility)
+### Scope (visibility)
 
-The `scope` column captures Rust's visibility modifier exactly as written:
+Explicit `pub` visibility is captured exactly as written; items with no
+visibility keyword default to `private`. This applies uniformly to every item
+kind, including `pub mod` declarations.
 
-| Scope value | Meaning |
-|-------------|---------|
+| Scope | Meaning |
+|-------|---------|
 | `pub` | Fully public |
 | `pub(crate)` | Crate-private |
 | `pub(super)` | Visible to parent module |
-| `pub(in path::to::module)` | Visible to specified module |
-| *(empty)* | Module-private (Rust default) |
+| `private` | Module-private (Rust default; no `pub` written) |
 
 ### Modifiers
 
-The `modifier` column captures behavior keywords that change how an item executes:
-
 | Modifier | Applies to | Meaning |
-|----------|-----------|---------|
+|----------|------------|---------|
 | `async` | functions | Returns a `Future` |
-| `unsafe` | functions, blocks | Requires `unsafe` to call |
+| `unsafe` | functions | Requires `unsafe` to call |
 | `const` | functions | Callable at compile time |
-| `extern` | functions | FFI / ABI specification |
-| `await` | calls | Call was `.await`-ed |
+| `extern "C"`, `extern "system"`, ... | functions, statics | FFI ABI — set on `extern fn` and on every declaration inside an `extern { }` block |
+| `await` | calls | The call was `.await`-ed |
+| `mut` | variables, arguments | Mutable binding: `let mut x`, `fn f(mut x: T)`, `static mut X`, `Some(mut x)` patterns |
 
-Combinations stack (e.g., `pub const fn` → scope=`pub`, modifier=`const`).
+Modifiers combine with everything else: `pub const fn` → scope `pub`, modifier `const`;
+`static mut` inside `extern "C" { }` → modifier `extern "C" mut`.
 
-### Clues (Rust-Specific Annotations)
+### Clues
 
-The `clue` column captures attributes and impl-block traits:
-
-| Clue pattern | Meaning |
-|--------------|---------|
-| `#[derive],#[allow]` | Outer attributes applied to the item |
-| `#[test]` | Test function marker |
-| `#[inline]` | Inline hint |
-| `#[deprecated]` | Deprecation warning |
-| `#[cfg]`, `#[cfg_attr]` | Conditional compilation |
-| `#[no_mangle]` | Disable name mangling |
-| `impl Display` | Item is an impl block implementing the named trait |
-| `impl` | Inherent impl block (no trait) |
-| `macro_rules!` | Item is a `macro_rules!` definition |
-| `macro!` | Call is a macro invocation |
-| `as` | Use-statement alias (`use foo as bar`) |
+| Clue | Where | Meaning |
+|------|-------|---------|
+| `#[test]`, `#[inline]`, `#[derive]`, ... | definitions | Outer attributes, comma-joined when stacked: `#[should_panic],#[test]`. Inner attributes (`#![...]`) are *not* attributed to the following item. |
+| `impl Display` | impl blocks | The impl implements the named trait |
+| `impl` | impl blocks | Inherent impl (no trait) |
+| `derive` | trait usages | The trait reference came from a `#[derive(...)]` list |
+| `as` | imports | Aliased import: `use foo as bar`, `extern crate proc_macro as pm` |
+| *(callee name)* | call arguments | `format`, `println`, etc. — which call this argument belongs to |
 
 ### Parent
 
-For methods, the `parent` column holds the **impl target type** (or trait, for trait methods). For enum variants, it's the enum. For method calls, it's the receiver name (when statically resolvable).
+The PAR column holds the nearest enclosing or qualifying symbol:
+
+- **Methods** → the impl target (`impl User` → parent `User`) or trait (for trait methods)
+- **Enum variants** → the enum; **variant fields** → the variant (`width` → `Rect`)
+- **Struct fields** → the struct
+- **Associated consts and types** → the trait/impl
+- **Method calls** → the receiver: `stack.pop()` → `stack`, `self.read(...)` → `self`.
+  In a chain, each link's parent is the previous link:
+  `text.trim().parse()` → `trim`|`text`, `parse`|`trim`
+- **Field accesses** → the immediate owner: `person.address.city` → `city`|`address`
+- **Struct-literal fields** → the let-bound variable when assigned
+  (`let addr = Address { street: ... }` → `street`|`addr`), the enclosing field for
+  nested literals, otherwise the literal's type name (`Person { name }` in return
+  position → `name`|`Person`)
+
+### Namespace (NS column)
+
+Module-path qualifiers, captured for:
+
+- imports: `use std::io::{Read, Write}` → `Read`|`std::io` (brace groups and nested
+  groups resolve fully: `use a::{b::{C}}` → `C`|`a::b`)
+- scoped calls: `AppError::Io(e)` → `Io`|`AppError`, `std::fs::read_to_string(p)` → NS `std::fs`
+- scoped patterns: `Shape::Circle(r) =>` → `Circle`|`Shape`
+- scoped trait bounds: `K: std::hash::Hash` → `Hash`|`std::hash`
+- aliases: `use auth::tokens::generate as gen_token` → `gen_token` with the full source path
 
 ### Type
 
-Captures the type annotation:
-- Function `return_type` → return type
-- `let x: T = ...` → `T`
-- `parameter: T` → `T`
-- `type Alias<T> = U` → `U`
-- `const NAME: T = ...` → `T`
+The TYPE column holds the annotation text verbatim:
+
+- function return types: `Result<String, std::io::Error>`
+- `let x: T`, parameters, fields, consts: `T`
+- type aliases: the aliased type (`type Cache<T> = HashMap<UserId, T>` → `HashMap<UserId, T>`)
+- `macro_rules!` for macro definitions; `macro` for macro invocations
 
 ---
 
@@ -201,327 +190,216 @@ Captures the type annotation:
 ### Functions and Methods
 
 ```bash
-# Find function definition
-qi "parse_config" -i func
-
-# Show full function body
-qi "parse_config" -i func -e
-
-# All functions in a file
-qi '*' -i func -f 'src/parser.rs'
-
-# Methods on a specific type (via parent)
-qi '*' -i func -p 'User'
-qi '*' -i func -p 'HashMap'
-
-# Methods on a trait
-qi '*' -i func -p 'Iterator'
-qi '*' -i func -p 'Display'
-
-# Constructors (Rust convention: `new`, `with_`, `from_`)
-qi 'new' 'with_*' 'from_*' -i func --def
+qi parse_config -i func              # find it
+qi parse_config -i func -e           # full body inline
+qi % -i func -f src/parser.rs        # all functions in a file
+qi % -i func -p User                 # methods on a type (impl target)
+qi % -i func -p Storage              # trait method signatures
+qi new with_% from_% -i func --def   # constructors by convention
+qi % -i func -p User -t Self         # methods returning Self (builders)
 ```
 
 ### Structs, Enums, Traits
 
 ```bash
-# Find struct definition
-qi "User" -i class -e
-
-# All structs in a module
-qi '*' -i class --def -f 'src/models/'
-
-# Enum and its variants
-qi "Status" -i enum -e
-qi '*' -i case -p 'Status'
-
-# Trait definition + its required methods
-qi "Storage" -i trait -e
-qi '*' -i func -p 'Storage'
-
-# Find struct fields
-qi '*' -i prop -p 'Config'
+qi User -i class -e                  # struct definition, expanded
+qi % -i class --def -f src/models/   # all structs in a module
+qi % -i prop -p Config               # fields of a struct
+qi Status -i enum -e                 # enum definition
+qi % -i case -p Status --def         # its variants
+qi % -i prop -p Rect                 # fields of a struct-like variant
+qi Storage -i trait -e               # trait definition
 ```
 
-### Variables and Constants
+### Variables, Constants, Type Aliases
 
 ```bash
-# Find a let/const/static binding
-qi "MAX_RETRIES" -i var
-
-# All consts in a file
-qi '*' -i var -f 'src/constants.rs' --def
-
-# Find variables with a specific type
-qi '*' -i var -t 'String' --def
-qi '*' -i var -t 'Vec<_>' --def
-
-# Statics (mutable global state — usually unsafe)
-qi '*' -i var -m static --def
-```
-
-### Type Aliases
-
-```bash
-# Find a type alias
-qi "AppResult" -i type
-
-# All type aliases in a crate
-qi '*' -i type --def
+qi MAX_RETRIES -i var                   # a const/static/let binding
+qi % -i var -f src/constants.rs --def  # all consts in a file
+qi % -i var -t 'Vec<%' --def            # bindings with a Vec type annotation
+qi % -i var -m mut --def                # mutable bindings
+qi % -i var -p Storage                  # associated consts of a trait
+qi AppResult -i type                    # type alias (TYPE column shows the target)
+qi % -i type -p Container               # associated types: type Item; / GATs
 ```
 
 ---
 
 ## Visibility & Modifiers
 
-Rust's visibility rules are central; qi makes them queryable.
-
-### Finding the Public API
+### Public API Surface
 
 ```bash
-# All public items in a crate
-qi '*' -s pub --def --limit 50
-
-# Public functions only
-qi '*' -i func -s pub --def
-
-# Public types only
-qi '*' -i class enum trait -s pub --def
-
-# Crate-private items (potential refactoring candidates)
-qi '*' -s 'pub(crate)' --def
-
-# Items visible to parent module only
-qi '*' -s 'pub(super)' --def
+qi % -s pub --def --limit 50            # everything public
+qi % -i func -s pub --def               # public functions
+qi % -i class enum trait -s pub --def   # public types
+qi % -s 'pub(crate)' --def              # crate-private items
+qi %helper% %internal% -s pub --def     # inadvertently-public helpers?
 ```
 
-### Auditing Visibility
+### Mutability Audit
 
 ```bash
-# Find items in a module's public API
-qi '*' -s pub --def -f 'src/api/'
-
-# Find inadvertently-public helpers (might want pub(crate))
-qi '*helper*' '*internal*' -s pub --def
-
-# Find module-private functions (the default — empty scope)
-qi '*' -i func --def | grep -v ' pub '
+qi % -m mut --def                       # every mutable binding
+qi % -i var -m '%mut%' -f src/ffi/      # mutable statics (incl. extern blocks)
+qi % -i arg -m mut                      # mut-by-value parameters
 ```
 
-### Async Functions
+### Const fn
 
 ```bash
-# All async functions
-qi '*' -i func -m async --def
-
-# Public async API
-qi '*' -i func -s pub -m async --def
-
-# Async functions returning a specific type
-qi '*' -i func -m async -t 'Result<%' --def
-```
-
-### Unsafe Code
-
-```bash
-# All unsafe functions
-qi '*' -i func -m unsafe --def
-
-# Unsafe public API (audit surface)
-qi '*' -i func -s pub -m unsafe --def
-
-# Unsafe function with context to see why
-qi '*' -i func -m unsafe --def -e
-```
-
-### Const fn (compile-time evaluable)
-
-```bash
-# All const fn
-qi '*' -i func -m const --def
-
-# Public const fn
-qi '*' -i func -s pub -m const --def
+qi % -i func -m const --def
+qi % -i func -s pub -m const --def
 ```
 
 ---
 
 ## Traits & Impl Blocks
 
-Traits and impl blocks are the heart of Rust's type system. qi tracks both ends of the relationship.
-
-### Finding Trait Definitions
+### Trait Definitions and Members
 
 ```bash
-# Define-site of a trait
-qi "Serializable" -i trait -e
-
-# All traits in a crate (Rust convention: often ends in -er, -able, -or)
-qi '*er' '*able' '*or' -i trait --def
-
-# Trait method signatures (with parent = trait name)
-qi '*' -i func -p 'Iterator'
-qi '*' -i func -p 'Display'
+qi Serializable -i trait -e         # define-site
+qi % -i trait --def                 # all traits in the crate
+qi % -i func -p Storage             # method signatures (bodyless ones included)
+qi % -i var -p Container            # associated consts (const CAPACITY: usize)
+qi % -i type -p Stream              # associated types (type Item<'a>)
 ```
 
-### Finding Impl Blocks
+### Impl Blocks
 
-Impl blocks are recorded as `CLASS` entries with `clue=impl <Trait>` (or just `impl` for inherent impls), and the symbol is the impl target.
+Impl blocks are `class` entries whose clue records the trait: `impl Display`
+(or just `impl` for inherent impls). The symbol is the impl target.
 
 ```bash
-# All inherent impls (impl Foo { ... })
-qi '*' -i class -c impl --def
-
-# All trait impls (impl Trait for Foo { ... })
-qi '*' -i class -c 'impl %' --def
-
-# Implementations of a specific trait
-qi '*' -i class -c 'impl Display'
-qi '*' -i class -c 'impl From'
-qi '*' -i class -c 'impl Iterator'
-
-# Impls of any trait on a specific type
-qi 'User' -i class --def
-# Returns: the struct def + all impl blocks for User
+qi % -i class -c impl --def         # inherent impls
+qi % -i class -c 'impl %' --def     # all trait impls
+qi % -i class -c 'impl Display'     # who implements Display?
+qi % -i class -c 'impl From'        # all From conversions
+qi User -i class --def              # struct def + every impl block for User
 ```
 
-### Finding Methods
+### Trait Bounds, Supertraits, Where Clauses
 
-Method definitions carry their impl target in the `parent` column.
+Every trait named in a bound is indexed as a `trait` **usage** — inline bounds
+(`<T: Clone>`), where clauses, supertraits, and associated-type bounds alike.
+Scoped paths carry their namespace.
 
 ```bash
-# All methods on a type (inherent + trait impls)
-qi '*' -i func -p 'User'
+qi Display -i trait --usage         # everywhere Display is required as a bound
+qi % -i trait --usage -f src/       # the crate's full constraint vocabulary
+qi Hash -i trait -ns std::hash      # scoped bound: where K: std::hash::Hash
+qi Send Sync -i trait --usage       # supertraits: trait Serializable: Send + Sync
+```
 
-# Methods on a generic type (use base name)
-qi '*' -i func -p 'Vec'
-qi '*' -i func -p 'Option'
+### Derives
 
-# Constructor-like methods
-qi 'new' 'with_*' -i func -p 'Config'
+Names inside `#[derive(...)]` are indexed as `trait` usages with clue `derive`:
 
-# Method definitions that return Self (constructors/builders)
-qi '*' -i func -p 'User' -t 'Self'
+```bash
+qi % -i trait -c derive             # every derived trait, everywhere
+qi Serialize -i trait -c derive     # which types derive Serialize?
+qi Clone -i trait --usage           # Clone as a bound *and* as a derive
 ```
 
 ### Method Call Sites
 
 ```bash
-# All calls to a method
-qi 'serialize' -i call
+qi serialize -i call                # all calls to a method
+qi % -i call -p self                # all self.method() calls
+qi lock -i call -p mutex            # specific method on specific receiver
+qi parse -i call                    # includes turbofish calls: .parse::<i32>()
+```
 
-# Method calls on a specific receiver name
-qi '*' -i call -p 'self'      # all self.something() calls
-qi '*' -i call -p 'request'   # all request.foo() calls
+Chained calls keep their link-to-link parents, so `-p` works mid-chain:
 
-# Specific method on specific receiver
-qi 'lock' -i call -p 'mutex'
-qi 'unwrap' -i call -p 'result'
+```bash
+# nums.iter().map(...).collect() indexes: iter|nums, map|iter, collect|map
+qi collect -i call -p map
 ```
 
 ---
 
-## Pattern Matching
+## Enums & Pattern Matching
 
-qi extracts variable bindings from `match`, `if let`, `while let`, `for`, and `let` patterns — including destructuring.
-
-### Match Arms
+### Variants: Definitions and References
 
 ```bash
-# Find variable bindings inside match arms
-qi '*' -i var --def -f 'src/parser.rs'
-
-# Find match expressions with a specific binding
-qi 'value' -i var --def -C 5
-
-# Find match arms over a specific enum variant
-qi 'Some' -i call         # Variant constructors used as patterns
-qi 'Ok' 'Err' -i call
+qi % -i case -p Status --def        # variants of an enum
+qi % -i case --usage                # variant references in match/if-let patterns
+qi % -i case -ns Shape              # arms matching on Shape::*
+qi NotFound -i case -ns AppError    # one variant, pattern position
+qi Io -i call -ns AppError          # same variant, construction position
 ```
 
-**Note:** qi treats uppercase-start identifiers in pattern position as constructor references (skipped as bindings) — so `None`, `Ok`, `Some` won't pollute your variable searches.
+Scoped paths in patterns (`AppError::NotFound =>`) are indexed as `case` usages
+with the path in NS. Bare constructors in patterns (`Ok(v)`, `Point { .. }`) are
+indexed as `class` usages.
 
-### If-let / While-let
+### Pattern Bindings
+
+Bindings are extracted from `match` arms, `if let`, `while let`, `for`, and `let`
+destructuring — including struct-pattern shorthand:
 
 ```bash
-# Find if-let / while-let bindings (look for var defs near `if let`)
-qi '*' -i var --def -C 2 | grep -B1 'if let'
+# Shape::Rect { width, height } => ...   binds width and height as VARs
+qi width height -i var --def
 
-# Specific binding inside if-let
-qi 'session' -i var --def -C 1
+# renamed bindings: let Point { x: px, y: py } = ...
+qi px py -i var
+
+# mut bindings in patterns: Some(mut conn) => ...
+qi % -i var -m mut --def
 ```
 
-### For Loops
+Uppercase-start identifiers in pattern position (`None`, `Pending`) are treated
+as constructor/constant references, not bindings, so they never pollute variable
+searches. One-character bindings (`x`, `i`) are dropped by the noise filter.
+
+---
+
+## Structs & Construction Sites
+
+Struct literals index both the type name (a `class` usage) and each field:
 
 ```bash
-# All loop variables
-qi '*' -i var --def -f 'src/main.rs'
+qi User -i class --usage            # every place a User { ... } is built
+qi Person --usage -C 2              # construction sites with context
 
-# Destructured for-loops bind each element separately:
-# `for (key, value) in map` produces two VAR entries on the same line.
+# Fields at initialization sites:
+qi street -i prop -p addr           # let addr = Address { street: ... }
+qi name -i prop -p Person           # Person { name, .. } in return position
+qi age -i prop --usage              # all initializations + accesses of `age`
 ```
 
-### Let Destructuring
+Field-access chains keep per-link parents:
 
 ```bash
-# `let (a, b, c) = tuple` — each name is indexed as VAR
-qi 'a' 'b' 'c' -i var --def
+# person.address.city indexes: address|person, city|address
+qi city -i prop -p address
 ```
 
 ---
 
 ## Async & Unsafe
 
-### Async Function Analysis
+### Async Functions and Await Points
 
 ```bash
-# All async functions
-qi '*' -i func -m async --def -v
-
-# Async functions in a module
-qi '*' -i func -m async --def -f 'src/handlers/'
-
-# Public async API
-qi '*' -i func -s pub -m async --def
-```
-
-### Await Points
-
-```bash
-# All awaited calls
-qi '*' -i call -m await
-
-# Awaited calls inside a specific function
-qi '*' -i call -m await --within 'handle_request'
-
-# Awaited method calls on a specific receiver
-qi '*' -i call -m await -p 'client'
-```
-
-### Finding Blocking in Async Code (Heuristic)
-
-```bash
-# Async functions that might block (look for std::thread::sleep, std::sync::Mutex)
-qi 'sleep' 'lock' -i call --within 'handle_request'
-
-# Async functions calling std::fs (likely should be tokio::fs)
-qi '*' -i call --within 'fetch_data' -p 'fs'
+qi % -i func -m async --def              # all async functions
+qi % -i func -s pub -m async --def       # public async API
+qi % -i call -m await                    # every await point
+qi % -i call -m await --within fetch_data   # awaits inside one function
+qi % -i call -m await -p client          # awaited calls on one receiver
 ```
 
 ### Unsafe Audit
 
 ```bash
-# All unsafe functions (the audit surface)
-qi '*' -i func -m unsafe --def
-
-# Unsafe public functions (broadest audit target)
-qi '*' -i func -m unsafe -s pub --def
-
-# Calls inside unsafe functions
-qi '*' -i call --within 'do_unsafe'
-
-# FFI calls (extern functions usually called from unsafe blocks)
-qi '*' -i call -ns 'libc'
+qi % -i func -m unsafe --def             # the audit surface
+qi % -i func -m unsafe -s pub --def      # unsafe public API (highest priority)
+qi % -i call --within do_unsafe          # what unsafe functions call
+qi transmute -i call -C 3                # always worth a look
 ```
 
 ---
@@ -530,51 +408,41 @@ qi '*' -i call -ns 'libc'
 
 ### Macro Definitions
 
-```bash
-# All macro_rules! definitions
-qi '*' -i func -c 'macro_rules!'
+`macro_rules!` definitions have their own context:
 
-# Specific macro
-qi 'debug_print' -i func -c 'macro_rules!' -e
+```bash
+qi % -i macro                       # all macro definitions
+qi debug_print -i macro -e          # expand one
 ```
+
+Note: macro *bodies* are token trees and are not indexed — calls inside a
+`macro_rules!` definition won't appear in the index.
 
 ### Macro Invocations
 
+Macro calls are `call` entries with `macro` in the TYPE column:
+
 ```bash
-# Common macro call sites
-qi 'println' -i call
-qi 'vec' -i call
-qi 'format' -i call
-qi 'assert_eq' -i call
-qi 'panic' -i call
+qi % -i call -t macro               # all macro invocations
+qi println panic assert_eq -i call  # specific macros
+qi % -i call -t macro --within main # macros used in one function
 
-# All macro invocations (clue='macro!')
-qi '*' -i call -c 'macro!'
-
-# Macro invocations within a function
-qi '*' -i call -c 'macro!' --within 'main'
+# Arguments passed to macros carry the macro name as their clue:
+qi % -i arg -c format               # everything passed to format!
 ```
 
-### FFI Declarations
+### FFI
 
 ```bash
-# Functions declared in extern blocks (return types preserved)
-qi 'malloc' 'free' 'strlen' -i func --def -v
+# Declarations inside extern blocks get the block's ABI as modifier
+qi % -i func -m 'extern "C"' --def       # foreign fns + #[no_mangle] exports
+qi % -i func -m 'extern "system"' --def  # other ABIs
+qi % -i var -m 'extern%' --def           # foreign statics (errno etc.)
+qi % -i func -c '%no_mangle%' --def      # exported with C ABI
 
-# extern crate declarations
-qi '*' -i imp -c 'extern_crate'   # If you add this clue
-
-# Functions exported with C ABI (#[no_mangle])
-qi '*' -i func -c '%no_mangle%' --def
-qi '*' -i func -m 'extern "C"' --def
-```
-
-### Foreign Statics
-
-```bash
-# extern static items
-qi 'errno' -i var --def -v
-qi '*' -i var -f 'src/ffi/' --def
+# extern crate declarations are imports
+qi alloc -i imp                          # extern crate alloc;
+qi pm -i imp -c as                       # extern crate proc_macro as pm;
 ```
 
 ---
@@ -584,1053 +452,231 @@ qi '*' -i var -f 'src/ffi/' --def
 ### Module Structure
 
 ```bash
-# All module declarations
-qi '*' -i ns --def
-
-# Public modules (forms the module path tree)
-qi '*' -i ns -s pub --def
-
-# Inline modules (mod foo { ... })
-qi '*' -i ns --def -e
+qi % -i ns --def                    # all module declarations
+qi % -i ns -c '#[cfg]'              # conditionally-compiled modules (mod tests)
+qi tests -i ns --def                # test modules by convention
 ```
 
 ### Use Statements
 
-```bash
-# All imported names
-qi '*' -i imp --limit 30
-
-# Imports from a specific path (uses namespace column)
-qi '*' -i imp -ns 'std::collections'
-qi '*' -i imp -ns 'tokio%'
-qi '*' -i imp -ns 'crate%'
-
-# Find use-aliases (use foo as bar)
-qi '*' -i imp -c 'as'
-
-# Find re-exports (pub use)
-qi '*' -i imp -f 'src/lib.rs'
-```
-
-### Import Audit
+The NS column holds the source path, including brace groups and nested groups:
 
 ```bash
-# What does this module pull in?
-qi '*' -i imp -f 'src/main.rs'
-
-# What standard library bits does the crate use?
-qi '*' -i imp -ns 'std%'
-
-# External crate dependencies (via use)
-qi '*' -i imp -ns 'serde%'
-qi '*' -i imp -ns 'tokio%'
+qi % -i imp --limit 30                   # all imported names
+qi % -i imp -ns std::collections         # from a specific path
+qi % -i imp -ns 'serde%'                 # external dependency usage
+qi % -i imp -ns 'crate%'                 # internal imports
+qi % -i imp -c as                        # aliases: use foo as bar
+qi % -i imp -f src/lib.rs                # what lib.rs pulls in (incl. pub use)
 ```
 
 ### Scoped Calls
 
 ```bash
-# Calls to a specific path: e.g., asyncio::sleep
-qi 'sleep' -i call -ns 'tokio::time'
-qi 'spawn' -i call -ns 'tokio'
-
-# All calls to functions in std::collections
-qi '*' -i call -ns 'std::collections%'
-
-# Constructor patterns: Type::new()
-qi 'new' -i call -ns 'User'
-qi 'new' -i call -ns '%::Builder'
+qi new -i call -ns Vec                   # Vec::new()
+qi spawn -i call -ns 'tokio%'            # tokio::spawn, tokio::task::spawn...
+qi % -i call -ns 'std::fs'               # all std::fs calls (sync IO audit)
 ```
 
 ---
 
 ## Common Workflows
 
-### Understanding a New Codebase (START HERE!)
-
-**Always start with Table of Contents:**
-
-```bash
-# 1. Get the entry-point structure
-qi '*' -f 'src/main.rs' --toc
-qi '*' -f 'src/lib.rs' --toc
-
-# Shows:
-# - What's imported (dependencies)
-# - All types, traits, functions defined
-# - Line ranges for jumping directly to definitions
-
-# 2. Explore module structure
-qi '*' -i ns --def -s pub
-
-# 3. Public API surface
-qi '*' -s pub --def -i func class enum trait
-
-# 4. Entry points
-qi 'main' -i func -e
-```
-
-**Why TOC first?**
-- Instant overview without opening files
-- Line ranges let you jump straight to code
-- Reveals module structure and dependencies
-- Faster than reading entire files
-
 ### Understanding a Function
 
 ```bash
-# 1. Find it
-qi "handle_request" -i func
-
-# 2. See the full body
-qi "handle_request" -i func -e
-
-# 3. What does it operate on?
-qi 'request' --within 'handle_request' -x noise
-
-# 4. What does it call?
-qi '*' -i call --within 'handle_request' --limit 30
-
-# 5. Awaited calls inside it
-qi '*' -i call -m await --within 'handle_request'
-
-# 6. Who calls it?
-qi 'handle_request' -i call
-
-# 7. Is it called as a macro? In a closure? With what arg types?
-qi 'handle_request' -i call -C 3
+qi handle_request -i func           # 1. find it
+qi handle_request -i func -e        # 2. read it
+qi % -i call --within handle_request --limit 30   # 3. what it calls
+qi % -i call -m await --within handle_request     # 4. where it awaits
+qi handle_request -i call -C 3      # 5. who calls it, in context
 ```
 
-### Tracing a Type Through a Codebase
+### Tracing a Type
 
 ```bash
-# 1. Find the definition
-qi "User" -i class -e
-
-# 2. Find all impl blocks
-qi 'User' -i class --def       # struct + all impls
-
-# 3. List methods
-qi '*' -i func -p 'User'
-
-# 4. List fields
-qi '*' -i prop -p 'User'
-
-# 5. Find variables of this type
-qi '*' -i var -t 'User%' --def
-
-# 6. Find function parameters of this type
-qi '*' -i arg -t 'User%'
-qi '*' -i arg -t '&User%'
-qi '*' -i arg -t '&mut User%'
-
-# 7. Find functions that return it
-qi '*' -i func -t 'User' --def
-qi '*' -i func -t 'Result<User,%' --def
-```
-
-### Trait Implementation Survey
-
-```bash
-# 1. Find the trait
-qi "Display" -i trait -e
-
-# 2. Required methods
-qi '*' -i func -p 'Display'
-
-# 3. All implementations
-qi '*' -i class -c 'impl Display'
-
-# 4. Implementations in a specific module
-qi '*' -i class -c 'impl Display' -f 'src/types/'
-
-# 5. Concrete impl bodies
-qi '*' -i class -c 'impl Display' -e
+qi User -i class -e                 # 1. definition
+qi User -i class --def              # 2. struct + every impl block
+qi % -i func -p User                # 3. methods
+qi % -i prop -p User --def          # 4. fields
+qi User -i class --usage            # 5. construction sites
+qi % -i arg -t '%User%'             # 6. parameters of this type
+qi % -i func -t '%User%' --def      # 7. functions returning it
 ```
 
 ### Error Handling Analysis
 
 ```bash
-# 1. Error enum definition
-qi "AppError" -i enum -e
-
-# 2. Variants
-qi '*' -i case -p 'AppError'
-
-# 3. From impls (conversions)
-qi 'AppError' -i class -c 'impl From'
-
-# 4. Display/Error trait impls
-qi 'AppError' -i class -c 'impl Display'
-qi 'AppError' -i class -c 'impl Error'
-
-# 5. Functions returning the error
-qi '*' -i func -t 'Result<%AppError%' --def
-qi '*' -i func -t '%AppError>' --def
-
-# 6. ? operator usage (find call sites that propagate errors)
-qi '*' -i call --within 'load_config' -C 2
+qi AppError -i enum -e                       # 1. the error enum
+qi % -i case -p AppError --def               # 2. variants
+qi AppError -i class -c 'impl From'          # 3. conversions feeding into it
+qi AppError -i class -c 'impl Display'       # 4. formatting impl
+qi % -i func -t '%AppError%' --def           # 5. functions producing it
+qi % -i case -ns AppError                    # 6. where each variant is matched
+qi % -i call -ns AppError                    # 7. where each variant is built
 ```
 
-### Refactoring a Function Signature
+### Trait Refactoring
 
 ```bash
-# 1. Find the function
-qi 'parse_config' -i func -e
-
-# 2. Find every caller
-qi 'parse_config' -i call --limit 50
-
-# 3. See callers in context
-qi 'parse_config' -i call -C 3
-
-# 4. Find argument names that callers use (to update naming consistently)
-qi '*' -i arg --columns line,symbol,parent,type --within 'parse_config'
-
-# 5. Tests that exercise it
-qi 'parse_config' -i call -f '%_test%' -f 'tests/'
-qi 'parse_config' -i call --within 'test_*'
+qi Storage -i trait -e                       # 1. the trait
+qi % -i class -c 'impl Storage' --def        # 2. all implementations
+qi % -i func -p Storage --def                # 3. the method set
+qi read write delete -i call -C 2            # 4. call sites of those methods
+qi Storage -i trait --usage                  # 5. where it's used as a bound
+qi % -i arg -t '%dyn Storage%' -t '%impl Storage%'   # 6. trait-object/impl params
 ```
 
 ### Test Discovery
 
 ```bash
-# All test functions
-qi '*' -i func -c '%test%' --def
-
-# Tests in a module
-qi '*' -i func -c '#[test]' --def
-
-# Benchmark functions
-qi '*' -i func -c '#[bench]' --def
-
-# should_panic tests
-qi '*' -i func -c '%should_panic%' --def
-
-# Test modules (Rust convention)
-qi 'tests' -i ns --def
-```
-
----
-
-## Power User Combinations
-
-These combinations unlock qi's full potential by stacking filters creatively.
-
-### Combining Scope + Modifier + Within
-
-```bash
-# Public async functions called from a specific function
-qi '*' -i call --within 'orchestrator' -m await
-
-# Public unsafe surface within a module
-qi '*' -i func -s pub -m unsafe -f 'src/ffi/'
-
-# Const fn in the public API
-qi '*' -i func -s pub -m const --def
-```
-
-### Combining Parent + Modifier + Type
-
-```bash
-# Methods on User that return Result
-qi '*' -i func -p 'User' -t 'Result%' --def
-
-# Async methods on a specific type
-qi '*' -i func -p 'Client' -m async --def
-
-# Static methods (no &self) — heuristic: returns Self or no parent in call
-qi 'new' '*_new' -i func -p 'User' --def
-```
-
-### Combining Clue + Within + Definition
-
-```bash
-# Test functions within a specific module
-qi '*' -i func -c '#[test]' --def -f 'src/parser/'
-
-# Derived traits (audit derives across the codebase)
-qi '*' -i class -c '%Serialize%' --def
-qi '*' -i class -c '%Debug%' --def
-
-# Deprecated public API
-qi '*' -s pub -c '#[deprecated]' --def
-```
-
-### Combining Multiple Filters for Precision
-
-```bash
-# All public async methods on a client
-qi '*' -i func -p 'Client' -s pub -m async --def
-
-# Inherent impl blocks for a specific type
-qi '*' -i class -c 'impl' -f 'src/models/user.rs'
-
-# Methods returning Self (likely builders/constructors)
-qi '*' -i func -t 'Self' --def
-qi '*' -i func -t '&mut Self' --def
-```
-
-### Creative Sampling
-
-```bash
-# Sample async usage per file
-qi '*' -i call -m await --limit-per-file 2
-
-# Sample test patterns
-qi '*' -i func -c '%test%' --def --limit-per-file 3
-
-# Compare distribution
-qi 'unwrap' -i call --limit 20            # Might cluster in one file
-qi 'unwrap' -i call --limit-per-file 3    # Distributed sample
+qi % -i func -c '#[test]' --def          # all tests
+qi % -i func -c '%should_panic%' --def   # panic tests
+qi % -i ns -c '#[cfg]' --def             # #[cfg(test)] modules
+qi parse_config -i call -f tests/        # tests exercising a function
 ```
 
 ---
 
 ## Advanced Queries
 
-### Parent Symbol Filtering (`-p`)
+### Stacking Filters
 
-`-p` filters by the parent symbol — for Rust, this is:
-- The **impl target** for methods (e.g., `User` for `impl User { ... }`)
-- The **trait** for trait methods
-- The **enum** for variants
-- The **receiver name** for method calls
+All filters compose; each one narrows the result set:
 
 ```bash
-# All methods on a type
-qi '*' -i func -p 'Client'
-
-# All variants of an enum
-qi '*' -i case -p 'Result'
-
-# All calls on a specific local variable
-qi '*' -i call -p 'response'
-qi '*' -i call -p 'config'
-
-# Specific method call on specific receiver
-qi 'lock' -i call -p 'mutex'
-qi 'await' -i call -p 'future'
+qi % -i func -p Client -s pub -m async --def    # public async methods on Client
+qi % -i func -s pub -c '#[deprecated]' --def    # deprecated public API
+qi % -i call -m await --limit-per-file 2        # sample await points per file
+qi % -i trait -c derive -f src/models/          # derives in one module
 ```
-
-**Note:** Parent is populated for method **definitions** (impl target) and method **calls** (receiver name).
 
 ### Scoped Search (`--within`)
 
 ```bash
-# What does parse_request do with `headers`?
-qi 'headers' --within 'parse_request' -x noise
-
-# Find all .await points within a function
-qi '*' -i call -m await --within 'fetch_user'
-
-# Find local variables in a function
-qi '*' -i var --within 'process_data' --def
-
-# Multiple functions (OR logic)
-qi 'token' --within 'authenticate' 'authorize' 'refresh_token'
+qi headers --within parse_request -x noise   # one symbol inside one function
+qi % -i var --within process_data --def      # locals of a function
+qi token --within authenticate authorize     # multiple functions (OR)
 ```
-
-**Why better than grep:** Understands function boundaries — no false matches from neighbors.
 
 ### Type Filter (`-t`)
 
+The TYPE column is matched as text, so wildcards work on the annotation:
+
 ```bash
-# Find all `Result<...>` returning functions
-qi '*' -i func -t 'Result<%' --def
-
-# Find `&str` parameters
-qi '*' -i arg -t '&str'
-
-# Find `Vec<u8>` returns
-qi '*' -i func -t 'Vec<u8>' --def
-
-# Generic constraints
-qi '*' -i arg -t 'impl %'    # impl Trait params
-qi '*' -i arg -t 'Box<dyn %' # trait object params
+qi % -i func -t 'Result<%' --def    # functions returning Result
+qi % -i arg -t '&str'               # &str parameters
+qi % -i arg -t '&mut %'             # mutable-reference parameters
+qi % -i arg -t 'impl %'             # impl Trait parameters
+qi % -i func -t 'impl Future%'      # functions returning futures
 ```
 
 ### Related Patterns (`--and`)
 
 ```bash
-# Find unwrap on a Result on the same line
-qi 'Result' 'unwrap' --and
-
-# Find lock/unlock within 5 lines (manual locking — usually a bug)
-qi 'lock' 'unlock' --and 5
-
-# Find unsafe + raw pointer use within 10 lines
-qi 'unsafe' '*mut' --and 10
-
-# Find ?-operator usage with specific functions
-qi 'parse' '?' --and -C 2
+qi fprintf stderr --and             # both on the same line
+qi lock unlock --and 5              # within 5 lines of each other
+qi unwrap expect --and 10           # clustered panicking calls
 ```
 
-### Sampling (`--limit-per-file`)
+### Display Control
 
 ```bash
-# Sample async usage per file
-qi '*' -i func -m async --limit-per-file 2
-
-# Sample trait impls per file
-qi '*' -i class -c 'impl %' --limit-per-file 2
-
-# Sample macro invocations per file
-qi '*' -i call -c 'macro!' --limit-per-file 5
-```
-
-### Multi-Column Display
-
-```bash
-# Default columns
-qi '*' -i func --def --limit 20
-
-# Custom columns
-qi '*' -i func --columns line,symbol,scope,modifier,type
-
-# All columns
-qi '*' -i func -v
-
-# Just symbols (good for piping)
-qi '*' -i func --columns symbol
-```
-
-### File Filtering
-
-```bash
-# Single file
-qi 'handler' -f 'src/server.rs'
-
-# Extension
-qi '*' -i func -f '.rs'
-
-# Directory subtree
-qi '*' -i func -f 'src/parser/'
-
-# Wildcard pattern
-qi '*' -i func -f '%/handlers/%'
-
-# Tests vs production
-qi '*' -i func -f 'tests/'
-qi '*' -i func -f '%_test.rs'
-```
-
-### Excluding Noise
-
-```bash
-# Exclude comments and strings (recommended default)
-qi 'error' -x noise
-
-# Exclude only comments
-qi 'error' -x comment
-
-# Exclude only strings
-qi 'error' -x string
-```
-
-### Context Display
-
-```bash
-# Show N lines after match
-qi 'fn main' -A 10
-
-# Show N lines before match
-qi 'return' -B 5
-
-# Show N lines before and after
-qi 'handle_request' -C 20
-
-# Best for definitions — show full body inline:
-qi 'handle_request' -i func -e
+qi % -i func -v                                 # all columns
+qi % -i func --columns line sym par mod type    # chosen columns (space-separated)
+qi getUserById -i func -e --raw                 # bare source (good Edit anchors)
+qi handle_request -C 5                          # context lines
+qi % -i call --limit-per-file 3 --limit 30      # distributed sampling
 ```
 
 ---
 
-## Tips & Tricks
-
-### Search Patterns
-
-```bash
-# Wildcard at start
-qi '*Error' -i enum         # Error enum types
-
-# Wildcard at end
-qi 'new_*' -i func          # Constructor variants
-
-# Wildcard in middle
-qi 'Http*Client' -i class   # Hybrid client types
-
-# Match anything
-qi '*' -i func              # All functions
-```
-
-### Common Rust Naming Patterns
-
-```bash
-# Constructors
-qi 'new' 'with_*' 'from_*' -i func --def
-
-# Builders
-qi '*Builder' -i class --def
-qi 'build' -i func -p '*Builder'
-
-# Conversions
-qi 'to_*' 'into_*' 'as_*' -i func --def
-
-# Predicates (return bool)
-qi 'is_*' 'has_*' -i func --def
-
-# Trait-impl conventional methods
-qi 'fmt' -i func -p 'Display'
-qi 'next' -i func -p 'Iterator'
-qi 'drop' -i func -p 'Drop'
-qi 'eq' -i func -p 'PartialEq'
-
-# Error types
-qi '*Error' -i enum --def
-
-# Tests
-qi 'test_*' -i func -c '#[test]'
-qi '*' -i func -f 'tests/'
-```
-
-### Combining with Shell Tools
-
-```bash
-# Count public functions per file
-qi '*' -i func -s pub --def --columns line,symbol \
-    | cut -d: -f1 | sort | uniq -c | sort -rn
-
-# Most-called functions
-qi '*' -i call --columns symbol \
-    | sort | uniq -c | sort -rn | head -20
-
-# Files with most unsafe code
-qi '*' -i func -m unsafe --def --columns line \
-    | cut -d: -f1 | sort | uniq -c | sort -rn
-
-# All unique trait names
-qi '*' -i trait --def --columns symbol | sort -u
-
-# Functions defined but never called (potential dead code)
-comm -23 \
-    <(qi '*' -i func --def --columns symbol | sort -u) \
-    <(qi '*' -i call --columns symbol | sort -u)
-```
-
-### Performance Tips
-
-```bash
-# Narrow with file filter first
-qi 'handler' -f 'src/server/' -i func
-
-# Use --limit during exploration
-qi '*' -i func --limit 20
-
-# Exclude noise for code-only searches
-qi 'error' -x noise -i call
-
-# Use --def or --usage to halve the result set
-qi 'parse' -i func --def
-```
-
-### Quick Reference Card
-
-```bash
-# Most useful Rust patterns (copy these!)
-
-# File structure
-qi '*' -f 'src/lib.rs' --toc
-
-# See a function
-qi 'parse_config' -i func -e
-
-# Public API
-qi '*' -s pub --def
-
-# Async functions
-qi '*' -i func -m async --def
-
-# Unsafe functions
-qi '*' -i func -m unsafe --def
-
-# All methods on a type
-qi '*' -i func -p 'User'
-
-# All implementations of a trait
-qi '*' -i class -c 'impl Display'
-
-# All await points
-qi '*' -i call -m await
-
-# Macro invocations
-qi '*' -i call -c 'macro!'
-
-# Tests
-qi '*' -i func -c '#[test]'
-
-# Imports from a path
-qi '*' -i imp -ns 'std::collections'
-
-# What does function X do?
-qi '*' --within 'X' -x noise
-```
-
----
-
-## Real-World Examples
-
-### Example 1: Auditing the Public API
-
-```bash
-# Get the full public API surface
-qi '*' -s pub --def --columns line,symbol,context_type,type > public_api.txt
-
-# Categorize:
-qi '*' -i func -s pub --def       # Functions
-qi '*' -i class -s pub --def      # Structs
-qi '*' -i enum -s pub --def       # Enums
-qi '*' -i trait -s pub --def      # Traits
-
-# Find pub items that look internal (audit candidates)
-qi '*helper*' '*internal*' '*impl*' -s pub --def
-
-# Items potentially exposed too broadly (should be pub(crate)?)
-qi '*' -s pub --def -f 'src/internal/'
-```
-
-### Example 2: Async Performance Audit
-
-```bash
-# 1. All async functions (the candidate set)
-qi '*' -i func -m async --def > async_fns.txt
-
-# 2. For each, find any sync-blocking calls
-for fn in $(cat async_fns.txt | awk '{print $1}'); do
-    echo "=== $fn ==="
-    qi 'sleep' 'lock' 'recv' -i call --within "$fn"
-done
-
-# 3. Find std::fs usage in async code (should be tokio::fs)
-qi '*' -i call --within '*async*' -ns 'std::fs'
-
-# 4. Find blocking println in async code
-qi 'println' -i call --within 'handle_*'
-```
-
-### Example 3: Unsafe Code Audit
-
-```bash
-# Where is unsafe used?
-qi '*' -i func -m unsafe --def       # unsafe functions
-qi 'unsafe' -f '.rs' -i func -e      # see implementations
-
-# What calls do unsafe functions make?
-for fn in $(qi '*' -i func -m unsafe --def --columns symbol); do
-    echo "=== $fn ==="
-    qi '*' -i call --within "$fn"
-done
-
-# Find raw pointer dereferences in context
-qi '*mut' '*const' --and -C 2
-
-# Find transmute calls (always a smell)
-qi 'transmute' -i call -C 3
-```
-
-### Example 4: Tracing an Error Type
-
-```bash
-# 1. Find the error type
-qi 'AppError' -i enum -e
-
-# 2. All variants
-qi '*' -i case -p 'AppError'
-
-# 3. All From<X> conversions feeding into AppError
-qi 'AppError' -i class -c 'impl From'
-
-# 4. All functions that produce this error
-qi '*' -i func -t '%AppError%' --def
-
-# 5. Where are these errors created?
-qi '*' -i call -ns 'AppError'
-
-# 6. How are they handled? (look for ? and match arms)
-qi 'AppError' --within '*' -C 5
-```
-
-### Example 5: Reviewing a New Module
-
-```bash
-# 1. Module overview
-qi '*' -f 'src/auth/' --toc
-
-# 2. Public API of this module
-qi '*' -s pub --def -f 'src/auth/'
-
-# 3. External dependencies (use statements)
-qi '*' -i imp -f 'src/auth/'
-
-# 4. Tests for this module
-qi '*' -i func -c '#[test]' --def -f 'src/auth/'
-
-# 5. Type-by-type drill-down
-qi '*' -i class -f 'src/auth/' --def -e
-
-# 6. Methods grouped by type
-for ty in $(qi '*' -i class --def --columns symbol -f 'src/auth/' | sort -u); do
-    echo "=== $ty ==="
-    qi '*' -i func -p "$ty"
-done
-```
-
-### Example 6: Finding Implementations of a Trait Across Crates
-
-```bash
-# Definition
-qi 'Iterator' -i trait -e
-
-# All types implementing Iterator in your crate
-qi '*' -i class -c 'impl Iterator'
-
-# With full impl bodies
-qi '*' -i class -c 'impl Iterator' --def -e
-
-# Their `next` implementations
-qi 'next' -i func -p 'Iterator' --def
-```
-
-### Example 7: Refactoring a Trait
-
-```bash
-# 1. Trait definition
-qi 'Storage' -i trait -e
-
-# 2. Find all implementations
-qi '*' -i class -c 'impl Storage' --def --columns line,symbol
-
-# 3. Find all required methods
-qi '*' -i func -p 'Storage' --def
-
-# 4. Find all call sites of those methods (heavy lift!)
-qi 'read' 'write' 'delete' -i call -C 2
-
-# 5. Find places that use the trait as a bound
-qi '*' -i arg -t 'impl Storage' --def
-qi '*' -i arg -t 'dyn Storage' --def
-qi '*' -i arg -t '&dyn Storage' --def
-```
-
----
-
-## Troubleshooting
+## Troubleshooting & Pitfalls
 
 ### Pattern Not Matching
 
 ```bash
-# Symbol not found
-qi 'my_function' -i func
-# (no results)
-
-# Try case-insensitive partial match
-qi '%function%' -i func
-
-# Check whether it's a method (look for parent)
-qi 'my_function' -i func -v
-
-# Check unfiltered
-qi 'my_function' -v
-
-# Generic types — try base name
-qi 'Vec' -i class       # works
-qi 'Vec<u8>' -i class   # won't match — symbol is just "Vec"
+qi my_function -i func        # no results?
+qi '%function%'               # try partial match, no context filter
+qi my_function -v             # check what context it actually has
 ```
 
-### Too Many Results
+### Generics: Search the Base Name
+
+The indexed symbol is the **base** name; the full generic expression lives in
+the TYPE column.
 
 ```bash
-# Add context filter
-qi 'test' -i func
-
-# Add file filter
-qi 'test' -i func -f 'src/server/'
-
-# Filter by visibility
-qi 'test' -i func -s pub --def
-
-# Exclude noise
-qi 'test' -x noise
-
-# Limit
-qi 'test' -i func --limit 20
+qi 'Vec<u8>' -i class         # ✗ won't match — symbol is just "Vec"
+qi Wrapper -i class --def     # ✓ finds Wrapper<'a, T>
+qi % -i var -t 'Vec<u8>'      # ✓ full expressions go in -t
 ```
 
-### Symbol in Stopwords
+### Filtered Symbols
+
+Rust keywords (`self`, `Self`, `crate`, ...) are never indexed, and symbols
+shorter than two characters are dropped (`x`, `i`, type params `T`, `K`).
+
+**Current limitation:** the shared stopword list is applied case-insensitively
+to code symbols, so a few common English words are unfindable even when they are
+real Rust symbols — notably `from` (`String::from`, `impl From`'s `fn from`),
+`Some`, and a `Move` variant. Prefer searching the surrounding context
+(`qi String -ns %`, `qi % -i case -ns Option`) until this is fixed.
+
+### Common Pitfalls
 
 ```bash
-# Common words may be filtered (`new`, `next`, etc. are NOT — common Rust words are kept)
-qi 'new'    # Works fine
-qi 'self'   # Filtered (Rust keyword)
+# ✗ grep for impl blocks            # ✓ ask the index
+grep -rn "impl Display" .           qi % -i class -c 'impl Display'
 
-# Use wildcards for common words
-qi '%self%'
-```
+# ✗ forget noise exclusion          # ✓ skip comments/strings
+qi error                            qi error -x noise
 
-### Generics & Lifetimes
+# ✗ comma-separated columns         # ✓ space-separated
+qi % --columns line,sym             qi % --columns line sym
 
-qi indexes the **base type name**, not the full generic type. The full type expression is in the `type` column.
-
-```bash
-# Find users of Wrapper<'a, T>
-qi 'Wrapper' -i class --def       # finds it
-qi 'Wrapper<...>' -i class         # won't work
-
-# Filter by type expression instead
-qi '*' -i arg -t 'Wrapper<%'       # any Wrapper<...> arg
-qi '*' -i var -t '&%' --def        # any & reference type
+# ✗ macro filter that doesn't exist # ✓ macro calls live in the TYPE column
+qi % -i call -c 'macro!'            qi % -i call -t macro
 ```
 
 ---
 
-## Best Practices & Learning Path
+## Quick Reference
 
-### Progressive Learning Path
-
-**Level 1: Basics**
-```bash
-qi 'symbol'                       # Find a symbol
-qi 'symbol' -i func               # Filter by context
-qi 'symbol' -x noise              # Exclude comments/strings
-```
-
-**Level 2: Structure First**
-```bash
-qi '*' -f 'src/lib.rs' --toc      # Always start with TOC
-qi 'fn_name' -i func -e           # See implementations
-qi 'Type' -i class -e             # Expand type definitions
-```
-
-**Level 3: Rust-Specific Patterns**
-```bash
-qi '*' -s pub --def               # Public API
-qi '*' -i func -m async           # Async functions
-qi '*' -i func -m unsafe          # Unsafe code
-qi '*' -i class -c 'impl %'       # Trait implementations
-```
-
-**Level 4: Advanced Filtering**
-```bash
-qi '*' -i func -p 'User'          # Methods on a type
-qi '*' -i call --within 'main'    # Calls within a function
-qi 'lock' 'unlock' --and 5        # Related patterns
-```
-
-**Level 5: Power Combinations**
-```bash
-qi '*' -i func -s pub -m async --def              # Public async API
-qi '*' -i class -c 'impl Display' --def -e        # Display impls with bodies
-qi '*' -i call -m await --within 'handle_request' # Async flow
-qi '*' -i func -p 'Iterator' --def                # Iterator methods
-```
-
-**Level 6: Master Workflows**
-- Start with `--toc` for any unfamiliar file
-- Use `-e` to read code inline rather than opening files
-- Use `--within` for function-scoped exploration
-- Stack `-s`, `-m`, `-c`, `-p`, `-t` for surgical precision
-
-### Common Pitfalls to Avoid
-
-**❌ Don't do this:**
-```bash
-# Reading files instead of TOC
-cat src/handler.rs | less
-
-# Using grep for impl blocks
-grep -rn "impl Display" .
-
-# Forgetting -x noise
-qi 'error'                           # buried in comments
-
-# Searching for full generic types
-qi 'Result<String, AppError>' -i func   # won't match
-```
-
-**✅ Do this instead:**
-```bash
-qi '*' -f 'src/handler.rs' --toc
-
-qi '*' -i class -c 'impl Display'
-
-qi 'error' -x noise -i call
-
-qi '*' -i func -t 'Result<%AppError%' --def
-```
-
-### Efficiency Tips
-
-1. **TOC first**: `qi '*' -f 'file.rs' --toc` shows structure instantly
-2. **Use -e liberally**: Inline code beats opening files
-3. **Filter by scope**: `-s pub` for API audit, no-scope for internals
-4. **Filter by modifier**: `-m async`, `-m unsafe`, `-m const` are Rust gold
-5. **Use clue for attrs/impls**: `-c '#[test]'`, `-c 'impl Display'`
-6. **Sample with --limit-per-file**: Get distributed examples
-7. **Always `-x noise`**: Unless searching docs/strings specifically
-
-### When to Use What
-
-| Task | Best Tool |
-|------|-----------|
-| File structure | `qi '*' -f 'file.rs' --toc` |
-| See function code | `qi 'name' -i func -e` |
-| Public API surface | `qi '*' -s pub --def` |
-| Async functions | `qi '*' -i func -m async` |
-| Unsafe audit | `qi '*' -i func -m unsafe` |
-| Methods on a type | `qi '*' -i func -p 'Type'` |
-| Trait implementations | `qi '*' -i class -c 'impl Trait'` |
-| Macro invocations | `qi '*' -i call -c 'macro!'` |
-| Imports | `qi '*' -i imp -ns 'crate%'` |
-| Await points | `qi '*' -i call -m await` |
-| What function does | `qi '*' --within 'fn_name'` |
-| Related patterns | `qi 'a' 'b' --and 5` |
-| Literal text search | `grep` (not qi) |
-
----
-
-## Comparison with Other Tools
-
-### qi vs grep
-
-```bash
-# grep: text-based, many false positives
-grep -rn 'parse_config' .
-
-# qi: semantic, finds only real symbol
-qi 'parse_config' -i func
-
-# grep: can't distinguish trait impls from other usages
-grep -rn 'impl Display' .
-
-# qi: precise — finds only impl blocks for Display
-qi '*' -i class -c 'impl Display'
-```
-
-### qi vs cargo doc
-
-```bash
-# cargo doc: rendered HTML for public items
-cargo doc --open
-
-# qi: queryable index of all items (pub + private), CLI-driven
-qi '*' -s pub --def                       # Public API
-qi '*' --def -f 'src/internal/'           # Private internals
-qi '*' -i func -p 'Client' --def          # All Client methods
-```
-
-### qi vs cargo expand
-
-```bash
-# cargo expand: shows macro-expanded source
-cargo expand my_macro
-
-# qi: shows macro definitions and invocations
-qi 'my_macro' -i func -c 'macro_rules!' -e
-qi 'my_macro' -i call -c 'macro!'
-```
-
-### qi vs IDE "Find Usages"
-
-```bash
-# IDE: great for active development, single symbol
-# qi: great for codebase-wide audits, scriptable
-
-# Find all callers of a function
-qi 'process' -i call --limit 100
-
-# Find all async callers of it
-qi 'process' -i call -m await
-
-# qi advantage: composable + pipeable
-qi '*' -i func -s pub --def | wc -l       # count public functions
-```
-
----
-
-## Glossary
-
-**Context**: What a symbol *is* (function, struct, trait, etc.)
-
-**Clue**: Auxiliary annotation — attributes for definitions (`#[derive]`, `#[test]`), `impl <Trait>` for impl blocks, `macro_rules!` / `macro!` for macros.
-
-**Definition**: Where a symbol is declared (def=1)
-
-**Usage**: A reference to a symbol (def=0)
-
-**Scope**: Visibility — `pub`, `pub(crate)`, `pub(super)`, or empty for private.
-
-**Modifier**: Behavior keyword — `async`, `unsafe`, `const`, `extern` for functions; `await` for calls.
-
-**Parent**: For methods, the impl target type (or trait); for variants, the enum; for method calls, the receiver name.
-
-**Namespace**: Module path qualifier — `std::collections`, `crate::auth`, `tokio::time`, etc.
-
-**Type**: The full type annotation text — `Result<String, io::Error>`, `&'a mut T`, `Vec<u8>`, etc.
-
----
-
-## Getting Help
-
-```bash
-# Show full help
-qi --help
-
-# List available columns
-qi 'test' --columns invalid   # error message shows valid column names
-
-# Check version
-qi --version
-
-# Report issues
-# https://github.com/ebcode/SourceMinder/issues
-```
+| Task | Command |
+|------|---------|
+| File structure | `qi % -f file.rs --toc` |
+| Expand a definition | `qi name -i func -e` |
+| Public API | `qi % -s pub --def` |
+| Async functions | `qi % -i func -m async --def` |
+| Unsafe functions | `qi % -i func -m unsafe --def` |
+| Mutable bindings | `qi % -m mut --def` |
+| Methods on a type | `qi % -i func -p Type` |
+| Fields of a type | `qi % -i prop -p Type` |
+| Enum variants | `qi % -i case -p Enum --def` |
+| Variant match sites | `qi % -i case -ns Enum` |
+| Construction sites | `qi Type -i class --usage` |
+| Trait impls | `qi % -i class -c 'impl Trait'` |
+| Trait bounds | `qi Trait -i trait --usage` |
+| Derived traits | `qi % -i trait -c derive` |
+| Associated types | `qi % -i type -p Trait` |
+| Associated consts | `qi % -i var -p Trait` |
+| Await points | `qi % -i call -m await` |
+| Macro definitions | `qi % -i macro` |
+| Macro invocations | `qi % -i call -t macro` |
+| FFI declarations | `qi % -m 'extern%' --def` |
+| Imports from a path | `qi % -i imp -ns std::io` |
+| Scoped calls | `qi new -i call -ns Vec` |
+| Inside a function | `qi token --within authenticate` |
+| Same-line patterns | `qi lock unlock --and 5` |
+| By type annotation | `qi % -i arg -t 'Result<%'` |
+| Tests | `qi % -i func -c '#[test]' --def` |
 
 ---
 
 ## Additional Resources
 
-- **Source Code**: `rust/rust_language.c` — handler implementations
+- **Handler source**: `rust/rust_language.c`
 - **Configuration**: `rust/config/{file_extensions,ignore_files,keywords}.txt`
-- **AST Explorer**: `tools/ast-explorer-rust` — debug tree-sitter output for a `.rs` file
-- **Test Files**: `scratch/sources/rust/*.rs` — known-good examples covering each feature
-
----
-
-## Quick Command Reference
-
-| Task | Command |
-|------|---------|
-| File structure | `qi '*' -f 'file.rs' --toc` |
-| Find function | `qi 'name' -i func` |
-| Expand definition | `qi 'name' -i func -e` |
-| Public API | `qi '*' -s pub --def` |
-| Async functions | `qi '*' -i func -m async` |
-| Unsafe functions | `qi '*' -i func -m unsafe` |
-| Methods on type | `qi '*' -i func -p 'Type'` |
-| Trait impls | `qi '*' -i class -c 'impl Trait'` |
-| Enum variants | `qi '*' -i case -p 'Enum'` |
-| Struct fields | `qi '*' -i prop -p 'Struct'` |
-| Macro definitions | `qi '*' -i func -c 'macro_rules!'` |
-| Macro invocations | `qi '*' -i call -c 'macro!'` |
-| Await points | `qi '*' -i call -m await` |
-| Scoped calls | `qi 'fn' -i call -ns 'std::%'` |
-| Search within function | `qi 'token' --within 'authenticate'` |
-| Related patterns | `qi 'lock' 'unlock' --and 5` |
-| Filter by type | `qi '*' -i arg -t 'Result<%'` |
-| Sample per file | `qi '*' --limit-per-file 3` |
-| Show context | `qi 'name' -C 20` |
-| Exclude noise | `qi 'name' -x noise` |
-| Custom columns | `qi '*' --columns line,symbol,scope,modifier` |
-
----
-
-*This guide covers qi version with Rust-specific scope (pub/pub(crate)), modifiers (async/unsafe/const/extern/await), and clues (#[attrs], impl blocks, macro_rules!).*
+- **AST debugging**: `tools/ast-explorer-rust file.rs` — view tree-sitter output
+- **Known-good examples**: `scratch/sources/rust/*.rs` — one file per language feature

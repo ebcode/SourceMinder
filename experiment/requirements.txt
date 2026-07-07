@@ -1,0 +1,26 @@
+# SourceMinder experiment -- Python dependencies.
+#
+# Curated top-level requirements (not a full `pip freeze`); pip resolves the
+# transitive tree. Pinned to the versions this experiment was validated against
+# so the pipeline -- agent runs, Docker evaluation, and statistical analysis --
+# is reproducible. Install into a venv:
+#
+#   python3 -m venv experiment/.venv
+#   experiment/.venv/bin/pip install -r experiment/requirements.txt
+#
+# Grouped by pipeline stage. Each stage can run independently, but they share
+# one venv here. Note: `swebench` pulls in `datasets`, which requires `pandas`
+# transitively -- analyze_stats.py itself uses only numpy/scipy/matplotlib.
+
+# --- Agent runs (run_one.py / run_experiment.py invoke the `mini-extra` CLI) ---
+mini-swe-agent==2.4.1
+litellm==1.89.1
+
+# --- Patch evaluation (evaluate_patches.py drives the SWE-bench Docker harness) ---
+swebench==4.1.0
+datasets==5.0.0          # SWE-bench_Verified loader; pulls pandas transitively
+
+# --- Statistical analysis (analyze_stats.py) ---
+numpy==2.4.6
+scipy==1.17.1            # Wilcoxon signed-rank, Spearman correlation
+matplotlib==3.11.0       # charts; soft dependency -- analyze_stats.py --no-charts skips it

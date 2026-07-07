@@ -19,6 +19,7 @@
 #define FILE_WATCHER_H
 
 #include <stddef.h>
+#include "file_walker.h"
 
 /* Maximum number of watched directories */
 #define MAX_WATCH_DIRS 16384
@@ -57,10 +58,15 @@ FileWatcher* file_watcher_init(void);
  * @param directory: Directory path to watch
  * @param extensions: Array of file extensions to watch (e.g., [".ts", ".tsx"])
  * @param extension_count: Number of extensions
+ * @param exclude_dirs: --exclude-dir patterns to skip (may be NULL);
+ *                      must outlive the watcher
+ * @param ignore_dirs: ignored-folders config patterns to skip (may be NULL);
+ *                     must outlive the watcher
  * Returns: 0 on success, -1 on error
  */
 int file_watcher_add_directory(FileWatcher *watcher, const char *directory,
-                                const char **extensions, int extension_count);
+                                const char **extensions, int extension_count,
+                                const ExcludeDirs *exclude_dirs, const WordSet *ignore_dirs);
 
 /**
  * Wait for file events with debouncing
