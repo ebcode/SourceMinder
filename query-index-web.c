@@ -405,12 +405,20 @@ int build_common_filters_web(SqlQueryBuilder *builder,
         if (sql_append(builder, ")") != 0) return -1;
     }
 
-    /* X-Macro: Add extensible column filters (using LIKE for pattern matching) */
+    /* X-Macro: Add extensible column filters (using LIKE for pattern matching).
+     * TEXT columns use leading+trailing wildcards so -p Server matches *Server,
+     * ServerImpl, etc. without the caller needing to know language-specific
+     * prefixes/suffixes. INT_COLUMN (is_definition) keeps exact match.
+     * Unlike native (whose sqlite3_mprintf %q does not quote), the web %q shim
+     * emits the surrounding quotes itself, so the wildcards are wrapped into
+     * the value before escaping rather than into the format string. */
 #define COLUMN(name, ...) \
     if (filters && filters->name.count > 0) { \
         if (sql_append(builder, " AND (") != 0) return -1; \
         for (int i = 0; i < filters->name.count; i++) { \
-            char *escaped_value = sqlite3_mprintf("%q", filters->name.values[i]); \
+            char wrapped_value[SYMBOL_MAX_LENGTH + 2]; \
+            snprintf(wrapped_value, sizeof(wrapped_value), "%%%s%%", filters->name.values[i]); \
+            char *escaped_value = sqlite3_mprintf("%q", wrapped_value); \
             int ret = sql_append(builder, "%s%s" #name " LIKE %s ESCAPE '\\'", \
                 i > 0 ? " OR " : "", col_prefix, escaped_value); \
             sqlite3_free(escaped_value); \

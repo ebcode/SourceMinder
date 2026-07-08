@@ -7,7 +7,7 @@
  * Exports:
  *   qi_web_build(command)            -> build-info string (SQL, patterns, limit)
  *   qi_web_format(build_info, rows_tsv, total, shown) -> formatted qi output
- *   qi_web_format_breakdown(tsv)     -> "Result breakdown: ..." + Tip line
+ *   qi_web_format_breakdown(tsv)     -> "Results CTX Totals: ..." + Tip line
  *   qi_web_format_files(tsv, shown, total) -> file list + "Found N files"
  *   qi_web_free_result(ptr)          -> free a result string
  */
@@ -137,6 +137,12 @@ typedef struct {
     int context_after;   /* -A / -C: lines of context after each match */
     int raw;             /* --raw: bare source only, suppress all framing */
     int limit_per_file; /* --limit-per-file: max matches shown per file */
+    int quiet;           /* -q/--quiet: drop banner/footer/rule chrome; keep header + rows */
+    /* First grep-style alternation split, for the educational warning (mirrors
+     * AltWarning in query-index.c); alt_original stays NULL if none occurred. */
+    char *alt_original;      /* the offending term as entered, e.g. "Renew\|Session" */
+    char *alt_alternatives;  /* its split terms re-quoted and space-joined: 'Renew' 'Session' */
+    const char *alt_sep;     /* the separator form the user typed: "\\|" or "|" */
 } WebCommand;
 
 static void free_col_filter(WebColFilter *f) {
@@ -163,6 +169,76 @@ static char *cmd_strdup(WebCommand *cmd, const char *s) {
     (cmd)->error_msg_malloced = 1; \
 } while(0)
 
+/* Split a term on the alternation operator '|' (the grep-ism '\|' is also
+ * accepted).  Mirrors split_alternation() in query-index.c, but allocates via
+ * cmd_strdup so an allocation failure marks the command OOM instead of
+ * exiting.  Writes up to max_out newly-allocated segments into out[] and
+ * returns the count; empty segments produced by a leading, trailing, or
+ * doubled separator are dropped.  The caller owns and must free each segment. */
+static int split_alternation_web(WebCommand *cmd, const char *term,
+                                 char *out[], int max_out) {
+    int count = 0;
+    const char *seg_start = term;
+    const char *p = term;
+    while (count < max_out) {
+        int sep_len = 0;
+        if (p[0] == '\\' && p[1] == '|') {
+            sep_len = 2;
+        } else if (p[0] == '|') {
+            sep_len = 1;
+        }
+        if (sep_len > 0 || *p == '\0') {
+            size_t len = (size_t)(p - seg_start);
+            if (len > 0) {
+                char seg[SYMBOL_MAX_LENGTH];
+                if (len >= sizeof(seg)) {
+                    len = sizeof(seg) - 1;
+                }
+                memcpy(seg, seg_start, len);
+                seg[len] = '\0';
+                out[count] = cmd_strdup(cmd, seg);
+                if (out[count]) count++;
+            }
+            if (*p == '\0') {
+                break;
+            }
+            p += sep_len;
+            seg_start = p;
+        } else {
+            p++;
+        }
+    }
+    return count;
+}
+
+/* Capture warning data for the first split term only (keep the message focused
+ * on one example), mirroring capture_alt_warning() in query-index.c.  Echoes
+ * the separator form the user actually typed. */
+static void capture_alt_warning_web(WebCommand *cmd, const char *original,
+                                    char *const segs[], int nseg) {
+    if (cmd->alt_original != NULL) {
+        return;  /* already captured an earlier term */
+    }
+    cmd->alt_sep = strstr(original, "\\|") ? "\\|" : "|";
+    cmd->alt_original = cmd_strdup(cmd, original);
+
+    /* Build "'seg0' 'seg1' ...": two quotes per term, a space between, plus NUL. */
+    size_t cap = 1;
+    for (int i = 0; i < nseg; i++) {
+        cap += strlen(segs[i]) + 3;
+    }
+    char *buf = malloc(cap);
+    if (!buf) {
+        cmd->oom = 1;
+        return;
+    }
+    size_t pos = 0;
+    for (int i = 0; i < nseg; i++) {
+        pos += (size_t)snprintf(buf + pos, cap - pos, "%s'%s'", i ? " " : "", segs[i]);
+    }
+    cmd->alt_alternatives = buf;
+}
+
 static void free_command(WebCommand *cmd) {
     for (int i = 0; i < cmd->pattern_count; i++) free(cmd->patterns[i]);
     for (int i = 0; i < cmd->include_count; i++) free(cmd->includes[i]);
@@ -171,6 +247,8 @@ static void free_command(WebCommand *cmd) {
     for (int i = 0; i < cmd->column_count; i++) free(cmd->column_names[i]);
     for (int i = 0; i < cmd->within_count; i++) free(cmd->within_symbols[i]);
     if (cmd->error_msg_malloced) free(cmd->error_msg);
+    free(cmd->alt_original);
+    free(cmd->alt_alternatives);
     free_col_filter(&cmd->cf.parent);
     free_col_filter(&cmd->cf.scope);
     free_col_filter(&cmd->cf.ns);
@@ -191,14 +269,22 @@ static int is_flag(const char *token) {
 }
 
 /* Parse values for a column filter flag.  Always sets show=1, then
- * collects any following non-flag tokens as filter values. */
+ * collects any following non-flag tokens as filter values.  Each value is
+ * split on grep-style alternation 'A|B' into separate OR'd values. */
 static void parse_col_flag_values(WebColFilter *cf, char **tokens, int tc, int *i,
                                    WebCommand *cmd) {
     cf->show = 1;
     while (*i + 1 < tc && !is_flag(tokens[*i + 1])) {
         (*i)++;
-        if (cf->count < MAX_CONTEXT_TYPES)
-            cf->values[cf->count++] = cmd_strdup(cmd, tokens[*i]);
+        char *fsegs[MAX_CONTEXT_TYPES];
+        int fnseg = split_alternation_web(cmd, tokens[*i], fsegs, MAX_CONTEXT_TYPES);
+        if (fnseg > 1) capture_alt_warning_web(cmd, tokens[*i], fsegs, fnseg);
+        for (int fs = 0; fs < fnseg; fs++) {
+            if (cf->count < MAX_CONTEXT_TYPES)
+                cf->values[cf->count++] = fsegs[fs];
+            else
+                free(fsegs[fs]);
+        }
     }
 }
 
@@ -255,12 +341,19 @@ static WebCommand parse_command(const char *input) {
         const char *t = tokens[i];
 
         if (!is_flag(t)) {
-            if (cmd.pattern_count >= MAX_PATTERNS) {
-                cmd.error = 1;
-                SET_CMD_ERROR(&cmd, "Too many patterns.");
-                goto done;
+            /* Split grep-style alternation 'A|B' (or 'A\|B') into separate OR'd terms. */
+            char *segs[MAX_PATTERNS];
+            int nseg = split_alternation_web(&cmd, t, segs, MAX_PATTERNS);
+            if (nseg > 1) capture_alt_warning_web(&cmd, t, segs, nseg);
+            for (int s = 0; s < nseg; s++) {
+                if (cmd.pattern_count >= MAX_PATTERNS) {
+                    for (int r = s; r < nseg; r++) free(segs[r]);
+                    cmd.error = 1;
+                    SET_CMD_ERROR(&cmd, "Too many patterns.");
+                    goto done;
+                }
+                cmd.patterns[cmd.pattern_count++] = segs[s];
             }
-            cmd.patterns[cmd.pattern_count++] = cmd_strdup(&cmd, t);
             i++;
             continue;
         }
@@ -359,7 +452,7 @@ static WebCommand parse_command(const char *input) {
             continue;
         }
 
-        if (strcmp(t, "--limit") == 0) {
+        if (strcmp(t, "--limit") == 0 || strcmp(t, "-l") == 0) {
             if (i + 1 >= tc) {
                 cmd.error = 1;
                 SET_CMD_ERROR(&cmd, "--limit requires a number.");
@@ -385,7 +478,7 @@ static WebCommand parse_command(const char *input) {
             continue;
         }
 
-        if (strcmp(t, "--limit-per-file") == 0) {
+        if (strcmp(t, "--limit-per-file") == 0 || strcmp(t, "-lpf") == 0) {
             if (i + 1 >= tc) {
                 cmd.error = 1;
                 SET_CMD_ERROR(&cmd, "--limit-per-file requires a number.");
@@ -434,8 +527,16 @@ static WebCommand parse_command(const char *input) {
                     } else {
                         const char *mapped = map_context_web(val);
                         if (!mapped) {
-                            cmd.error = 1;
-                            SET_CMD_ERROR(&cmd, "Unknown context type.");
+                            /* Mirrors report_invalid_context() in query-index.c;
+                             * the pipeline prefixes "Error: " to this message. */
+                            char errbuf[320];
+                            snprintf(errbuf, sizeof(errbuf),
+                                "unrecognized context type '%s' for %s.\n"
+                                "Valid types: class iface func arg var exc type prop com str file "
+                                "imp exp call ns enum case trait lam label goto macro\n"
+                                "Note: Go structs index as 'class', interfaces as 'iface'.",
+                                val, is_include ? "-i" : "-x");
+                            SET_CMD_ERROR(&cmd, errbuf);
                             goto done;
                         }
                         if (is_include) {
@@ -501,6 +602,10 @@ static WebCommand parse_command(const char *input) {
         }
         if (strcmp(t, "--raw") == 0) {
             cmd.raw = 1;
+            i++; continue;
+        }
+        if (strcmp(t, "-q") == 0 || strcmp(t, "--quiet") == 0) {
+            cmd.quiet = 1;
             i++; continue;
         }
         if (strcmp(t, "-A") == 0 || strcmp(t, "--after-context") == 0) {
@@ -645,6 +750,28 @@ static void emit_file_filter_count_sql(WebOutput *wo, ContextTypeList *include,
     free_sql_builder(&b);
 }
 
+/* Emit one filter-exclusion diagnostic count query (NRD_SQL_<flag_suffix>):
+ * the main query's match count with one filter cleared by the caller, so the
+ * no-results formatter can name the culprit flag (diagnose_filter_exclusion in
+ * query-index.c).  `definition` re-applies the --def/--usage injection (-1 for
+ * none, or when the probe is clearing -d itself). */
+static void emit_nrd_count_sql(WebOutput *wo, const char *flag_suffix,
+                               PatternList *patterns,
+                               ContextTypeList *include, ContextTypeList *exclude,
+                               QueryFilters *filters, FileFilterList *file_filter,
+                               int line_range, int definition, int debug) {
+    SqlQueryBuilder b;
+    if (init_sql_builder(&b) != 0) return;
+    if (sql_append(&b, "SELECT COUNT(*) FROM code_index WHERE (") == 0 &&
+        build_query_filters_web(&b, patterns, include, exclude, filters,
+                                file_filter, NULL, line_range, debug) == 0 &&
+        (definition < 0 ||
+         sql_append(&b, " AND is_definition = %d", definition) == 0)) {
+        wo_printf(wo, "\nNRD_SQL_%s|%s", flag_suffix, b.sql);
+    }
+    free_sql_builder(&b);
+}
+
 /* Help text for the browser terminal -- mirrors native show_help_compact()
  * (query-index.c) but uses wo_printf.  Database flags (--db-file) and the
  * config-file note are omitted; they are irrelevant in the WASM context. */
@@ -692,8 +819,8 @@ static void show_help_compact_web(WebOutput *wo) {
     wo_printf(wo, "      --usage                    usages only\n");
     wo_printf(wo, "      --lines LINE|START-END     filter line/range\n");
     wo_printf(wo, "  -w, --within SYMBOL...         search inside definitions\n");
-    wo_printf(wo, "      --limit NUM                limit matches\n");
-    wo_printf(wo, "      --limit-per-file NUM       limit matches per file\n");
+    wo_printf(wo, "  -l, --limit NUM                limit matches\n");
+    wo_printf(wo, "  -lpf, --limit-per-file NUM     limit matches per file\n");
     wo_printf(wo, "\n");
 
     wo_printf(wo, "Display:\n");
@@ -723,15 +850,15 @@ static void show_help_compact_web(WebOutput *wo) {
     wo_printf(wo, "  -v, --verbose                  all columns\n");
     wo_printf(wo, "      --full                     full column names\n");
     wo_printf(wo, "      --raw                      source only; useful with -e/-A/-B\n");
+    wo_printf(wo, "  -q, --quiet                    drop banner/footer/rule chrome; keep header + rows\n");
     wo_printf(wo, "\n");
 
     wo_printf(wo, "      --debug                    show SQL\n");
     wo_printf(wo, "\n");
 
     wo_printf(wo, "Types: func class macro var arg type prop call imp com str file; use --list-types for all.\n");
-    wo_printf(wo, "Patterns: exact by default; wildcards: * any, . one char. %% and _ also work.\n");
+    wo_printf(wo, "Patterns: case-insensitive, exact by default; wildcards: %% or * any chars, _ or . one char (* needs shell quoting).\n");
     wo_printf(wo, "Escape leading flags: qi '\\--help'. Prefer prefix patterns like get* for speed.\n");
-    wo_printf(wo, "More examples: README.md, docs/C_GUIDE.md, docs/QI_VS_GREP.md\n");
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -781,6 +908,22 @@ char *qi_web_build(const char *command) {
         wo_printf(&wo, "ERROR|%s", cmd.error_msg);
         free_command(&cmd);
         { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
+    }
+
+    /* Cross-mode metadata, emitted first so every mode's build_info carries it
+     * (build_info lines are order-independent: JS and find_build_line key by
+     * name).  ALT_WARN*: the grep-style alternation teaching warning -- native
+     * prints it to stderr at parse time, so it shows in every mode and
+     * survives -q; the formatters print these lines ahead of their output. */
+    if (cmd.quiet)
+        wo_printf(&wo, "QUIET|1\n");
+    if (cmd.alt_original) {
+        wo_printf(&wo, "ALT_WARN1|qi: '%s' contains grep-style %s alternation; searching for %s instead.\n",
+                  cmd.alt_original, cmd.alt_sep, cmd.alt_alternatives);
+        wo_printf(&wo, "ALT_WARN2|    Pass symbols as separate arguments: qi %s\n",
+                  cmd.alt_alternatives);
+        if (cmd.line_range >= 0)
+            wo_printf(&wo, "ALT_WARN3|    --and [N] is used to find matches within a certain number of lines from eachother (0 by default).\n");
     }
 
     /* Help mode: signal the pipeline to call qi_web_help() -- no DB needed. */
@@ -1154,6 +1297,75 @@ char *qi_web_build(const char *command) {
                 sqlite3_free(wild);
             }
         }
+
+        /* Filter-exclusion diagnostics: one count probe per narrowing filter,
+         * each with exactly that filter cleared, so qi_web_format_no_results
+         * can name the culprit flag (diagnose_filter_exclusion in
+         * query-index.c).  The pipeline runs each NRD_SQL_<flag> only on a
+         * zero-result query and hands the counts back as NRD_CNT_<flag>.
+         * Skipped when --within is active (it redefines what a match is;
+         * native falls back to the generic message) and for --and queries
+         * (native reports "No lines contain ALL patterns together." first). */
+        if (has_filters && cmd.within_count == 0 && cmd.line_range < 0) {
+            ContextTypeList no_ctx = {0};
+            FileFilterList no_files = {0};
+            if (include.count > 0)
+                emit_nrd_count_sql(&wo, "i", &patterns, &no_ctx, &exclude, &filters,
+                                   &file_filter, cmd.line_range, cmd.definition, cmd.debug);
+            if (file_filter.count > 0) {
+                emit_nrd_count_sql(&wo, "f", &patterns, &include, &exclude, &filters,
+                                   &no_files, cmd.line_range, cmd.definition, cmd.debug);
+                /* File hint: where the matches actually live, ignoring -f
+                 * (print_file_filter_hint + get_total_file_count in native). */
+                SqlQueryBuilder hb;
+                if (init_sql_builder(&hb) == 0) {
+                    if (sql_append(&hb, "SELECT DISTINCT directory, filename FROM code_index WHERE (") == 0 &&
+                        build_query_filters_web(&hb, &patterns, &include, &exclude, &filters,
+                                                &no_files, NULL, cmd.line_range, cmd.debug) == 0 &&
+                        (cmd.definition < 0 ||
+                         sql_append(&hb, " AND is_definition = %d", cmd.definition) == 0) &&
+                        sql_append(&hb, " ORDER BY directory, filename LIMIT 3") == 0) {
+                        wo_printf(&wo, "\nNRD_FILEHINT_SQL|%s", hb.sql);
+                    }
+                    free_sql_builder(&hb);
+                }
+                if (init_sql_builder(&hb) == 0) {
+                    if (sql_append(&hb, "SELECT COUNT(*) FROM (SELECT DISTINCT directory, filename "
+                                        "FROM code_index WHERE (") == 0 &&
+                        build_query_filters_web(&hb, &patterns, &include, &exclude, &filters,
+                                                &no_files, NULL, cmd.line_range, cmd.debug) == 0 &&
+                        (cmd.definition < 0 ||
+                         sql_append(&hb, " AND is_definition = %d", cmd.definition) == 0) &&
+                        sql_append(&hb, ")") == 0) {
+                        wo_printf(&wo, "\nNRD_FILEHINT_COUNT_SQL|%s", hb.sql);
+                    }
+                    free_sql_builder(&hb);
+                }
+            }
+            if (exclude.count > 0)
+                emit_nrd_count_sql(&wo, "x", &patterns, &include, &no_ctx, &filters,
+                                   &file_filter, cmd.line_range, cmd.definition, cmd.debug);
+            /* Extensible columns: clear each populated filter in turn.  The -d
+             * probe also clears the --def/--usage SQL injection (native folds
+             * those into filters.is_definition, so clearing -d clears both). */
+#define COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) \
+            if (filters.name.count > 0) { \
+                QueryFilters no_col = filters; \
+                no_col.name.count = 0; \
+                emit_nrd_count_sql(&wo, #short_flag, &patterns, &include, &exclude, &no_col, \
+                                   &file_filter, cmd.line_range, cmd.definition, cmd.debug); \
+            }
+#define INT_COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) \
+            if (filters.name.count > 0 || cmd.definition >= 0) { \
+                QueryFilters no_col = filters; \
+                no_col.name.count = 0; \
+                emit_nrd_count_sql(&wo, #short_flag, &patterns, &include, &exclude, &no_col, \
+                                   &file_filter, cmd.line_range, -1, cmd.debug); \
+            }
+#include "shared/column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+        }
     }
 
     if (cmd.verbose)
@@ -1399,6 +1611,21 @@ static int parse_flag(const char *build_info, const char *key) {
     return val && val[0] == '1';
 }
 
+/* Print the ALT_WARN* teaching-warning lines captured at parse time (grep-style
+ * alternation).  Native emits these on stderr; the web bridge has one output
+ * stream, so they lead the output -- and print even under -q, matching stderr's
+ * survival of quiet mode. */
+static void print_alt_warning(WebOutput *wo, const char *build_info) {
+    static const char *keys[] = { "ALT_WARN1", "ALT_WARN2", "ALT_WARN3" };
+    for (size_t i = 0; i < sizeof(keys) / sizeof(keys[0]); i++) {
+        const char *val = find_build_line(build_info, keys[i]);
+        if (!val) continue;
+        const char *end = strchr(val, '\n');
+        size_t len = end ? (size_t)(end - val) : strlen(val);
+        wo_printf(wo, "%.*s\n", (int)len, val);
+    }
+}
+
 /* Parse patterns string from build_info */
 static void parse_patterns(const char *build_info, char *out, size_t out_size) {
     const char *val = find_build_line(build_info, "PATTERNS");
@@ -1599,11 +1826,16 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
                     int total, int shown,
                     const char *sources_blob, int sources_len,
                     int suppress_header) {
+    /* `shown` is part of the ccall ABI (the pipeline passes rows.length) but
+     * the formatter recomputes its own row_count after per-file limiting. */
+    (void)shown;
+
     WebOutput wo;
     if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
 
     int compact = parse_flag(build_info, "COMPACT");
     int raw = parse_flag(build_info, "RAW");
+    int quiet = parse_flag(build_info, "QUIET");
     int needs_source = parse_flag(build_info, "NEEDS_SOURCE");
     int expand = parse_flag(build_info, "EXPAND");
     int ctx_before = parse_int_value(build_info, "CONTEXT_BEFORE");
@@ -1632,11 +1864,16 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
      * by the first (zero-row) pass -- mirroring native's `goto retry_query`,
      * which re-runs the query without reprinting "Searching for:". */
     if (!raw && !suppress_header) {
+        print_alt_warning(&wo, build_info);
         /* "Searching for:" then the filter header lines, matching the native CLI
          * (no leading blank line -- dropped in the main-branch UX cleanup).  The
-         * blank before the table is emitted with the table below. */
-        wo_printf(&wo, "Searching for: %s\n", patterns_buf);
-        print_hdr_lines(&wo, build_info);
+         * blank before the table is emitted with the table below.  Quiet mode
+         * drops this banner but keeps the --debug SQL below: -q strips stdout
+         * chrome, while native --debug writes to stderr, unaffected by -q. */
+        if (!quiet) {
+            wo_printf(&wo, "Searching for: %s\n", patterns_buf);
+            print_hdr_lines(&wo, build_info);
+        }
         /* --debug: show the runnable SQL the web executes, labeled and ordered by
          * execution (scope-resolving lookups first, then the main query).  The
          * [Get total count] / [Get context summary] queries print later, next to
@@ -1649,15 +1886,17 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
     }
 
     if (!rows_tsv || !rows_tsv[0]) {
-        if (!raw && total == 0)
-            wo_printf(&wo, "No results\n");
+        /* Zero rows: print nothing here.  The pipeline follows up with
+         * qi_web_format_no_results, which prints the diagnostics first and the
+         * blunt "0 matches" verdict LAST, mirroring native's reordered
+         * no-match path. */
         source_map_free(&sources);
         { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
     }
 
     /* First pass: compute max column widths from data (table framing only) */
     if (!raw) {
-    wo_printf(&wo, "\n");   /* blank line before the table (native print_table_header) */
+    if (!quiet) wo_printf(&wo, "\n");   /* blank line before the table (native print_table_header) */
     {
         char *scan_copy = strdup(rows_tsv);
         if (scan_copy) {
@@ -1691,16 +1930,19 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
     }
     wo_printf(&wo, "\n");
 
-    /* Separator row */
-    for (int ci = 0; ci < num_cols; ci++) {
-        if (ci > 0) wo_printf(&wo, "-+-");
-        for (int w = 0; w < active[ci].max_width; w++) wo_printf(&wo, "-");
+    /* Separator row (decoration; suppressed in quiet mode) */
+    if (!quiet) {
+        for (int ci = 0; ci < num_cols; ci++) {
+            if (ci > 0) wo_printf(&wo, "-+-");
+            for (int w = 0; w < active[ci].max_width; w++) wo_printf(&wo, "-");
+        }
+        wo_printf(&wo, "\n");
     }
-    wo_printf(&wo, "\n");
     }  /* end if (!raw) table framing */
 
     /* Second pass: output rows with file grouping, then any source block */
     int row_count = 0;  /* rows actually displayed (after per-file filtering) */
+    int n_skipped_expand = 0;  /* Non-definition rows skipped by -e */
     {
         char *rows_copy = strdup(rows_tsv);
         if (!rows_copy) {
@@ -1786,6 +2028,8 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
                 print_expansion_or_context_web(&wo, content, filepath,
                     line_no, srcloc, is_def, expand, ctx_before, ctx_after,
                     hl_patterns, hl_count, raw);
+
+                if (expand && is_def != 1) n_skipped_expand++;
             }
 
             row_count++;
@@ -1796,25 +2040,50 @@ char *qi_web_format(const char *build_info, const char *rows_tsv,
         free(rows_copy);
     }
 
+    /* Warn when -e skipped non-expandable rows (usages, not definitions).
+     * In raw mode these rows produce no output at all, which looks like a bug.
+     * Native emits this on stderr; the web bridge has one stream, so it lands
+     * between the rows and the footer. */
+    if (n_skipped_expand > 0) {
+        if (n_skipped_expand == row_count) {
+            wo_printf(&wo, "No expandable definitions found: all %d result%s %s not a definition. "
+                    "Try -i func/class to narrow, or remove -e.\n",
+                    n_skipped_expand, n_skipped_expand == 1 ? "" : "s",
+                    n_skipped_expand == 1 ? "is" : "are");
+        } else {
+            wo_printf(&wo, "%d result%s not expanded (not a definition). "
+                    "Try -i func/class to narrow.\n",
+                    n_skipped_expand, n_skipped_expand == 1 ? "" : "s");
+        }
+    }
+
     if (!raw) {
         /* The total-count query, printed right above the total it produced. */
         if (parse_flag(build_info, "DEBUG"))
             print_debug_sql(&wo, build_info, "[Get total count]", "DEBUG_COUNT_SQL");
-        char match_word[16];
-        if (total == 1) snprintf(match_word, sizeof(match_word), "match");
-        else pluralize_common_word("match", match_word, sizeof(match_word));
-        wo_printf(&wo, "\nFound %d %s", total, match_word);
-        if (total > row_count) {
-            wo_printf(&wo, " (showing first %d)", row_count);
+        if (quiet) {
+            /* Quiet mode: emit nothing except a terse notice when a limit
+             * clipped results, so the user still knows the output was
+             * truncated (mirrors native print_summary_stats). */
+            if (total > row_count)
+                wo_printf(&wo, "... %d matches, showing %d\n", total, row_count);
+        } else {
+            char match_word[16];
+            if (total == 1) snprintf(match_word, sizeof(match_word), "match");
+            else pluralize_common_word("match", match_word, sizeof(match_word));
+            wo_printf(&wo, "\nFound %d %s", total, match_word);
+            if (total > row_count) {
+                wo_printf(&wo, " (showing first %d)", row_count);
+            }
+            wo_printf(&wo, "\n");
         }
-        wo_printf(&wo, "\n");
     }
 
     source_map_free(&sources);
     { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
 }
 
-/* Formats the "Result breakdown: COM (N), VAR (N), ..." + Tip line.
+/* Formats the "Results CTX Totals: COM (N), VAR (N), ..." + Tip line.
  * context_tsv: newline-separated rows of "context_name\tcount".
  * Called separately (mirroring the CLI's get_context_summary()) only when
  * results are truncated; caller decides whether to invoke it.
@@ -1827,7 +2096,7 @@ char *qi_web_format_breakdown(const char *context_tsv, const char *debug_sql) {
 
     if (debug_sql && debug_sql[0])
         wo_printf(&wo, "SQL: [Get context summary] %s\n", debug_sql);
-    wo_printf(&wo, "Result breakdown: ");
+    wo_printf(&wo, "Results CTX Totals: ");
     int first = 1;
     const char *p = context_tsv ? context_tsv : "";
     while (*p) {
@@ -1860,9 +2129,139 @@ char *qi_web_format_breakdown(const char *context_tsv, const char *debug_sql) {
 
         p = nl ? nl + 1 : p + row_len;
     }
-    wo_printf(&wo, "\nTip: Use -i <context> to narrow results\n");
+    wo_printf(&wo, "\nTip: Use -i CTX to narrow results\n");
 
     { char *r = wo_steal(&wo); return r ? r : strdup("Error: out of memory."); }
+}
+
+/* Print the actual file paths where matches live (ignoring the -f filter),
+ * from the NRD_FILEHINT_* lines the pipeline ran.  Web port of
+ * print_file_filter_hint() in query-index.c. */
+static void print_file_filter_hint_web(WebOutput *body, const char *build_info) {
+    int total_files = parse_int_value(build_info, "NRD_FILEHINT_TOTAL");
+    if (total_files <= 0) return;
+    const char *rows = find_build_line(build_info, "NRD_FILEHINT_ROWS");
+    if (!rows) return;
+
+    const char *line_end = strchr(rows, '\n');
+    const char *end = line_end ? line_end : rows + strlen(rows);
+    int shown = 0;
+    const char *p = rows;
+    while (p < end) {
+        const char *tab = memchr(p, '\t', (size_t)(end - p));
+        size_t len = tab ? (size_t)(tab - p) : (size_t)(end - p);
+        if (len > 0) {
+            if (shown == 0) { wo_printf(body, "  Match found at: "); }
+            else            { wo_printf(body, "                  "); }
+            wo_printf(body, "%.*s\n", (int)len, p);
+            shown++;
+        }
+        p = tab ? tab + 1 : end;
+    }
+
+    if (total_files > shown && shown > 0) {
+        wo_printf(body, "                  ... plus %d other %s\n",
+                  total_files - shown, total_files - shown == 1 ? "file" : "files");
+    }
+}
+
+/* When every match was excluded by filters, name WHICH filter is responsible
+ * so the user drops the right one instead of all of them.  Web port of
+ * diagnose_filter_exclusion() in query-index.c: the per-filter recovery counts
+ * were computed by the pipeline from the NRD_SQL_<flag> probes emitted by
+ * qi_web_build and handed back as NRD_CNT_<flag> lines in build_info (absent
+ * lines read as 0, so a missing probe can never become a culprit).
+ * `pattern_total` is the single pattern's filter-free match count (the exact
+ * count from counts_tsv, native's count_pattern_matches). */
+static void diagnose_filter_exclusion_web(WebOutput *body, const char *build_info,
+                                          char *const pat[], int pat_count,
+                                          long pattern_total) {
+    typedef struct { char flag[8]; int count; } CulpritEntry;
+    CulpritEntry culprits[16];
+    int n_culprits = 0;
+
+    /* Per-flag culprit candidates: -i, -f, then the extensible columns.  -x is
+     * special (clearing it would re-add what the user deliberately removed). */
+    static const char *suffixes[] = { "i", "f",
+#define COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) #short_flag,
+#define INT_COLUMN(name, sql_type, c_type, width, full, compact, long_flag, short_flag, ...) #short_flag,
+#include "shared/column_schema.def"
+#undef COLUMN
+#undef INT_COLUMN
+    };
+    int n_no_file = 0;
+    for (size_t s = 0; s < sizeof(suffixes) / sizeof(suffixes[0]); s++) {
+        char key[24];
+        snprintf(key, sizeof(key), "NRD_CNT_%s", suffixes[s]);
+        int n = parse_int_value(build_info, key);
+        if (n > 0 && n_culprits < (int)(sizeof(culprits) / sizeof(culprits[0]))) {
+            snprintf(culprits[n_culprits].flag, sizeof(culprits[n_culprits].flag),
+                     "-%s", suffixes[s]);
+            culprits[n_culprits].count = n;
+            n_culprits++;
+        }
+        if (strcmp(suffixes[s], "f") == 0) n_no_file = n;
+    }
+    int n_no_exclude = parse_int_value(build_info, "NRD_CNT_x");
+
+    /* Sort by count descending so the most impactful culprit comes first. */
+    for (int i = 0; i < n_culprits - 1; i++)
+        for (int j = i + 1; j < n_culprits; j++)
+            if (culprits[j].count > culprits[i].count) {
+                CulpritEntry tmp = culprits[i]; culprits[i] = culprits[j]; culprits[j] = tmp;
+            }
+
+    int single = (pat_count == 1);
+
+    if (n_culprits == 1) {
+        /* Single culprit: keep the existing terse style. */
+        if (single)
+            wo_printf(body, "'%s': %d %s excluded by %s. Re-run without %s to see them.\n",
+                   pat[0], culprits[0].count, culprits[0].count == 1 ? "match" : "matches",
+                   culprits[0].flag, culprits[0].flag);
+        else
+            wo_printf(body, "Matches exist but were excluded by %s. Re-run without %s to see them.\n",
+                   culprits[0].flag, culprits[0].flag);
+        if (n_no_file > 0)
+            print_file_filter_hint_web(body, build_info);
+    } else if (n_culprits > 1) {
+        /* Multiple culprits: total count, then each flag's independent recovery count. */
+        if (single) {
+            wo_printf(body, "'%s': %ld %s excluded by filters",
+                   pat[0], pattern_total, pattern_total == 1 ? "match" : "matches");
+        } else {
+            wo_printf(body, "Matches excluded by multiple filters");
+        }
+        for (int i = 0; i < n_culprits; i++)
+            wo_printf(body, "; remove %s to show %d %s",
+                   culprits[i].flag, culprits[i].count,
+                   culprits[i].count == 1 ? "match" : "matches");
+        wo_printf(body, ".\n");
+        if (n_no_file > 0)
+            print_file_filter_hint_web(body, build_info);
+    } else if (n_no_exclude > 0) {
+        /* Only clearing -x recovers matches. */
+        if (single) {
+            wo_printf(body, "'%s': %d %s excluded by -x. Remove -x to see them.\n",
+                   pat[0], n_no_exclude, n_no_exclude == 1 ? "match" : "matches");
+        } else {
+            wo_printf(body, "%d result%s excluded by -x. Remove -x to see them.\n",
+                   n_no_exclude, n_no_exclude == 1 ? "" : "s");
+        }
+    } else {
+        /* No single filter explains it -- a combination did. Suggest unfiltered. */
+        if (single) {
+            wo_printf(body, "'%s' has %ld matches, all excluded by filters.\n",
+                   pat[0], pattern_total);
+        } else {
+            wo_printf(body, "All patterns exist, but all matches were excluded by filters.\n");
+        }
+        wo_printf(body, "Re-run without filters to see them:\n  qi");
+        for (int i = 0; i < pat_count; i++) {
+            wo_printf(body, " %s", pat[i]);
+        }
+        wo_printf(body, "\n");
+    }
 }
 
 /* Formats the zero-results diagnostics, mirroring query-index.c's no-match path.
@@ -1871,8 +2270,9 @@ char *qi_web_format_breakdown(const char *context_tsv, const char *debug_sql) {
  *   counts_tsv   one "exact\twild" line per pattern, in NR_PATTERNS order; wild
  *                is -1 when the pattern carries a '%' (no partial-match probe).
  * Output: first line "RETRY|<idx>" -- the pattern index the pipeline should
- *   re-run wildcarded (NR_RETRY_SQL), or -1 for none -- followed by the text to
- *   print after "No results".  The host-only "Note: keyword/stopword/too short"
+ *   re-run wildcarded (NR_RETRY_SQL), or -1 for none -- followed by the
+ *   diagnostics text, ending with the "0 matches" verdict (printed last so the
+ *   actionable line leads, mirroring native's reordered no-match path).  The host-only "Note: keyword/stopword/too short"
  *   diagnostics are intentionally omitted (they need the language word lists,
  *   absent in the WASM build); such patterns are treated as valid here. */
 EMSCRIPTEN_KEEPALIVE
@@ -1905,6 +2305,7 @@ char *qi_web_format_no_results(const char *build_info, const char *counts_tsv) {
 
     int retry_idx = -1;
     int all_matched = 1;
+    long exact0 = 0;  /* first pattern's filter-free count (count_pattern_matches) */
 
     const char *cp = counts_tsv ? counts_tsv : "";
     for (int i = 0; i < pat_count; i++) {
@@ -1917,6 +2318,7 @@ char *qi_web_format_no_results(const char *build_info, const char *counts_tsv) {
             const char *nl = strchr(cp, '\n');
             cp = nl ? nl + 1 : cp + strlen(cp);
         }
+        if (i == 0) exact0 = exact;
 
         if (exact == 0) {
             all_matched = 0;
@@ -1928,7 +2330,7 @@ char *qi_web_format_no_results(const char *build_info, const char *counts_tsv) {
                     retry_idx = i;
                     break;     /* native goto retry_query: stop here, re-run */
                 } else {
-                    wo_printf(&body, "No partial matches found for '*%s*' either.", pat[i]);
+                    wo_printf(&body, "No partial matches found for '*%s*'.", pat[i]);
                 }
             }
             wo_printf(&body, "\n");
@@ -1937,15 +2339,24 @@ char *qi_web_format_no_results(const char *build_info, const char *counts_tsv) {
         }
     }
 
+    int show_verdict = 1;  /* cleared when a branch already reports the count */
     if (retry_idx < 0 && all_matched && pat_count > 0) {
         if (has_line_range) {
             wo_printf(&body, "No lines contain ALL patterns together.\n");
         } else if (has_filters) {
-            wo_printf(&body, "All matches were excluded by filters.\n");
-            wo_printf(&body, "Try without filters to see if symbols exist:\n  qi");
-            for (int i = 0; i < pat_count; i++) wo_printf(&body, " %s", pat[i]);
-            wo_printf(&body, "\n");
+            /* Name the responsible filter so the user drops the right one,
+             * instead of the blunt "0 matches" that sends them to grep. */
+            diagnose_filter_exclusion_web(&body, build_info, pat, pat_count, exact0);
+            show_verdict = 0;  /* the diagnostic already reports the count */
         }
+    }
+
+    /* The blunt verdict, last -- after the diagnostics that explain it.
+     * Skipped when the filtered-miss branch already reported the count, and on
+     * a partial-match retry (native's goto retry_query skips it; the pipeline
+     * appends the retry's own results instead). */
+    if (retry_idx < 0 && show_verdict) {
+        wo_printf(&body, "0 matches\n");
     }
 
     wo_printf(&wo, "RETRY|%d\n", retry_idx);
@@ -1964,12 +2375,16 @@ char *qi_web_format_files(const char *build_info, const char *rows_tsv,
     WebOutput wo;
     if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
 
+    print_alt_warning(&wo, build_info);
     /* Header: "Searching for:" + filter lines, matching native (main() prints
-     * the same header before print_files_only -- no leading blank line). */
-    char patterns_buf[4096] = "";
-    parse_patterns(build_info, patterns_buf, sizeof(patterns_buf));
-    wo_printf(&wo, "Searching for: %s\n", patterns_buf);
-    print_hdr_lines(&wo, build_info);
+     * the same header before print_files_only -- no leading blank line, and
+     * suppressed by -q; the file list and footer are not chrome). */
+    if (!parse_flag(build_info, "QUIET")) {
+        char patterns_buf[4096] = "";
+        parse_patterns(build_info, patterns_buf, sizeof(patterns_buf));
+        wo_printf(&wo, "Searching for: %s\n", patterns_buf);
+        print_hdr_lines(&wo, build_info);
+    }
 
     const char *p = rows_tsv ? rows_tsv : "";
     while (*p) {
@@ -2012,6 +2427,17 @@ EMSCRIPTEN_KEEPALIVE
 char *qi_web_toc_format(const char *build_info, const char *rows_tsv,
                         int total_shown, int total_available,
                         const char *context_counts) {
-    return format_toc_web(build_info, rows_tsv, total_shown,
-                          total_available, context_counts);
+    char *toc = format_toc_web(build_info, rows_tsv, total_shown,
+                               total_available, context_counts);
+    /* Native's alternation warning goes to stderr, so it shows even in TOC
+     * mode (which -q otherwise leaves untouched); prepend it here. */
+    if (!find_build_line(build_info, "ALT_WARN1")) return toc;
+    WebOutput wo;
+    if (wo_init(&wo) != 0) return toc;
+    print_alt_warning(&wo, build_info);
+    if (toc) {
+        wo_printf(&wo, "%s", toc);
+        free(toc);
+    }
+    { char *r = wo_steal(&wo); return r ? r : strdup("Error: out of memory."); }
 }

@@ -34,7 +34,6 @@ tools/*
 benchmark/*
 !benchmark/*.*
 tmp/*
-!tmp/*.*
 */grammar_version.h
 token-science
 tmp/cachegrind*
@@ -58,3 +57,9 @@ wasm/sqlite3.h
 html/sources/*
 !html/sources/README.md
 !html/sources/browser-snapshot.sh
+
+.idea
+.theia
+node_modules
+
+memory

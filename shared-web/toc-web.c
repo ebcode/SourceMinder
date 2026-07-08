@@ -605,7 +605,7 @@ char *format_toc_web(const char *build_info, const char *rows_tsv,
 
     /* Phase 2: print summary */
     if (context_counts && context_counts[0]) {
-        wo_printf(&wo, "Result breakdown: ");
+        wo_printf(&wo, "Results CTX Totals: ");
         /* Parse "TYPE:COUNT\nTYPE:COUNT\n..." */
         char *cc_copy = strdup(context_counts);
         if (cc_copy) {

@@ -106,6 +106,14 @@ void print_lines_range_web(WebOutput *wo, const char *content, const char *filep
             if (raw) {
                 /* Raw mode: full lines, no prefix or column trimming */
                 wo_write(wo, line, len);
+            } else if (start_column < 0) {
+                /* Whole-line mode (start_column sentinel < 0): print full lines
+                 * with line numbers and no column trimming. Used when -e expands
+                 * a definition (preserving leading indentation), possibly merged
+                 * with surrounding -C/-A/-B context.  Mirrors native
+                 * print_lines_range(). */
+                wo_printf(wo, "%d:", current_line);
+                wo_write(wo, line, len);
             } else if (current_line == start_line && current_line == end_line) {
                 /* Single line: respect both start and end columns */
                 emit_trimmed(wo, current_line, line, len, start_column, end_column);
@@ -217,15 +225,39 @@ void print_expansion_or_context_web(WebOutput *wo, const char *content, const ch
                                     int line, const char *source_location, int is_definition,
                                     int expand, int context_before, int context_after,
                                     char **patterns, int pattern_count, int raw) {
-    if (expand && is_definition == 1 &&
-        source_location && source_location[0] != '\0') {
+    if (expand && is_definition == 1) {
+        /* Expand the definition. Two kinds of row share is_definition=1:
+         *   - Body-bearing definitions (functions, structs, enums, impls, ...)
+         *     carry a full source span and expand to their whole body.
+         *   - Body-less definition sites (let/$x bindings, struct fields, enum
+         *     variants, parameters, imports) are legitimate definitions too --
+         *     `$x = 1;` is where $x is defined -- but the indexer records no
+         *     span for them yet, so fall back to showing the single defining
+         *     line at this row's location.
+         * Either way -e shows the actual source text. A missing span is an
+         * expected, permanent property of these rows, never evidence of a stale
+         * index, so we do not warn or guess about freshness. */
         int start_line, start_column, end_line, end_column;
-        if (parse_source_location_web(source_location, &start_line, &start_column,
-                                      &end_line, &end_column) == 0) {
-            print_lines_range_web(wo, content, filepath,
-                                  start_line, end_line, start_column, end_column, raw);
-            if (!raw) wo_printf(wo, "--\n");  /* Closing separator after definition */
+        int have_span = source_location && source_location[0] != '\0' &&
+            parse_source_location_web(source_location, &start_line, &start_column,
+                                      &end_line, &end_column) == 0;
+        if (!have_span) {
+            start_line = end_line = line;  /* fall back to the defining line */
         }
+        /* Always whole-line mode (-1 columns): print the complete lines the
+         * definition spans, preserving leading indentation. Column-precise
+         * trimming would slice the indentation off the first line, leaving it
+         * misaligned against the rest of the body. */
+        if (context_before > 0 || context_after > 0) {
+            int ctx_start = start_line - context_before;
+            if (ctx_start < 1) ctx_start = 1;
+            print_lines_range_web(wo, content, filepath,
+                                  ctx_start, end_line + context_after, -1, -1, raw);
+        } else {
+            print_lines_range_web(wo, content, filepath,
+                                  start_line, end_line, -1, -1, raw);
+        }
+        if (!raw) wo_printf(wo, "--\n");  /* Closing separator after definition */
     } else if (context_before > 0 || context_after > 0) {
         print_context_lines_web(wo, content, filepath, line, patterns, pattern_count,
                                 context_before, context_after, raw);

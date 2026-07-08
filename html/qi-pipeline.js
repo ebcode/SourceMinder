@@ -412,8 +412,11 @@ export async function runQuery(ctx, input, opts) {
     /* 6. Append breakdown when results are truncated (mirrors CLI
      * get_context_summary).  --raw suppresses all non-source output, so skip it
      * entirely -- native gates the equivalent print_summary_stats behind
-     * `if (!raw)`; the breakdown export also carries the trailing Tip line. */
-    if (total > rows.length && buildLines.BREAKDOWN_SQL && buildLines.RAW !== '1') {
+     * `if (!raw)`; the breakdown export also carries the trailing Tip line.
+     * -q drops the breakdown too (footer chrome): native quiet returns from
+     * print_summary_stats before the breakdown prints. */
+    if (total > rows.length && buildLines.BREAKDOWN_SQL && buildLines.RAW !== '1' &&
+        buildLines.QUIET !== '1') {
         try {
             /* Same --within scoping as COUNT_SQL: BREAKDOWN_SQL was precomputed
              * before WITHIN post-processing; inject ahead of its GROUP BY. */
@@ -441,6 +444,34 @@ export async function runQuery(ctx, input, opts) {
             try { if (exactSql) exactCount = expectSingleValue(db, exactSql); } catch (e) { exactCount = 0; }
             try { if (wildSql !== undefined) wildCount = expectSingleValue(db, wildSql); } catch (e) { wildCount = -1; }
             countLines.push(exactCount + '\t' + wildCount);
+        }
+
+        /* Filter-exclusion diagnostics: run each NRD_SQL_<flag> probe (the
+         * query with that one filter cleared) and hand the counts back as
+         * NRD_CNT_<flag>, so the C side can name the culprit filter.  The
+         * file hint additionally reports WHERE the matches live when -f was
+         * the culprit (paths joined with tabs; native prints dir+file
+         * concatenated, so no separator is inserted). */
+        for (var nk in buildLines) {
+            if (nk.indexOf('NRD_SQL_') === 0) {
+                var nrdCount = 0;
+                try { nrdCount = expectSingleValue(db, buildLines[nk]); } catch (e) { nrdCount = 0; }
+                buildResult += '\nNRD_CNT_' + nk.slice('NRD_SQL_'.length) + '|' + nrdCount;
+            }
+        }
+        if (buildLines.NRD_FILEHINT_COUNT_SQL) {
+            var fhTotal = 0;
+            try { fhTotal = expectSingleValue(db, buildLines.NRD_FILEHINT_COUNT_SQL); } catch (e) { fhTotal = 0; }
+            buildResult += '\nNRD_FILEHINT_TOTAL|' + fhTotal;
+            if (fhTotal > 0 && buildLines.NRD_FILEHINT_SQL) {
+                try {
+                    var fhRows = db.selectArrays(buildLines.NRD_FILEHINT_SQL);
+                    var fhPaths = fhRows.map(function(r) {
+                        return String(r[0] != null ? r[0] : '') + String(r[1] != null ? r[1] : '');
+                    });
+                    buildResult += '\nNRD_FILEHINT_ROWS|' + fhPaths.join('\t');
+                } catch (e) { /* hint is cosmetic; the count line alone is ignored */ }
+            }
         }
 
         var nrOut = qiModule.ccall('qi_web_format_no_results', 'string',
