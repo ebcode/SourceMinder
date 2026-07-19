@@ -16,12 +16,21 @@
  *     { type: 'error',    message: '...' }    -- error from init/load/query
  */
 
-import sqlite3InitModule from './node_modules/@sqlite.org/sqlite-wasm/dist/index.mjs';
+/* ASSET_BASE: origin for all heavy static assets (DBs, wasm glue+binary, the
+ * source trees, and the sqlite-wasm vendor module).  Local dev serves them from
+ * the app docroot (./assets/); production serves them from the CDN.
+ * Mirrors the resolver in index.html's bootstrap.  self.location is the worker's
+ * URL (same origin as the page), so hostname distinguishes the two.  The sqlite
+ * vendor module is imported dynamically below (its path is base-dependent), so
+ * there is no longer a static top-level import of it. */
+var ASSET_BASE = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(self.location.hostname)
+    ? './assets/' : 'https://cdn.sourceminder.org/';
 
 /* qi-web.js (+ its .wasm) and qi-pipeline.js are loaded dynamically in init()
  * for cache-busting: the WASM glue/binary are resolved through the build's
- * content-hashed asset-manifest.json, and the pipeline is busted with the same
- * ?t token this worker was loaded under.  Bound here, assigned in init(). */
+ * content-hashed asset-manifest.json (names) against ASSET_BASE, and the
+ * pipeline is busted with the same ?t token this worker was loaded under (it
+ * stays same-origin).  Bound here, assigned in init(). */
 var runQuery = null;
 var expectSingleValue = null;
 
@@ -169,7 +178,7 @@ async function getDbBytes(project) {
         }
     }
 
-    var resp = await fetch(project.dbUrl);
+    var resp = await fetch(ASSET_BASE + project.dbUrl);
     if (!resp.ok) throw new Error('Failed to fetch DB: ' + resp.status + ' ' + resp.statusText);
 
     var total = parseInt(resp.headers.get('Content-Length') || '', 10) || project.sizeBytes || 0;
@@ -232,7 +241,7 @@ async function loadProject(project) {
      * catch handler's point of view. */
     if (activeDb) { try { activeDb.close(); } catch (e) { /* ignore */ } }
     activeDb = newDb;
-    SourceCache.setBase(project.sourceBase);
+    SourceCache.setBase(ASSET_BASE + project.sourceBase);
 
     ready = true;
     self.postMessage({
@@ -253,8 +262,10 @@ async function init() {
     expectSingleValue = pipeline.expectSingleValue;
 
     self.postMessage({ type: 'status', message: 'Initializing qi WASM module...' });
-    /* WASM glue + binary: resolve content-hashed names from the build manifest,
-     * falling back to the plain names when no manifest is present. */
+    /* WASM glue + binary: resolve content-hashed names from the build manifest
+     * (fetched same-origin from the app root), falling back to the plain names
+     * when no manifest is present.  The names themselves live under ASSET_BASE
+     * (the CDN in prod), so resolve them there -- not against the worker URL. */
     var assets = null;
     try {
         var manifestResp = await fetch('./asset-manifest.json', { cache: 'no-store' });
@@ -262,8 +273,8 @@ async function init() {
     } catch (e) { /* fall back to plain names below */ }
     var qiJsName   = assets ? assets.qiWebJs   : 'qi-web.js';
     var qiWasmName = assets ? assets.qiWebWasm : 'qi-web.wasm';
-    var qiJsUrl   = new URL('./' + qiJsName,   self.location.href).href;
-    var qiWasmUrl = new URL('./' + qiWasmName, self.location.href).href;
+    var qiJsUrl   = new URL(ASSET_BASE + qiJsName,   self.location.href).href;
+    var qiWasmUrl = new URL(ASSET_BASE + qiWasmName, self.location.href).href;
 
     var QiWebModule = (await import(qiJsUrl)).default;
     qiModule = await QiWebModule({
@@ -273,6 +284,12 @@ async function init() {
     });
 
     self.postMessage({ type: 'status', message: 'Initializing SQLite WASM runtime...' });
+    /* sqlite-wasm vendor module lives under ASSET_BASE (CDN in prod); import it
+     * dynamically since the path is base-dependent.  Its internal locate of
+     * sqlite3.wasm resolves relative to index.mjs, so the .wasm is fetched from
+     * the same origin (CDN) -- both covered by the assets-origin CORS rule. */
+    var sqlite3InitModule = (await import(
+        new URL(ASSET_BASE + 'vendor/sqlite-wasm/index.mjs', self.location.href).href)).default;
     sqlite3 = await sqlite3InitModule({ print: function() {}, printErr: function() {} });
     console.log('[worker] sqlite3 loaded, version', sqlite3.version.libVersion);
 

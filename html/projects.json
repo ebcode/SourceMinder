@@ -4,8 +4,8 @@
     "name": "SourceMinder",
     "version": "1",
     "language": "c",
-    "dbUrl": "./code-index-sourceminder.browser.db",
-    "sourceBase": "./sources/sourceminder/",
+    "dbUrl": "code-index-sourceminder.browser.db",
+    "sourceBase": "sources/sourceminder/",
     "sizeBytes": 16388096
   },
   {
@@ -13,8 +13,8 @@
     "name": "negroni",
     "version": "3.1.1",
     "language": "go",
-    "dbUrl": "./code-index-negroni.browser.db",
-    "sourceBase": "./sources/negroni/",
+    "dbUrl": "code-index-negroni.browser.db",
+    "sourceBase": "sources/negroni/",
     "sizeBytes": 716800
   },
   {
@@ -22,8 +22,8 @@
     "name": "logrus",
     "version": "1",
     "language": "go",
-    "dbUrl": "./code-index-logrus.browser.db",
-    "sourceBase": "./sources/logrus/",
+    "dbUrl": "code-index-logrus.browser.db",
+    "sourceBase": "sources/logrus/",
     "sizeBytes": 2752512
   },
   {
@@ -31,8 +31,8 @@
     "name": "htop",
     "version": "3.5.1",
     "language": "c",
-    "dbUrl": "./code-index-htop.browser.db",
-    "sourceBase": "./sources/htop/",
+    "dbUrl": "code-index-htop.browser.db",
+    "sourceBase": "sources/htop/",
     "sizeBytes": 14938112
   },
   {
@@ -40,8 +40,8 @@
     "name": "phpdotenv",
     "version": "5.6.3",
     "language": "php",
-    "dbUrl": "./code-index-phpdotenv.browser.db",
-    "sourceBase": "./sources/phpdotenv/",
+    "dbUrl": "code-index-phpdotenv.browser.db",
+    "sourceBase": "sources/phpdotenv/",
     "sizeBytes": 1462272
   },
   {
@@ -49,8 +49,8 @@
     "name": "Slim",
     "version": "1",
     "language": "php",
-    "dbUrl": "./code-index-Slim.browser.db",
-    "sourceBase": "./sources/Slim/",
+    "dbUrl": "code-index-Slim.browser.db",
+    "sourceBase": "sources/Slim/",
     "sizeBytes": 4386816
   },
   {
@@ -58,8 +58,8 @@
     "name": "Flask",
     "version": "1",
     "language": "python",
-    "dbUrl": "./code-index-flask.browser.db",
-    "sourceBase": "./sources/flask/",
+    "dbUrl": "code-index-flask.browser.db",
+    "sourceBase": "sources/flask/",
     "sizeBytes": 7557120
   }
 ]

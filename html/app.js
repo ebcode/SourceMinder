@@ -8,6 +8,14 @@
 
 import { createStateMachine } from './statemachine.js';
 
+/* ASSET_BASE: origin for heavy static assets (DBs, wasm, sources, vendor).
+ * Set by index.html's head bootstrap; the ` || ` recomputes the same value as a
+ * fallback if app.js is ever loaded without that bootstrap.  Kept identical to
+ * the resolver in qi-worker.js and the HTML. */
+var ASSET_BASE = self.__ASSET_BASE__ ||
+    (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)
+        ? './assets/' : 'https://cdn.sourceminder.org/');
+
 var statusEl = document.getElementById("status");
 var summaryEl = document.getElementById("summary");
 var terminalContainerEl = document.getElementById("terminal-container");
@@ -195,7 +203,7 @@ function updateDownloadLink() {
     var filename = p.dbUrl.split("/").pop();
     var label = "Download " + filename +
         (p.sizeBytes ? " (" + formatBytes(p.sizeBytes) + ")" : "");
-    projectDownloadEl.href = p.dbUrl;
+    projectDownloadEl.href = ASSET_BASE + p.dbUrl;
     projectDownloadEl.download = filename;
     projectDownloadEl.title = label;
     projectDownloadEl.textContent = filename;

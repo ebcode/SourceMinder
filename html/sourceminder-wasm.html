@@ -4,8 +4,22 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>SourceMinder Design System — Token Spec</title>
-<link rel="stylesheet" href="colors_and_type-sm.css" />
-<link rel="stylesheet" href="./node_modules/xterm/css/xterm.css">
+<!-- ASSET_BASE bootstrap (mirrors index.html / qi-worker.js): resolve the
+     assets origin, then inject the stylesheets from there as early as possible
+     to minimize FOUC.  self.__ASSET_BASE__ is reused by the body-end script. -->
+<script>
+  (function () {
+    var B = self.__ASSET_BASE__ =
+      /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)
+        ? './assets/' : 'https://cdn.sourceminder.org/';
+    ['colors_and_type-sm.css', 'vendor/xterm/xterm.css'].forEach(function (href) {
+      var l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = B + href;
+      document.head.appendChild(l);
+    });
+  })();
+</script>
 <style>
 .site-title {
     font-family: "RecursiveMono";
@@ -170,13 +184,31 @@ article {
   </div>
 </div>
 
-  <script src="./node_modules/xterm/lib/xterm.js"></script>
-  <script src="./node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
-  <!-- Cache-bust app.js (and, transitively, the worker it spawns) on every
-       load.  A static `src` can't carry a query string without rewriting this
-       file each build, so bootstrap with a dynamic import instead. -->
-  <script type="module">
-    import('./app.js?t=' + Date.now());
+  <!-- Load the vendor UMD bundles (Terminal, FitAddon) from the assets origin
+       in order, then cache-bust app.js.  self.__ASSET_BASE__ was set by the
+       head bootstrap.  async=false makes dynamically-inserted scripts run in
+       insertion order so the globals exist before app.js imports. -->
+  <script>
+    (function () {
+      var B = self.__ASSET_BASE__;
+      function loadScript(src) {
+        return new Promise(function (resolve, reject) {
+          var s = document.createElement('script');
+          s.src = src;
+          s.async = false;
+          s.onload = resolve;
+          s.onerror = function () { reject(new Error('Failed to load ' + src)); };
+          document.body.appendChild(s);
+        });
+      }
+      loadScript(B + 'vendor/xterm/xterm.js')
+        .then(function () { return loadScript(B + 'vendor/addon-fit/addon-fit.js'); })
+        .then(function () { return import('./app.js?t=' + Date.now()); })
+        .catch(function (e) {
+          var el = document.getElementById('error');
+          if (el) { el.hidden = false; el.textContent = 'Failed to load assets: ' + e.message; }
+        });
+    })();
   </script>
 </body>
 </html> 

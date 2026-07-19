@@ -112,7 +112,8 @@
     }
     #project-download:hover { color: #b3ccff; }
   </style>
-  <link rel="stylesheet" href="./node_modules/xterm/css/xterm.css">
+  <!-- xterm stylesheet + vendor scripts are injected by the ASSET_BASE
+       bootstrap at end of <body> (they live on the assets origin / CDN). -->
 </head>
 <body>
   <main>
@@ -133,13 +134,45 @@
     </section>
   </main>
 
-  <script src="./node_modules/xterm/lib/xterm.js"></script>
-  <script src="./node_modules/@xterm/addon-fit/lib/addon-fit.js"></script>
-  <!-- Cache-bust app.js (and, transitively, the worker it spawns) on every
-       load.  A static `src` can't carry a query string without rewriting this
-       file each build, so bootstrap with a dynamic import instead. -->
-  <script type="module">
-    import('./app.js?t=' + Date.now());
+  <!-- ASSET_BASE bootstrap: resolve the assets origin (local dev -> ./assets/,
+       prod -> CDN), inject the xterm stylesheet + vendor scripts from there,
+       then cache-bust app.js (and, transitively, the worker it spawns).  The
+       vendor UMD bundles set globals (Terminal, FitAddon) app.js needs, so they
+       must finish loading -- in order -- before app.js imports.  A static `src`
+       can't carry a query string or the base without rewriting this file per
+       build/env, so everything is injected dynamically. -->
+  <script>
+    (function () {
+      var B = self.__ASSET_BASE__ =
+        /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)
+          ? './assets/' : 'https://cdn.sourceminder.org/';
+
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = B + 'vendor/xterm/xterm.css';
+      document.head.appendChild(link);
+
+      /* Dynamically-inserted scripts default to async; async=false makes them
+         execute in insertion order.  Chain so app.js boots only after both. */
+      function loadScript(src) {
+        return new Promise(function (resolve, reject) {
+          var s = document.createElement('script');
+          s.src = src;
+          s.async = false;
+          s.onload = resolve;
+          s.onerror = function () { reject(new Error('Failed to load ' + src)); };
+          document.body.appendChild(s);
+        });
+      }
+
+      loadScript(B + 'vendor/xterm/xterm.js')
+        .then(function () { return loadScript(B + 'vendor/addon-fit/addon-fit.js'); })
+        .then(function () { return import('./app.js?t=' + Date.now()); })
+        .catch(function (e) {
+          var el = document.getElementById('error');
+          if (el) { el.hidden = false; el.textContent = 'Failed to load assets: ' + e.message; }
+        });
+    })();
   </script>
 </body>
 </html>
