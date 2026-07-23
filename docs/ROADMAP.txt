@@ -10,11 +10,13 @@
 
 5. Automated tests. Gold output snapshots to prevent regressions.
 
-6. Performance: Add multithreading to index files in parallel
+6. Performance: Add multithreading to index files in parallel.
+
+7. Single-command support for polyglot codebases. Currently, to index a PHP + TypeScript project, you need to run both index-php and index-ts.
 
 ## Not on the roadmap (yet)
 
-1. Alternative Storage: Currently local Sqlite only. Consider MySql/Postgres or other backends, including remote Sqlite (could allow real-time collaboration on the same project).
+1. Alternative Storage: Currently local Sqlite only. Consider MySql/Postgres or other backends, including remote Sqlite (would allow real-time collaboration on the same project).
 
 ## Not on the roadmap (ever)
 

@@ -129,6 +129,7 @@ typedef struct {
     char *error_msg;
     int error_msg_malloced;  /* 1 if error_msg was strdup'd and must be freed */
     int help;   /* --help / -h: show help text */
+    int list_types;   /* --list-types: show context-type table */
     int oom;    /* set when any strdup fails during parsing */
     int toc_mode;
     int files_mode;      /* --files: show only unique file paths */
@@ -632,6 +633,11 @@ static WebCommand parse_command(const char *input) {
             goto done;
         }
 
+        if (strcmp(t, "--list-types") == 0) {
+            cmd.list_types = 1;
+            goto done;
+        }
+
         /* Unknown flag — report error instead of silently ignoring */
         {
             char errbuf[256];
@@ -869,6 +875,45 @@ char *qi_web_help(void) {
     { char *r = wo_steal(&wo); return r ? r : strdup("Error: out of memory."); }
 }
 
+/* Context-type table for --list-types -- verbatim twin of native
+ * print_context_types() (query-index.c).  The native table is hardcoded (not
+ * generated from column_schema.def), so keep this in sync by hand if the CLI
+ * list changes. */
+EMSCRIPTEN_KEEPALIVE
+char *qi_web_list_types(void) {
+    WebOutput wo;
+    if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
+    wo_printf(&wo, "Context Types (use full or abbreviated forms, case insensitive):\n");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "Full Name", "Short", "Description");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "------------", "-----", "-----------");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "argument", "arg", "Function parameters");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "call", "-", "Function/method calls");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "case", "-", "Enum values/cases");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "class", "-", "Class definitions");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "comment", "com", "Words from comments");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "enum", "-", "Enum type definitions");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "exception", "exc", "Exception classes");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "export", "exp", "Export statements");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "filename", "file", "Filename without extension");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "function", "func", "Function/method definitions");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "goto", "-", "Goto statements (C)");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "import", "imp", "Import/include statements");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "interface", "iface", "Interface definitions");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "label", "-", "Labels (for goto in C)");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "lambda", "lam", "Lambda/arrow functions");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "macro", "-", "Preprocessor macros");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "namespace", "ns", "Namespace/package declarations");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "property", "prop", "Class/struct fields");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "string", "str", "Words from string literals");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "trait", "-", "Trait definitions (PHP)");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "type", "-", "Type definitions (struct, enum, etc.)");
+    wo_printf(&wo, "  %-12s %-9s %s\n", "variable", "var", "Variables and constants");
+    wo_printf(&wo, "\n");
+    wo_printf(&wo, "  Examples: -i func, -i function, -i FUNC all work the same\n");
+    wo_printf(&wo, "  Special: -x noise expands to -x comment string\n");
+    { char *r = wo_steal(&wo); return r ? r : strdup("Error: out of memory."); }
+}
+
 /* =================================================================
  * Exported API 1: build SQL from command text
  * Returns: "PATTERNS|p1 p2\nSQL|...\nLIMIT|20\nERROR|OK"
@@ -904,6 +949,14 @@ char *qi_web_build(const char *command) {
         cmd.error = 0;
     }
 
+    /* --list-types needs no patterns -- override the same error. */
+    if (cmd.list_types && cmd.error && cmd.error_msg &&
+        strcmp(cmd.error_msg, "At least one search pattern is required.") == 0) {
+        if (cmd.error_msg_malloced) { free(cmd.error_msg); cmd.error_msg_malloced = 0; }
+        cmd.error_msg = NULL;
+        cmd.error = 0;
+    }
+
     if (cmd.error) {
         wo_printf(&wo, "ERROR|%s", cmd.error_msg);
         free_command(&cmd);
@@ -929,6 +982,13 @@ char *qi_web_build(const char *command) {
     /* Help mode: signal the pipeline to call qi_web_help() -- no DB needed. */
     if (cmd.help) {
         wo_printf(&wo, "MODE|help\nERROR|OK");
+        free_command(&cmd);
+        { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
+    }
+
+    /* --list-types: signal the pipeline to call qi_web_list_types() -- no DB. */
+    if (cmd.list_types) {
+        wo_printf(&wo, "MODE|list-types\nERROR|OK");
         free_command(&cmd);
         { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
     }

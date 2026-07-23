@@ -36,17 +36,36 @@ void to_lowercase_copy(const char *src, char *dst, size_t size);
 void pluralize_common_word(const char *word, char *output, size_t output_size);
 
 /* Safe tree-sitter node text extraction
- * Extracts text from a tree-sitter node into buffer.
- * EXITS with error if text exceeds buffer_size.
+ * Extracts text from a tree-sitter node into buffer. If the text is too long to
+ * fit (a legitimately huge string/comment, or a pathologically long identifier),
+ * it does NOT abort: it emits a warn_oversized_symbol() Warning and leaves buffer
+ * empty (""), so the caller skips it (an empty symbol is never indexed). This
+ * keeps one oversized node from taking down the whole index run.
  * Parameters:
  *   source_code  - Original source code
  *   node         - Tree-sitter node to extract text from
  *   buffer       - Destination buffer
  *   buffer_size  - Size of destination buffer
- *   filename     - Source filename for error reporting
+ *   filename     - Source filename for the warning message
  */
 void safe_extract_node_text(const char *source_code, TSNode node, char *buffer,
                             size_t buffer_size, const char *filename);
+
+/* Emit the standard "skipping oversized symbol" Warning.
+ * Used wherever an extracted symbol is too long to index (over SYMBOL_MAX_LENGTH,
+ * or over an extraction buffer). Prints one line naming the symbol kind, its true
+ * byte length, a short content preview, and its line/file.
+ * Parameters:
+ *   desc      - What the symbol is (e.g. ts_node_type(node), or a context name)
+ *   length    - True byte length of the skipped content
+ *   content   - Pointer to the content (for a short preview; not required to be
+ *               NUL-terminated as long as it has >= min(length,16) bytes)
+ *   line      - 1-based source line
+ *   filename  - Source filename
+ */
+void warn_oversized_symbol(const char *desc, size_t length,
+                           const char *content, unsigned int line,
+                           const char *filename);
 
 /* Format source location from tree-sitter node
  * Formats node's start and end positions as "startRow:startCol - endRow:endCol"

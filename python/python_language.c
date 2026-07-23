@@ -682,14 +682,6 @@ static void handle_string(TSNode node, const char *source_code,
         /* Only process string_content nodes - skip interpolations */
         if (child_sym == python_symbols.string_content) {
             /* Skip strings that exceed the word buffer (e.g., very long docstrings) */
-            uint32_t slen = ts_node_end_byte(child) - ts_node_start_byte(child);
-            if (slen >= CLEANED_WORD_BUFFER) {
-                TSPoint pt = ts_node_start_point(child);
-                fprintf(stderr, "WARNING: skipping oversized string (%u bytes) at %s:%u\n",
-                        slen, filename, pt.row + 1);
-                continue;
-            }
-
             char string_content[CLEANED_WORD_BUFFER];
             safe_extract_node_text(source_code, child, string_content, sizeof(string_content), filename);
 

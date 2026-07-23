@@ -80,6 +80,21 @@ void add_entry(ParseResult *result, const char *symbol, int line,
               ContextType context, const char *directory,
               const char *filename, const char *source_location,
               const ExtColumns *ext) {
+    /* Never index an empty symbol (e.g. a node safe_extract_node_text skipped). */
+    if (!symbol || symbol[0] == '\0') return;
+
+    /* A symbol at or beyond SYMBOL_MAX_LENGTH won't fit the storage fields without
+     * truncation. Past this length it's data, not a code symbol, so skip it and
+     * warn rather than silently store a truncated fragment. (String/comment words
+     * arrive here at full length; over-long identifiers are already dropped to ""
+     * by safe_extract_node_text and short-circuited above.) */
+    size_t symbol_len = strlen(symbol);
+    if (symbol_len >= SYMBOL_MAX_LENGTH) {
+        warn_oversized_symbol(context_to_string(context, 1), symbol_len,
+                              symbol, line, filename);
+        return;
+    }
+
     /* Ensure we have capacity for one more entry - fail fast if allocation fails */
     if (ensure_capacity(result) != 0) {
         fprintf(stderr, "FATAL: Failed to allocate memory for parse result at entry %d\n", result->count);

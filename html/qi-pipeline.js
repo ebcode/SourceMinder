@@ -254,6 +254,11 @@ export async function runQuery(ctx, input, opts) {
         return qiModule.ccall('qi_web_help', 'string', [], []);
     }
 
+    /* --list-types: no DB query; delegate to qi_web_list_types() */
+    if (buildLines.MODE === 'list-types') {
+        return qiModule.ccall('qi_web_list_types', 'string', [], []);
+    }
+
     var sql = buildLines.SQL;
     log('[pipeline] SQL:', sql);
 

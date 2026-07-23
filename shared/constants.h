@@ -34,7 +34,7 @@
  */
 
 /* Version string for all indexer binaries and query tool */
-#define VERSION "0.3.0-beta"
+#define VERSION "0.3.1-beta"
 
 /* ============================================================================
  * Symbol & Identifier Limits
@@ -53,7 +53,7 @@
 #define WORD_MAX_LENGTH 64
 
 /* Buffer size for cleaned/processed word extraction from comments and strings */
-#define CLEANED_WORD_BUFFER 16384
+#define CLEANED_WORD_BUFFER 32768
 
 /* Maximum recursion depth when walking nested expression trees. Misparsed code
  * (e.g. C++ template syntax read as chained comparison operators by the C
