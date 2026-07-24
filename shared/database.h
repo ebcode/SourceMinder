@@ -125,6 +125,10 @@ int db_init(CodeIndexDatabase *db, const char *db_path);
  * Skips schema migrations (CREATE/DROP INDEX) -- safe because the seed DB
  * is already correctly indexed. Much faster than db_init on large databases. */
 int db_open_watch_only(CodeIndexDatabase *db, const char *db_path);
+/* Open an existing index read-only (for queries): no schema/index bootstrap and
+ * no INSERT prepare, so the query path never writes. Requires the index already
+ * exist and be correctly built by an indexer. */
+int db_open_readonly(CodeIndexDatabase *db, const char *db_path);
 int db_enable_concurrent_writes(CodeIndexDatabase *db);
 void db_close(CodeIndexDatabase *db);
 int db_begin_transaction(CodeIndexDatabase *db);

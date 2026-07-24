@@ -51,6 +51,13 @@ golden tests) before the new pin ships in a release.
 
 ## configure --portable
 
+> **You do not run this yourself for a release.** `release.sh` runs
+> `fetch-grammars.sh`, `./configure --enable-all --portable`, and `make static`
+> for you, inside the pinned container, against a clean `git archive HEAD`
+> export. A local `./configure` / `make` has no effect on the release
+> artifacts — it's only for normal dev builds. This section documents the flag
+> the pipeline uses internally.
+
 Release builds must use `./configure --enable-all --portable`. The default
 release CFLAGS include `-march=native -mtune=native`, which tune the binary
 to the build machine's CPU — fine for local builds, but a distributed binary
@@ -70,6 +77,18 @@ the Dockerfile means re-validating the indexers.
 
 The build input is a clean `git archive HEAD` export — the working tree
 cannot leak into an artifact.
+
+**Prerequisites** (before running `./release.sh`):
+
+- **podman or docker** installed and runnable — the whole build happens in the
+  container; nothing is compiled on the host.
+- **Your changes committed.** The build input is `git archive HEAD`, so
+  anything uncommitted (or unstaged) is *not* in the artifacts. Commit first.
+- **A clean working tree**, and for a real (non-`--snapshot`) build, **HEAD at
+  an annotated tag `v<VERSION>`** matching VERSION in `shared/constants.h`.
+- That's it — you do **not** run `./configure` or `make` yourself; `release.sh`
+  runs `fetch-grammars.sh` + `configure --enable-all --portable` + `make static`
+  in the container.
 
     ./release.sh                     # release build, both arches
     ./release.sh --arch x86_64       # one arch

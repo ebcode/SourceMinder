@@ -4001,9 +4001,10 @@ int main(int argc, char *argv[]) {
         goto cleanup;
     }
 
-    /* Open database connection */
-    if (db_init(&db, db_file) != SQLITE_OK) {
-        fprintf(stderr, "Failed to open database: %s\n", db_file);        
+    /* Open read-only: qi never writes, and the schema/index bootstrap in
+       db_init() belongs only to the indexer (see indexer_main.c) */
+    if (db_open_readonly(&db, db_file) != SQLITE_OK) {
+        fprintf(stderr, "Failed to open database: %s\n", db_file);
         retval = 1;
         goto cleanup;
     }

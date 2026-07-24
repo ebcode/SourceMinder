@@ -1,12 +1,12 @@
 # SourceMinder Changelog
 
-## Version 0.3.1-beta (unreleased)
+## Version 0.3.1-beta (2026-07-22)
 
 - install.sh for one-line installation
-- Release scripts and Alpine Dockerfile for building static binaries
+- Release scripts and Alpine Dockerfile for building static binaries (x86_64 for now)
 - Moved scratch Rust sources to tools/sources/rust/
 - Added cross-instance eval results and logs
-- --list-types flag ported to WASM/web bridge (qi-web-entry.c, qi-pipeline.js)
+- --list-types flag ported to WASM build
 
 ## Version 0.3.0-beta (2026-07-06)
 

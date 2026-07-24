@@ -217,6 +217,24 @@ int db_open_watch_only(CodeIndexDatabase *db, const char *db_path) {
     return SQLITE_OK;
 }
 
+int db_open_readonly(CodeIndexDatabase *db, const char *db_path) {
+    db->insert_stmt = NULL;  /* query path never inserts */
+
+    int rc = sqlite3_open_v2(db_path, &db->db, SQLITE_OPEN_READONLY, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Cannot open database: %s\n", sqlite3_errmsg(db->db));
+        return rc;
+    }
+
+    /* Handle lock contention with a concurrent indexer */
+    sqlite3_busy_timeout(db->db, 5000);
+
+    /* Keep --and proximity temp tables in memory instead of spilling to disk */
+    sqlite3_exec(db->db, "PRAGMA temp_store=MEMORY", NULL, NULL, NULL);
+
+    return SQLITE_OK;
+}
+
 int db_enable_concurrent_writes(CodeIndexDatabase *db) {
     char *err_msg = NULL;
     int rc;
