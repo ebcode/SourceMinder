@@ -299,3 +299,7 @@ CLI flags always override config-file defaults.
 - [docs/QI_VS_GREP.md](docs/QI_VS_GREP.md) — when to use which, hybrid workflows
 - [docs/PERFORMANCE.md](docs/PERFORMANCE.md) — index sizes, query performance, best practices
 - [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) — locked databases, missing symbols, build issues
+
+## Bug Reporting
+
+Please email bug reports to bugs@sourceminder.org.
