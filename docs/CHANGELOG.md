@@ -1,5 +1,10 @@
 # SourceMinder Changelog
 
+## Version 0.3.3-beta (2026-07-28)
+
+- Add check for .smconfig file in current folder
+- Separate [ic] config sections into individual indexer sections
+
 ## Version 0.3.2-beta (2026-07-28)
 
 - Fix slow db_init issue in query-index.c
