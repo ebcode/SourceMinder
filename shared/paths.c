@@ -304,3 +304,29 @@ void get_install_data_path(const char *relative_path, char *out_path, size_t out
     snprintf(out_path, out_size, "/usr/share/sourceminder/%s", relative_path);
 #endif
 }
+
+int resolve_smconfig_path(char *out_path, size_t out_size) {
+    if (!out_path || out_size == 0) {
+        return 0;
+    }
+
+    /* 1. Project-local .smconfig in the current working directory takes
+     * precedence over the home-directory copy. */
+    if (file_exists(CONFIG_FILENAME)) {
+        int written = snprintf(out_path, out_size, "%s", CONFIG_FILENAME);
+        if (written > 0 && (size_t)written < out_size) {
+            return 1;
+        }
+    }
+
+    /* 2. Fall back to $HOME/.smconfig. */
+    const char *home = getenv("HOME");
+    if (home) {
+        int written = snprintf(out_path, out_size, "%s/%s", home, CONFIG_FILENAME);
+        if (written > 0 && (size_t)written < out_size) {
+            return 1;
+        }
+    }
+
+    return 0;
+}

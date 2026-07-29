@@ -279,21 +279,15 @@ static int should_skip_config_line(const char *line, int cli_flags) {
     return 0;
 }
 
-/* Load config file from ~/.smconfig and prepend args to argv */
-/* HOST_ONLY: reads CLI defaults from HOME and the local filesystem. */
+/* Load .smconfig (./.smconfig preferred, else ~/.smconfig) and append its args
+ * to argv (config args go after the CLI args, so CLI flags take precedence). */
+/* HOST_ONLY: reads CLI defaults from the cwd/HOME and the local filesystem. */
 static int load_config_file(int *argc_ptr, char ***argv_ptr, int cli_flags) {
     /* Security note: We trust HOME environment variable for config file location.
      * If an attacker can set HOME, they can already execute arbitrary code in this
      * process context. Config file is optional and only affects query defaults. */
-    const char *home = getenv("HOME");
-    if (!home) return 0;
-
     char config_path[PATH_MAX_LENGTH];
-    int written = snprintf(config_path, sizeof(config_path), "%s/%s", home, CONFIG_FILENAME);
-    if (written < 0 || (size_t)written >= sizeof(config_path)) {
-        fprintf(stderr, "Warning: HOME path too long, skipping config file\n");
-        return 0;
-    }
+    if (!resolve_smconfig_path(config_path, sizeof(config_path))) return 0;
 
     FILE *f = safe_fopen(config_path, "r", 1);
     if (!f) return 0;  /* No config file is fine */
@@ -3075,7 +3069,11 @@ static void show_help_compact(void) {
     printf("Types: func call class var arg type prop com str; use --list-types for all.\n");
     printf("Patterns: case-insensitive, exact by default; wildcards: %% or * any chars, _ or . one char (* needs shell quoting).\n");
     printf("Filters: case-insensitive, fuzzy by default.\n");
-    printf("Config: ~/%s, [qi] section; CLI flags override config.\n", CONFIG_FILENAME);
+    printf("\n");
+
+    printf("Configuration:\n");
+    printf("  Config file: ./.smconfig or ~/.smconfig. CLI flags override config\n");
+    printf("  Format: [qi] section header, then one flag per line. Example: --db-file /dev/shm/index.db\n");
     printf("\n");
     printf("Please email bug reports to bugs@sourceminder.org.\n");
 }

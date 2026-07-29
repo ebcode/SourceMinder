@@ -872,6 +872,11 @@ static void show_help_compact_web(WebOutput *wo) {
     wo_printf(wo, "Patterns: case-insensitive, exact by default; wildcards: %% or * any chars, _ or . one char (* needs shell quoting).\n");
     wo_printf(wo, "Filters: case-insensitive, fuzzy by default.\n");
     wo_printf(wo, "\n");
+
+    wo_printf(wo, "Configuration:\n");
+    wo_printf(wo, "  Config file: ./.smconfig or ~/.smconfig. CLI flags override config\n");
+    wo_printf(wo, "  Format: [qi] section header, then one flag per line. Example: --db-file /dev/shm/index.db\n");
+    wo_printf(wo, "\n");
     wo_printf(wo, "Please email bug reports to bugs@sourceminder.org.\n");
 }
 

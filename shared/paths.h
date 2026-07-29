@@ -84,4 +84,20 @@ int resolve_data_file(const char *relative_path, char *out_path, size_t out_size
  */
 void get_install_data_path(const char *relative_path, char *out_path, size_t out_size);
 
+/**
+ * Resolve the path to the effective .smconfig file.
+ *
+ * Search order (first match wins):
+ * 1. ./.smconfig     (current working directory, project-local)
+ * 2. $HOME/.smconfig (user's home directory)
+ *
+ * A project-local .smconfig is preferred over the one in the home directory,
+ * so config can be scoped per-project by running the tool from that directory.
+ *
+ * @param out_path Output buffer for the resolved path
+ * @param out_size Size of output buffer
+ * @return 1 if a .smconfig was found (out_path written), 0 if none exists
+ */
+int resolve_smconfig_path(char *out_path, size_t out_size);
+
 #endif /* PATHS_H */

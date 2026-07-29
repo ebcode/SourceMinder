@@ -135,31 +135,31 @@ static int should_skip_config_line(const char *line, int cli_flags) {
     return 0;
 }
 
-/* Load config file from ~/.smconfig and prepend args to argv */
-static void load_config_file(int *argc_ptr, char ***argv_ptr, int cli_flags) {
+/* Load .smconfig (./.smconfig preferred, else ~/.smconfig) and append its args
+ * to argv (config args go after the CLI args, so CLI flags take precedence).
+ * Each indexer only reads its own [<tool_name>] section (e.g. [index-c]); every
+ * other section is ignored. */
+static void load_config_file(int *argc_ptr, char ***argv_ptr, int cli_flags, const char *tool_name) {
     /* Security note: We trust HOME environment variable for config file location.
      * If an attacker can set HOME, they can already execute arbitrary code in this
      * process context. Config file is optional and only affects indexer defaults. */
-    const char *home = getenv("HOME");
-    if (!home) return;
-
     char config_path[PATH_MAX_LENGTH];
-    int written = snprintf(config_path, sizeof(config_path), "%s/%s", home, CONFIG_FILENAME);
-    if (written < 0 || (size_t)written >= sizeof(config_path)) {
-        fprintf(stderr, "Warning: HOME path too long, skipping config file\n");
-        return;
-    }
+    if (!resolve_smconfig_path(config_path, sizeof(config_path))) return;
 
     FILE *f = safe_fopen(config_path, "r", 1);
     if (!f) return;  /* No config file is fine */
+
+    /* This indexer's section header, e.g. "[index-c]". */
+    char expected_section[FILENAME_MAX_LENGTH];
+    snprintf(expected_section, sizeof(expected_section), "[%s]", tool_name);
 
     /* Count lines and allocate space for new argv */
     char line[LINE_BUFFER_MEDIUM];
     int config_arg_count = 0;
     char *config_args[MAX_PATTERNS * 2];  /* Max config arguments */
 
-    /* Track if we're in the [ic] section */
-    int in_ic_section = 0;
+    /* Track if we're in this indexer's section */
+    int in_indexer_section = 0;
 
     /* Parse config file */
     while (fgets(line, sizeof(line), f)) {
@@ -176,12 +176,12 @@ static void load_config_file(int *argc_ptr, char ***argv_ptr, int cli_flags) {
 
         /* Check for section headers */
         if (*trimmed == '[') {
-            in_ic_section = (strcmp(trimmed, "[ic]") == 0);
+            in_indexer_section = (strcmp(trimmed, expected_section) == 0);
             continue;
         }
 
-        /* Only process lines in the [ic] section */
-        if (!in_ic_section) continue;
+        /* Only process lines in this indexer's section */
+        if (!in_indexer_section) continue;
 
         /* Skip lines for flags present in CLI */
         if (should_skip_config_line(trimmed, cli_flags)) continue;
@@ -316,9 +316,8 @@ static void print_usage(const IndexerConfig *config) {
     printf("\n");
 
     printf("Configuration:\n");
-    printf("  Config file: ~/.smconfig (CLI flags override config)\n");
-    printf("  Format: [ic] section header, then one flag per line (e.g., \"--once\" or \"--quiet-init\")\n");
-    printf("\n");
+    printf("  Config file: ./.smconfig or ~/.smconfig. CLI flags override config\n");
+    printf("  Format: [%s] section header, then one flag per line. Example: --db-file /dev/shm/index.db\n", config->name);
 }
 
 int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
@@ -338,7 +337,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     /* Load config file only if not showing help (CLI flags override config) */
     if (!show_help) {
         int cli_flags = scan_cli_flags(argc, argv);
-        load_config_file(&argc, &argv, cli_flags);
+        load_config_file(&argc, &argv, cli_flags, config->name);
     }
 
     if (argc < 2 || show_help) {
