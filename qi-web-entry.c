@@ -130,6 +130,7 @@ typedef struct {
     int error_msg_malloced;  /* 1 if error_msg was strdup'd and must be freed */
     int help;   /* --help / -h: show help text */
     int list_types;   /* --list-types: show context-type table */
+    int version;   /* --version: show version info */
     int oom;    /* set when any strdup fails during parsing */
     int toc_mode;
     int files_mode;      /* --files: show only unique file paths */
@@ -638,6 +639,11 @@ static WebCommand parse_command(const char *input) {
             goto done;
         }
 
+        if (strcmp(t, "--version") == 0) {
+            cmd.version = 1;
+            goto done;
+        }
+
         /* Unknown flag — report error instead of silently ignoring */
         {
             char errbuf[256];
@@ -862,9 +868,11 @@ static void show_help_compact_web(WebOutput *wo) {
     wo_printf(wo, "      --debug                    show SQL\n");
     wo_printf(wo, "\n");
 
-    wo_printf(wo, "Types: func class macro var arg type prop call imp com str file; use --list-types for all.\n");
+    wo_printf(wo, "Types: func call class var arg type prop com str; use --list-types for all.\n");
     wo_printf(wo, "Patterns: case-insensitive, exact by default; wildcards: %% or * any chars, _ or . one char (* needs shell quoting).\n");
-    wo_printf(wo, "Escape leading flags: qi '\\--help'. Prefer prefix patterns like get* for speed.\n");
+    wo_printf(wo, "Filters: case-insensitive, fuzzy by default.\n");
+    wo_printf(wo, "\n");
+    wo_printf(wo, "Please email bug reports to bugs@sourceminder.org.\n");
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -914,6 +922,19 @@ char *qi_web_list_types(void) {
     { char *r = wo_steal(&wo); return r ? r : strdup("Error: out of memory."); }
 }
 
+/* Version info for --version.  VERSION is the shared build version (constants.h);
+ * the "(WASM)" suffix marks this as the WebAssembly port.  The SQLite version is
+ * appended by the JS pipeline from the live sqlite-wasm connection
+ * (SELECT sqlite_version()) since sqlite3 is not linked into this module.  No
+ * tree-sitter line: the port queries pre-indexed DBs and never parses source. */
+EMSCRIPTEN_KEEPALIVE
+char *qi_web_version(void) {
+    WebOutput wo;
+    if (wo_init(&wo) != 0) return strdup("Error: out of memory.");
+    wo_printf(&wo, "%s (WASM)\n", VERSION);
+    { char *r = wo_steal(&wo); return r ? r : strdup("Error: out of memory."); }
+}
+
 /* =================================================================
  * Exported API 1: build SQL from command text
  * Returns: "PATTERNS|p1 p2\nSQL|...\nLIMIT|20\nERROR|OK"
@@ -957,6 +978,14 @@ char *qi_web_build(const char *command) {
         cmd.error = 0;
     }
 
+    /* --version needs no patterns -- override the same error. */
+    if (cmd.version && cmd.error && cmd.error_msg &&
+        strcmp(cmd.error_msg, "At least one search pattern is required.") == 0) {
+        if (cmd.error_msg_malloced) { free(cmd.error_msg); cmd.error_msg_malloced = 0; }
+        cmd.error_msg = NULL;
+        cmd.error = 0;
+    }
+
     if (cmd.error) {
         wo_printf(&wo, "ERROR|%s", cmd.error_msg);
         free_command(&cmd);
@@ -989,6 +1018,14 @@ char *qi_web_build(const char *command) {
     /* --list-types: signal the pipeline to call qi_web_list_types() -- no DB. */
     if (cmd.list_types) {
         wo_printf(&wo, "MODE|list-types\nERROR|OK");
+        free_command(&cmd);
+        { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
+    }
+
+    /* --version: signal the pipeline to call qi_web_version() and append the
+     * live SQLite version -- no DB rows needed. */
+    if (cmd.version) {
+        wo_printf(&wo, "MODE|version\nERROR|OK");
         free_command(&cmd);
         { char *r = wo_steal(&wo); return r ? r : strdup("ERROR|out of memory"); }
     }

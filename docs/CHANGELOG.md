@@ -1,5 +1,14 @@
 # SourceMinder Changelog
 
+## Version 0.3.2-beta (2026-07-28)
+
+- Fix slow db_init issue in query-index.c
+- Add --exclude-file flag to indexers
+- Add bug reporting email to README and --help
+- Remove tree-sitter version from qi --version
+- Add --version flag to WASM port
+- Minor --help output changes
+
 ## Version 0.3.1-beta (2026-07-22)
 
 - install.sh for one-line installation

@@ -222,6 +222,34 @@ static int is_excluded(const char *full_path, const char *dirname, const Exclude
     return exclude_dirs_match(full_path, dirname, exclude_dirs) != NULL;
 }
 
+const char *exclude_files_match(const char *full_path, const char *basename, const ExcludeFiles *exclude_files) {
+    if (!exclude_files) return NULL;
+
+    for (int i = 0; i < exclude_files->count; i++) {
+        /* Check if the exclude pattern matches the full path */
+        if (strstr(full_path, exclude_files->files[i]) != NULL) {
+            /* Verify it's a proper path component match */
+            const char *match = strstr(full_path, exclude_files->files[i]);
+            size_t pattern_len = strnlength(exclude_files->files[i], FILENAME_MAX_LENGTH);
+            /* Ensure the match is either at the start or preceded by '/' */
+            /* and is either at the end or followed by '/' or '\0' */
+            if ((match == full_path || *(match - 1) == '/') &&
+                (match[pattern_len] == '/' || match[pattern_len] == '\0')) {
+                return exclude_files->files[i];
+            }
+        }
+        /* Also check basename for simple exclude patterns */
+        if (strcmp(basename, exclude_files->files[i]) == 0) {
+            return exclude_files->files[i];
+        }
+    }
+    return NULL;
+}
+
+static int is_file_excluded(const char *full_path, const char *filename, const ExcludeFiles *exclude_files) {
+    return exclude_files_match(full_path, filename, exclude_files) != NULL;
+}
+
 int is_path_ignored(const char *full_path, const char *dirname, const WordSet *ignore_dirs) {
     if (!ignore_dirs) return 0;
 
@@ -298,7 +326,7 @@ static int is_file_ignored(const char *full_path, const char *filename, const Wo
     return 0;
 }
 
-static void walk_directory(const char *dir_path, FileList *files, const ExcludeDirs *exclude_dirs, const FileExtensions *extensions, const WordSet *ignore_dirs) {
+static void walk_directory(const char *dir_path, FileList *files, const ExcludeDirs *exclude_dirs, const ExcludeFiles *exclude_files, const FileExtensions *extensions, const WordSet *ignore_dirs) {
     DIR *dir;
     struct dirent *entry;
 
@@ -335,11 +363,15 @@ static void walk_directory(const char *dir_path, FileList *files, const ExcludeD
                 continue;
             }
             /* Recursively walk subdirectory */
-            walk_directory(path, files, exclude_dirs, extensions, ignore_dirs);
+            walk_directory(path, files, exclude_dirs, exclude_files, extensions, ignore_dirs);
         }
         else if (S_ISREG(st.st_mode)) {
             /* Skip ignored files (e.g., *.o, test_*.tmp, *.c) */
             if (is_file_ignored(path, entry->d_name, ignore_dirs)) {
+                continue;
+            }
+            /* Skip user-specified exclude files */
+            if (is_file_excluded(path, entry->d_name, exclude_files)) {
                 continue;
             }
             /* Check if file has valid extension */
@@ -352,8 +384,8 @@ static void walk_directory(const char *dir_path, FileList *files, const ExcludeD
     closedir(dir);
 }
 
-int find_files(const char *dir_path, FileList *files, const ExcludeDirs *exclude_dirs, const FileExtensions *extensions, const WordSet *ignore_dirs) {
+int find_files(const char *dir_path, FileList *files, const ExcludeDirs *exclude_dirs, const ExcludeFiles *exclude_files, const FileExtensions *extensions, const WordSet *ignore_dirs) {
     files->count = 0;
-    walk_directory(dir_path, files, exclude_dirs, extensions, ignore_dirs);
+    walk_directory(dir_path, files, exclude_dirs, exclude_files, extensions, ignore_dirs);
     return 0;
 }

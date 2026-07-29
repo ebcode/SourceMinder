@@ -795,7 +795,7 @@ web: $(WEB_DIR)
 		-sMODULARIZE=1 \
 		-sEXPORT_ES6=1 \
 		-sEXPORT_NAME='QiWebModule' \
-		-sEXPORTED_FUNCTIONS='["_qi_web_build","_qi_web_format","_qi_web_format_breakdown","_qi_web_format_files","_qi_web_format_no_results","_qi_web_free_result","_qi_web_toc_format","_qi_web_help","_qi_web_list_types","_malloc","_free"]' \
+		-sEXPORTED_FUNCTIONS='["_qi_web_build","_qi_web_format","_qi_web_format_breakdown","_qi_web_format_files","_qi_web_format_no_results","_qi_web_free_result","_qi_web_toc_format","_qi_web_help","_qi_web_list_types","_qi_web_version","_malloc","_free"]' \
 		-sEXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString","lengthBytesUTF8","stringToUTF8"]' \
 		-sALLOW_MEMORY_GROWTH=1 \
 		-sINITIAL_MEMORY=32MB \

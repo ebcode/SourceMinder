@@ -34,7 +34,7 @@
  */
 
 /* Version string for all indexer binaries and query tool */
-#define VERSION "0.3.1-beta"
+#define VERSION "0.3.2-beta"
 
 /* ============================================================================
  * Symbol & Identifier Limits
@@ -143,6 +143,9 @@
 
 /* Maximum number of directories that can be excluded via --exclude-dir */
 #define MAX_EXCLUDE_DIRS 32
+
+/* Maximum number of files that can be excluded via --exclude-file */
+#define MAX_EXCLUDE_FILES 32
 
 /* Maximum number of target paths (files or directories) on command line */
 #define MAX_TARGETS 256
@@ -262,6 +265,7 @@ _Static_assert(MAX_FILTER_WORDS > 0, "MAX_FILTER_WORDS must be positive");
 _Static_assert(MAX_FILE_EXTENSIONS > 0 && MAX_FILE_EXTENSIONS <= 32,
     "MAX_FILE_EXTENSIONS must be positive and reasonable (1-32)");
 _Static_assert(MAX_EXCLUDE_DIRS > 0, "MAX_EXCLUDE_DIRS must be positive");
+_Static_assert(MAX_EXCLUDE_FILES > 0, "MAX_EXCLUDE_FILES must be positive");
 _Static_assert(MAX_TARGETS > 0, "MAX_TARGETS must be positive");
 
 #endif /* CONSTANTS_H */

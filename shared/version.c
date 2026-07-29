@@ -22,9 +22,10 @@
 #include <tree_sitter/api.h>
 
 void print_version(void) {
+    /* The query tool depends on SQLite but not tree-sitter (only the indexers
+     * parse source); tree-sitter is reported by print_version_with_grammar(). */
     printf("%s\n", VERSION);
     printf("SQLite: %s\n", sqlite3_libversion());
-    printf("Tree-sitter: (language version %d)\n", TREE_SITTER_LANGUAGE_VERSION);
 }
 
 void print_version_with_grammar(const char *grammar_name, const char *grammar_version) {

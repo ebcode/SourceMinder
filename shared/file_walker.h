@@ -32,6 +32,11 @@ typedef struct {
     int count;
 } ExcludeDirs;
 
+typedef struct {
+    char files[MAX_EXCLUDE_FILES][FILENAME_MAX_LENGTH];
+    int count;
+} ExcludeFiles;
+
 /* Initialize FileList with dynamic allocation */
 void init_file_list(FileList *list);
 
@@ -42,12 +47,15 @@ void free_file_list(FileList *list);
 void add_file_to_list(FileList *list, const char *path);
 
 /* Find all files matching configured extensions in a directory recursively */
-int find_files(const char *dir_path, FileList *files, const ExcludeDirs *exclude_dirs, const FileExtensions *extensions, const WordSet *ignore_dirs);
+int find_files(const char *dir_path, FileList *files, const ExcludeDirs *exclude_dirs, const ExcludeFiles *exclude_files, const FileExtensions *extensions, const WordSet *ignore_dirs);
 
 /* Check if a path should be ignored based on ignore_dirs patterns */
 int is_path_ignored(const char *full_path, const char *dirname, const WordSet *ignore_dirs);
 
 /* Returns the matched exclude pattern, or NULL if no pattern matches */
 const char *exclude_dirs_match(const char *full_path, const char *basename, const ExcludeDirs *exclude_dirs);
+
+/* Returns the matched exclude-file pattern, or NULL if no pattern matches */
+const char *exclude_files_match(const char *full_path, const char *basename, const ExcludeFiles *exclude_files);
 
 #endif

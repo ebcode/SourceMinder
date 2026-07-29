@@ -254,6 +254,20 @@ export async function runQuery(ctx, input, opts) {
         return qiModule.ccall('qi_web_help', 'string', [], []);
     }
 
+    /* --version: C renders the "(WASM)" version line; append the live SQLite
+     * version straight from the sqlite-wasm connection (sqlite3 is not linked
+     * into the WASM module, so the C side can't report it). */
+    if (buildLines.MODE === 'version') {
+        var versionText = qiModule.ccall('qi_web_version', 'string', [], []);
+        try {
+            var sqliteVer = db.selectValue('SELECT sqlite_version()');
+            if (sqliteVer) versionText += 'SQLite: ' + sqliteVer + '\n';
+        } catch (e) {
+            log('[pipeline] sqlite_version query error:', e);
+        }
+        return versionText;
+    }
+
     /* --list-types: no DB query; delegate to qi_web_list_types() */
     if (buildLines.MODE === 'list-types') {
         return qiModule.ccall('qi_web_list_types', 'string', [], []);

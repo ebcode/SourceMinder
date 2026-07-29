@@ -102,6 +102,7 @@ static int reindex_single_file(void *parser, ParserParseFunc parser_parse,
 #define FLAG_EXCLUDE_DIR (1 << 5)
 #define FLAG_ECHO        (1 << 6)
 #define FLAG_WATCH_ONLY  (1 << 7)
+#define FLAG_EXCLUDE_FILE (1 << 8)
 
 /* Scan CLI arguments to detect which flags are present (before config loading) */
 static int scan_cli_flags(int argc, char *argv[]) {
@@ -113,6 +114,7 @@ static int scan_cli_flags(int argc, char *argv[]) {
         else if (strcmp(argv[i], "--verbose") == 0) flags |= FLAG_VERBOSE;
         else if (strcmp(argv[i], "--db-file") == 0 || strcmp(argv[i], "-f") == 0) flags |= FLAG_DB_FILE;
         else if (strcmp(argv[i], "--exclude-dir") == 0) flags |= FLAG_EXCLUDE_DIR;
+        else if (strcmp(argv[i], "--exclude-file") == 0) flags |= FLAG_EXCLUDE_FILE;
         else if (strcmp(argv[i], "--echo") == 0) flags |= FLAG_ECHO;
         else if (strcmp(argv[i], "--watch-only") == 0) flags |= FLAG_WATCH_ONLY;
     }
@@ -127,6 +129,7 @@ static int should_skip_config_line(const char *line, int cli_flags) {
     if ((cli_flags & FLAG_VERBOSE) && strstr(line, "--verbose") == line) return 1;
     if ((cli_flags & FLAG_DB_FILE) && (strstr(line, "--db-file") == line || strstr(line, "-f") == line)) return 1;
     if ((cli_flags & FLAG_EXCLUDE_DIR) && strstr(line, "--exclude-dir") == line) return 1;
+    if ((cli_flags & FLAG_EXCLUDE_FILE) && strstr(line, "--exclude-file") == line) return 1;
     if ((cli_flags & FLAG_ECHO) && strstr(line, "--echo") == line) return 1;
     if ((cli_flags & FLAG_WATCH_ONLY) && strstr(line, "--watch-only") == line) return 1;
     return 0;
@@ -287,6 +290,7 @@ static void print_usage(const IndexerConfig *config) {
     printf("      --verbose                  show preflight checks and validation\n");    
     printf("      --show-config              show effective config files and their sources, then exit\n");
     printf("      --exclude-dir DIR...       exclude directories (can specify multiple)\n");
+    printf("      --exclude-file FILE...     exclude files (can specify multiple)\n");
     printf("  -f, --db-file PATH             database file location (default: code-index.db)\n");
     printf("      --echo MESSAGE             print message and continue (for testing)\n");
     printf("\n");
@@ -307,6 +311,7 @@ static void print_usage(const IndexerConfig *config) {
     printf("  %s ./src --quiet-init                # Quiet initial index, show re-index\n", config->name);
     printf("  %s ./src --silent                    # Completely silent\n", config->name);
     printf("  %s ../ --exclude-dir indexer tests   # Exclude specific directories\n", config->name);
+    printf("  %s ../ --exclude-file main.c test.c  # Exclude specific files\n", config->name);
     printf("  %s ./src -f /dev/shm/code-index.db  # Use custom database location\n", config->name);
     printf("\n");
 
@@ -349,6 +354,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     int daemon_mode = 1;  /* Daemon mode enabled by default */
     int watch_only = 0;
     ExcludeDirs exclude_dirs = { .count = 0 };
+    ExcludeFiles exclude_files = { .count = 0 };
     char *targets[MAX_TARGETS];
     int target_count = 0;
     IndexMode mode = MODE_DIRECTORIES;
@@ -392,6 +398,15 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
                 if (exclude_dirs.count < MAX_EXCLUDE_DIRS) {
                     snprintf(exclude_dirs.dirs[exclude_dirs.count], FILENAME_MAX_LENGTH, "%s", argv[i + 1]);
                     exclude_dirs.count++;
+                }
+                i++;
+            }
+        } else if (strcmp(argv[i], "--exclude-file") == 0) {
+            /* Collect all exclude files until we hit another flag or end */
+            while (i + 1 < argc && argv[i + 1][0] != '-') {
+                if (exclude_files.count < MAX_EXCLUDE_FILES) {
+                    snprintf(exclude_files.files[exclude_files.count], FILENAME_MAX_LENGTH, "%s", argv[i + 1]);
+                    exclude_files.count++;
                 }
                 i++;
             }
@@ -511,6 +526,13 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
             printf("Excluding directories:");
             for (int i = 0; i < exclude_dirs.count; i++) {
                 printf(" %s", exclude_dirs.dirs[i]);
+            }
+            printf("\n");
+        }
+        if (exclude_files.count > 0) {
+            printf("Excluding files:");
+            for (int i = 0; i < exclude_files.count; i++) {
+                printf(" %s", exclude_files.files[i]);
             }
             printf("\n");
         }
@@ -640,7 +662,7 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
                 free_file_list(files);
                 init_file_list(files);
             }
-            find_files(targets[dir_idx], files, &exclude_dirs, extensions, ignore_dirs);
+            find_files(targets[dir_idx], files, &exclude_dirs, &exclude_files, extensions, ignore_dirs);
 
             if (!quiet_init && !silent && target_count > 1) {
                 printf("Found %d files in %s\n", files->count, targets[dir_idx]);
@@ -801,6 +823,18 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
                             ? "Registered change" : "Registered new file";
                         printf("%s: %s, but not indexed due to --exclude-dir %s\n",
                                verb, events[i].filepath, matched_excl);
+                    }
+                    continue;
+                }
+
+                /* Check --exclude-file: DELETED still cleans up stale rows */
+                const char *matched_excl_file = exclude_files_match(events[i].filepath, excl_basename, &exclude_files);
+                if (matched_excl_file && events[i].type != FILE_EVENT_DELETED) {
+                    if (!silent) {
+                        const char *verb = (events[i].type == FILE_EVENT_MODIFIED)
+                            ? "Registered change" : "Registered new file";
+                        printf("%s: %s, but not indexed due to --exclude-file %s\n",
+                               verb, events[i].filepath, matched_excl_file);
                     }
                     continue;
                 }

@@ -3072,10 +3072,12 @@ static void show_help_compact(void) {
     printf("      --debug                    show SQL\n");
     printf("\n");
 
-    printf("Types: func class macro var arg type prop call imp com str file; use --list-types for all.\n");
+    printf("Types: func call class var arg type prop com str; use --list-types for all.\n");
     printf("Patterns: case-insensitive, exact by default; wildcards: %% or * any chars, _ or . one char (* needs shell quoting).\n");
-    printf("Escape leading flags: qi '\\--help'. Prefer prefix patterns like get* for speed.\n");
+    printf("Filters: case-insensitive, fuzzy by default.\n");
     printf("Config: ~/%s, [qi] section; CLI flags override config.\n", CONFIG_FILENAME);
+    printf("\n");
+    printf("Please email bug reports to bugs@sourceminder.org.\n");
 }
 
 /* HOST_ONLY: CLI entry point depends on argv parsing, filesystem checks, environment, and terminal output. */
