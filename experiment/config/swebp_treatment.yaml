@@ -38,62 +38,29 @@ agent:
     I've already taken care of all changes to any of the test files described in the PR_DESCRIPTION. This means you DON'T have to modify the testing logic or any of the tests in any way!
     Your task is to make the minimal changes to non-tests files in the {{working_dir}} directory to ensure the PR_DESCRIPTION is satisfied.
 
+    ## IMPORTANT
+
     A new code search tool, *qi* (query-index) has been installed on this machine to assist you with your task.
-    CRITICAL! You MUST use qi THROUGHOUT YOUR SESSION for better code understanding.
 
-    qi is a code index querying tool (short for query-index): FAST, precise, and noise-free.
+    Please prefer to use qi first to understand the codebase.
 
-    qi adds a CTX (context) column, which tells you what a symbol *IS*. A function name, comment,
-    string, class, argument, import. This is impossible to see with grep, and it is what makes qi POWERFUL.
-    No more hunting down code only to find it's been commented out!
-
-    Use qi FIRST to UNDERSTAND the code.
-
-    **Use qi as a COMPLEMENT to grep, and as FIRST and FALLBACK lines of attack for understanding the code**
-
-    To keep the code index to a reasonable size, it does not contain any of the following:
+    To keep qi's code index to a reasonable size, it does not contain any of the following:
     - short, common english words are excluded (and, to, of, the)
     - Language keywords are also excluded: `pub`, `fn`, `async`, `impl`, `let`, `self`, `struct`, `for`, `match`, `return`, `type`, `use`
     - Punctuation is excluded: `.clone()`, `::`, `#[derive(...)]`, `()`, `<>, `...`
     - Runtime/dynamic attributes set in code (not declarations) are excluded
     - Single-character symbols or pure numbers
 
+    **Use qi as a COMPLEMENT to grep**
+
     If `qi SYMBOL` returns 0, qi will auto-retry as `*SYMBOL*`. If still 0,
     check the list above — if the term is a language keyword or contains punctuation, use grep. Otherwise, loosen your filters.
 
     ---
 
-    ## qi vs grep decision table 
+    ## QI: Reading the extra columns (-v)
 
-    Goal | Command
-
-    See a file's "table of contents" | `qi '*' -f FILENAME.ext --toc`
-    Jump to a function/class/interface definition | `qi NAME -i func class iface -e`
-    See definition + all metadata at once | `qi NAME -i func class iface -e -v`
-    See code around any match (not just definitions) | `qi NAME -C 3 -x noise`
-    Find all call sites | `qi NAME --usage -l 40`
-    Where a symbol is imported | `qi NAME -i imp`
-    Disambiguate same name in different places | `qi NAME -v -x noise` (reveals PAR, SCOPE, TYPE)
-    All members of a class/type | `qi '*' -p TypeName`
-    One method on a type | `qi METHOD -p TypeName -i func`
-    How an object is used (methods called on it) | `qi '*' -i call -p OBJ -l 40`
-    What a function does with SYMBOL (read its internals) | `qi SYMBOL --within FUNCNAME -x noise`
-    What functions does this function call | `qi '*' -i call --within FUNCNAME`
-    All decorated functions (Python: @decorator) | `qi '*' -i func -c '@'`
-    Async functions (Python, JS, TS) | `qi '*' -i func -m async`
-    Goroutines, defers, channel ops (Go) | `qi '*' -i call -c go` (or `-c defer`, `-c send`, `-c receive`)
-    Multi-word fuzzy phrase (all words on same line) | `qi '*WORD-1*' '*WORD-2*' '*WORD-3*' --and`
-    Two exact symbols near each other (within 10 lines) | `qi SYMBOL1 SYMBOL2 --and 10`
-    Exact source lines to anchor a sed edit | `qi NAME -i func -e --raw`
-    Keyword, punctuation, regex, or text pattern | `grep -rn 'pattern' .`
-
-    THINK: For SYMBOLs, use qi; for STRINGs, use grep.
-
-    ---
-
-    ## Reading the extra columns (-v)
-
-    Adding `-v` to any query reveals language-specific columns you can filter on:
+    Adding `-v` to any qi query reveals language-specific columns you can filter on:
 
     Column | Flag | What it captures | Example values
     CLUE   | `-c` | decorators, context hints, unaliased imports | `@property`, `@staticmethod`, `yield`, `:=`, `./database`; `go`, `defer`, `send`, `receive` in Go
@@ -111,13 +78,10 @@ agent:
     qi '*' -f FILENAME.ext --toc
 
     # 2. Locate — broad search first
-    qi 'TERM*' -x noise -l 20 -v
+    qi '*TERM*' -x noise -l 20 -v
 
     # 3. Understand — expand + metadata in ONE command (not two turns)
     qi SYMBOL -i func -e -v -x noise;  qi SYMBOL --usage -l 20 -x noise
-
-    # 4. Text search — for anything qi can't find
-    grep -rn 'pattern' path/
 
     `-e` expands **definitions** (functions/classes). For a call site, usage, import,
     or any non-definition match, use `-C N` to see the surrounding lines.
@@ -126,14 +90,7 @@ agent:
     `--raw` (with `-e` or `-B`/`-A`/`-C`) prints bare source lines — no headers, line numbers,
     or separators — so you can copy the EXACT text into a sed pattern:
 
-    qi SYMBOL -i func -e --raw        # exact definition lines, ready to anchor a sed edit
-
-    **FINDING a phrase? Use --and, not grep.**
-    `--and` requires ALL patterns to match on the same line (`--and N`: within N lines).
-    Words from comments and strings ARE indexed — so DROP `-x noise` here (it would hide
-    the comment/string lines a phrase usually lives in):
-
-    qi '%WORD1%' '%WORD2%' --and      # e.g. an error message: qi '%invalid%' '%config%' --and
+    qi SYMBOL -i func -e --raw        # exact definition lines, ready to anchor a sed edit    
 
     **BATCH INDEPENDENT QI LOOKUPS:**
 
@@ -143,7 +100,7 @@ agent:
 
     ---
 
-    ## Four rules that prevent the most wasted turns
+    ## Three rules that prevent the most wasted turns
 
     1. ALWAYS add `-x noise` and `--limit N` to qi queries.
     `-x noise` drops comment and string results. `-l 20` caps output. Without them, a broad pattern dumps hundreds of irrelevant lines into your context.
@@ -153,11 +110,6 @@ agent:
 
     3. Narrow one filter at a time.
     Start broad: `qi SYMBOL -x noise -l 20 -v`. Inspect PAR/SCOPE/TYPE in `-v` output, then add filters to pin the match you want. If the query returns 0, the filter was too tight — broaden it.
-
-    4. Split qualified names.
-    `qi PARENT.SYMBOL` is the wrong shape for qi, which queries atomic symbols. The PARENT value exists in the parent column, filterable with -p:
-
-    qi SYMBOL -p PARENT
 
     ---
 
@@ -179,10 +131,12 @@ agent:
     - **Patterns first, flags after.** `qi --def SYMBOL` treats `SYMBOL` as `--def`'s argument. Write: `qi SYMBOL --def -e`.
 
     When you find a file you want to understand at a glance, run this command FIRST: `qi '*' -f FILENAME.ext --toc` (FILENAME must include extension)
-    But *SKIP* the --toc flag if you're already planning to read the whole file.
 
     One final note on qi: the index is kept in sync with your file changes.
     This means that you can continue to use qi after you've edited files and you will see your changes in the index.
+
+    Give qi a try with this task! The --toc flag is especially useful for getting an overview of a file.
+    Use qi well and you'll find that it will help you understand code faster and make your task easier.
 
     Follow these steps to resolve the issue:
     0. Run: qi --help

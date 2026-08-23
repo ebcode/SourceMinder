@@ -801,50 +801,13 @@ web: $(WEB_DIR)
 		-sINITIAL_MEMORY=32MB \
 		-o $(WEB_DIR)/qi-web.js \
 		$(WEB_SRC) $(WEB_ENTRY_SRC) $(WEB_SHARED_SRC)
-	@mkdir -p html/assets
-	cp $(WEB_DIR)/qi-web.js $(WEB_DIR)/qi-web.wasm html/assets/
-	@# Content-hash the wasm and mint hashed copies + asset-manifest.json so the
-	@# browser worker (which resolves asset names via asset-manifest.json) can
-	@# never serve a stale cached binary.  The wasm glue+binary live under
-	@# html/assets/ (the CDN origin in prod); the manifest stays same-origin at
-	@# html/ (the worker fetches it there).  The plain html/assets/qi-web.{js,wasm}
-	@# above stay as the no-manifest fallback; the glob below only clears prior
-	@# HASHED copies (qi-web.<hash>.*), not the two-dotless plain names.  Both js
-	@# and wasm share the wasm-derived hash (the .js embeds no wasm name -- the
-	@# worker's locateFile rewrites it).  shasum is the macOS fallback.
-	@rm -f html/assets/qi-web.*.js html/assets/qi-web.*.wasm
-	@H=$$( { sha256sum html/assets/qi-web.wasm 2>/dev/null || shasum -a 256 html/assets/qi-web.wasm; } | cut -c1-12 ); \
-		cp html/assets/qi-web.js   html/assets/qi-web.$$H.js; \
-		cp html/assets/qi-web.wasm html/assets/qi-web.$$H.wasm; \
-		printf '{"qiWebJs":"qi-web.%s.js","qiWebWasm":"qi-web.%s.wasm"}\n' $$H $$H > html/asset-manifest.json; \
-		echo "web: asset-manifest.json -> qi-web.$$H.{js,wasm}"
-
-# Headless end-to-end test of the web bridge: loads the built qi-web.wasm under
-# Node and runs canned qi queries through the shared pipeline (no browser).
-# Run after `make web`.  See test/web-harness/README.md.
-web-test:
-	node test/web-harness/run.mjs
-
-# Side-by-side parity: diff native `qi` output against the web bridge for the
-# same commands and data.  Run after `make web`.  See test/web-harness/README.md.
-web-parity:
-	node test/web-harness/parity.mjs --batch
-
-# Working-tree index for the web test harness (test/web-harness/projects.test.json):
-# index this repo with the local C indexer into build/test/, then snapshot a
-# browser-safe (non-WAL) copy via VACUUM INTO.  --exclude-dir html keeps demo
-# source copies under html/ out of the index.
-test-web-db: ./index-c
-	@mkdir -p build/test
-	@rm -f build/test/code-index.db build/test/code-index.browser.db
-	./index-c . --once --silent --db-file build/test/code-index.db --exclude-dir html
-	sqlite3 build/test/code-index.db "VACUUM INTO 'build/test/code-index.browser.db'"
-	@echo "wrote build/test/code-index.db + build/test/code-index.browser.db"
+	@echo "web: built $(WEB_DIR)/qi-web.js + $(WEB_DIR)/qi-web.wasm"
+	@echo "     copy both into the sourceminder-web repo's assets/ to package + deploy"
 
 $(WEB_DIR):
 	mkdir -p $(WEB_DIR)
 
-.PHONY: all static clean install install-data uninstall lint debug test tests web web-smoke web-test web-parity test-web-db
+.PHONY: all static clean install install-data uninstall lint debug test tests web web-smoke
 EOF_MAKEFILE
 
 # Substitute variables in Makefile

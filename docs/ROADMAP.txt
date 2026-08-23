@@ -1,26 +1,33 @@
 # SourceMinder Roadmap for 2026
 
-1. Additional Languages: Perl, Rust. Perl is mostly there (as of June 2026). Rust needs more testing against real codebases.
+1. Figure out how to index: ''' onclick="clickFunction();" ''' in an HTML file that references JavaScript.
 
-2. Add guides for php, typescript, perl, and rust
+2. PHP Blade / Twig template indexing. Similarly for templates in Python (django), and Go (hugo), etc.
 
-3. Test against larger codebases. (Tested against llvm-project, ~30k files, gives 7.2GB index, slow to query.)
+3. Split out the ./experiment and ./html folders into their own repositories.
 
-4. Instrument queries (perf).
+4. Additional Languages: Perl, Rust. Perl is mostly there (as of June 2026). Rust needs more testing against real codebases.
 
-5. Automated tests. Gold output snapshots to prevent regressions.
+5. Add guides for php, typescript, perl, and rust.
 
-6. Performance: Add multithreading to index files in parallel.
+6. Test against larger codebases. (Tested against llvm-project, ~30k files, gives 7.2GB index, slow to query.)
 
-7. Single-command support for polyglot codebases. Currently, to index a PHP + TypeScript project, you need to run both index-php and index-ts.
+7. Instrument queries (perf).
+
+8. Automated tests. Gold output snapshots to prevent regressions.
 
 ## Not on the roadmap (yet)
 
 1. Alternative Storage: Currently local Sqlite only. Consider MySql/Postgres or other backends, including remote Sqlite (would allow real-time collaboration on the same project).
 
+2. Performance: Add multithreading to index files in parallel.
+
+3. Single-command support for polyglot codebases. Currently, to index a PHP + TypeScript project, you need to run both index-php and index-ts.
+
+
 ## Not on the roadmap (ever)
 
 1. Call graph functionality (which functions call this function, aka: dependency graph) -- there are better tools for this available. Keep this tool simple.
 
-  1.1 The one-way call graph -- "Which functions does this function call?" (callees) -- is accomplished with: qi % -i call --within <function>.
-      A --callees flag could be a useful shorthand for the above. And if it had a --depth flag, you could do: qi <function> --callees --depth 3. This might be worth investigating.
+  1.1 The one-way call graph -- "Which functions does this function call?" (callees) -- is accomplished with: qi % -i call --within $function.
+      A --callees flag could be a useful shorthand for the above. If it had a --depth flag, you could do: qi <function> --callees --depth 3. This might be worth investigating.

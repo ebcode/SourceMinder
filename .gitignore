@@ -42,22 +42,9 @@ test.parquet
 run_pro_ledger.jsonl
 dist/
 
-# WASM artifacts (generated) -- plain + content-hashed copies live under
-# html/assets/; the manifest stays same-origin at html/ (worker fetches it).
-html/assets/qi-web.js
-html/assets/qi-web.wasm
-html/assets/qi-web.*.js
-html/assets/qi-web.*.wasm
-html/asset-manifest.json
+# Generated sqlite source for the WASM build.
 wasm/sqlite3.c
 wasm/sqlite3.h
-
-# Per-project source trees for browser -e/-C extraction (local/generated;
-# populated by copying/cloning repos in -- see html/assets/sources/README.md).
-# Browser DB snapshots (*.browser.db) are already covered by *.db above.
-html/assets/sources/*
-!html/assets/sources/README.md
-!html/assets/sources/browser-snapshot.sh
 
 .idea
 .theia
