@@ -23,7 +23,15 @@ out. SourceMinder solves that problem.
 `-e` shows (expands) full definitions without opening the file, and 
 `--raw` prints exact source lines (hides line #:) to anchor edits.
 
-## Build & Install
+## Setup
+
+If you're on Linux (x86_64 or aarch64) or a modern Mac (arm64), you can download pre-built binaries:
+
+```
+curl -fsSl https://sourceminder.org/install.sh | bash
+```
+
+And jump down to the [Five-Minute Tour](#tour) section. Otherwise, you'll need to build from source.
 
 ### Prerequisites
 
@@ -74,7 +82,7 @@ sudo make install       # Install to /usr/local/bin
 **Installed binaries:** `index-c`, `index-go`, `index-perl`, `index-php`, `index-python`, `index-rust`, `index-ts`, `qi`
 **Config files:** `/usr/local/share/sourceminder/<language>/config/`
 
-## Five-Minute Tour
+## Five-Minute Tour {#tour}
 
 **1. Index a codebase** (SourceMinder itself, here):
 
