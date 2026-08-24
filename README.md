@@ -31,7 +31,7 @@ If you're on Linux (x86_64 or aarch64) or a modern Mac (arm64), you can download
 curl -fsSl https://sourceminder.org/install.sh | bash
 ```
 
-And jump down to the [Five-Minute Tour](#tour) section. Otherwise, you'll need to build from source.
+And jump down to the Five-Minute Tour section. Otherwise, you'll need to build from source.
 
 ### Prerequisites
 
@@ -82,7 +82,7 @@ sudo make install       # Install to /usr/local/bin
 **Installed binaries:** `index-c`, `index-go`, `index-perl`, `index-php`, `index-python`, `index-rust`, `index-ts`, `qi`
 **Config files:** `/usr/local/share/sourceminder/<language>/config/`
 
-## Five-Minute Tour {#tour}
+## Five-Minute Tour
 
 **1. Index a codebase** (SourceMinder itself, here):
 
