@@ -33,14 +33,14 @@ fail() {
 OS=$(uname -s)
 case "$OS" in
     Linux) OS=linux ;;
-    Darwin) fail "no prebuilt macOS binaries yet -- see the README for building from source" ;;
+    Darwin) OS=macos ;;
     *) fail "unsupported platform '$OS' -- see the README for building from source" ;;
 esac
 
 ARCH=$(uname -m)
 case "$ARCH" in
     x86_64|amd64) ARCH=x86_64 ;;
-    aarch64|arm64) ARCH=aarch64 ;;
+    arm64|aarch64) [ "$OS" = "macos" ] && ARCH=arm64 || ARCH=aarch64 ;;
     *) fail "unsupported architecture '$ARCH' -- see the README for building from source" ;;
 esac
 
@@ -111,8 +111,22 @@ echo "Installed to $BIN_DIR: $TOOLS"
 
 case ":$PATH:" in
     *":$BIN_DIR:"*) ;;
-    *) echo "Note: $BIN_DIR is not on your PATH. Add it with:"
-       echo "  export PATH=\"$BIN_DIR:\$PATH\"" ;;
+    *)
+        # Pick the rc file for the user's login shell so the PATH line lands
+        # somewhere that actually gets sourced. On a fresh VM the file may not
+        # exist yet, hence the "create it if it doesn't exist" note.
+        case "${SHELL##*/}" in
+            zsh) RC=".zshrc" ;;
+            bash) RC=".bashrc" ;;
+            *) RC=".profile" ;;
+        esac
+        echo ""
+        echo "Next step: $BIN_DIR is not on your PATH yet."
+        echo "Add this line to ~/$RC (create it if it doesn't exist):"
+        echo "  export PATH=\"$BIN_DIR:\$PATH\""
+        echo "Then reload it with:"
+        echo "  source ~/$RC"
+        ;;
 esac
 
 echo ""

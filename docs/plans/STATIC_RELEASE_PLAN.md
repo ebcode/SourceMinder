@@ -27,9 +27,12 @@ built for SWE-bench containers) — the mechanism is proven; make it portable:
 - **Linux (x86_64, aarch64):** build in an Alpine (musl) container so binaries
   run on any distro. glibc `-static` is version-fragile; musl is not. Build
   libtree-sitter.a and libsqlite3.a from source inside the container.
-- **macOS (arm64, x86_64):** fully-static is impossible (no static libSystem)
-  and unnecessary — macOS ships libsqlite3.dylib. Statically link only
-  libtree-sitter.a; result runs on a clean Mac.
+- **macOS (arm64, x86_64):** arm64 DONE 2026-08-24 (via release-macos.sh).
+  Fully-static is impossible (no static libSystem), so the binaries dynamically
+  link Apple's system libraries — every Mac ships them. tree-sitter and sqlite
+  are statically linked from pinned source, so recipients need no Homebrew or
+  other third-party packages. Native build only (macOS cannot be cross-compiled
+  from Linux); arm64 built and verified on an M1, x86_64 pending an Intel Mac.
 - **Windows:** deferred to a later release (MSYS2 source build remains the path).
 
 Per-binary static linking duplicates the tree-sitter runtime + sqlite
@@ -46,23 +49,41 @@ integration, if ever wanted, is a thin shim that calls `./release.sh`.
    upstream's `release` branch (generated parser.c included, byte-identical
    to the local proven copy — no tree-sitter CLI dependency). Documented in
    docs/RELEASE_BUILD.md; README's per-language clone instructions unchanged.
-2. ~~Linux builds~~ **DONE 2026-07-07** — `./release.sh` builds x86_64 and
-   aarch64 static binaries in a pinned Alpine container
-   (tools/release-alpine.Dockerfile: alpine 3.22, tree-sitter v0.26.8 static)
-   from a clean `git archive HEAD` export. Release mode requires HEAD at an
-   annotated tag `v<VERSION>` matching shared/constants.h and a clean tree;
-   `--snapshot` builds commit-named test artifacts for pipeline iteration.
-3. ~~Smoke tests~~ **DONE 2026-07-07** — in release.sh: every binary's
-   `--version` must equal VERSION; every indexer's `--show-config` must work
-   in an empty dir (embedded config); index a sample C file and query the
-   symbol back with `qi`. Native-arch binaries are smoke-tested on the host
-   (proves musl-static runs outside Alpine); foreign arches in-container
-   via qemu.
+2. ~~Linux builds~~ **DONE 2026-07-07 (x86_64); aarch64 cross-build validated
+   2026-08-23** — `./release.sh` builds x86_64 and aarch64 static binaries in a
+   pinned Alpine container (tools/release-alpine.Dockerfile: alpine 3.22,
+   tree-sitter v0.26.8 static) from a clean `git archive HEAD` export. Release
+   mode requires HEAD at an annotated tag `v<VERSION>` matching
+   shared/constants.h and a clean tree; `--snapshot` builds commit-named test
+   artifacts for pipeline iteration. Cross-arch Linux (aarch64 Linux on an
+   x86_64 Linux host) needs two one-time host prerequisites: qemu binfmt
+   (`docker run --privileged --rm tonistiigi/binfmt --install arm64`) to run the
+   foreign binaries, and docker buildx (`sudo apt install docker-buildx`) to
+   honor `--platform` at build time — the legacy docker builder silently builds
+   host-arch otherwise. release.sh checks both and asserts the built image's
+   architecture before the long compile. Verified 2026-08-23: `file qi` →
+   `ELF 64-bit ... ARM aarch64, statically linked`. This path is Linux-only;
+   macOS (arm64) and Windows-on-ARM are separate OS targets (different binary
+   format and libc) that qemu/buildx cannot produce — see the macOS/Windows
+   notes below.
+3. ~~Smoke tests~~ **DONE 2026-07-07; qi gate hardened 2026-08-23** — in
+   release.sh: every binary's `--version` must equal VERSION; every indexer's
+   `--show-config` must work in an empty dir (embedded config); index a sample C
+   file and query the symbol back with `qi`. The qi gate matches the `Found <n>`
+   count line, not the bare symbol: qi echoes the query term in its "Searching
+   for:" header (and exits 0) even on a zero-match run, so grepping the symbol
+   alone would false-pass without a real hit. Native-arch binaries are
+   smoke-tested on the host (proves musl-static runs outside Alpine); foreign
+   arches in-container via qemu.
 4. ~~Package~~ **DONE 2026-07-07** — `dist/sourceminder-<version>-linux-
    <arch>.tar.gz` (eight binaries, LICENSE, README.md) + `dist/checksums.txt`.
    Where artifacts are *hosted* is a separate, open decision (see below).
-5. macOS (arm64, x86_64): not covered by release.sh (needs a Mac in the
-   loop); still open.
+5. macOS: arm64 DONE 2026-08-24 — built by `release-macos.sh`, a separate
+   native macOS script (release.sh is Linux/container-only). Same git-archive
+   input, `--snapshot`/`--keep-work` flags, and hardened smoke test; statically
+   links tree-sitter + sqlite and verifies with otool that only Apple system
+   libraries are dynamic. x86_64 still open (needs an Intel Mac). See
+   docs/RELEASE_BUILD.md.
 
 ## Step 3: install.sh (repo root) — DONE 2026-07-07
 

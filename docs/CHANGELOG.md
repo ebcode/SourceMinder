@@ -1,5 +1,11 @@
 # SourceMinder Changelog
 
+## Version 0.4.0-beta (2026-08-24)
+
+- Prebuilt binaries for Linux aarch64 and macOS arm64
+- release-macos.sh: builds self-contained macOS binaries
+- install.sh now installs on macOS
+
 ## Version 0.3.3-beta (2026-07-28)
 
 - Add check for .smconfig file in current folder

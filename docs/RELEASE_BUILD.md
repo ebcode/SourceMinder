@@ -82,6 +82,21 @@ cannot leak into an artifact.
 
 - **podman or docker** installed and runnable — the whole build happens in the
   container; nothing is compiled on the host.
+- **For a cross-arch Linux build** (aarch64 Linux on an x86_64 Linux host), two
+  one-time host prerequisites — release.sh checks both and fails early with
+  instructions if either is missing:
+  - qemu binfmt, to run the foreign binaries (smoke tests execute them):
+    `docker run --privileged --rm tonistiigi/binfmt --install arm64`
+    (or `sudo apt install qemu-user-static binfmt-support`).
+  - docker buildx, to build the foreign image: `sudo apt install docker-buildx`.
+    The legacy docker builder silently ignores `--platform` and builds the host
+    arch, producing a mislabeled tarball; buildx (BuildKit) honors it. podman
+    handles `--platform` natively and needs no buildx.
+
+  This covers aarch64 Linux only. macOS (arm64) and Windows-on-ARM are separate
+  OS targets — different binary format and libc — that qemu/buildx cannot
+  produce from the Alpine container; they need native toolchains and are out of
+  scope for `release.sh` (see the macOS/Windows notes in STATIC_RELEASE_PLAN.md).
 - **Your changes committed.** The build input is `git archive HEAD`, so
   anything uncommitted (or unstaged) is *not* in the artifacts. Commit first.
 - **A clean working tree**, and for a real (non-`--snapshot`) build, **HEAD at
@@ -112,12 +127,47 @@ portability proof. Foreign arches (aarch64 on an x86_64 host) build and
 test in-container via qemu binfmt; the script prints one-time setup
 instructions if qemu is missing.
 
+## release-macos.sh
+
+Builds the distributable macOS tarball. Must run on a Mac — macOS cannot be
+cross-compiled from Linux (Mach-O format, different ABI, no static libSystem),
+so this script builds the host architecture only. Run it on an Apple-silicon
+Mac for the arm64 tarball, and on an Intel Mac for the x86_64 tarball.
+
+Unlike the Linux binaries, macOS binaries are not fully static: they
+dynamically link Apple's system libraries (`/usr/lib/libSystem` and friends),
+which ship with every macOS. tree-sitter and sqlite are statically linked from
+pinned source, so recipients need no Homebrew or other third-party packages.
+The tree-sitter pin matches the Linux build (v0.26.8); sqlite is built from the
+3.53.4 amalgamation, whereas the Linux/Alpine build uses Alpine's sqlite-static
+(currently 3.49.x). The SQLite on-disk format is compatible across both, so an
+index DB written on one platform reads on the other.
+
+Prerequisites: Xcode Command Line Tools (`xcode-select --install`) for clang,
+make, ar, otool, and unzip. Same clean `git archive HEAD` input and
+tag/clean-tree rules as release.sh.
+
+    ./release-macos.sh                            # release build (host arch)
+    ./release-macos.sh --snapshot                 # test build, no tag required
+    ./release-macos.sh --keep-work                # keep the temp build dir
+    ./release-macos.sh --deployment-target 12.0   # oldest macOS to support
+                                                  # (default 11.0 arm64,
+                                                  #  10.15 x86_64)
+
+Before packaging, the script verifies each binary is the expected architecture
+and that `otool -L` reports only Apple system libraries (`/usr/lib`,
+`/System/Library`) — a non-system dependency (e.g. a Homebrew dylib) fails the
+build. It then runs the same smoke test as release.sh (versions, empty-dir
+`--show-config`, index a sample and query it back). Output:
+`dist/sourceminder-<version>-macos-<arch>.tar.gz` plus `dist/checksums.txt`.
+
 ## Release pipeline (see STATIC_RELEASE_PLAN.md)
 
 1. `fetch-grammars.sh` — pinned grammar sources (this document, above).
 2. `release.sh` — static musl binaries for Linux x86_64/aarch64, smoke
-   tests, tarballs + checksums in `dist/` (this document, above). macOS
-   builds are not yet covered (require a Mac in the loop).
+   tests, tarballs + checksums in `dist/` (this document, above).
+   `release-macos.sh` — the macOS equivalent, run natively on a Mac
+   (arm64, and an Intel Mac for x86_64).
 3. `install.sh` — user-facing installer:
    `curl -fsSL https://sourceminder.org/install.sh | sh`. Resolves the
    latest tag via the `/releases/latest` redirect (pin with
@@ -143,10 +193,22 @@ sourceminder.org serves the install path directly (no forge involved):
 Per release:
 
 1. Bump VERSION in `shared/constants.h`, commit, `git tag -a v<VERSION>`.
-2. `./release.sh` — builds, smoke-tests, packages into `dist/`.
-3. Upload `dist/*.tar.gz` + `dist/checksums.txt` to
+2. Build the tarballs on each platform, from the same tag:
+   - `./release.sh` on Linux — Linux x86_64 + aarch64.
+   - `./release-macos.sh` on a Mac (Apple silicon for arm64; an Intel Mac
+     for x86_64).
+3. Collect every tarball into one directory and generate a single
+   `checksums.txt` over the full set: `sha256sum -- *.tar.gz > checksums.txt`.
+   Each build script only checksums the tarballs in its own `dist/`, so those
+   per-machine files are partial — the hosted checksums.txt must list every
+   asset install.sh might download, or the install aborts on a missing hash.
+   Any one machine can do this: sha256 is computed over the raw bytes, so
+   running `sha256sum` on the Linux box over a macOS tarball (copied over as
+   binary) yields the same digest a Mac's `shasum -a 256` would, and
+   install.sh verifies with either tool.
+4. Upload `*.tar.gz` + `checksums.txt` to
    `sourceminder.org/releases/download/v<VERSION>/`.
-4. Create (or leave a stub at) `/releases/tag/v<VERSION>` and point the
+5. Create (or leave a stub at) `/releases/tag/v<VERSION>` and point the
    `/releases/latest` redirect at it.
-5. If install.sh changed since the last release, upload the new copy to
+6. If install.sh changed since the last release, upload the new copy to
    `sourceminder.org/install.sh` (the repo copy is the source of truth).

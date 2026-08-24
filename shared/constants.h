@@ -34,7 +34,7 @@
  */
 
 /* Version string for all indexer binaries and query tool */
-#define VERSION "0.3.3-beta"
+#define VERSION "0.4.0-beta"
 
 /* ============================================================================
  * Symbol & Identifier Limits

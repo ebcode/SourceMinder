@@ -137,7 +137,11 @@ cat > sample.c << 'EOF_C'
 int release_smoke_marker(int x) { return x + 1; }
 EOF_C
 "$BIN/index-c-static" . --once --silent
-"$BIN/qi-static" release_smoke_marker | grep -q release_smoke_marker
+# Gate on the match-count line, not the bare symbol: qi echoes the query term
+# in its "Searching for:" header even on a zero-match run (and exits 0), so
+# grepping the symbol alone would pass without a real hit. "Found <n>" prints
+# only when there are results.
+"$BIN/qi-static" release_smoke_marker | grep -qE '^Found [1-9]'
 
 echo "smoke OK"
 EOF_SMOKE
@@ -149,17 +153,44 @@ build_arch() {
         aarch64) platform=linux/arm64 ;;
     esac
 
-    if [ "$arch" != "$HOST_ARCH" ] && [ ! -e "/proc/sys/fs/binfmt_misc/qemu-$arch" ]; then
-        echo "Error: cross-building $arch needs qemu binfmt. One-time setup:" >&2
-        echo "  $ENGINE run --privileged --rm tonistiigi/binfmt --install arm64" >&2
-        echo "  (or: sudo apt install qemu-user-static binfmt-support)" >&2
-        exit 1
+    # Cross-arch prerequisites. Fail loudly and early rather than emit a
+    # mislabeled tarball: qemu runs the foreign binaries, buildx honors
+    # --platform at build time.
+    if [ "$arch" != "$HOST_ARCH" ]; then
+        if [ ! -e "/proc/sys/fs/binfmt_misc/qemu-$arch" ]; then
+            echo "Error: cross-building $arch needs qemu binfmt. One-time setup:" >&2
+            echo "  $ENGINE run --privileged --rm tonistiigi/binfmt --install arm64" >&2
+            echo "  (or: sudo apt install qemu-user-static binfmt-support)" >&2
+            exit 1
+        fi
+        # docker's legacy builder silently ignores --platform and builds the
+        # host arch; only BuildKit/buildx honors it. podman handles --platform
+        # natively, so this check is docker-only.
+        if [ "$ENGINE" = "docker" ] && ! docker buildx version >/dev/null 2>&1; then
+            echo "Error: cross-building $arch with docker needs buildx (BuildKit)." >&2
+            echo "       Without it the legacy builder silently builds $HOST_ARCH." >&2
+            echo "       One-time setup:" >&2
+            echo "  sudo apt install docker-buildx" >&2
+            echo "  (or install docker-buildx-plugin from Docker's apt repo)" >&2
+            exit 1
+        fi
     fi
 
     image="sourceminder-release:alpine-$arch"
     echo "==> [$arch] building toolchain image $image"
     $ENGINE build --platform "$platform" -t "$image" \
         -f tools/release-alpine.Dockerfile tools
+
+    # Trust nothing: confirm the image is the arch we asked for. A builder
+    # that ignores --platform produces a host-arch image that "builds" and
+    # "smoke-tests" fine yet ships mislabeled -- catch it before the long make.
+    want_imgarch=${platform#linux/}
+    got_imgarch=$($ENGINE image inspect "$image" --format '{{.Architecture}}' 2>/dev/null || true)
+    if [ "$got_imgarch" != "$want_imgarch" ]; then
+        echo "Error: image $image is arch '$got_imgarch', expected '$want_imgarch'." >&2
+        echo "       The builder ignored --platform (docker legacy builder?)." >&2
+        exit 1
+    fi
 
     # Fresh copy of the export per arch so build trees never mix.
     rm -rf "$WORK/build-$arch"
