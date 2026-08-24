@@ -1,4 +1,0 @@
-model,arm,instance_id,rep,kind,test_name,status
-claude-haiku-4-5-20251001,swebp_control,instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan,rep02,pass_to_pass,test/user/emails.js | email confirmation (library methods) getValidationExpiry should return a number smaller than configured expiry if validation available,FAILED
-claude-haiku-4-5-20251001,swebp_treatment,instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan,rep01,pass_to_pass,test/user/emails.js | email confirmation (library methods) getValidationExpiry should return a number smaller than configured expiry if validation available,FAILED
-claude-haiku-4-5-20251001,swebp_treatment,instance_NodeBB__NodeBB-04998908ba6721d64eba79ae3b65a351dcfbc5b5-vnan,rep03,fail_to_pass,test/user/emails.js | email confirmation (library methods) canSendValidation should return true if it has been long enough to re-send confirmation,FAILED
