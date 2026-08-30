@@ -16,3 +16,11 @@ Apply them concretely:
 - Measure and verify behavior instead of assuming it.
 
 If a requested change appears to conflict with these precepts, call out the conflict explicitly and propose an approach that satisfies the request while preserving the design principles where possible.
+
+---
+
+## Session-learned guidance
+
+- **Avoid blanket `sed -i` path-prefix rewrites.** A `sed -i 's|experiment/||g'` sweep over code + docs looked mechanical but silently mangled prose ("the `experiment/` directory" → "the `` directory"), comments, and a migration-plan doc that was supposed to be a historical record of the move. Cheap to miss, costly to repair.
+  - Prefer targeted `edit`/`rg -n`-reviewed changes; if a sweep is truly warranted, first confirm the token only appears as the intended prefix (e.g. `rg -n` and inspect every hit), exclude files that must stay historically accurate, and diff/verify after (`py_compile`, `bash -n`, re-grep).
+  - When de-prefixing paths after a repo move, review *each* match for prose vs. path before rewriting.

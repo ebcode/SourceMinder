@@ -99,7 +99,6 @@ how
 all
 any
 both
-each
 few
 more
 most

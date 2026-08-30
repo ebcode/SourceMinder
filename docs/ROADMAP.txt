@@ -4,7 +4,7 @@
 
 2. PHP Blade / Twig template indexing. Similarly for templates in Python (django), and Go (hugo), etc.
 
-3. Split out the ./experiment and ./html folders into their own repositories.
+3. Split out the ./experiment and ./html folders into their own repositories. (Done: `../sourceminder-experiment` and `sourceminder.org`, 2026-08-23.)
 
 4. Additional Languages: Perl, Rust. Perl is mostly there (as of June 2026). Rust needs more testing against real codebases.
 

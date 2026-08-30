@@ -4,7 +4,7 @@
 
 - Prebuilt binaries for Linux aarch64 and macOS arm64
 - release-macos.sh: builds self-contained macOS binaries
-- install.sh now installs on macOS
+- install.sh now installs on macOS arm64 and Linux aarch64
 
 ## Version 0.3.3-beta (2026-07-28)
 
