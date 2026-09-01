@@ -23,7 +23,15 @@ out. SourceMinder solves that problem.
 `-e` shows (expands) full definitions without opening the file, and 
 `--raw` prints exact source lines (hides line #:) to anchor edits.
 
-## Build & Install
+## Setup
+
+If you're on Linux (x86_64 or aarch64) or a modern Mac (arm64), you can download pre-built binaries:
+
+```
+curl -fsSl https://sourceminder.org/install.sh | bash
+```
+
+And jump down to the Five-Minute Tour section. Otherwise, you'll need to build from source.
 
 ### Prerequisites
 
