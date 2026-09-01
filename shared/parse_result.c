@@ -38,6 +38,7 @@ int init_parse_result(ParseResult *result) {
     }
     result->count = 0;
     result->capacity = PARSE_RESULT_INITIAL_CAPACITY;
+    result->filter = NULL;
     return 0;
 }
 
@@ -123,6 +124,16 @@ void add_entry(ParseResult *result, const char *symbol, int line,
             len--;
             entry->symbol[len] = '\0';
         }
+    }
+
+    /* English stopwords are a prose filter: drop them from STRING/COMMENT words
+     * only. Code symbols are never stopword-filtered (filter_should_index no
+     * longer does it). result->filter may be NULL for callers that don't set it.
+     * The slot at result->entries[count] is not committed until count++ below,
+     * so returning here simply leaves it to be reused. */
+    if ((context == CONTEXT_COMMENT || context == CONTEXT_STRING) &&
+        result->filter && filter_is_stopword(result->filter, entry->symbol)) {
+        return;
     }
 
     snprintf(entry->directory, sizeof(entry->directory), "%s", directory);

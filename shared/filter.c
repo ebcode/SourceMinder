@@ -198,7 +198,7 @@ static int load_regex_patterns_from_string(RegexSet *set, const char *data) {
     return 0;
 }
 
-static int is_in_set(WordSet *set, const char *word) {
+static int is_in_set(const WordSet *set, const char *word) {
     for (int i = 0; i < set->count; i++) {
         if (strcmp(set->words[i], word) == 0) {
             return 1;
@@ -324,10 +324,11 @@ int filter_should_index(SymbolFilter *filter, const char *symbol) {
         return 0;
     }
 
-    /* Skip common English stopwords */
-    if (is_in_set(&filter->stopwords, lower)) {
-        return 0;
-    }
+    /* Stopwords are intentionally NOT applied here. filter_should_index is the
+     * code-symbol gate (min-length, pure numbers, language keywords, regex);
+     * English stopwords are a prose filter that would wrongly drop real
+     * identifiers like `other`, `at`, or `not`. They are applied only to
+     * STRING/COMMENT words, centrally in add_entry(). See filter_is_stopword(). */
 
     /* Skip symbols matching regex patterns */
     if (matches_regex_pattern(&filter->regex_patterns, symbol)) {
@@ -335,6 +336,22 @@ int filter_should_index(SymbolFilter *filter, const char *symbol) {
     }
 
     return 1;
+}
+
+int filter_is_stopword(const SymbolFilter *filter, const char *symbol) {
+    if (!filter || !symbol || !symbol[0]) {
+        return 0;
+    }
+
+    /* Compare case-insensitively against the stopword list. */
+    char lower[SYMBOL_MAX_LENGTH];
+    int i;
+    for (i = 0; symbol[i] && i < SYMBOL_MAX_LENGTH - 1; i++) {
+        lower[i] = (char)tolower((unsigned char)symbol[i]);
+    }
+    lower[i] = '\0';
+
+    return is_in_set(&filter->stopwords, lower);
 }
 
 void filter_clean_string_symbol(const char *src, char *dst, size_t dst_size) {

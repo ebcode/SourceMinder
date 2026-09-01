@@ -47,8 +47,14 @@ typedef struct {
 /* Initialize filter by loading word lists from files */
 int filter_init(SymbolFilter *filter, const char *data_dir);
 
-/* Check if symbol should be indexed (returns 1 if yes, 0 if no) */
+/* Check if symbol should be indexed (returns 1 if yes, 0 if no).
+ * This is the code-symbol gate and does NOT apply stopwords. */
 int filter_should_index(SymbolFilter *filter, const char *symbol);
+
+/* Check if a word is an English stopword (returns 1 if yes, 0 if no).
+ * Applied only to STRING/COMMENT words (in add_entry); code symbols are never
+ * stopword-filtered. */
+int filter_is_stopword(const SymbolFilter *filter, const char *symbol);
 
 /* Clean symbol for strings/comments: preserve path characters (dots, slashes, hyphens, colons) */
 void filter_clean_string_symbol(const char *src, char *dst, size_t dst_size);

@@ -144,12 +144,6 @@ static void extract_type_from_declaration(TSNode declaration_node, const char *s
                                           TSNode declarator_node, char *type_buffer, size_t type_size,
                                           char *modifier_buffer, size_t modifier_size, const char *filename);
 
-/* Node handler function pointer type */
-typedef void (*NodeHandler)(TSNode node, const char *source_code,
-                           const char *directory, const char *filename,
-                           ParseResult *result, SymbolFilter *filter,
-                           int line);
-
 /* Initialize symbol lookup table - called once at startup */
 static void init_c_symbols(const TSLanguage *language) {
     static int initialized = 0;

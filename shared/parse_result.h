@@ -20,12 +20,15 @@
 
 #include "database.h"
 #include "constants.h"
+#include "filter.h"
 
 /* Parse result structure shared by all language parsers */
 typedef struct ParseResult {
     IndexEntry *entries;     /* Dynamic array of index entries */
     int count;               /* Current number of entries */
     int capacity;            /* Allocated capacity */
+    const SymbolFilter *filter;  /* For context-aware filtering (stopwords on
+                                    STRING/COMMENT words); may be NULL */
 } ParseResult;
 
 /* Initialize a ParseResult with initial capacity

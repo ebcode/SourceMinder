@@ -1,5 +1,9 @@
 # SourceMinder Changelog
 
+## Version 0.4.1-beta (2026-08-31)
+
+- /shared/config/stopwords.txt now ONLY filters out symbols from strings and comments
+
 ## Version 0.4.0-beta (2026-08-24)
 
 - Prebuilt binaries for Linux aarch64 and macOS arm64

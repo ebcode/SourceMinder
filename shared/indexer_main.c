@@ -589,6 +589,10 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         return 1;
     }
 
+    /* Give add_entry the filter so it can drop stopwords from STRING/COMMENT
+     * words only. Code symbols are never stopword-filtered. */
+    result->filter = filter;
+
     if (watch_only) {
         if (!silent) {
             printf("Skipping initial index (--watch-only). Watching for file changes...\n");
