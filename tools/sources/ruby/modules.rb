@@ -42,3 +42,23 @@ class Person
     @name = name
   end
 end
+
+# Compact qualified definitions: the written scope is the owner and namespace.
+module Zoo::Feeding
+  SCHEDULE = %w[dawn dusk]
+
+  def self.next_meal
+    SCHEDULE.first
+  end
+end
+
+class Zoo::Cage
+  def initialize(size)
+    @size = size
+  end
+end
+
+# Qualified reads and calls: terminal is the symbol, the qualifier is the namespace.
+first_meal = Zoo::Feeding::SCHEDULE.first
+pen = Zoo::Enclosure.new("otter")
+Zoo::Feeding.next_meal
