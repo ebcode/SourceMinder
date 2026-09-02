@@ -1,3 +1,7 @@
+__dir__
+__encoding__
+__file__
+__line__
 BEGIN
 END
 alias

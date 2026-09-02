@@ -69,11 +69,17 @@ void pluralize_common_word(const char *word, char *output, size_t output_size) {
 void warn_oversized_symbol(const char *desc, size_t length,
                            const char *content, unsigned int line,
                            const char *filename) {
-    /* Short preview of the offending content (safe for non-NUL-terminated input) */
+    /* Short preview of the offending content (safe for non-NUL-terminated input).
+     * Control bytes become spaces so one warning stays one grep-able line. */
     char preview[17];
     size_t preview_len = length < sizeof(preview) - 1 ? length : sizeof(preview) - 1;
     memcpy(preview, content, preview_len);
     preview[preview_len] = '\0';
+    for (size_t i = 0; i < preview_len; i++) {
+        if ((unsigned char)preview[i] < 0x20 || (unsigned char)preview[i] == 0x7F) {
+            preview[i] = ' ';
+        }
+    }
 
     fprintf(stderr,
             "Warning: indexer skipping oversized %s (%zu bytes, over SYMBOL_MAX_LENGTH): "

@@ -150,8 +150,10 @@ static int ensure_file_list_capacity(FileList *list) {
     list->files = new_files;
     list->capacity = new_capacity;
 
-    fprintf(stderr, "[FileList] Growing capacity: %d → %d files\n",
-            list->capacity / FILE_LIST_GROWTH_FACTOR, new_capacity);
+    /* A successful realloc is normal operation, not a user-facing event; this
+     * printed 5 lines on a 900-file tree. Kept for local debugging only.
+     * fprintf(stderr, "[FileList] Growing capacity: %d → %d files\n",
+     *         list->capacity / FILE_LIST_GROWTH_FACTOR, new_capacity); */
 
     return 0;
 }

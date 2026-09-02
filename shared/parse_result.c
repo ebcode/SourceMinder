@@ -92,7 +92,7 @@ void add_entry(ParseResult *result, const char *symbol, int line,
     size_t symbol_len = strlen(symbol);
     if (symbol_len >= SYMBOL_MAX_LENGTH) {
         warn_oversized_symbol(context_to_string(context, 1), symbol_len,
-                              symbol, line, filename);
+                              symbol, (unsigned int)line, filename);
         return;
     }
 
@@ -124,6 +124,9 @@ void add_entry(ParseResult *result, const char *symbol, int line,
             len--;
             entry->symbol[len] = '\0';
         }
+        /* An all-punctuation word ("...", "::") strips to nothing. The empty
+         * check at the top ran before this, so re-check. */
+        if (len == 0) return;
     }
 
     /* English stopwords are a prose filter: drop them from STRING/COMMENT words

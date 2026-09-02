@@ -236,6 +236,22 @@ static void extract_parameters(TSNode params, const char *source_code, const cha
 static void handle_method(TSNode node, const char *source_code, const char *directory,
                           const char *filename, ParseResult *result, SymbolFilter *filter,
                           int line, const char *parent, const char *ns) {
+    /* A parse error in the def header: on
+     * tree-sitter-ruby v0.23.1 `def !@` does not parse, and recovering reads the
+     * body's first statement as a method name, indexing a definition
+     * not present in the source. Recheck `def !@` on grammar
+     * updates and drop this guard once it (!@) parses. */
+    uint32_t header_children = ts_node_child_count(node);
+    for (uint32_t i = 0; i < header_children; i++) {
+        if (ts_node_is_error(ts_node_child(node, i))) {
+            if (g_debug) {
+                debug("[handle_method] Line %d: parse error in def header; no definition recorded", line);
+            }
+            process_children(node, source_code, directory, filename, result, filter, parent, ns);
+            return;
+        }
+    }
+
     TSNode name_node = ts_node_child_by_field_name(node, "name", 4);
     if (ts_node_is_null(name_node)) {
         process_children(node, source_code, directory, filename, result, filter, parent, ns);
@@ -733,29 +749,35 @@ static void index_symbol_args(TSNode call, const char *source_code, const char *
     }
 }
 
-/* Index the string argument of a require/require_relative as an import. */
+/* Index the string argument of a require/require_relative as an import.
+ * A path is split on interpolation boundaries: each literal run is its own IMP
+ * row, and each `#{...}` is visited so the names inside are indexed as reads
+ * (`__dir__` is filtered as a keyword; a real variable is not). */
 static void index_require(TSNode call, const char *source_code, const char *directory,
                           const char *filename, ParseResult *result, SymbolFilter *filter,
-                          const char *clue) {
+                          const char *clue, const char *parent, const char *ns) {
     TSNode args = ts_node_child_by_field_name(call, "arguments", 9);
     if (ts_node_is_null(args)) return;
     uint32_t n = ts_node_child_count(args);
     for (uint32_t i = 0; i < n; i++) {
         TSNode arg = ts_node_child(args, i);
         if (ts_node_symbol(arg) != ruby_symbols.string) continue;
-        char raw[SYMBOL_MAX_LENGTH];
-        node_text(arg, source_code, filename, raw, sizeof(raw));
-        size_t len = strlen(raw);
-        char path[SYMBOL_MAX_LENGTH];
-        if (len >= 2 && (raw[0] == '"' || raw[0] == '\'')) {
-            snprintf(path, sizeof(path), "%.*s", (int)(len - 2), raw + 1);
-        } else {
-            snprintf(path, sizeof(path), "%s", raw);
-        }
-        if (path[0] && filter_should_index(filter, path)) {
-            ExtColumns ext = { .clue = clue };
-            add_entry(result, path, node_line(arg), CONTEXT_IMPORT,
-                      directory, filename, NULL, &ext);
+        uint32_t parts = ts_node_child_count(arg);
+        for (uint32_t j = 0; j < parts; j++) {
+            TSNode part = ts_node_child(arg, j);
+            TSSymbol part_sym = ts_node_symbol(part);
+            if (part_sym == ruby_symbols.string_content) {
+                char path[SYMBOL_MAX_LENGTH];
+                node_text(part, source_code, filename, path, sizeof(path));
+                if (path[0] && filter_should_index(filter, path)) {
+                    ExtColumns ext = { .clue = clue };
+                    add_entry(result, path, node_line(part), CONTEXT_IMPORT,
+                              directory, filename, NULL, &ext);
+                }
+            } else if (part_sym == ruby_symbols.interpolation) {
+                visit_node(part, source_code, directory, filename, result, filter,
+                           parent, ns);
+            }
         }
     }
 }
@@ -801,7 +823,8 @@ static void handle_call(TSNode node, const char *source_code, const char *direct
     if (!ts_node_is_null(method) && ts_node_is_null(receiver)) {
         if (strcmp(mname, "require") == 0 || strcmp(mname, "require_relative") == 0 ||
             strcmp(mname, "load") == 0 || strcmp(mname, "autoload") == 0) {
-            index_require(node, source_code, directory, filename, result, filter, mname);
+            index_require(node, source_code, directory, filename, result, filter, mname,
+                          parent, ns);
             special = 1;
         } else if (strcmp(mname, "attr_accessor") == 0 || strcmp(mname, "attr_reader") == 0 ||
                    strcmp(mname, "attr_writer") == 0 || strcmp(mname, "attr") == 0) {
