@@ -48,6 +48,13 @@ class Dog < Animal
   end
 end
 
+# Qualified superclass (namespaced base class).
+class Puppy < Animals::Base
+  def speak
+    "Yip"
+  end
+end
+
 # Singleton method on a specific object.
 rex = Dog.new("Rex", "Lab")
 def rex.trick

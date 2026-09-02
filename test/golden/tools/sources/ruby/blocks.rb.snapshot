@@ -1,0 +1,69 @@
+line	symbol	context	parent	d
+1	blocks	COM		0
+1	blocks	FILE		0
+1	lambdas	COM		0
+1	procs	COM		0
+2	numbers	VAR		1
+4	block	COM		0
+4	do..end	COM		0
+5	each	CALL	numbers	0
+5	num	ARG		0
+5	numbers	VAR		0
+6	num	VAR		0
+6	puts	CALL		0
+9	block	COM		0
+9	braces	COM		0
+10	doubled	VAR		1
+10	map	CALL	numbers	0
+10	num	ARG		0
+10	num	VAR		0
+10	numbers	VAR		0
+12	block	COM		0
+12	index	COM		0
+12	multiple	COM		0
+12	params	COM		0
+13	each_with_index	CALL	numbers	0
+13	idx	ARG		0
+13	numbers	VAR		0
+13	value	ARG		0
+14	idx	VAR		0
+14	puts	CALL		0
+14	value	VAR		0
+17	lambda	COM		0
+17	locals	COM		0
+17	proc	COM		0
+18	adder	VAR		1
+18	lhs	ARG		0
+18	lhs	VAR		0
+18	proc	CALL		0
+18	rhs	ARG		0
+18	rhs	VAR		0
+19	lambda	CALL		0
+19	lhs	ARG		0
+19	lhs	VAR		0
+19	multiplier	VAR		1
+19	rhs	ARG		0
+19	rhs	VAR		0
+20	stabby	VAR		1
+20	val	ARG		0
+20	val	VAR		0
+20	val	VAR		0
+22	block	COM		0
+22	method	COM		0
+22	takes	COM		0
+22	yields	COM		0
+23	repeat	FUNC		1
+23	times	ARG	repeat	0
+24	idx	ARG		0
+24	idx	VAR		0
+24	times	CALL	times	0
+24	times	VAR		0
+27	2.7+	COM		0
+27	block	COM		0
+27	numbered	COM		0
+27	parameters	COM		0
+27	ruby	COM		0
+28	_1	VAR		0
+28	map	CALL	numbers	0
+28	numbers	VAR		0
+28	tripled	VAR		1

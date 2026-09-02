@@ -838,6 +838,11 @@ tests/run-tests: tests/run-tests.c
 	@echo "Compiling test runner..."
 	@$(CC) -std=c11 -Wall -Wextra -o tests/run-tests tests/run-tests.c
 
+# Golden-snapshot harness: per-file normalized index snapshots under test/
+test/sm-verify: test/sm-verify.c
+	@echo "Compiling sm-verify..."
+	@$(CC) $(CFLAGS) -o $@ test/sm-verify.c $(LDFLAGS)
+
 # Web/WASM slice compile-only smoke test
 web-smoke: $(WEB_DIR)
 	emcc -I. -Ishared -Ishared-web -std=c11 -c -DENABLE_TYPESCRIPT=1 $(WEB_SRC) -o $(WEB_DIR)/query-index-web.o

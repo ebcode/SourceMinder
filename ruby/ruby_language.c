@@ -306,6 +306,40 @@ static void handle_class(TSNode node, const char *source_code, const char *direc
         while (*p == '<' || isspace((unsigned char)*p)) p++;
         snprintf(super_buf, sizeof(super_buf), "%s", p);
         type = super_buf;
+
+        /* Record the superclass reference. When it names a constant (plain, or the
+         * terminal of a Scope::Name), it is a CLASS usage; a dynamic superclass
+         * (Struct.new(...), a variable) is visited as its natural CALL/VAR form. */
+        TSNode super_expr = ts_node_named_child(super, 0);
+        if (!ts_node_is_null(super_expr)) {
+            TSSymbol s = ts_node_symbol(super_expr);
+            bool is_const = (s == ruby_symbols.constant);
+            TSNode name_node = super_expr;
+            /* For a qualified Scope::Name, the scope is the terminal's parent, and is
+             * itself recorded as a read — matching handle_scope_resolution. */
+            const char *super_parent = NULL;
+            char scope_buf[SYMBOL_MAX_LENGTH];
+            if (s == ruby_symbols.scope_resolution) {
+                name_node = ts_node_child_by_field_name(super_expr, "name", 4);
+                is_const = !ts_node_is_null(name_node);
+                TSNode scope = ts_node_child_by_field_name(super_expr, "scope", 5);
+                if (!ts_node_is_null(scope)) {
+                    node_text(scope, source_code, filename, scope_buf, sizeof(scope_buf));
+                    if (scope_buf[0] && !strchr(scope_buf, '\n')) super_parent = scope_buf;
+                    visit_node(scope, source_code, directory, filename, result, filter, parent, ns);
+                }
+            }
+            if (is_const) {
+                char cbuf[SYMBOL_MAX_LENGTH];
+                node_text(name_node, source_code, filename, cbuf, sizeof(cbuf));
+                if (cbuf[0] && filter_should_index(filter, cbuf))
+                    add_entry(result, cbuf, node_line(name_node), CONTEXT_CLASS,
+                              directory, filename, NULL,
+                              super_parent ? &(ExtColumns){.parent = super_parent} : NULL);
+            } else {
+                visit_node(super_expr, source_code, directory, filename, result, filter, parent, ns);
+            }
+        }
     }
 
     if (name[0] && filter_should_index(filter, name)) {
@@ -761,6 +795,37 @@ static void handle_identifier(TSNode node, const char *source_code, const char *
     }
 }
 
+/* Qualified constant reference `Scope::Name` (e.g. Float::INFINITY). Record the
+ * rightmost `name` as a VAR read with the scope as its parent, then visit the
+ * scope so it is a read too (and nested A::B::C recurses). */
+static void handle_scope_resolution(TSNode node, const char *source_code, const char *directory,
+                                    const char *filename, ParseResult *result, SymbolFilter *filter,
+                                    int line, const char *parent, const char *ns) {
+    (void)line; (void)parent;
+    TSNode scope = ts_node_child_by_field_name(node, "scope", 5);
+    TSNode name = ts_node_child_by_field_name(node, "name", 4);
+
+    const char *name_parent = NULL;
+    char scope_buf[SYMBOL_MAX_LENGTH];
+    if (!ts_node_is_null(scope)) {
+        node_text(scope, source_code, filename, scope_buf, sizeof(scope_buf));
+        if (scope_buf[0] && !strchr(scope_buf, '\n')) name_parent = scope_buf;
+    }
+
+    if (!ts_node_is_null(name)) {
+        char nbuf[SYMBOL_MAX_LENGTH];
+        node_text(name, source_code, filename, nbuf, sizeof(nbuf));
+        if (nbuf[0] && filter_should_index(filter, nbuf)) {
+            ExtColumns ext = { .parent = name_parent };
+            add_entry(result, nbuf, node_line(name), CONTEXT_VARIABLE,
+                      directory, filename, NULL, &ext);
+        }
+    }
+
+    if (!ts_node_is_null(scope))
+        visit_node(scope, source_code, directory, filename, result, filter, parent, ns);
+}
+
 /* A :symbol literal used as a value (status = :active, when :circle, role: :admin).
  * The bare name (colon stripped) is the searchable token, recorded as a usage. */
 static void handle_symbol(TSNode node, const char *source_code, const char *directory,
@@ -902,7 +967,7 @@ static void visit_pattern(TSNode node, const char *source_code, const char *dire
                sym == ruby_symbols.find_pattern ||
                sym == ruby_symbols.hash_pattern) {
         /* Container patterns: an optional `class` constant (a matched type — a
-         * read, deferred to constant-read support) plus element sub-patterns. */
+         * read) plus element sub-patterns. */
         uint32_t n = ts_node_named_child_count(node);
         for (uint32_t i = 0; i < n; i++) {
             visit_pattern(ts_node_named_child(node, i), source_code, directory,
@@ -997,8 +1062,11 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
         handle_comment(node, source_code, directory, filename, result, filter, line, parent, ns);
     } else if (sym == ruby_symbols.heredoc_body) {
         handle_heredoc(node, source_code, directory, filename, result, filter, line, parent, ns);
-    } else if (sym == ruby_symbols.identifier) {
+    } else if (sym == ruby_symbols.identifier || sym == ruby_symbols.constant) {
+        /* A bare constant in read position is a usage, like a bare identifier read. */
         handle_identifier(node, source_code, directory, filename, result, filter, line, parent, ns);
+    } else if (sym == ruby_symbols.scope_resolution) {
+        handle_scope_resolution(node, source_code, directory, filename, result, filter, line, parent, ns);
     } else if (sym == ruby_symbols.simple_symbol) {
         handle_symbol(node, source_code, directory, filename, result, filter, line, parent, ns);
     } else if (sym == ruby_symbols.pair) {

@@ -15,6 +15,7 @@ end
 
 class Circle
   TAU = PI * 2
+  BIGGEST = Float::INFINITY
 
   def initialize(radius)
     @radius = radius
@@ -25,5 +26,9 @@ class Circle
 
   def area
     @area ||= PI * @radius * @radius
+  end
+
+  def circumference
+    Math.sqrt(@area) * TAU
   end
 end
