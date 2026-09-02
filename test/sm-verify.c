@@ -42,6 +42,7 @@
 
 #define MAX_PATH 4096
 #define MAX_CMD 8192
+#define MAX_FILES 4096
 
 typedef struct {
     const char *ext;
@@ -64,6 +65,7 @@ static const Language languages[] = {
 static int update_mode = 0;
 static int passed = 0;
 static int failed = 0;
+static int updated = 0;
 
 static int file_exists(const char *path) {
     struct stat st;
@@ -71,9 +73,17 @@ static int file_exists(const char *path) {
 }
 
 /* The golden tree must stay under test/golden/, so require a repository-root-
- * relative path with no ".." components. */
+ * relative path with no ".." component. A ".." inside a name (foo..bar.rb) is
+ * fine; only a whole component escapes. */
 static int path_is_safe(const char *path) {
-    return path[0] != '/' && strstr(path, "..") == NULL;
+    if (path[0] == '/') return 0;
+    for (const char *p = path; *p; ) {
+        if (p[0] == '.' && p[1] == '.' && (p[2] == '/' || p[2] == '\0')) return 0;
+        const char *slash = strchr(p, '/');
+        if (!slash) break;
+        p = slash + 1;
+    }
+    return 1;
 }
 
 static const Language *get_language(const char *path) {
@@ -93,13 +103,13 @@ static int run_command(const char *cmd) {
 
 static int files_differ(const char *file1, const char *file2) {
     char cmd[MAX_CMD + MAX_PATH];
-    snprintf(cmd, sizeof(cmd), "diff -q %s %s > /dev/null 2>&1", file1, file2);
+    snprintf(cmd, sizeof(cmd), "diff -q \"%s\" \"%s\" > /dev/null 2>&1", file1, file2);
     return run_command(cmd) != 0;
 }
 
 static void show_diff(const char *file1, const char *file2) {
     char cmd[MAX_CMD + MAX_PATH];
-    snprintf(cmd, sizeof(cmd), "diff -u %s %s", file1, file2);
+    snprintf(cmd, sizeof(cmd), "diff -u \"%s\" \"%s\"", file1, file2);
     int rc = system(cmd);
     (void)rc;
 }
@@ -197,7 +207,8 @@ static void verify_file(const char *path) {
 
     const Language *lang = get_language(path);
     if (!lang) {
-        printf("  %s ... SKIP (unsupported extension)\n", path);
+        /* Named on the command line but unverifiable: report it, don't skip quietly. */
+        printf("  %s ... FAIL (unsupported extension)\n", path);
         failed++;
         return;
     }
@@ -214,7 +225,12 @@ static void verify_file(const char *path) {
 
     snprintf(db_path, sizeof(db_path), "/tmp/sm-verify-%d.db", getpid());
     snprintf(actual_path, sizeof(actual_path), "/tmp/sm-verify-%d.out", getpid());
-    snprintf(golden_path, sizeof(golden_path), "test/golden/%s.snapshot", path);
+    if (snprintf(golden_path, sizeof(golden_path), "test/golden/%s.snapshot", path)
+            >= (int)sizeof(golden_path)) {
+        printf("  %s ... FAIL (path too long for a golden)\n", path);
+        failed++;
+        return;
+    }
     snprintf(golden_dir, sizeof(golden_dir), "%s", golden_path);
     char *last_slash = strrchr(golden_dir, '/');
     if (last_slash) *last_slash = '\0';
@@ -222,7 +238,10 @@ static void verify_file(const char *path) {
     printf("  %s ... ", path);
     fflush(stdout);
 
-    /* Step 1: index the file into a fresh scratch DB */
+    /* Step 1: index into a genuinely fresh scratch DB. The indexer appends, and a
+     * killed run leaves its DB for whoever next reuses the PID, so clear the path
+     * first -- inherited rows would silently corrupt the golden. */
+    cleanup_scratch(db_path, actual_path);
     snprintf(cmd, sizeof(cmd), "%s \"%s\" --db-file %s --once --silent > /dev/null 2>&1",
              lang->indexer, path, db_path);
     if (run_command(cmd) != 0) {
@@ -265,7 +284,7 @@ static void verify_file(const char *path) {
             failed++;
         } else {
             printf("UPDATED\n");
-            passed++;
+            updated++;
         }
     } else if (!file_exists(golden_path)) {
         printf("FAIL (no golden: %s; run with --update)\n", golden_path);
@@ -294,11 +313,10 @@ static void print_usage(const char *prog) {
     printf("Examples:\n");
     printf("  %s tools/sources/ruby/blocks.rb\n", prog);
     printf("  %s --update tools/sources/ruby/*.rb\n", prog);
-    printf("  %s tools/sources/ruby tools/sources/c\n", prog);
 }
 
 int main(int argc, char *argv[]) {
-    const char *files[MAX_PATH];
+    const char *files[MAX_FILES];
     int file_count = 0;
 
     for (int i = 1; i < argc; i++) {
@@ -308,7 +326,7 @@ int main(int argc, char *argv[]) {
             print_usage(argv[0]);
             return 0;
         } else {
-            if (file_count >= MAX_PATH) {
+            if (file_count >= MAX_FILES) {
                 fprintf(stderr, "Error: too many files\n");
                 return 2;
             }
@@ -333,6 +351,9 @@ int main(int argc, char *argv[]) {
     }
 
     printf("\n");
-    printf("Results: %d passed, %d failed\n", passed, failed);
+    if (update_mode)
+        printf("Results: %d updated, %d failed\n", updated, failed);
+    else
+        printf("Results: %d passed, %d failed\n", passed, failed);
     return failed == 0 ? 0 : 1;
 }

@@ -281,6 +281,32 @@ static void handle_method(TSNode node, const char *source_code, const char *dire
     }
 }
 
+/* A `Scope::Name` constant, split into parts. */
+typedef struct {
+    TSNode name;              /* the terminal constant */
+    TSNode scope;             /* null if absent */
+    const char *scope_text;   /* points into the caller's buffer; NULL if unusable */
+} ScopeRef;
+
+/* Split `Scope::Name` so every site records it alike: terminal is the symbol,
+ * scope is the parent. The scope stays as written -- Ruby resolves constants at
+ * run time, so the real path is unknowable here. False if there is no name. */
+static bool split_scope_ref(TSNode node, const char *source_code, const char *filename,
+                            char *scope_buf, size_t scope_len, ScopeRef *out) {
+    TSNode name = ts_node_child_by_field_name(node, "name", 4);
+    if (ts_node_is_null(name)) return false;
+
+    out->name = name;
+    out->scope = ts_node_child_by_field_name(node, "scope", 5);
+    out->scope_text = NULL;
+    if (!ts_node_is_null(out->scope)) {
+        node_text(out->scope, source_code, filename, scope_buf, scope_len);
+        /* Newlines would break a single-line column. */
+        if (scope_buf[0] && !strchr(scope_buf, '\n')) out->scope_text = scope_buf;
+    }
+    return true;
+}
+
 /* class Foo < Bar ... end */
 static void handle_class(TSNode node, const char *source_code, const char *directory,
                          const char *filename, ParseResult *result, SymbolFilter *filter,
@@ -289,6 +315,22 @@ static void handle_class(TSNode node, const char *source_code, const char *direc
     if (ts_node_is_null(name_node)) {
         process_children(node, source_code, directory, filename, result, filter, parent, ns);
         return;
+    }
+
+    /* `class Scope::Name` names the same class as `module Scope; class Name`, so
+     * record it the same way. Ruby reads the scope to find where to define the
+     * class -- `class Missing::Thing` raises NameError -- so index it as a read. */
+    char class_scope_buf[SYMBOL_MAX_LENGTH];
+    const char *class_scope = NULL;
+    if (ts_node_symbol(name_node) == ruby_symbols.scope_resolution) {
+        ScopeRef sr;
+        if (split_scope_ref(name_node, source_code, filename, class_scope_buf,
+                            sizeof(class_scope_buf), &sr)) {
+            name_node = sr.name;
+            class_scope = sr.scope_text;
+            if (!ts_node_is_null(sr.scope))
+                visit_node(sr.scope, source_code, directory, filename, result, filter, parent, ns);
+        }
     }
 
     char name[SYMBOL_MAX_LENGTH];
@@ -314,28 +356,35 @@ static void handle_class(TSNode node, const char *source_code, const char *direc
         if (!ts_node_is_null(super_expr)) {
             TSSymbol s = ts_node_symbol(super_expr);
             bool is_const = (s == ruby_symbols.constant);
-            TSNode name_node = super_expr;
+            TSNode super_name = super_expr;
             /* For a qualified Scope::Name, the scope is the terminal's parent, and is
              * itself recorded as a read — matching handle_scope_resolution. */
             const char *super_parent = NULL;
             char scope_buf[SYMBOL_MAX_LENGTH];
             if (s == ruby_symbols.scope_resolution) {
-                name_node = ts_node_child_by_field_name(super_expr, "name", 4);
-                is_const = !ts_node_is_null(name_node);
-                TSNode scope = ts_node_child_by_field_name(super_expr, "scope", 5);
-                if (!ts_node_is_null(scope)) {
-                    node_text(scope, source_code, filename, scope_buf, sizeof(scope_buf));
-                    if (scope_buf[0] && !strchr(scope_buf, '\n')) super_parent = scope_buf;
-                    visit_node(scope, source_code, directory, filename, result, filter, parent, ns);
+                ScopeRef sr;
+                is_const = split_scope_ref(super_expr, source_code, filename,
+                                           scope_buf, sizeof(scope_buf), &sr);
+                if (is_const) {
+                    super_name = sr.name;
+                    super_parent = sr.scope_text;
+                    if (!ts_node_is_null(sr.scope))
+                        visit_node(sr.scope, source_code, directory, filename, result, filter, parent, ns);
                 }
             }
             if (is_const) {
                 char cbuf[SYMBOL_MAX_LENGTH];
-                node_text(name_node, source_code, filename, cbuf, sizeof(cbuf));
-                if (cbuf[0] && filter_should_index(filter, cbuf))
-                    add_entry(result, cbuf, node_line(name_node), CONTEXT_CLASS,
-                              directory, filename, NULL,
-                              super_parent ? &(ExtColumns){.parent = super_parent} : NULL);
+                node_text(super_name, source_code, filename, cbuf, sizeof(cbuf));
+                if (cbuf[0] && filter_should_index(filter, cbuf)) {
+                    /* Record the namespace this reference sits in, as every other
+                     * entry does, so -ns filters don't skip superclass references. */
+                    ExtColumns ext = {
+                        .parent = super_parent,
+                        .namespace = (ns && ns[0]) ? ns : NULL
+                    };
+                    add_entry(result, cbuf, node_line(super_name), CONTEXT_CLASS,
+                              directory, filename, NULL, &ext);
+                }
             } else {
                 visit_node(super_expr, source_code, directory, filename, result, filter, parent, ns);
             }
@@ -345,9 +394,11 @@ static void handle_class(TSNode node, const char *source_code, const char *direc
     if (name[0] && filter_should_index(filter, name)) {
         char location[SYMBOL_MAX_LENGTH];
         format_source_location(node, location, sizeof(location));
+        /* A written-out scope wins over the enclosing one: it says where the class
+         * lives, while the enclosing namespace is only where the text sits. */
         ExtColumns ext = {
-            .parent = parent,
-            .namespace = (ns && ns[0]) ? ns : NULL,
+            .parent = class_scope ? class_scope : parent,
+            .namespace = class_scope ? class_scope : ((ns && ns[0]) ? ns : NULL),
             .type = type,
             .definition = "1"
         };
@@ -356,7 +407,7 @@ static void handle_class(TSNode node, const char *source_code, const char *direc
     }
 
     char scope[SYMBOL_MAX_LENGTH];
-    child_ns(ns, name, scope, sizeof(scope));
+    child_ns(class_scope ? class_scope : ns, name, scope, sizeof(scope));
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
     if (!ts_node_is_null(body)) {
         process_children(body, source_code, directory, filename, result, filter, name, scope);
@@ -802,28 +853,23 @@ static void handle_scope_resolution(TSNode node, const char *source_code, const 
                                     const char *filename, ParseResult *result, SymbolFilter *filter,
                                     int line, const char *parent, const char *ns) {
     (void)line; (void)parent;
-    TSNode scope = ts_node_child_by_field_name(node, "scope", 5);
-    TSNode name = ts_node_child_by_field_name(node, "name", 4);
-
-    const char *name_parent = NULL;
     char scope_buf[SYMBOL_MAX_LENGTH];
-    if (!ts_node_is_null(scope)) {
-        node_text(scope, source_code, filename, scope_buf, sizeof(scope_buf));
-        if (scope_buf[0] && !strchr(scope_buf, '\n')) name_parent = scope_buf;
+    ScopeRef sr;
+    if (!split_scope_ref(node, source_code, filename, scope_buf, sizeof(scope_buf), &sr)) {
+        process_children(node, source_code, directory, filename, result, filter, parent, ns);
+        return;
     }
 
-    if (!ts_node_is_null(name)) {
-        char nbuf[SYMBOL_MAX_LENGTH];
-        node_text(name, source_code, filename, nbuf, sizeof(nbuf));
-        if (nbuf[0] && filter_should_index(filter, nbuf)) {
-            ExtColumns ext = { .parent = name_parent };
-            add_entry(result, nbuf, node_line(name), CONTEXT_VARIABLE,
-                      directory, filename, NULL, &ext);
-        }
+    char nbuf[SYMBOL_MAX_LENGTH];
+    node_text(sr.name, source_code, filename, nbuf, sizeof(nbuf));
+    if (nbuf[0] && filter_should_index(filter, nbuf)) {
+        ExtColumns ext = { .parent = sr.scope_text };
+        add_entry(result, nbuf, node_line(sr.name), CONTEXT_VARIABLE,
+                  directory, filename, NULL, &ext);
     }
 
-    if (!ts_node_is_null(scope))
-        visit_node(scope, source_code, directory, filename, result, filter, parent, ns);
+    if (!ts_node_is_null(sr.scope))
+        visit_node(sr.scope, source_code, directory, filename, result, filter, parent, ns);
 }
 
 /* A :symbol literal used as a value (status = :active, when :circle, role: :admin).
