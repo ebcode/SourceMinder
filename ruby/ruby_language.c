@@ -1138,6 +1138,24 @@ static void handle_identifier(TSNode node, const char *source_code, const char *
     }
 }
 
+/* instance_variable / class_variable in read position. Mirrors the write path
+ * (index_lvalue): object/class state is CONTEXT_PROPERTY owned by the enclosing
+ * class (implicit self), so the read in `@count + 1` groups with the write in
+ * `@count = 0`. The sigil counts toward length and stays in full_symbol;
+ * add_entry strips it for the search key. */
+static void handle_instance_variable(TSNode node, const char *source_code, const char *directory,
+                                     const char *filename, ParseResult *result, SymbolFilter *filter,
+                                     int line, const char *parent, const char *ns) {
+    (void)ns;
+    char name[SYMBOL_MAX_LENGTH];
+    node_text(node, source_code, filename, name, sizeof(name));
+    if (index_name(filter, name)) {
+        ExtColumns ext = { .parent = parent };
+        add_entry(result, name, line, CONTEXT_PROPERTY,
+                  directory, filename, NULL, &ext);
+    }
+}
+
 /* Qualified constant reference `Scope::Name` (e.g. Float::INFINITY). Record the
  * rightmost `name` as a VAR read with the scope as its parent, then visit the
  * scope so it is a read too (and nested A::B::C recurses). */
@@ -1413,6 +1431,8 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
          * identifier read. The sigil counts toward length: `$o` is 2 chars and
          * is indexed, matching the "symbols longer than 1 char" contract. */
         handle_identifier(node, source_code, directory, filename, result, filter, line, parent, ns);
+    } else if (sym == ruby_symbols.instance_variable || sym == ruby_symbols.class_variable) {
+        handle_instance_variable(node, source_code, directory, filename, result, filter, line, parent, ns);
     } else if (sym == ruby_symbols.scope_resolution) {
         handle_scope_resolution(node, source_code, directory, filename, result, filter, line, parent, ns);
     } else if (sym == ruby_symbols.simple_symbol) {
