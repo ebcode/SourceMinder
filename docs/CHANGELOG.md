@@ -2,7 +2,13 @@
 
 ## Version 0.4.1-beta (2026-08-31)
 
-- /shared/config/stopwords.txt now ONLY filters out symbols from strings and comments
+- /shared/config/stopwords.txt now filters out symbols from comments and strings only
+- All Indexers: index keyword-named symbols in all languages; keywords.txt files filter out comments and strings only
+- qi: strip leading sigils ($, @, #) and retry on 0 results
+- qi: query results count pulls from `symbol` column, not `full_symbol`
+- Perl Indexer: add perl_symbols.arraylen
+- PHP Indexer: now indexes use trait statements
+- Ruby Indexer: initial implementation
 
 ## Version 0.4.0-beta (2026-08-24)
 

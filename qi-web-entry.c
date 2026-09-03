@@ -1349,8 +1349,11 @@ char *qi_web_build(const char *command) {
         }
 
         for (int i = 0; i < patterns.count; i++) {
+            /* `symbol`, not `full_symbol`: this must count what the main query
+             * matches, or the diagnostics claim matches the suggested command
+             * cannot return. Mirrors native count_pattern_matches. */
             char *eq = sqlite3_mprintf(
-                "SELECT COUNT(*) FROM code_index WHERE full_symbol LIKE %q ESCAPE '\\'",
+                "SELECT COUNT(*) FROM code_index WHERE symbol LIKE %q ESCAPE '\\'",
                 patterns.patterns[i]);
             if (eq) { wo_printf(&wo, "\nNR_EXACT_%d|%s", i, eq); sqlite3_free(eq); }
             /* Partial-match count only when the converted pattern has no '%'
@@ -1359,7 +1362,7 @@ char *qi_web_build(const char *command) {
                 char *wild = sqlite3_mprintf("%%%s%%", patterns.patterns[i]);
                 if (wild) {
                     char *wq = sqlite3_mprintf(
-                        "SELECT COUNT(*) FROM code_index WHERE full_symbol LIKE %q ESCAPE '\\'",
+                        "SELECT COUNT(*) FROM code_index WHERE symbol LIKE %q ESCAPE '\\'",
                         wild);
                     if (wq) { wo_printf(&wo, "\nNR_WILD_%d|%s", i, wq); sqlite3_free(wq); }
                     sqlite3_free(wild);

@@ -326,16 +326,19 @@ int filter_should_index(SymbolFilter *filter, const char *symbol) {
         return 0;
     }
 
-    /* Skip language keywords */
-    if (is_in_set(&filter->ts_keywords, lower)) {
-        return 0;
-    }
-
-    /* Stopwords are intentionally NOT applied here. filter_should_index is the
-     * code-symbol gate (min-length, pure numbers, language keywords, regex);
-     * English stopwords are a prose filter that would wrongly drop real
-     * identifiers like `other`, `at`, or `not`. They are applied only to
-     * STRING/COMMENT words, centrally in add_entry(). See filter_is_stopword(). */
+    /* Neither stopwords nor language keywords are applied here. filter_should_index
+     * is the code-symbol gate: minimum length, pure numbers, regex patterns. Both
+     * word lists are prose filters, applied to STRING/COMMENT words only, centrally
+     * in add_entry().
+     *
+     * Stopwords match real identifiers such as `other`, `at` and `not`.
+     *
+     * Keywords match real names. The grammar gives keyword position its own node
+     * type, so text arriving here as a symbol is a name the parser accepted:
+     * `sub print`, `function list()`, `def next`. The comparison lowercases, so a
+     * keyword entry also matches any capitalization of it: `Long`, `Retry`.
+     *
+     * See filter_is_stopword() and filter_is_keyword(). */
 
     /* Skip symbols matching regex patterns */
     if (matches_regex_pattern(&filter->regex_patterns, symbol)) {

@@ -134,13 +134,16 @@ void add_entry(ParseResult *result, const char *symbol, int line,
         if (len == 0) return;
     }
 
-    /* English stopwords are a prose filter: drop them from STRING/COMMENT words
-     * only. Code symbols are never stopword-filtered (filter_should_index no
-     * longer does it). result->filter may be NULL for callers that don't set it.
-     * The slot at result->entries[count] is not committed until count++ below,
-     * so returning here simply leaves it to be reused. */
-    if ((context == CONTEXT_COMMENT || context == CONTEXT_STRING) &&
-        result->filter && filter_is_stopword(result->filter, entry->symbol)) {
+    /* English stopwords and language keywords are prose filters: they apply to
+     * STRING/COMMENT words only. Code symbols are never filtered for either,
+     * because both lists match legitimate identifiers (`other`, `not`) and
+     * legitimate names in keyword position (`sub print`, `def next`).
+     * result->filter may be NULL for callers that don't set it. The slot at
+     * result->entries[count] is not committed until count++ below, so returning
+     * here simply leaves it to be reused. */
+    if ((context == CONTEXT_COMMENT || context == CONTEXT_STRING) && result->filter &&
+        (filter_is_stopword(result->filter, entry->symbol) ||
+         filter_is_keyword(result->filter, entry->symbol))) {
         return;
     }
 

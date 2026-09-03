@@ -130,13 +130,11 @@ static void node_text(TSNode node, const char *source_code, const char *filename
 }
 
 /* Gate for a name the grammar put in a naming position (method name, def name,
- * class/module name, hash key, symbol). A keyword there is never the keyword —
- * tree-sitter gives keyword position its own node type — so `obj.class`,
- * `def next` and `:yield` are real names and only the keyword list rejects them.
- * Not for prose or raw text: string words, require paths, filenames. */
+ * class/module name, hash key, symbol). Keyword exemption lives in
+ * filter_should_index, which applies the keyword list to prose only, so this is
+ * the plain code-symbol gate plus a non-empty check. */
 static int index_name(SymbolFilter *filter, const char *name) {
-    return name[0] && (filter_should_index(filter, name) ||
-                       filter_is_keyword(filter, name));
+    return name[0] && filter_should_index(filter, name);
 }
 
 /* Bounded copy between symbol buffers. strncat-based copies of a

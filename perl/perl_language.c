@@ -109,6 +109,12 @@ static struct {
     TSSymbol slice_expression;
     TSSymbol slice_container_variable;
 
+    /* $#array — last index of @array. The grammar gives it its own node with a
+     * varname child, so without this it reads as neither scalar nor array and
+     * the array reference is lost. ($#{$ref} / $#$ref are
+     * arraylen_deref_expression and already resolve via process_children.) */
+    TSSymbol arraylen;
+
     /* Subroutine signature parameters */
     TSSymbol mandatory_parameter;
     TSSymbol optional_parameter;
@@ -198,6 +204,7 @@ static void init_perl_symbols(const TSLanguage *language) {
     perl_symbols.array_element_expression  = ts_language_symbol_for_name(language, "array_element_expression",  24, true);
     perl_symbols.slice_expression          = ts_language_symbol_for_name(language, "slice_expression",          16, true);
     perl_symbols.slice_container_variable  = ts_language_symbol_for_name(language, "slice_container_variable",  24, true);
+    perl_symbols.arraylen                  = ts_language_symbol_for_name(language, "arraylen",                  8, true);
 
     /* Subroutine signature parameters */
     perl_symbols.mandatory_parameter = ts_language_symbol_for_name(language, "mandatory_parameter", 19, true);
@@ -274,6 +281,9 @@ static void index_sigil_node(TSNode node, const char *source_code,
         const char *sigil_type = PERL_TYPE_SCALAR;
         if (node_sym == perl_symbols.array) sigil_type = PERL_TYPE_ARRAY;
         else if (node_sym == perl_symbols.hash) sigil_type = PERL_TYPE_HASH;
+        /* $#items yields a scalar but names @items, so the row describes the
+         * array being read -- matching $items[0], which also records `array`. */
+        else if (node_sym == perl_symbols.arraylen) sigil_type = PERL_TYPE_ARRAY;
         /* scalar and container_variable both yield PERL_TYPE_SCALAR */
 
         int line = (int)ts_node_start_point(node).row + 1;
@@ -1416,10 +1426,12 @@ static void visit_node(TSNode node, const char *source_code,
         return;
     }
 
-    /* Standalone scalar/array/hash/container_variable outside a declaration — index as reference */
+    /* Standalone scalar/array/hash/container_variable/arraylen outside a
+     * declaration — index as reference */
     if (node_sym == perl_symbols.scalar         ||
         node_sym == perl_symbols.array          ||
         node_sym == perl_symbols.hash           ||
+        node_sym == perl_symbols.arraylen       ||
         node_sym == perl_symbols.container_variable) {
         /* Skip if already indexed as filehandle by handle_function_call */
         if (ts_node_start_byte(node) == g_skip_scalar_start) {

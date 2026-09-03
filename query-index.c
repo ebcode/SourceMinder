@@ -1597,14 +1597,20 @@ static int count_distinct_files(CodeIndexDatabase *db,
     return file_count;
 }
 
-/* WEB_SAFE: counts pattern matches against the indexed symbol column. */
+/* WEB_SAFE: counts pattern matches against the indexed symbol column.
+ * Must query `symbol`, not `full_symbol`: `symbol` is the search key the main
+ * query matches, while `full_symbol` keeps the name as written (PHP `$greet`,
+ * Ruby `@count`). Counting the wrong column made the no-results diagnostics
+ * claim matches that the command they suggested could not return, and -- because
+ * a nonzero count means "this pattern exists" -- suppressed the wildcard and
+ * sigil retries for exactly the patterns that need them. */
 static int count_pattern_matches(CodeIndexDatabase *db, const char *pattern) {
     SqlQueryBuilder builder;
     if (init_sql_builder(&builder) != 0) {
         return -1;
     }
 
-    if (sql_append(&builder, "SELECT COUNT(*) FROM code_index WHERE full_symbol LIKE ? ESCAPE '\\'") != 0) {
+    if (sql_append(&builder, "SELECT COUNT(*) FROM code_index WHERE symbol LIKE ? ESCAPE '\\'") != 0) {
         free_sql_builder(&builder);
         return -1;
     }
@@ -1626,6 +1632,25 @@ static int count_pattern_matches(CodeIndexDatabase *db, const char *pattern) {
 
     sqlite3_finalize(stmt);
     return count;
+}
+
+/* Length of the leading sigil run on a search pattern ($greet, @count, @@total,
+ * &subref), or 0 if there is none.
+ *
+ * Perl's `%hash` and `*glob` are deliberately NOT sigils here: `%` and `*` are
+ * qi's wildcards, and that reading already recovers the symbol (`%hash` matches
+ * anything ending in hash, which includes hash itself). Stripping them would
+ * break working queries to fix nothing.
+ *
+ * Returns 0 for a pattern that is nothing but sigils, so stripping never
+ * produces an empty pattern. */
+static size_t pattern_sigil_len(const char *pattern) {
+    size_t n = 0;
+    while (pattern[n] == '$' || pattern[n] == '@' || pattern[n] == '&') n++;
+    /* Perl's $#array (last index of @array) is a two-character sigil. `#` counts
+     * only directly after `$`, never on its own, so `#foo` is left alone. */
+    if (n > 0 && pattern[n - 1] == '$' && pattern[n] == '#') n++;
+    return pattern[n] ? n : 0;
 }
 
 /**
@@ -2732,6 +2757,49 @@ retry_query:
                         safe_strdup_ctx(qn->qualifier, "Failed to allocate memory for parent filter");
                 goto retry_query;
             }
+        }
+
+        /* Sigil recovery: `qi $greet` -> retry as `qi greet`. The search key in
+         * `symbol` is the bare name; the sigil survives only in `full_symbol`,
+         * which is what the SYM column prints -- so a user who copies a name out
+         * of qi's own output and searches for it gets nothing. Perl strips the
+         * sigil from both columns, so there the retry is the only recovery.
+         * Applies to every pattern independently, since stripping is per-pattern:
+         * `qi $one @two` retries as `qi one two`. Retries when at least one
+         * stripped pattern recovers matches; the rest of the query is untouched,
+         * and any remaining zero-match patterns are reported as usual. Runs
+         * before symbol_filter is allocated so the goto leaks nothing, and cannot
+         * loop because the rewritten patterns carry no sigils. */
+        int n_sigiled = 0, n_recovered = 0, first_recovered = 0;
+        for (int i = 0; i < patterns->count; i++) {
+            size_t n_sigil = pattern_sigil_len(patterns->patterns[i]);
+            if (n_sigil == 0) continue;
+            n_sigiled++;
+            if (count_pattern_matches(db, patterns->patterns[i] + n_sigil) > 0) {
+                /* Teach with a pattern that actually recovers, so the example
+                 * the user reads is one they can verify from the results. */
+                if (n_recovered == 0) first_recovered = i;
+                n_recovered++;
+            }
+        }
+        if (n_recovered > 0) {
+            const char *example = patterns->patterns[first_recovered];
+            printf("Retrying without the %s: qi", n_sigiled == 1 ? "sigil" : "sigils");
+            for (int i = 0; i < patterns->count; i++)
+                printf(" %s", patterns->patterns[i] + pattern_sigil_len(patterns->patterns[i]));
+            /* "searched as", not "is stored as": the pattern may be a wildcard
+             * (`$gre%`), which is not a stored symbol. */
+            printf("\n%s searched as %s; sigils are kept for display, not for search.\n\n",
+                   example, example + pattern_sigil_len(example));
+            for (int i = 0; i < patterns->count; i++) {
+                size_t n_sigil = pattern_sigil_len(patterns->patterns[i]);
+                if (n_sigil == 0) continue;
+                char *bare = safe_strdup_ctx(patterns->patterns[i] + n_sigil,
+                                             "Failed to allocate memory for bare symbol");
+                free(patterns->patterns[i]);
+                patterns->patterns[i] = bare;
+            }
+            goto retry_query;
         }
 
         /* Initialize filter to check if patterns are valid symbols */
