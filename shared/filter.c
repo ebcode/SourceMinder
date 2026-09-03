@@ -44,14 +44,18 @@ static int load_file_extensions(FileExtensions *exts, const char *config_path) {
         /* Skip empty lines */
         if (len == 0) continue;
 
-        /* Ensure extension starts with . */
-        if (line[0] == '.') {
-            /* Use strnlength to safely truncate if needed */
-            size_t copy_len = strnlength(line, FILE_EXTENSION_MAX_LENGTH - 1);
-            memcpy(exts->extensions[exts->count], line, copy_len);
-            exts->extensions[exts->count][copy_len] = '\0';
-            exts->count++;
+        /* An entry is a suffix (.rb) or an exact basename (Rakefile); a path is
+         * neither — warn instead of silently dropping it. */
+        if (strchr(line, '/') || strchr(line, '\\')) {
+            fprintf(stderr, "Warning: ignoring file_extensions entry %s (use an extension like .rb or a bare filename like Rakefile)\n", line);
+            continue;
         }
+
+        /* Use strnlength to safely truncate if needed */
+        size_t copy_len = strnlength(line, FILE_EXTENSION_MAX_LENGTH - 1);
+        memcpy(exts->extensions[exts->count], line, copy_len);
+        exts->extensions[exts->count][copy_len] = '\0';
+        exts->count++;
     }
 
     fclose(f);
@@ -75,12 +79,15 @@ static int load_file_extensions_from_string(FileExtensions *exts, const char *da
 
         if (len == 0) continue;
 
-        if (line[0] == '.') {
-            size_t copy_len = strnlength(line, FILE_EXTENSION_MAX_LENGTH - 1);
-            memcpy(exts->extensions[exts->count], line, copy_len);
-            exts->extensions[exts->count][copy_len] = '\0';
-            exts->count++;
+        if (strchr(line, '/') || strchr(line, '\\')) {
+            fprintf(stderr, "Warning: ignoring file_extensions entry %s (use an extension like .rb or a bare filename like Rakefile)\n", line);
+            continue;
         }
+
+        size_t copy_len = strnlength(line, FILE_EXTENSION_MAX_LENGTH - 1);
+        memcpy(exts->extensions[exts->count], line, copy_len);
+        exts->extensions[exts->count][copy_len] = '\0';
+        exts->count++;
     }
 
     return 0;
@@ -352,6 +359,21 @@ int filter_is_stopword(const SymbolFilter *filter, const char *symbol) {
     lower[i] = '\0';
 
     return is_in_set(&filter->stopwords, lower);
+}
+
+int filter_is_keyword(const SymbolFilter *filter, const char *symbol) {
+    if (!filter || !symbol || !symbol[0]) {
+        return 0;
+    }
+
+    char lower[SYMBOL_MAX_LENGTH];
+    int i;
+    for (i = 0; symbol[i] && i < SYMBOL_MAX_LENGTH - 1; i++) {
+        lower[i] = (char)tolower((unsigned char)symbol[i]);
+    }
+    lower[i] = '\0';
+
+    return is_in_set(&filter->ts_keywords, lower);
 }
 
 void filter_clean_string_symbol(const char *src, char *dst, size_t dst_size) {

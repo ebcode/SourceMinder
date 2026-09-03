@@ -2963,7 +2963,9 @@ int parser_parse_file(GoParser *parser, const char *filepath,
     if (dot) *dot = '\0';
 
     result->count = 0;
-    if (name_only[0] && filter_should_index(parser->filter, name_only)) {
+    /* A filename is not an identifier: no keyword/length filtering, so
+     * type.go and range.go still get their FILE row. */
+    if (name_only[0]) {
         add_entry(result, name_only, 1, CONTEXT_FILENAME, directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
     }
 

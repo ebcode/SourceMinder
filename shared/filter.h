@@ -56,6 +56,11 @@ int filter_should_index(SymbolFilter *filter, const char *symbol);
  * stopword-filtered. */
 int filter_is_stopword(const SymbolFilter *filter, const char *symbol);
 
+/* Check if a word is a language keyword (returns 1 if yes, 0 if no).
+ * For callers holding a name the grammar put in a naming position, where a
+ * keyword string is never the keyword: `obj.class`, `def next`, `:yield`. */
+int filter_is_keyword(const SymbolFilter *filter, const char *symbol);
+
 /* Clean symbol for strings/comments: preserve path characters (dots, slashes, hyphens, colons) */
 void filter_clean_string_symbol(const char *src, char *dst, size_t dst_size);
 

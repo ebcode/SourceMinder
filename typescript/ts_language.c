@@ -2538,7 +2538,9 @@ int parser_parse_file(TypeScriptParser *parser, const char *filepath, const char
     char *dot = strrchr(filename_no_ext, '.');
     if (dot) *dot = '\0';
 
-    if (filter_should_index(parser->filter, filename_no_ext)) {
+    /* A filename is not an identifier: no keyword/length filtering, so
+     * class.ts and interface.ts still get their FILE row. */
+    if (filename_no_ext[0]) {
         add_entry(result, filename_no_ext, 1, CONTEXT_FILENAME, directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
     }
 

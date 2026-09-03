@@ -2043,7 +2043,9 @@ int parser_parse_file(RustParser *parser, const char *filepath,
     snprintf(fname_noext, sizeof(fname_noext), "%s", filename);
     char *dot = strrchr(fname_noext, '.');
     if (dot) *dot = '\0';
-    if (filter_should_index(parser->filter, fname_noext)) {
+    /* A filename is not an identifier: no keyword/length filtering, so
+     * match.rs and impl.rs still get their FILE row. */
+    if (fname_noext[0]) {
         add_entry(result, fname_noext, 1, CONTEXT_FILENAME,
                   directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
     }

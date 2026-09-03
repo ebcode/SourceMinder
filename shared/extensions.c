@@ -40,20 +40,24 @@ static void add_extension_line(FileExtensions *exts, char *line, size_t line_siz
     /* Skip empty lines */
     if (len == 0) return;
 
-    /* Ensure extension starts with . */
-    if (line[0] == '.') {
-        /* Check for duplicates before adding */
-        for (int i = 0; i < exts->count; i++) {
-            if (strcmp(exts->extensions[i], line) == 0) {
-                return;
-            }
-        }
-
-        size_t copy_len = strnlength(line, FILE_EXTENSION_MAX_LENGTH - 1);
-        memcpy(exts->extensions[exts->count], line, copy_len);
-        exts->extensions[exts->count][copy_len] = '\0';
-        exts->count++;
+    /* An entry is a suffix (.rb) or an exact basename (Rakefile); a path is
+     * neither — warn instead of silently dropping it. */
+    if (strchr(line, '/') || strchr(line, '\\')) {
+        fprintf(stderr, "Warning: ignoring file_extensions entry %s (use an extension like .rb or a bare filename like Rakefile)\n", line);
+        return;
     }
+
+    /* Check for duplicates before adding */
+    for (int i = 0; i < exts->count; i++) {
+        if (strcmp(exts->extensions[i], line) == 0) {
+            return;
+        }
+    }
+
+    size_t copy_len = strnlength(line, FILE_EXTENSION_MAX_LENGTH - 1);
+    memcpy(exts->extensions[exts->count], line, copy_len);
+    exts->extensions[exts->count][copy_len] = '\0';
+    exts->count++;
 }
 
 /**
@@ -226,15 +230,33 @@ int is_plaintext_extension(const char *extension) {
     return 0;
 }
 
+static const char *path_basename(const char *filepath) {
+    const char *basename = strrchr(filepath, '/');
+    const char *windows_basename = strrchr(filepath, '\\');
+    if (!basename || (windows_basename && windows_basename > basename)) {
+        basename = windows_basename;
+    }
+    return basename ? basename + 1 : filepath;
+}
+
+/* A configured entry starting with '.' matches as a suffix (.rb); any other
+ * entry matches the exact basename (Rakefile matches lib/Rakefile but not
+ * MyRakefile). */
 static int has_configured_extension(const char *filepath, const FileExtensions *extensions) {
     if (!filepath || !extensions || extensions->count == 0) {
         return 0;
     }
 
     size_t len = strnlength(filepath, FILENAME_MAX_LENGTH);
+    const char *basename = path_basename(filepath);
     for (int i = 0; i < extensions->count; i++) {
-        size_t ext_len = strnlength(extensions->extensions[i], FILE_EXTENSION_MAX_LENGTH);
-        if (len > ext_len && strcmp(filepath + len - ext_len, extensions->extensions[i]) == 0) {
+        const char *entry = extensions->extensions[i];
+        if (entry[0] == '.') {
+            size_t ext_len = strnlength(entry, FILE_EXTENSION_MAX_LENGTH);
+            if (len > ext_len && strcmp(filepath + len - ext_len, entry) == 0) {
+                return 1;
+            }
+        } else if (strcmp(basename, entry) == 0) {
             return 1;
         }
     }
@@ -247,13 +269,7 @@ static int basename_has_extension(const char *filepath) {
         return 0;
     }
 
-    const char *basename = strrchr(filepath, '/');
-    const char *windows_basename = strrchr(filepath, '\\');
-    if (!basename || (windows_basename && windows_basename > basename)) {
-        basename = windows_basename;
-    }
-    basename = basename ? basename + 1 : filepath;
-
+    const char *basename = path_basename(filepath);
     const char *last_dot = strrchr(basename, '.');
     return (last_dot && last_dot != basename);
 }

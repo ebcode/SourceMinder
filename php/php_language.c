@@ -77,6 +77,7 @@ static struct {
     TSSymbol property_element;
     TSSymbol const_element;
     TSSymbol class_interface_clause;
+    TSSymbol use_declaration;
 
     /* Parameters */
     TSSymbol simple_parameter;
@@ -161,6 +162,7 @@ static void init_php_symbols(const TSLanguage *language) {
     php_symbols.property_element = ts_language_symbol_for_name(language, "property_element", 16, true);
     php_symbols.const_element = ts_language_symbol_for_name(language, "const_element", 13, true);
     php_symbols.class_interface_clause = ts_language_symbol_for_name(language, "class_interface_clause", 22, true);
+    php_symbols.use_declaration = ts_language_symbol_for_name(language, "use_declaration", 15, true);
 
     /* Parameters */
     php_symbols.simple_parameter = ts_language_symbol_for_name(language, "simple_parameter", 16, true);
@@ -804,6 +806,48 @@ static void handle_interface_declaration(TSNode node, const char *source_code, c
                                          const char *filename, ParseResult *result, SymbolFilter *filter,
                                          int line) {
     handle_simple_declaration(node, source_code, directory, filename, result, filter, line, CONTEXT_INTERFACE);
+}
+
+/* `use TraitName;` inside a class/trait/enum body mixes a trait in: each trait
+ * name is a TYPE usage with clue "use", the trait analog of the implements
+ * clause above. A qualified name (`use Foo\Bar;`) records its terminal name,
+ * matching how the trait's own definition is indexed. The use_list
+ * (insteadof/as adaptations) is not walked. */
+static void handle_use_declaration(TSNode node, const char *source_code, const char *directory,
+                                   const char *filename, ParseResult *result, SymbolFilter *filter,
+                                   int line) {
+    (void)line;
+    char namespace_buf[SYMBOL_MAX_LENGTH];
+    get_namespace(node, source_code, namespace_buf, sizeof(namespace_buf), filename);
+
+    uint32_t child_count = ts_node_child_count(node);
+    for (uint32_t i = 0; i < child_count; i++) {
+        TSNode child = ts_node_child(node, i);
+        const char *child_type = ts_node_type(child);
+
+        TSNode name_node = child;
+        if (strcmp(child_type, "qualified_name") == 0) {
+            uint32_t qn_count = ts_node_child_count(child);
+            for (uint32_t j = 0; j < qn_count; j++) {
+                TSNode qn_child = ts_node_child(child, j);
+                if (strcmp(ts_node_type(qn_child), "name") == 0) {
+                    name_node = qn_child;
+                }
+            }
+            if (ts_node_eq(name_node, child)) continue;
+        } else if (strcmp(child_type, "name") != 0) {
+            continue;
+        }
+
+        char trait_name[SYMBOL_MAX_LENGTH];
+        safe_extract_node_text(source_code, name_node, trait_name, sizeof(trait_name), filename);
+        int name_line = (int)(ts_node_start_point(name_node).row + 1);
+
+        if (filter_should_index(filter, trait_name)) {
+            add_entry(result, trait_name, name_line, CONTEXT_TYPE,
+                    directory, filename, NULL, &(ExtColumns){.namespace = namespace_buf, .clue = "use"});
+        }
+    }
 }
 
 static void handle_formal_parameters(TSNode node, const char *source_code, const char *directory,
@@ -1903,6 +1947,11 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
         handle_trait_declaration(node, source_code, directory, filename, result, filter, line);
         return;
     }
+    if (node_sym == php_symbols.use_declaration) {
+        if (g_debug) fprintf(stderr, "[DEBUG] visit_node: calling handler for use_declaration\n");
+        handle_use_declaration(node, source_code, directory, filename, result, filter, line);
+        return;
+    }
     if (node_sym == php_symbols.method_declaration) {
         if (g_debug) fprintf(stderr, "[DEBUG] visit_node: calling handler for method_declaration\n");
         handle_method_declaration(node, source_code, directory, filename, result, filter, line);
@@ -2089,7 +2138,9 @@ int parser_parse_file(PHPParser *parser, const char *filepath, const char *proje
     char *dot = strrchr(filename_no_ext, '.');
     if (dot) *dot = '\0';
 
-    if (filter_should_index(parser->filter, filename_no_ext)) {
+    /* A filename is not an identifier: no keyword/length filtering, so
+     * class.php and interface.php still get their FILE row. */
+    if (filename_no_ext[0]) {
         add_entry(result, filename_no_ext, 1, CONTEXT_FILENAME, directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
     }
 

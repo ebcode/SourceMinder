@@ -1,1 +1,6 @@
 .rb
+.rake
+.gemspec
+.ru
+Rakefile
+Gemfile

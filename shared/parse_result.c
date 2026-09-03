@@ -108,10 +108,15 @@ void add_entry(ParseResult *result, const char *symbol, int line,
     /* Store full_symbol first (preserves original symbol with any prefixes like $) */
     snprintf(entry->full_symbol, sizeof(entry->full_symbol), "%s", symbol);
 
-    /* For PHP variables/properties, strip leading $ before creating search symbol */
+    /* Strip sigils before creating the search symbol, so `qi vari` finds PHP's
+     * `$vari` and `qi ivar` finds Ruby's `@ivar`. full_symbol keeps the written
+     * form. Length filtering happens upstream against the written form, so a
+     * short-but-sigilled name like `$o` is indexed while a bare `o` is not. */
     const char *symbol_for_search = symbol;
     if (context == CONTEXT_VARIABLE || context == CONTEXT_PROPERTY) {
         symbol_for_search = skip_leading_char(symbol, '$');
+        symbol_for_search = skip_leading_char(symbol_for_search, '@');
+        symbol_for_search = skip_leading_char(symbol_for_search, '@');
     }
 
     /* Create lowercase symbol, stripping trailing punctuation for strings/comments */

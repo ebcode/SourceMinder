@@ -80,6 +80,7 @@ static struct {
     TSSymbol simple_symbol;
     TSSymbol hash_key_symbol;
     TSSymbol hash;
+    TSSymbol element_reference;
     TSSymbol operator_;
     TSSymbol optional_parameter;
     TSSymbol keyword_parameter;
@@ -126,6 +127,16 @@ static const char *strip_sigils(const char *name) {
 static void node_text(TSNode node, const char *source_code, const char *filename,
                       char *buf, size_t size) {
     safe_extract_node_text(source_code, node, buf, size, filename);
+}
+
+/* Gate for a name the grammar put in a naming position (method name, def name,
+ * class/module name, hash key, symbol). A keyword there is never the keyword —
+ * tree-sitter gives keyword position its own node type — so `obj.class`,
+ * `def next` and `:yield` are real names and only the keyword list rejects them.
+ * Not for prose or raw text: string words, require paths, filenames. */
+static int index_name(SymbolFilter *filter, const char *name) {
+    return name[0] && (filter_should_index(filter, name) ||
+                       filter_is_keyword(filter, name));
 }
 
 /* Bounded copy between symbol buffers. strncat-based copies of a
@@ -189,7 +200,7 @@ static void index_param(TSNode name_node, const char *source_code, const char *d
     char name[SYMBOL_MAX_LENGTH];
     node_text(name_node, source_code, filename, name, sizeof(name));
     const char *sym = strip_sigils(name);
-    if (sym[0] && filter_should_index(filter, sym)) {
+    if (index_name(filter, sym)) {
         ExtColumns ext = { .parent = owner };
         add_entry(result, sym, node_line(name_node), CONTEXT_ARGUMENT,
                   directory, filename, NULL, &ext);
@@ -271,7 +282,7 @@ static void handle_method(TSNode node, const char *source_code, const char *dire
         modifier = object_buf;
     }
 
-    if (name[0] && filter_should_index(filter, name)) {
+    if (index_name(filter, name)) {
         char location[SYMBOL_MAX_LENGTH];
         format_source_location(node, location, sizeof(location));
         ExtColumns ext = {
@@ -366,7 +377,7 @@ static void visit_scope(TSNode scope, const char *source_code, const char *direc
     if (sym == ruby_symbols.constant) {
         char name[SYMBOL_MAX_LENGTH];
         node_text(scope, source_code, filename, name, sizeof(name));
-        if (name[0] && filter_should_index(filter, name)) {
+        if (index_name(filter, name)) {
             add_entry(result, name, node_line(scope), CONTEXT_NAMESPACE,
                       directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
         }
@@ -378,7 +389,7 @@ static void visit_scope(TSNode scope, const char *source_code, const char *direc
         }
         char name[SYMBOL_MAX_LENGTH];
         node_text(sr.name, source_code, filename, name, sizeof(name));
-        if (name[0] && filter_should_index(filter, name)) {
+        if (index_name(filter, name)) {
             ExtColumns ext = { .parent = opt_text(sr.owner), .namespace = opt_text(sr.scope_text) };
             add_entry(result, name, node_line(sr.name), CONTEXT_NAMESPACE,
                       directory, filename, NULL, &ext);
@@ -466,7 +477,7 @@ static void handle_class(TSNode node, const char *source_code, const char *direc
             if (is_const) {
                 char cbuf[SYMBOL_MAX_LENGTH];
                 node_text(super_name, source_code, filename, cbuf, sizeof(cbuf));
-                if (cbuf[0] && filter_should_index(filter, cbuf)) {
+                if (index_name(filter, cbuf)) {
                     ExtColumns ext = {
                         .parent = opt_text(sr.owner),
                         .namespace = opt_text(sr.scope_text)
@@ -480,7 +491,7 @@ static void handle_class(TSNode node, const char *source_code, const char *direc
         }
     }
 
-    if (name[0] && filter_should_index(filter, name)) {
+    if (index_name(filter, name)) {
         char location[SYMBOL_MAX_LENGTH];
         format_source_location(node, location, sizeof(location));
         ExtColumns ext = {
@@ -521,7 +532,7 @@ static void handle_module(TSNode node, const char *source_code, const char *dire
     char name[SYMBOL_MAX_LENGTH];
     node_text(name_node, source_code, filename, name, sizeof(name));
 
-    if (name[0] && filter_should_index(filter, name)) {
+    if (index_name(filter, name)) {
         char location[SYMBOL_MAX_LENGTH];
         format_source_location(node, location, sizeof(location));
         ExtColumns ext = {
@@ -576,9 +587,11 @@ static bool simple_lvalue_name(TSNode target, const char *source_code, const cha
     if (!classify_lvalue(ts_node_symbol(target), ctx_out)) return false;
     char raw[SYMBOL_MAX_LENGTH];
     node_text(target, source_code, filename, raw, sizeof(raw));
-    const char *sym = strip_sigils(raw);
-    if (!sym[0]) return false;
-    copy_symbol(out, size, sym);
+    /* Keep the sigil: `$o`/`@x` are 2 chars as written and must survive the
+     * length gate, and full_symbol should show the name as the user typed it.
+     * add_entry strips the sigil for the search symbol. */
+    if (!raw[0]) return false;
+    copy_symbol(out, size, raw);
     return true;
 }
 
@@ -588,7 +601,7 @@ static void index_lvalue(TSNode target, const char *source_code, const char *dir
     ContextType context;
     char sym[SYMBOL_MAX_LENGTH];
     if (!simple_lvalue_name(target, source_code, filename, &context, sym, sizeof(sym))) return;
-    if (!filter_should_index(filter, sym)) return;
+    if (!index_name(filter, sym)) return;
 
     /* Ruby has no separate declaration, so a plain `=` to a local, constant, or
      * global (all CONTEXT_VARIABLE) is that binding's definition. Compound
@@ -604,6 +617,83 @@ static void index_lvalue(TSNode target, const char *source_code, const char *dir
     };
     add_entry(result, sym, node_line(target), context,
               directory, filename, NULL, &ext);
+}
+
+/* A constant assigned from Struct.new(...), Data.define(...), or Class.new —
+ * a class definition in everything but syntax. Records the LHS as CLASS D=1
+ * (clue = the written call), each symbol argument as PROP D=1 owned by it, and
+ * walks an attached block with the LHS as parent so `def` members inside are
+ * owned by the new class, not the lexical enclosure. The call keeps its
+ * truthful CALL row and receiver read; other arguments (superclass constant,
+ * keyword_init: pair) are visited as ordinary code. Returns false when the
+ * shape doesn't match, so the caller falls back to a plain VAR assignment. */
+static bool index_class_assignment(TSNode left, TSNode right, const char *source_code,
+                                   const char *directory, const char *filename,
+                                   ParseResult *result, SymbolFilter *filter,
+                                   const char *parent, const char *ns) {
+    if (ts_node_symbol(left) != ruby_symbols.constant) return false;
+    if (ts_node_is_null(right) || ts_node_symbol(right) != ruby_symbols.call) return false;
+
+    TSNode recv = ts_node_child_by_field_name(right, "receiver", 8);
+    TSNode method = ts_node_child_by_field_name(right, "method", 6);
+    if (ts_node_is_null(recv) || ts_node_is_null(method)) return false;
+    if (ts_node_symbol(recv) != ruby_symbols.constant) return false;
+
+    char recv_name[SYMBOL_MAX_LENGTH], mname[SYMBOL_MAX_LENGTH];
+    node_text(recv, source_code, filename, recv_name, sizeof(recv_name));
+    node_text(method, source_code, filename, mname, sizeof(mname));
+
+    const char *clue = NULL;
+    if (strcmp(recv_name, "Struct") == 0 && strcmp(mname, "new") == 0) clue = "Struct.new";
+    else if (strcmp(recv_name, "Data") == 0 && strcmp(mname, "define") == 0) clue = "Data.define";
+    else if (strcmp(recv_name, "Class") == 0 && strcmp(mname, "new") == 0) clue = "Class.new";
+    if (!clue) return false;
+
+    char cname[SYMBOL_MAX_LENGTH];
+    node_text(left, source_code, filename, cname, sizeof(cname));
+    if (!index_name(filter, cname)) return false;
+
+    ExtColumns cls = {
+        .parent = parent,
+        .namespace = (ns && ns[0]) ? ns : NULL,
+        .clue = clue,
+        .definition = "1"
+    };
+    add_entry(result, cname, node_line(left), CONTEXT_CLASS,
+              directory, filename, NULL, &cls);
+
+    if (index_name(filter, mname)) {
+        ExtColumns call_ext = { .parent = recv_name };
+        add_entry(result, mname, node_line(method), CONTEXT_CALL,
+                  directory, filename, NULL, &call_ext);
+    }
+    visit_node(recv, source_code, directory, filename, result, filter, parent, ns);
+
+    TSNode args = ts_node_child_by_field_name(right, "arguments", 9);
+    if (!ts_node_is_null(args)) {
+        uint32_t n = ts_node_named_child_count(args);
+        for (uint32_t i = 0; i < n; i++) {
+            TSNode arg = ts_node_named_child(args, i);
+            if (ts_node_symbol(arg) == ruby_symbols.simple_symbol) {
+                char raw[SYMBOL_MAX_LENGTH];
+                node_text(arg, source_code, filename, raw, sizeof(raw));
+                const char *member = (raw[0] == ':') ? raw + 1 : raw;
+                if (index_name(filter, member)) {
+                    ExtColumns prop = { .parent = cname, .clue = clue, .definition = "1" };
+                    add_entry(result, member, node_line(arg), CONTEXT_PROPERTY,
+                              directory, filename, NULL, &prop);
+                }
+            } else {
+                visit_node(arg, source_code, directory, filename, result, filter, parent, ns);
+            }
+        }
+    }
+
+    TSNode blk = ts_node_child_by_field_name(right, "block", 5);
+    if (!ts_node_is_null(blk)) {
+        visit_node(blk, source_code, directory, filename, result, filter, cname, ns);
+    }
+    return true;
 }
 
 /* assignment / operator_assignment. Index the left-hand target(s), then visit the
@@ -623,6 +713,7 @@ static void handle_assignment(TSNode node, const char *source_code, const char *
     char lvalue[SYMBOL_MAX_LENGTH] = "";
     bool has_lvalue = false;
     TSNode left = ts_node_child_by_field_name(node, "left", 4);
+    TSNode right = ts_node_child_by_field_name(node, "right", 5);
     if (!ts_node_is_null(left)) {
         if (ts_node_symbol(left) == ruby_symbols.left_assignment_list) {
             uint32_t n = ts_node_child_count(left);
@@ -631,13 +722,24 @@ static void handle_assignment(TSNode node, const char *source_code, const char *
                              result, filter, parent, ns, defining);
             }
         } else {
+            /* Const = Struct.new(...) and friends define a class, not a VAR;
+             * index_class_assignment consumes the whole statement when it matches. */
+            if (defining && index_class_assignment(left, right, source_code, directory,
+                                                   filename, result, filter, parent, ns)) {
+                return;
+            }
             index_lvalue(left, source_code, directory, filename, result, filter, parent, ns, defining);
+            if (ts_node_symbol(left) == ruby_symbols.element_reference) {
+                /* `h[k] = v` assigns through a call: the object and the index
+                 * expression are reads, and index_lvalue records neither. */
+                process_children(left, source_code, directory, filename, result, filter,
+                                 parent, ns);
+            }
             ContextType ctx;
             has_lvalue = simple_lvalue_name(left, source_code, filename, &ctx, lvalue, sizeof(lvalue));
         }
     }
 
-    TSNode right = ts_node_child_by_field_name(node, "right", 5);
     if (ts_node_is_null(right)) return;
 
     /* The hash may be the direct RHS ({ ... }) or the receiver of a method call
@@ -653,7 +755,7 @@ static void handle_assignment(TSNode node, const char *source_code, const char *
     if (has_lvalue && rhs_hash) {
         char saved[SYMBOL_MAX_LENGTH];
         copy_symbol(saved, sizeof(saved), g_hash_parent);
-        copy_symbol(g_hash_parent, sizeof(g_hash_parent), lvalue);
+        copy_symbol(g_hash_parent, sizeof(g_hash_parent), strip_sigils(lvalue));
         visit_node(right, source_code, directory, filename, result, filter, parent, ns);
         copy_symbol(g_hash_parent, sizeof(g_hash_parent), saved);
     } else {
@@ -730,7 +832,7 @@ static void index_symbol_args(TSNode call, const char *source_code, const char *
         char name[SYMBOL_MAX_LENGTH];
         bool dynamic = false;
         if (!symbol_arg_name(arg, source_code, filename, name, sizeof(name), &dynamic)) continue;
-        if (!filter_should_index(filter, name)) continue;
+        if (!index_name(filter, name)) continue;
 
         if (dynamic) {
             ExtColumns ext = { .parent = parent, .clue = clue };
@@ -782,9 +884,57 @@ static void index_require(TSNode call, const char *source_code, const char *dire
     }
 }
 
+/* include/extend/prepend Foo: the module is a TYPE usage (clue = the verb), the
+ * analog of PHP's `implements`, so `qi Foo -i type` answers "who mixes this in"
+ * (scope with -w). Shaped like the superclass reference: a qualified name keeps
+ * the qualifier's last segment as parent, the written qualifier as ns, and
+ * emits the NS scope rows. Non-constant args (`extend self`, `include
+ * Module.new`) are visited as ordinary code — no TYPE row is asserted where the
+ * grammar does not guarantee a module name. */
+static void index_mixin_args(TSNode node, const char *source_code, const char *directory,
+                             const char *filename, ParseResult *result, SymbolFilter *filter,
+                             const char *mname, const char *parent, const char *ns) {
+    TSNode args = ts_node_child_by_field_name(node, "arguments", 9);
+    if (ts_node_is_null(args)) return;
+
+    uint32_t n = ts_node_named_child_count(args);
+    for (uint32_t i = 0; i < n; i++) {
+        TSNode arg = ts_node_named_child(args, i);
+        TSSymbol s = ts_node_symbol(arg);
+        bool is_const = (s == ruby_symbols.constant);
+        TSNode name_node = arg;
+        ScopeRef sr = { .scope_text = "", .owner = "" };
+        if (s == ruby_symbols.scope_resolution) {
+            is_const = split_scope_ref(arg, source_code, filename, &sr);
+            if (is_const) {
+                name_node = sr.name;
+                if (!ts_node_is_null(sr.scope))
+                    visit_scope(sr.scope, source_code, directory, filename, result, filter,
+                                parent, ns);
+            }
+        }
+        if (is_const) {
+            char cbuf[SYMBOL_MAX_LENGTH];
+            node_text(name_node, source_code, filename, cbuf, sizeof(cbuf));
+            if (index_name(filter, cbuf)) {
+                ExtColumns ext = {
+                    .parent = opt_text(sr.owner),
+                    .namespace = opt_text(sr.scope_text),
+                    .clue = mname
+                };
+                add_entry(result, cbuf, node_line(name_node), CONTEXT_TYPE,
+                          directory, filename, NULL, &ext);
+            }
+        } else {
+            visit_node(arg, source_code, directory, filename, result, filter, parent, ns);
+        }
+    }
+}
+
 /* Method call. Indexes the method name as CONTEXT_CALL (receiver → parent),
  * with special handling for the common declarative DSL calls (require, attr_*,
- * define_method). Always visits arguments and any attached block. */
+ * define_method, include/extend/prepend). Always visits arguments and any
+ * attached block. */
 static void handle_call(TSNode node, const char *source_code, const char *directory,
                         const char *filename, ParseResult *result, SymbolFilter *filter,
                         int line, const char *parent, const char *ns) {
@@ -792,6 +942,10 @@ static void handle_call(TSNode node, const char *source_code, const char *direct
     char mname[SYMBOL_MAX_LENGTH] = "";
     if (!ts_node_is_null(method)) {
         node_text(method, source_code, filename, mname, sizeof(mname));
+    } else if (!ts_node_is_null(ts_node_child_by_field_name(node, "receiver", 8))) {
+        /* `fact.(n)` is the proc-call shorthand for `fact.call(n)`: a call node
+         * with a receiver and arguments but no method field. */
+        snprintf(mname, sizeof(mname), "call");
     }
 
     /* Receiver becomes the call's parent, e.g. `qi each -p numbers`. A qualified
@@ -838,7 +992,19 @@ static void handle_call(TSNode node, const char *source_code, const char *direct
         }
     }
 
-    if (!special && mname[0] && filter_should_index(filter, mname)) {
+    /* Mixins keep their CALL row (`qi include` still works), so `special` stays 0;
+     * only the generic argument walk is replaced, to avoid double-indexing the
+     * module as a bare VAR read. */
+    int mixin = 0;
+    if (!ts_node_is_null(method) && ts_node_is_null(receiver) &&
+        (strcmp(mname, "include") == 0 || strcmp(mname, "extend") == 0 ||
+         strcmp(mname, "prepend") == 0)) {
+        index_mixin_args(node, source_code, directory, filename, result, filter,
+                         mname, parent, ns);
+        mixin = 1;
+    }
+
+    if (!special && index_name(filter, mname)) {
         ExtColumns ext = { .parent = call_parent, .namespace = call_ns };
         add_entry(result, mname, line, CONTEXT_CALL,
                   directory, filename, NULL, &ext);
@@ -857,7 +1023,7 @@ static void handle_call(TSNode node, const char *source_code, const char *direct
      * (require, attr_ helpers, define_method): those fully consume their
      * symbol/string args above, and re-walking would double-index them. */
     TSNode args = ts_node_child_by_field_name(node, "arguments", 9);
-    if (!special && !ts_node_is_null(args)) {
+    if (!special && !mixin && !ts_node_is_null(args)) {
         process_children(args, source_code, directory, filename, result, filter, parent, ns);
     }
     TSNode blk = ts_node_child_by_field_name(node, "block", 5);
@@ -867,9 +1033,9 @@ static void handle_call(TSNode node, const char *source_code, const char *direct
 }
 
 /* do..end / { } block attached to a call: extract block params, visit the body.
- * Block params are anonymous-scope locals — the block has no name — so they get no
- * owner (NULL). The body keeps `parent` so define_method members inside still
- * resolve to the enclosing class/module. */
+ * Block params are locals of the enclosing method — the same owner block-body
+ * locals and pattern bindings get — so `qi <method> -p` sees them. The body keeps
+ * `parent` so define_method members inside still resolve to the class/module. */
 static void handle_block(TSNode node, const char *source_code, const char *directory,
                          const char *filename, ParseResult *result, SymbolFilter *filter,
                          int line, const char *parent, const char *ns) {
@@ -877,7 +1043,7 @@ static void handle_block(TSNode node, const char *source_code, const char *direc
     TSNode params = ts_node_child_by_field_name(node, "parameters", 10);
     if (!ts_node_is_null(params)) {
         extract_parameters(params, source_code, directory, filename, result, filter,
-                           NULL, parent, ns);
+                           local_owner(parent), parent, ns);
     }
 
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
@@ -894,8 +1060,8 @@ static void handle_block(TSNode node, const char *source_code, const char *direc
     }
 }
 
-/* -> (args) { body } lambda literal. Like a block, a lambda is anonymous, so its
- * params get no owner (NULL). */
+/* -> (args) { body } lambda literal. Like a block, its params are owned by the
+ * enclosing method. */
 static void handle_lambda(TSNode node, const char *source_code, const char *directory,
                           const char *filename, ParseResult *result, SymbolFilter *filter,
                           int line, const char *parent, const char *ns) {
@@ -903,7 +1069,7 @@ static void handle_lambda(TSNode node, const char *source_code, const char *dire
     TSNode params = ts_node_child_by_field_name(node, "parameters", 10);
     if (!ts_node_is_null(params)) {
         extract_parameters(params, source_code, directory, filename, result, filter,
-                           NULL, parent, ns);
+                           local_owner(parent), parent, ns);
     }
     TSNode body = ts_node_child_by_field_name(node, "body", 4);
     if (!ts_node_is_null(body)) {
@@ -966,7 +1132,7 @@ static void handle_identifier(TSNode node, const char *source_code, const char *
     (void)parent; (void)ns;
     char name[SYMBOL_MAX_LENGTH];
     node_text(node, source_code, filename, name, sizeof(name));
-    if (name[0] && filter_should_index(filter, name)) {
+    if (index_name(filter, name)) {
         add_entry(result, name, line, CONTEXT_VARIABLE,
                   directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
     }
@@ -987,7 +1153,7 @@ static void handle_scope_resolution(TSNode node, const char *source_code, const 
 
     char nbuf[SYMBOL_MAX_LENGTH];
     node_text(sr.name, source_code, filename, nbuf, sizeof(nbuf));
-    if (nbuf[0] && filter_should_index(filter, nbuf)) {
+    if (index_name(filter, nbuf)) {
         ExtColumns ext = { .parent = opt_text(sr.owner), .namespace = opt_text(sr.scope_text) };
         add_entry(result, nbuf, node_line(sr.name), CONTEXT_VARIABLE,
                   directory, filename, NULL, &ext);
@@ -1006,7 +1172,7 @@ static void handle_symbol(TSNode node, const char *source_code, const char *dire
     char raw[SYMBOL_MAX_LENGTH];
     node_text(node, source_code, filename, raw, sizeof(raw));
     const char *sym = (raw[0] == ':') ? raw + 1 : raw;
-    if (sym[0] && filter_should_index(filter, sym)) {
+    if (index_name(filter, sym)) {
         add_entry(result, sym, line, CONTEXT_VARIABLE,
                   directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
     }
@@ -1028,11 +1194,15 @@ static void handle_pair(TSNode node, const char *source_code, const char *direct
     char key_name[SYMBOL_MAX_LENGTH] = "";
     bool symbol_key = false;
     if (!ts_node_is_null(key)) {
-        if (ts_node_symbol(key) == ruby_symbols.hash_key_symbol) {
+        TSSymbol ksym = ts_node_symbol(key);
+        if (ksym == ruby_symbols.hash_key_symbol || ksym == ruby_symbols.simple_symbol) {
             symbol_key = true;
             node_text(key, source_code, filename, key_name, sizeof(key_name));
-            if (key_name[0] && filter_should_index(filter, key_name)) {
-                add_entry(result, key_name, node_line(key), CONTEXT_PROPERTY,
+            /* `sym: v` and `:sym => v` name the same key; drop the rocket form's
+             * leading colon so both produce the same PROP row. */
+            const char *kname = (key_name[0] == ':') ? key_name + 1 : key_name;
+            if (index_name(filter, kname)) {
+                add_entry(result, kname, node_line(key), CONTEXT_PROPERTY,
                           directory, filename, NULL,
                           g_hash_parent[0] ? &(ExtColumns){.parent = g_hash_parent} : NULL);
             }
@@ -1066,7 +1236,7 @@ static void add_pattern_binding(TSNode name_node, const char *source_code,
     if (ts_node_is_null(name_node)) return;
     char name[SYMBOL_MAX_LENGTH];
     node_text(name_node, source_code, filename, name, sizeof(name));
-    if (name[0] && filter_should_index(filter, name)) {
+    if (index_name(filter, name)) {
         ExtColumns ext = {
             .parent = local_owner(parent),
             .namespace = (ns && ns[0]) ? ns : NULL,
@@ -1117,7 +1287,7 @@ static void visit_pattern(TSNode node, const char *source_code, const char *dire
         if (sym_key) {
             char key_name[SYMBOL_MAX_LENGTH];
             node_text(key, source_code, filename, key_name, sizeof(key_name));
-            if (key_name[0] && filter_should_index(filter, key_name)) {
+            if (index_name(filter, key_name)) {
                 add_entry(result, key_name, node_line(key), CONTEXT_PROPERTY,
                           directory, filename, NULL, NULL);
             }
@@ -1237,8 +1407,11 @@ static void visit_node(TSNode node, const char *source_code, const char *directo
         handle_comment(node, source_code, directory, filename, result, filter, line, parent, ns);
     } else if (sym == ruby_symbols.heredoc_body) {
         handle_heredoc(node, source_code, directory, filename, result, filter, line, parent, ns);
-    } else if (sym == ruby_symbols.identifier || sym == ruby_symbols.constant) {
-        /* A bare constant in read position is a usage, like a bare identifier read. */
+    } else if (sym == ruby_symbols.identifier || sym == ruby_symbols.constant ||
+               sym == ruby_symbols.global_variable) {
+        /* A bare constant or global in read position is a usage, like a bare
+         * identifier read. The sigil counts toward length: `$o` is 2 chars and
+         * is indexed, matching the "symbols longer than 1 char" contract. */
         handle_identifier(node, source_code, directory, filename, result, filter, line, parent, ns);
     } else if (sym == ruby_symbols.scope_resolution) {
         handle_scope_resolution(node, source_code, directory, filename, result, filter, line, parent, ns);
@@ -1300,6 +1473,7 @@ static void init_ruby_symbols(const TSLanguage *language) {
     ruby_symbols.simple_symbol = ts_language_symbol_for_name(language, "simple_symbol", 13, true);
     ruby_symbols.hash_key_symbol = ts_language_symbol_for_name(language, "hash_key_symbol", 15, true);
     ruby_symbols.hash = ts_language_symbol_for_name(language, "hash", 4, true);
+    ruby_symbols.element_reference = ts_language_symbol_for_name(language, "element_reference", 17, true);
     ruby_symbols.operator_ = ts_language_symbol_for_name(language, "operator", 8, true);
     ruby_symbols.optional_parameter = ts_language_symbol_for_name(language, "optional_parameter", 18, true);
     ruby_symbols.keyword_parameter = ts_language_symbol_for_name(language, "keyword_parameter", 17, true);
@@ -1364,7 +1538,9 @@ int parser_parse_file(RubyParser *parser, const char *filepath, const char *proj
     snprintf(filename_no_ext, sizeof(filename_no_ext), "%s", filename);
     char *dot = strrchr(filename_no_ext, '.');
     if (dot) *dot = '\0';
-    if (filter_should_index(parser->filter, filename_no_ext)) {
+    /* A filename is not an identifier: no keyword/length filtering, so
+     * class.rb and module.rb still get their FILE row. */
+    if (filename_no_ext[0]) {
         add_entry(result, filename_no_ext, 1, CONTEXT_FILENAME, directory, filename, NULL, NO_EXTENSIBLE_COLUMNS);
     }
 
