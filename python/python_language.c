@@ -199,11 +199,6 @@ static void extract_parameters(TSNode parameters_node, const char *source_code,
             char param_name[SYMBOL_MAX_LENGTH];
             safe_extract_node_text(source_code, child, param_name, sizeof(param_name), filename);
 
-            /* Skip self and cls - they're conventions, not real parameters */
-            if (strcmp(param_name, "self") == 0 || strcmp(param_name, "cls") == 0) {
-                continue;
-            }
-
             /* Check if parameter should be indexed */
             if (!filter_should_index(filter, param_name)) {
                 continue;
@@ -235,8 +230,7 @@ static void extract_parameters(TSNode parameters_node, const char *source_code,
                 char param_name[SYMBOL_MAX_LENGTH];
                 safe_extract_node_text(source_code, id_node, param_name, sizeof(param_name), filename);
 
-                if (strcmp(param_name, "self") != 0 && strcmp(param_name, "cls") != 0 &&
-                    filter_should_index(filter, param_name)) {
+                if (filter_should_index(filter, param_name)) {
                     /* Extract type annotation if present */
                     char type_str[SYMBOL_MAX_LENGTH] = "";
                     if (!ts_node_is_null(type_node)) {
@@ -515,10 +509,14 @@ static void handle_assignment(TSNode node, const char *source_code,
         }
     }
 
-    /* Process the right-hand side of assignment (e.g., lambda expressions) */
+    /* The right-hand side is an expression: visit_expression records identifier
+     * reads and walks operators, collections, subscripts and attributes,
+     * delegating calls, lambdas, walrus expressions and strings to visit_node.
+     * visit_node alone has no identifier case, so a plain `copy = alpha` would
+     * record the target and lose the read of alpha. */
     TSNode right_node = ts_node_child_by_field_name(node, "right", 5);
     if (!ts_node_is_null(right_node)) {
-        visit_node(right_node, source_code, directory, filename, result, filter);
+        visit_expression(right_node, source_code, directory, filename, result, filter);
     }
 }
 
@@ -817,10 +815,11 @@ static void handle_call(TSNode node, const char *source_code,
             }
         }
 
-        /* Visit complex receivers so chained reads (a.b.method()) still
-         * index the intermediate attributes */
-        if (!ts_node_is_null(object_node) &&
-            strcmp(ts_node_type(object_node), "identifier") != 0) {
+        /* Visit the receiver, including a plain identifier, so it is recorded as
+         * a read in its own right as well as appearing as the CALL row's parent.
+         * The parent column answers "what was called on alpha"; the read row
+         * answers "where is alpha used". */
+        if (!ts_node_is_null(object_node)) {
             visit_expression(object_node, source_code, directory, filename, result, filter);
         }
     } else if (strcmp(func_type, "identifier") == 0) {
@@ -973,8 +972,10 @@ static void visit_expression(TSNode node, const char *source_code,
         if (!ts_node_is_null(object)) {
             const char *object_type = ts_node_type(object);
             if (strcmp(object_type, "identifier") == 0) {
-                /* Plain receiver: captured as the parent, not indexed again */
+                /* Plain receiver: recorded as the parent and visited as a read,
+                 * so `qi alpha` finds the use in `alpha.attr`. */
                 safe_extract_node_text(source_code, object, parent_name, sizeof(parent_name), filename);
+                visit_object = 1;
             } else if (strcmp(object_type, "attribute") == 0) {
                 /* a.b.c: c's parent is b (immediate parent); recurse so
                  * b gets its own entry with parent a */

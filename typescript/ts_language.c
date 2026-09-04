@@ -1905,9 +1905,12 @@ static void handle_variable_declaration(TSNode node, const char *source_code, co
             add_entry(result, symbol, line, CONTEXT_VARIABLE, directory, filename, location,
                 &(ExtColumns){.type = type_str[0] ? type_str : NULL, .definition = "1"});
         }
-        /* Traverse value for nested calls, strings, etc. */
+        /* The initialiser is an expression: visit_expression records identifier
+         * reads and delegates calls, functions and template strings to visit_node.
+         * process_children would descend past the value node itself, so a
+         * `const x = obj.method()` initialiser would lose its own CALL row. */
         if (!ts_node_is_null(value_node)) {
-            process_children(value_node, source_code, directory, filename, result, filter);
+            visit_expression(value_node, source_code, directory, filename, result, filter);
         }
     }
 }
@@ -2109,16 +2112,11 @@ static void handle_assignment_expression(TSNode node, const char *source_code, c
         rhs_is_function = is_function_value(ts_node_symbol(right_node));
     }
 
-    /* Get the left side of the assignment */
+    /* Get the left side of the assignment. A member-expression target is indexed
+     * as a property write by the loop below, which stops on any other target
+     * (plain identifier, destructuring pattern). Those carry no property row of
+     * their own, but their right-hand side is still processed. */
     TSNode left_node = ts_node_child_by_field_name(node, "left", 4);
-    if (ts_node_is_null(left_node)) {
-        return;
-    }
-
-    const char *left_type = ts_node_type(left_node);
-    if (!left_type || strcmp(left_type, "member_expression") != 0) {
-        return;
-    }
 
     /* Extract and index all levels of the member expression chain */
     /* For this.config.timeout, we want to index:
@@ -2196,27 +2194,16 @@ static void handle_assignment_expression(TSNode node, const char *source_code, c
     if (rhs_is_function) {
         /* A2: process function body without emitting an anonymous LAM */
         handle_function_body(right_node, source_code, directory, filename, result, filter);
-    } else {
-        /* Index the RHS identifier if it's a simple identifier (parameter usage) */
-        if (!ts_node_is_null(right_node)) {
-            const char *right_type = ts_node_type(right_node);
-            if (right_type && strcmp(right_type, "identifier") == 0) {
-                char rhs_symbol[SYMBOL_MAX_LENGTH];
-                safe_extract_node_text(source_code, right_node, rhs_symbol, sizeof(rhs_symbol), filename);
-                if (filter_should_index(filter, rhs_symbol)) {
-                    if (g_debug) {
-                        fprintf(stderr, "[DEBUG] handle_assignment_expression: INDEXING RHS '%s' as VAR at line %d\n",
-                                rhs_symbol, line);
-                    }
-                    add_entry(result, rhs_symbol, line, CONTEXT_VARIABLE,
-                        directory, filename, NULL, &(ExtColumns){.definition = "0"});
-                }
-            }
-        }
+    } else if (!ts_node_is_null(right_node)) {
+        /* The right-hand side is an expression: visit_expression records identifier
+         * reads and walks members, operators and collections, delegating calls,
+         * functions and template strings to visit_node. Walking only the right
+         * side keeps a member-expression target from being indexed twice, once by
+         * the loop above and again by the traversal. */
         if (g_debug) {
-            fprintf(stderr, "[DEBUG] handle_assignment_expression: calling process_children with skip at line %d\n", line);
+            fprintf(stderr, "[DEBUG] handle_assignment_expression: visiting RHS at line %d\n", line);
         }
-        process_children(node, source_code, directory, filename, result, filter);
+        visit_expression(right_node, source_code, directory, filename, result, filter);
     }
 }
 

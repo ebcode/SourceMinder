@@ -8,6 +8,7 @@
 - qi: query results count pulls from `symbol` column, not `full_symbol`
 - Perl Indexer: add perl_symbols.arraylen
 - PHP Indexer: now indexes use trait statements
+- Python Indexer: now index "self" and "cls" params
 - Ruby Indexer: initial implementation
 
 ## Version 0.4.0-beta (2026-08-24)

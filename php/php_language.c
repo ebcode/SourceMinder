@@ -1498,6 +1498,16 @@ static void handle_member_access_expression(TSNode node, const char *source_code
         /* Extract parent object from variable_name (including $) */
         if (strcmp(child_type, "variable_name") == 0) {
             safe_extract_node_text(source_code, child, parent_obj, sizeof(parent_obj), filename);
+
+            /* The receiver is also a read in its own right. The parent column
+             * answers "what was read from $alpha"; this row answers "where is
+             * $alpha used". */
+            if (filter_should_index(filter, parent_obj)) {
+                TSPoint obj_start = ts_node_start_point(child);
+                add_entry(result, parent_obj, (int)(obj_start.row + 1), CONTEXT_VARIABLE,
+                        directory, filename, NULL,
+                        &(ExtColumns){.definition = "0", .namespace = namespace_buf});
+            }
         }
 
         /* Extract property name */
@@ -1589,6 +1599,16 @@ static void handle_member_call_expression(TSNode node, const char *source_code, 
         /* Extract parent object from variable_name (including $) */
         if (strcmp(child_type, "variable_name") == 0) {
             safe_extract_node_text(source_code, child, parent_obj, sizeof(parent_obj), filename);
+
+            /* The receiver is also a read in its own right. The parent column
+             * answers "what was called on $alpha"; this row answers "where is
+             * $alpha used". */
+            if (filter_should_index(filter, parent_obj)) {
+                TSPoint obj_start = ts_node_start_point(child);
+                add_entry(result, parent_obj, (int)(obj_start.row + 1), CONTEXT_VARIABLE,
+                        directory, filename, NULL,
+                        &(ExtColumns){.definition = "0", .namespace = namespace_buf});
+            }
         }
 
         /* Extract method name */

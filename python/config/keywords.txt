@@ -33,5 +33,3 @@ try
 while
 with
 yield
-self
-cls
