@@ -3127,6 +3127,7 @@ static void show_help_compact(void) {
     printf("      --full                     full column names\n");
     printf("      --raw                      source only; useful with -e/-A/-B\n");
     printf("  -q, --quiet                    drop banner/footer/rule chrome; keep header + rows\n");
+    printf("      --no-config                ignore ./.smconfig and ~/.smconfig\n");
     printf("\n");
 
     printf("Database:\n");
@@ -3140,7 +3141,7 @@ static void show_help_compact(void) {
     printf("\n");
 
     printf("Configuration:\n");
-    printf("  Config file: ./.smconfig or ~/.smconfig. CLI flags override config\n");
+    printf("  Config file: ./.smconfig or ~/.smconfig. CLI flags override config.\n");
     printf("  Format: [qi] section header, then one flag per line. Example: --db-file /dev/shm/index.db\n");
     printf("\n");
     printf("Please email bug reports to bugs@sourceminder.org.\n");
@@ -3154,11 +3155,12 @@ int main(int argc, char *argv[]) {
     WithinFilter within_filter = {0};
     WithinRangeList within_ranges = {0};
 
-    /* Check for --help, --version, --list-types, and --toc flags first */
+    /* Check for --help, --version, --list-types, --toc, and --no-config flags first */
     int show_help = 0;
     int show_version = 0;
     int show_list_types = 0;
     int show_toc = 0;
+    int no_config = 0;
     for (int arg_idx = 1; arg_idx < argc; arg_idx++) {
         if (strcmp(argv[arg_idx], "--help") == 0 || strcmp(argv[arg_idx], "-h") == 0) {
             show_help = 1;
@@ -3174,6 +3176,9 @@ int main(int argc, char *argv[]) {
         }
         if (strcmp(argv[arg_idx], "--toc") == 0) {
             show_toc = 1;
+        }
+        if (strcmp(argv[arg_idx], "--no-config") == 0) {
+            no_config = 1;
         }
     }
 
@@ -3191,8 +3196,10 @@ int main(int argc, char *argv[]) {
     char **original_argv = argv;
     int original_argc = argc;
 
-    /* Load config file only if not showing help (CLI flags override config) */
-    if (!show_help) {
+    /* Load config file only if not showing help (CLI flags override config).
+     * --no-config skips the file so a run depends on argv alone, which keeps
+     * scripted runs the same on any machine. */
+    if (!show_help && !no_config) {
         int cli_flags = scan_cli_flags(argc, argv);
         if (load_config_file(&argc, &argv, cli_flags) != 0) {
             retval = 1;
@@ -3387,6 +3394,9 @@ int main(int argc, char *argv[]) {
         }
         else if (strcmp(argv[i], "--toc") == 0) {
             toc_mode = 1;
+        }
+        else if (strcmp(argv[i], "--no-config") == 0) {
+            /* Handled in the pre-scan above, before the config file is read. */
         }
         else if ((strcmp(argv[i], "-i") == 0 || strcmp(argv[i], "--include-context") == 0)) {
             has_include = 1;

@@ -839,9 +839,9 @@ tests/run-tests: tests/run-tests.c
 	@$(CC) -std=c11 -Wall -Wextra -o tests/run-tests tests/run-tests.c
 
 # Golden-snapshot harness: per-file normalized index snapshots under test/
-test/sm-verify: test/sm-verify.c
-	@echo "Compiling sm-verify..."
-	@$(CC) $(CFLAGS) -o $@ test/sm-verify.c $(LDFLAGS)
+test/sm-golden: test/sm-golden.c
+	@echo "Compiling sm-golden..."
+	@$(CC) $(CFLAGS) -o $@ test/sm-golden.c $(LDFLAGS)
 
 # Web/WASM slice compile-only smoke test
 web-smoke: $(WEB_DIR)
