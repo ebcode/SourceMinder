@@ -1,0 +1,37 @@
+LINE | SYM           | PAR  | SCOPE   | NS                     | MOD | CLUE | TYPE               | D | CTX 
+./tools/sources/rust/modules.rs:
+1    | modules       |      |         |                        |     |      |                    | 0 | FILE
+1    | HashMap       |      |         | std::collections       |     |      |                    | 0 | IMP 
+2    | Read          |      |         | std::io                |     |      |                    | 0 | IMP 
+2    | Write         |      |         | std::io                |     |      |                    | 0 | IMP 
+3    | Arc           |      |         | std::sync              |     |      |                    | 0 | IMP 
+3    | Mutex         |      |         | std::sync              |     |      |                    | 0 | IMP 
+4    | Serialize     |      |         | serde                  |     |      |                    | 0 | IMP 
+4    | Deserialize   |      |         | serde                  |     |      |                    | 0 | IMP 
+5    | Settings      |      |         | crate::config          |     |      |                    | 0 | IMP 
+6    | format_time   |      |         | super::helpers         |     |      |                    | 0 | IMP 
+8    | Inline        |      |         |                        |     |      |                    | 0 | COM 
+8    | module        |      |         |                        |     |      |                    | 0 | COM 
+9    | auth          |      | pub     |                        |     |      |                    | 1 | NS  
+10   | login         |      | pub     |                        |     |      | bool               | 1 | FUNC
+10   | user          |      |         |                        |     |      | &str               | 0 | ARG 
+11   | is_empty      | user |         |                        |     |      |                    | 0 | CALL
+14   | tokens        |      | pub     |                        |     |      |                    | 1 | NS  
+15   | generate      |      | pub     |                        |     |      | String             | 1 | FUNC
+16   | from          |      |         | String                 |     |      |                    | 0 | CALL
+16   | token         |      |         |                        |     |      |                    | 0 | STR 
+21   | Module        |      |         |                        |     |      |                    | 0 | COM 
+21   | declaration   |      |         |                        |     |      |                    | 0 | COM 
+21   | resolves      |      |         |                        |     |      |                    | 0 | COM 
+21   | file          |      |         |                        |     |      |                    | 0 | COM 
+22   | handlers      |      | pub     |                        |     |      |                    | 1 | NS  
+24   | Re-export     |      |         |                        |     |      |                    | 0 | COM 
+25   | login         |      |         | auth                   |     |      |                    | 0 | IMP 
+26   | gen_token     |      |         | auth::tokens::generate |     | as   |                    | 0 | IMP 
+28   | alias         |      |         |                        |     |      |                    | 0 | COM 
+29   | UserId        |      | pub     |                        |     |      | u64                | 1 | TYPE
+30   | Cache         |      | pub     |                        |     |      | HashMap<UserId, T> | 1 | TYPE
+33   | MAX_USERS     |      | pub     |                        |     |      | usize              | 1 | VAR 
+34   | GLOBAL_PREFIX |      | pub     |                        |     |      | &str               | 1 | VAR 
+34   | app_          |      |         |                        |     |      |                    | 0 | STR 
+35   | COUNTER       |      | private |                        | mut |      | u32                | 1 | VAR 

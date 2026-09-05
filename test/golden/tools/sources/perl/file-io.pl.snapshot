@@ -1,0 +1,174 @@
+LINE | SYM             | PAR | SCOPE | NS | MOD | CLUE | TYPE       | D | CTX 
+./tools/sources/perl/file-io.pl:
+1    | file-io         |     |       |    |     |      |            | 0 | FILE
+2    | strict          |     |       |    |     |      |            | 0 | IMP 
+3    | warnings        |     |       |    |     |      |            | 0 | IMP 
+5    | Lexical         |     |       |    |     |      |            | 0 | COM 
+5    | filehandle      |     |       |    |     |      |            | 0 | COM 
+5    | preferred       |     |       |    |     |      |            | 0 | COM 
+5    | modern          |     |       |    |     |      |            | 0 | COM 
+5    | style           |     |       |    |     |      |            | 0 | COM 
+6    | open            |     |       |    |     |      |            | 0 | CALL
+6    | fh              |     |       |    | my  |      | filehandle | 1 | VAR 
+6    | input.txt       |     |       |    |     |      |            | 0 | STR 
+6    | die             |     |       |    |     |      |            | 0 | CALL
+6    | Cannot          |     |       |    |     |      |            | 0 | STR 
+6    | $!              |     |       |    |     |      |            | 0 | STR 
+7    | line            |     |       |    | my  |      | scalar     | 1 | VAR 
+7    | fh              |     |       |    |     |      | filehandle | 0 | VAR 
+8    | chomp           |     |       |    |     |      |            | 0 | CALL
+8    | line            |     |       |    |     |      | scalar     | 0 | VAR 
+9    | print           |     |       |    |     |      |            | 0 | CALL
+9    | $linen          |     |       |    |     |      |            | 0 | STR 
+9    | line            |     |       |    |     |      | scalar     | 0 | VAR 
+11   | close           |     |       |    |     |      |            | 0 | CALL
+11   | fh              |     |       |    |     |      | filehandle | 0 | VAR 
+13   | Writing         |     |       |    |     |      |            | 0 | COM 
+13   | file            |     |       |    |     |      |            | 0 | COM 
+14   | open            |     |       |    |     |      |            | 0 | CALL
+14   | out             |     |       |    | my  |      | filehandle | 1 | VAR 
+14   | output.txt      |     |       |    |     |      |            | 0 | STR 
+14   | die             |     |       |    |     |      |            | 0 | CALL
+14   | Cannot          |     |       |    |     |      |            | 0 | STR 
+14   | $!              |     |       |    |     |      |            | 0 | STR 
+15   | print           |     |       |    |     |      |            | 0 | CALL
+15   | out             |     |       |    |     |      | scalar     | 0 | VAR 
+15   | Hello           |     |       |    |     |      |            | 0 | STR 
+15   | file!n          |     |       |    |     |      |            | 0 | STR 
+16   | close           |     |       |    |     |      |            | 0 | CALL
+16   | out             |     |       |    |     |      | filehandle | 0 | VAR 
+18   | Append          |     |       |    |     |      |            | 0 | COM 
+18   | mode            |     |       |    |     |      |            | 0 | COM 
+19   | open            |     |       |    |     |      |            | 0 | CALL
+19   | log             |     |       |    | my  |      | filehandle | 1 | VAR 
+19   | >>              |     |       |    |     |      |            | 0 | STR 
+19   | app.log         |     |       |    |     |      |            | 0 | STR 
+19   | die             |     |       |    |     |      |            | 0 | CALL
+19   | Cannot          |     |       |    |     |      |            | 0 | STR 
+19   | $!              |     |       |    |     |      |            | 0 | STR 
+20   | print           |     |       |    |     |      |            | 0 | CALL
+20   | log             |     |       |    |     |      | scalar     | 0 | VAR 
+20   | Log             |     |       |    |     |      |            | 0 | STR 
+20   | entryn          |     |       |    |     |      |            | 0 | STR 
+21   | close           |     |       |    |     |      |            | 0 | CALL
+21   | log             |     |       |    |     |      | filehandle | 0 | VAR 
+23   | Reading         |     |       |    |     |      |            | 0 | COM 
+23   | lines           |     |       |    |     |      |            | 0 | COM 
+24   | open            |     |       |    |     |      |            | 0 | CALL
+24   | in              |     |       |    | my  |      | filehandle | 1 | VAR 
+24   | data.txt        |     |       |    |     |      |            | 0 | STR 
+24   | die             |     |       |    |     |      |            | 0 | CALL
+25   | lines           |     |       |    | my  |      | array      | 1 | VAR 
+25   | in              |     |       |    |     |      | filehandle | 0 | VAR 
+26   | close           |     |       |    |     |      |            | 0 | CALL
+26   | in              |     |       |    |     |      | filehandle | 0 | VAR 
+27   | chomp           |     |       |    |     |      |            | 0 | CALL
+27   | lines           |     |       |    |     |      | array      | 0 | VAR 
+29   | Slurp           |     |       |    |     |      |            | 0 | COM 
+29   | entire          |     |       |    |     |      |            | 0 | COM 
+29   | file            |     |       |    |     |      |            | 0 | COM 
+30   | open            |     |       |    |     |      |            | 0 | CALL
+30   | slurp_fh        |     |       |    | my  |      | filehandle | 1 | VAR 
+30   | config.txt      |     |       |    |     |      |            | 0 | STR 
+30   | die             |     |       |    |     |      |            | 0 | CALL
+31   | contents        |     |       |    | my  |      | scalar     | 1 | VAR 
+32   | contents        |     |       |    |     |      | scalar     | 0 | VAR 
+32   | slurp_fh        |     |       |    |     |      | filehandle | 0 | VAR 
+33   | close           |     |       |    |     |      |            | 0 | CALL
+33   | slurp_fh        |     |       |    |     |      | filehandle | 0 | VAR 
+35   | Bareword        |     |       |    |     |      |            | 0 | COM 
+35   | filehandles     |     |       |    |     |      |            | 0 | COM 
+35   | legacy          |     |       |    |     |      |            | 0 | COM 
+35   | style           |     |       |    |     |      |            | 0 | COM 
+36   | open            |     |       |    |     |      |            | 0 | CALL
+36   | >>              |     |       |    |     |      |            | 0 | STR 
+36   | legacy.log      |     |       |    |     |      |            | 0 | STR 
+36   | die             |     |       |    |     |      |            | 0 | CALL
+37   | print           |     |       |    |     |      |            | 0 | CALL
+37   | LOGFILE         |     |       |    |     |      |            | 0 | CALL
+37   | legacy          |     |       |    |     |      |            | 0 | STR 
+37   | entryn          |     |       |    |     |      |            | 0 | STR 
+38   | close           |     |       |    |     |      |            | 0 | CALL
+40   | Standard        |     |       |    |     |      |            | 0 | COM 
+40   | handles         |     |       |    |     |      |            | 0 | COM 
+41   | print           |     |       |    |     |      |            | 0 | CALL
+41   | STDOUT          |     |       |    |     |      |            | 0 | CALL
+41   | stdoutn         |     |       |    |     |      |            | 0 | STR 
+42   | print           |     |       |    |     |      |            | 0 | CALL
+42   | STDERR          |     |       |    |     |      |            | 0 | CALL
+42   | stderrn         |     |       |    |     |      |            | 0 | STR 
+43   | input           |     |       |    | my  |      | scalar     | 1 | VAR 
+43   | STDIN           |     |       |    |     |      |            | 0 | VAR 
+45   | In-memory       |     |       |    |     |      |            | 0 | COM 
+45   | filehandle      |     |       |    |     |      |            | 0 | COM 
+46   | File::Temp      |     |       |    |     |      |            | 0 | IMP 
+46   | tempfile        |     |       |    |     |      |            | 0 | IMP 
+47   | tmp_fh          |     |       |    | my  |      | scalar     | 1 | VAR 
+47   | tmp_name        |     |       |    | my  |      | scalar     | 1 | VAR 
+47   | tempfile        |     |       |    |     |      |            | 0 | CALL
+49   | String          |     |       |    |     |      |            | 0 | COM 
+49   | filehandle      |     |       |    |     |      |            | 0 | COM 
+50   | buffer          |     |       |    | my  |      | scalar     | 1 | VAR 
+51   | open            |     |       |    |     |      |            | 0 | CALL
+51   | str_fh          |     |       |    | my  |      | filehandle | 1 | VAR 
+51   | buffer          |     |       |    |     |      | scalar     | 0 | VAR 
+51   | die             |     |       |    |     |      |            | 0 | CALL
+52   | print           |     |       |    |     |      |            | 0 | CALL
+52   | str_fh          |     |       |    |     |      | scalar     | 0 | VAR 
+52   | written         |     |       |    |     |      |            | 0 | STR 
+52   | stringn         |     |       |    |     |      |            | 0 | STR 
+53   | close           |     |       |    |     |      |            | 0 | CALL
+53   | str_fh          |     |       |    |     |      | filehandle | 0 | VAR 
+55   | Read/write      |     |       |    |     |      |            | 0 | COM 
+55   | mode            |     |       |    |     |      |            | 0 | COM 
+56   | open            |     |       |    |     |      |            | 0 | CALL
+56   | rw              |     |       |    | my  |      | filehandle | 1 | VAR 
+56   | +<              |     |       |    |     |      |            | 0 | STR 
+56   | existing.txt    |     |       |    |     |      |            | 0 | STR 
+56   | die             |     |       |    |     |      |            | 0 | CALL
+57   | seek            |     |       |    |     |      |            | 0 | CALL
+57   | rw              |     |       |    |     |      | filehandle | 0 | VAR 
+58   | first           |     |       |    | my  |      | scalar     | 1 | VAR 
+58   | rw              |     |       |    |     |      | filehandle | 0 | VAR 
+59   | close           |     |       |    |     |      |            | 0 | CALL
+59   | rw              |     |       |    |     |      | filehandle | 0 | VAR 
+61   | -e              |     |       |    |     |      |            | 0 | COM 
+61   | -f              |     |       |    |     |      |            | 0 | COM 
+61   | -d              |     |       |    |     |      |            | 0 | COM 
+61   | file            |     |       |    |     |      |            | 0 | COM 
+61   | tests           |     |       |    |     |      |            | 0 | COM 
+62   | -e              |     |       |    |     |      |            | 0 | CALL
+62   | input.txt       |     |       |    |     |      |            | 0 | STR 
+63   | size            |     |       |    | my  |      | scalar     | 1 | VAR 
+63   | -s              |     |       |    |     |      |            | 0 | CALL
+63   | input.txt       |     |       |    |     |      |            | 0 | STR 
+64   | is_file         |     |       |    | my  |      | scalar     | 1 | VAR 
+64   | -f              |     |       |    |     |      |            | 0 | CALL
+64   | input.txt       |     |       |    |     |      |            | 0 | STR 
+65   | is_dir          |     |       |    | my  |      | scalar     | 1 | VAR 
+65   | -d              |     |       |    |     |      |            | 0 | CALL
+65   | input.txt       |     |       |    |     |      |            | 0 | STR 
+68   | Reading         |     |       |    |     |      |            | 0 | COM 
+68   | binary          |     |       |    |     |      |            | 0 | COM 
+69   | open            |     |       |    |     |      |            | 0 | CALL
+69   | bin             |     |       |    | my  |      | filehandle | 1 | VAR 
+69   | <:raw           |     |       |    |     |      |            | 0 | STR 
+69   | image.png       |     |       |    |     |      |            | 0 | STR 
+69   | die             |     |       |    |     |      |            | 0 | CALL
+70   | header          |     |       |    | my  |      | scalar     | 1 | VAR 
+71   | read            |     |       |    |     |      |            | 0 | CALL
+71   | bin             |     |       |    |     |      | filehandle | 0 | VAR 
+71   | header          |     |       |    |     |      | scalar     | 0 | VAR 
+72   | close           |     |       |    |     |      |            | 0 | CALL
+72   | bin             |     |       |    |     |      | filehandle | 0 | VAR 
+74   | Encoding        |     |       |    |     |      |            | 0 | COM 
+74   | layer           |     |       |    |     |      |            | 0 | COM 
+75   | open            |     |       |    |     |      |            | 0 | CALL
+75   | utf8_fh         |     |       |    | my  |      | filehandle | 1 | VAR 
+75   | <:encodingUTF-8 |     |       |    |     |      |            | 0 | STR 
+75   | unicode.txt     |     |       |    |     |      |            | 0 | STR 
+75   | die             |     |       |    |     |      |            | 0 | CALL
+76   | utf8_fh         |     |       |    |     |      | filehandle | 0 | VAR 
+76   | chomp           |     |       |    |     |      |            | 0 | CALL
+77   | close           |     |       |    |     |      |            | 0 | CALL
+77   | utf8_fh         |     |       |    |     |      | filehandle | 0 | VAR 

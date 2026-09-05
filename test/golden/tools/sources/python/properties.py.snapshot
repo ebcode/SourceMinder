@@ -1,0 +1,219 @@
+LINE | SYM                                     | PAR                   | SCOPE | NS | MOD | CLUE               | TYPE | D | CTX  
+./tools/sources/python/properties.py:
+1    | properties                              |                       |       |    |     |                    |      | 0 | FILE 
+1    | Python                                  |                       |       |    |     |                    |      | 0 | STR  
+1    | property                                |                       |       |    |     |                    |      | 0 | STR  
+1    | decorators.                             |                       |       |    |     |                    |      | 0 | STR  
+4    | Person                                  |                       |       |    |     |                    |      | 1 | CLASS
+5    | Basic                                   |                       |       |    |     |                    |      | 0 | STR  
+5    | property                                |                       |       |    |     |                    |      | 0 | STR  
+5    | usage.                                  |                       |       |    |     |                    |      | 0 | STR  
+7    | __init__                                | Person                |       |    |     |                    |      | 1 | FUNC 
+7    | self                                    | __init__              |       |    |     |                    |      | 0 | ARG  
+7    | name                                    | __init__              |       |    |     |                    |      | 0 | ARG  
+8    | _name                                   | self                  |       |    |     |                    |      | 1 | PROP 
+8    | name                                    |                       |       |    |     |                    |      | 0 | VAR  
+9    | _age                                    | self                  |       |    |     |                    |      | 1 | PROP 
+12   | name                                    | Person                |       |    |     | @property          |      | 1 | FUNC 
+12   | self                                    | name                  |       |    |     |                    |      | 0 | ARG  
+13   | Getter                                  |                       |       |    |     |                    |      | 0 | STR  
+13   | name.                                   |                       |       |    |     |                    |      | 0 | STR  
+14   | _name                                   | self                  |       |    |     |                    |      | 0 | PROP 
+14   | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+16   | setter                                  | name                  |       |    |     |                    |      | 0 | PROP 
+16   | name                                    |                       |       |    |     |                    |      | 0 | VAR  
+17   | name                                    | Person                |       |    |     | @name.setter       |      | 1 | FUNC 
+17   | self                                    | name                  |       |    |     |                    |      | 0 | ARG  
+17   | value                                   | name                  |       |    |     |                    |      | 0 | ARG  
+18   | Setter                                  |                       |       |    |     |                    |      | 0 | STR  
+18   | name.                                   |                       |       |    |     |                    |      | 0 | STR  
+19   | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+20   | ValueError                              |                       |       |    |     |                    |      | 0 | CALL 
+20   | Name                                    |                       |       |    |     |                    |      | 0 | STR  
+20   | cannot                                  |                       |       |    |     |                    |      | 0 | STR  
+20   | empty                                   |                       |       |    |     |                    |      | 0 | STR  
+21   | _name                                   | self                  |       |    |     |                    |      | 1 | PROP 
+21   | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+23   | deleter                                 | name                  |       |    |     |                    |      | 0 | PROP 
+23   | name                                    |                       |       |    |     |                    |      | 0 | VAR  
+24   | name                                    | Person                |       |    |     | @name.deleter      |      | 1 | FUNC 
+24   | self                                    | name                  |       |    |     |                    |      | 0 | ARG  
+25   | Deleter                                 |                       |       |    |     |                    |      | 0 | STR  
+25   | name.                                   |                       |       |    |     |                    |      | 0 | STR  
+26   | _name                                   | self                  |       |    |     |                    |      | 0 | PROP 
+26   | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+29   | age                                     | Person                |       |    |     | @property          |      | 1 | FUNC 
+29   | self                                    | age                   |       |    |     |                    |      | 0 | ARG  
+30   | Read-only                               |                       |       |    |     |                    |      | 0 | STR  
+30   | property                                |                       |       |    |     |                    |      | 0 | STR  
+30   | setter.                                 |                       |       |    |     |                    |      | 0 | STR  
+31   | _age                                    | self                  |       |    |     |                    |      | 0 | PROP 
+31   | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+34   | Temperature                             |                       |       |    |     |                    |      | 1 | CLASS
+35   | Property                                |                       |       |    |     |                    |      | 0 | STR  
+35   | conversion                              |                       |       |    |     |                    |      | 0 | STR  
+35   | logic.                                  |                       |       |    |     |                    |      | 0 | STR  
+37   | __init__                                | Temperature           |       |    |     |                    |      | 1 | FUNC 
+37   | self                                    | __init__              |       |    |     |                    |      | 0 | ARG  
+37   | celsius                                 | __init__              |       |    |     |                    |      | 0 | ARG  
+38   | _celsius                                | self                  |       |    |     |                    |      | 1 | PROP 
+38   | celsius                                 |                       |       |    |     |                    |      | 0 | VAR  
+41   | celsius                                 | Temperature           |       |    |     | @property          |      | 1 | FUNC 
+41   | self                                    | celsius               |       |    |     |                    |      | 0 | ARG  
+42   | _celsius                                | self                  |       |    |     |                    |      | 0 | PROP 
+42   | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+44   | setter                                  | celsius               |       |    |     |                    |      | 0 | PROP 
+44   | celsius                                 |                       |       |    |     |                    |      | 0 | VAR  
+45   | celsius                                 | Temperature           |       |    |     | @celsius.setter    |      | 1 | FUNC 
+45   | self                                    | celsius               |       |    |     |                    |      | 0 | ARG  
+45   | value                                   | celsius               |       |    |     |                    |      | 0 | ARG  
+46   | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+47   | ValueError                              |                       |       |    |     |                    |      | 0 | CALL 
+47   | Temperature                             |                       |       |    |     |                    |      | 0 | STR  
+47   | absolute                                |                       |       |    |     |                    |      | 0 | STR  
+47   | zero                                    |                       |       |    |     |                    |      | 0 | STR  
+48   | _celsius                                | self                  |       |    |     |                    |      | 1 | PROP 
+48   | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+51   | fahrenheit                              | Temperature           |       |    |     | @property          |      | 1 | FUNC 
+51   | self                                    | fahrenheit            |       |    |     |                    |      | 0 | ARG  
+52   | Computed                                |                       |       |    |     |                    |      | 0 | STR  
+52   | property.                               |                       |       |    |     |                    |      | 0 | STR  
+53   | celsius                                 | self                  |       |    |     |                    |      | 0 | PROP 
+53   | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+55   | setter                                  | fahrenheit            |       |    |     |                    |      | 0 | PROP 
+55   | fahrenheit                              |                       |       |    |     |                    |      | 0 | VAR  
+56   | fahrenheit                              | Temperature           |       |    |     | @fahrenheit.setter |      | 1 | FUNC 
+56   | self                                    | fahrenheit            |       |    |     |                    |      | 0 | ARG  
+56   | value                                   | fahrenheit            |       |    |     |                    |      | 0 | ARG  
+57   | celsius                                 | self                  |       |    |     |                    |      | 1 | PROP 
+57   | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+60   | Rectangle                               |                       |       |    |     |                    |      | 1 | CLASS
+61   | Property                                |                       |       |    |     |                    |      | 0 | STR  
+61   | validation.                             |                       |       |    |     |                    |      | 0 | STR  
+63   | __init__                                | Rectangle             |       |    |     |                    |      | 1 | FUNC 
+63   | self                                    | __init__              |       |    |     |                    |      | 0 | ARG  
+63   | width                                   | __init__              |       |    |     |                    |      | 0 | ARG  
+63   | height                                  | __init__              |       |    |     |                    |      | 0 | ARG  
+64   | _width                                  | self                  |       |    |     |                    |      | 1 | PROP 
+64   | width                                   |                       |       |    |     |                    |      | 0 | VAR  
+65   | _height                                 | self                  |       |    |     |                    |      | 1 | PROP 
+65   | height                                  |                       |       |    |     |                    |      | 0 | VAR  
+68   | width                                   | Rectangle             |       |    |     | @property          |      | 1 | FUNC 
+68   | self                                    | width                 |       |    |     |                    |      | 0 | ARG  
+69   | _width                                  | self                  |       |    |     |                    |      | 0 | PROP 
+69   | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+71   | setter                                  | width                 |       |    |     |                    |      | 0 | PROP 
+71   | width                                   |                       |       |    |     |                    |      | 0 | VAR  
+72   | width                                   | Rectangle             |       |    |     | @width.setter      |      | 1 | FUNC 
+72   | self                                    | width                 |       |    |     |                    |      | 0 | ARG  
+72   | value                                   | width                 |       |    |     |                    |      | 0 | ARG  
+73   | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+74   | ValueError                              |                       |       |    |     |                    |      | 0 | CALL 
+74   | Width                                   |                       |       |    |     |                    |      | 0 | STR  
+74   | must                                    |                       |       |    |     |                    |      | 0 | STR  
+74   | positive                                |                       |       |    |     |                    |      | 0 | STR  
+75   | _width                                  | self                  |       |    |     |                    |      | 1 | PROP 
+75   | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+78   | height                                  | Rectangle             |       |    |     | @property          |      | 1 | FUNC 
+78   | self                                    | height                |       |    |     |                    |      | 0 | ARG  
+79   | _height                                 | self                  |       |    |     |                    |      | 0 | PROP 
+79   | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+81   | setter                                  | height                |       |    |     |                    |      | 0 | PROP 
+81   | height                                  |                       |       |    |     |                    |      | 0 | VAR  
+82   | height                                  | Rectangle             |       |    |     | @height.setter     |      | 1 | FUNC 
+82   | self                                    | height                |       |    |     |                    |      | 0 | ARG  
+82   | value                                   | height                |       |    |     |                    |      | 0 | ARG  
+83   | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+84   | ValueError                              |                       |       |    |     |                    |      | 0 | CALL 
+84   | Height                                  |                       |       |    |     |                    |      | 0 | STR  
+84   | must                                    |                       |       |    |     |                    |      | 0 | STR  
+84   | positive                                |                       |       |    |     |                    |      | 0 | STR  
+85   | _height                                 | self                  |       |    |     |                    |      | 1 | PROP 
+85   | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+88   | area                                    | Rectangle             |       |    |     | @property          |      | 1 | FUNC 
+88   | self                                    | area                  |       |    |     |                    |      | 0 | ARG  
+89   | Computed                                |                       |       |    |     |                    |      | 0 | STR  
+89   | read-only                               |                       |       |    |     |                    |      | 0 | STR  
+89   | property.                               |                       |       |    |     |                    |      | 0 | STR  
+90   | _width                                  | self                  |       |    |     |                    |      | 0 | PROP 
+90   | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+90   | _height                                 | self                  |       |    |     |                    |      | 0 | PROP 
+90   | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+93   | CachedProperty                          |                       |       |    |     |                    |      | 1 | CLASS
+94   | Property                                |                       |       |    |     |                    |      | 0 | STR  
+94   | caching.                                |                       |       |    |     |                    |      | 0 | STR  
+96   | __init__                                | CachedProperty        |       |    |     |                    |      | 1 | FUNC 
+96   | self                                    | __init__              |       |    |     |                    |      | 0 | ARG  
+97   | _cache                                  | self                  |       |    |     |                    |      | 1 | PROP 
+100  | expensive_computation                   | CachedProperty        |       |    |     | @property          |      | 1 | FUNC 
+100  | self                                    | expensive_computation |       |    |     |                    |      | 0 | ARG  
+101  | Cache                                   |                       |       |    |     |                    |      | 0 | STR  
+101  | result                                  |                       |       |    |     |                    |      | 0 | STR  
+101  | expensive                               |                       |       |    |     |                    |      | 0 | STR  
+101  | computation.                            |                       |       |    |     |                    |      | 0 | STR  
+102  | _cache                                  | self                  |       |    |     |                    |      | 0 | PROP 
+102  | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+103  | print                                   |                       |       |    |     |                    |      | 0 | CALL 
+103  | Computing...                            |                       |       |    |     |                    |      | 0 | STR  
+104  | _cache                                  | self                  |       |    |     |                    |      | 1 | PROP 
+104  | sum                                     |                       |       |    |     |                    |      | 0 | CALL 
+104  | range                                   |                       |       |    |     |                    |      | 0 | CALL 
+105  | _cache                                  | self                  |       |    |     |                    |      | 0 | PROP 
+105  | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+108  | User                                    |                       |       |    |     |                    |      | 1 | CLASS
+109  | Multiple                                |                       |       |    |     |                    |      | 0 | STR  
+109  | properties.                             |                       |       |    |     |                    |      | 0 | STR  
+111  | __init__                                | User                  |       |    |     |                    |      | 1 | FUNC 
+111  | self                                    | __init__              |       |    |     |                    |      | 0 | ARG  
+111  | first_name                              | __init__              |       |    |     |                    |      | 0 | ARG  
+111  | last_name                               | __init__              |       |    |     |                    |      | 0 | ARG  
+112  | _first_name                             | self                  |       |    |     |                    |      | 1 | PROP 
+112  | first_name                              |                       |       |    |     |                    |      | 0 | VAR  
+113  | _last_name                              | self                  |       |    |     |                    |      | 1 | PROP 
+113  | last_name                               |                       |       |    |     |                    |      | 0 | VAR  
+116  | first_name                              | User                  |       |    |     | @property          |      | 1 | FUNC 
+116  | self                                    | first_name            |       |    |     |                    |      | 0 | ARG  
+117  | _first_name                             | self                  |       |    |     |                    |      | 0 | PROP 
+117  | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+119  | setter                                  | first_name            |       |    |     |                    |      | 0 | PROP 
+119  | first_name                              |                       |       |    |     |                    |      | 0 | VAR  
+120  | first_name                              | User                  |       |    |     | @first_name.setter |      | 1 | FUNC 
+120  | self                                    | first_name            |       |    |     |                    |      | 0 | ARG  
+120  | value                                   | first_name            |       |    |     |                    |      | 0 | ARG  
+121  | _first_name                             | self                  |       |    |     |                    |      | 1 | PROP 
+121  | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+124  | last_name                               | User                  |       |    |     | @property          |      | 1 | FUNC 
+124  | self                                    | last_name             |       |    |     |                    |      | 0 | ARG  
+125  | _last_name                              | self                  |       |    |     |                    |      | 0 | PROP 
+125  | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+127  | setter                                  | last_name             |       |    |     |                    |      | 0 | PROP 
+127  | last_name                               |                       |       |    |     |                    |      | 0 | VAR  
+128  | last_name                               | User                  |       |    |     | @last_name.setter  |      | 1 | FUNC 
+128  | self                                    | last_name             |       |    |     |                    |      | 0 | ARG  
+128  | value                                   | last_name             |       |    |     |                    |      | 0 | ARG  
+129  | _last_name                              | self                  |       |    |     |                    |      | 1 | PROP 
+129  | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+132  | full_name                               | User                  |       |    |     | @property          |      | 1 | FUNC 
+132  | self                                    | full_name             |       |    |     |                    |      | 0 | ARG  
+133  | Derived                                 |                       |       |    |     |                    |      | 0 | STR  
+133  | property                                |                       |       |    |     |                    |      | 0 | STR  
+133  | properties.                             |                       |       |    |     |                    |      | 0 | STR  
+134  | f"{self._first_name} {self._last_name}" |                       |       |    |     |                    |      | 0 | STR  
+134  | _first_name                             | self                  |       |    |     |                    |      | 0 | PROP 
+134  | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+134  | _last_name                              | self                  |       |    |     |                    |      | 0 | PROP 
+134  | self                                    |                       |       |    |     |                    |      | 0 | VAR  
+136  | setter                                  | full_name             |       |    |     |                    |      | 0 | PROP 
+136  | full_name                               |                       |       |    |     |                    |      | 0 | VAR  
+137  | full_name                               | User                  |       |    |     | @full_name.setter  |      | 1 | FUNC 
+137  | self                                    | full_name             |       |    |     |                    |      | 0 | ARG  
+137  | value                                   | full_name             |       |    |     |                    |      | 0 | ARG  
+138  | parts                                   |                       |       |    |     |                    |      | 1 | VAR  
+138  | split                                   | value                 |       |    |     |                    |      | 0 | CALL 
+138  | value                                   |                       |       |    |     |                    |      | 0 | VAR  
+139  | _first_name                             | self                  |       |    |     |                    |      | 1 | PROP 
+139  | parts                                   |                       |       |    |     |                    |      | 0 | VAR  
+140  | _last_name                              | self                  |       |    |     |                    |      | 1 | PROP 
+140  | parts                                   |                       |       |    |     |                    |      | 0 | VAR  
+140  | len                                     |                       |       |    |     |                    |      | 0 | CALL 
+140  | parts                                   |                       |       |    |     | len                |      | 0 | ARG  

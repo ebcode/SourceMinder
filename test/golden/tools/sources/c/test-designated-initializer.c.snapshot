@@ -1,0 +1,25 @@
+LINE | SYM                         | PAR           | SCOPE | NS | MOD | CLUE | TYPE       | D | CTX 
+./tools/sources/c/test-designated-initializer.c:
+1    | test-designated-initializer |               |       |    |     |      |            | 0 | FILE
+1    | Test                        |               |       |    |     |      |            | 0 | COM 
+1    | designated                  |               |       |    |     |      |            | 0 | COM 
+1    | initializers                |               |       |    |     |      |            | 0 | COM 
+3    | TestStruct                  |               |       |    |     |      |            | 1 | TYPE
+4    | char                        |               |       |    |     |      |            | 0 | TYPE
+4    | name                        |               |       |    |     |      | char*      | 1 | PROP
+5    | char                        |               |       |    |     |      |            | 0 | TYPE
+5    | definition                  |               |       |    |     |      | char*      | 1 | PROP
+6    | int                         |               |       |    |     |      |            | 0 | TYPE
+6    | value                       |               |       |    |     |      | int        | 1 | PROP
+9    | test_function               |               |       |    |     |      | void       | 1 | FUNC
+9    | is_definition               | test_function |       |    |     |      | int        | 1 | ARG 
+10   | pattern                     |               |       |    |     |      |            | 0 | COM 
+10   | show                        |               |       |    |     |      |            | 0 | COM 
+10   | designated                  |               |       |    |     |      |            | 0 | COM 
+10   | initializers                |               |       |    |     |      |            | 0 | COM 
+11   | ext                         |               |       |    |     |      | TestStruct | 1 | VAR 
+12   | name                        | ext           |       |    |     |      |            | 0 | PROP
+12   | test                        |               |       |    |     |      |            | 0 | STR 
+13   | definition                  | ext           |       |    |     |      |            | 0 | PROP
+13   | is_definition               |               |       |    |     |      |            | 0 | VAR 
+14   | value                       | ext           |       |    |     |      |            | 0 | PROP

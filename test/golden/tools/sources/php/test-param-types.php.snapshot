@@ -1,0 +1,13 @@
+LINE | SYM              | PAR        | SCOPE  | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/test-param-types.php:
+1    | test-param-types |            |        |    |     |      |      | 0 | FILE 
+2    | Test             |            |        |    |     |      |      | 0 | COM  
+2    | PHP              |            |        |    |     |      |      | 0 | COM  
+2    | parameter        |            |        |    |     |      |      | 0 | COM  
+2    | types            |            |        |    |     |      |      | 0 | COM  
+4    | FileFilter       |            |        |    |     |      |      | 1 | IFACE
+5    | count            | FileFilter | public |    |     |      |      | 1 | FUNC 
+8    | simpleType       |            |        |    |     |      |      | 1 | FUNC 
+10   | customType       |            |        |    |     |      |      | 1 | FUNC 
+12   | arrayType        |            |        |    |     |      |      | 1 | FUNC 
+14   | nullableType     |            |        |    |     |      |      | 1 | FUNC 

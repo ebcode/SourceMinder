@@ -1,0 +1,55 @@
+LINE | SYM            | PAR            | SCOPE   | NS         | MOD    | CLUE | TYPE | D | CTX  
+./tools/sources/php/magic_methods.php:
+1    | magic_methods  |                |         |            |        |      |      | 0 | FILE 
+3    | App\Models     |                |         |            |        |      |      | 1 | NS   
+5    | demonstrating  |                |         | App\Models |        |      |      | 0 | COM  
+5    | magic          |                |         | App\Models |        |      |      | 0 | COM  
+5    | methods        |                |         | App\Models |        |      |      | 0 | COM  
+8    | MagicContainer |                |         | App\Models |        |      |      | 1 | CLASS
+9    | $data          | MagicContainer | private | App\Models |        |      |      | 1 | PROP 
+10   | $methods       | MagicContainer | private | App\Models |        |      |      | 1 | PROP 
+12   | __construct    | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+13   | $data          |                |         | App\Models |        |      |      | 0 | VAR  
+13   | $this          |                |         | App\Models |        |      |      | 0 | VAR  
+13   | data           | $this          |         | App\Models |        |      |      | 0 | PROP 
+16   | __get          | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+17   | $this          |                |         | App\Models |        |      |      | 0 | VAR  
+17   | $name          |                |         | App\Models |        |      |      | 0 | VAR  
+20   | __set          | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+21   | $value         |                |         | App\Models |        |      |      | 0 | VAR  
+21   | $this          |                |         | App\Models |        |      |      | 0 | VAR  
+21   | $name          |                |         | App\Models |        |      |      | 0 | VAR  
+24   | __isset        | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+25   | isset          |                |         | App\Models |        |      |      | 0 | CALL 
+25   | $this          |                |         | App\Models |        |      |      | 0 | VAR  
+25   | $name          |                |         | App\Models |        |      |      | 0 | VAR  
+28   | __unset        | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+29   | $this          |                |         | App\Models |        |      |      | 0 | VAR  
+29   | $name          |                |         | App\Models |        |      |      | 0 | VAR  
+32   | __call         | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+33   | Called         |                |         | App\Models |        |      |      | 0 | STR  
+33   | method:        |                |         | App\Models |        |      |      | 0 | STR  
+36   | __callStatic   | MagicContainer | public  | App\Models | static |      |      | 1 | FUNC 
+37   | Called         |                |         | App\Models |        |      |      | 0 | STR  
+37   | method:        |                |         | App\Models |        |      |      | 0 | STR  
+40   | __toString     | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+41   | json_encode    |                |         | App\Models |        |      |      | 0 | CALL 
+41   | $this          |                |         | App\Models |        |      |      | 0 | VAR  
+44   | __invoke       | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+45   | Invoked        |                |         | App\Models |        |      |      | 0 | STR  
+48   | __clone        | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+49   | $this          |                |         | App\Models |        |      |      | 0 | VAR  
+49   | data           | $this          |         | App\Models |        |      |      | 0 | PROP 
+49   | array_merge    |                |         | App\Models |        |      |      | 0 | CALL 
+49   | $this          |                |         | App\Models |        |      |      | 0 | VAR  
+52   | __destruct     | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+53   | Cleanup        |                |         | App\Models |        |      |      | 0 | COM  
+56   | __sleep        | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+57   | data           |                |         | App\Models |        |      |      | 0 | STR  
+60   | __wakeup       | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+61   | Restore        |                |         | App\Models |        |      |      | 0 | COM  
+61   | state          |                |         | App\Models |        |      |      | 0 | COM  
+64   | __debugInfo    | MagicContainer | public  | App\Models |        |      |      | 1 | FUNC 
+65   | count          |                |         | App\Models |        |      |      | 0 | STR  
+65   | count          |                |         | App\Models |        |      |      | 0 | CALL 
+65   | $this          |                |         | App\Models |        |      |      | 0 | VAR  

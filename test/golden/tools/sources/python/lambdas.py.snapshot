@@ -1,0 +1,134 @@
+LINE | SYM             | PAR             | SCOPE | NS | MOD | CLUE        | TYPE | D | CTX 
+./tools/sources/python/lambdas.py:
+1    | lambdas         |                 |       |    |     |             |      | 0 | FILE
+1    | Python          |                 |       |    |     |             |      | 0 | STR 
+1    | expressions.    |                 |       |    |     |             |      | 0 | STR 
+4    | Basic           |                 |       |    |     |             |      | 0 | COM 
+5    | square          |                 |       |    |     |             |      | 1 | VAR 
+5    | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+5    | xyz             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+7    | multiple        |                 |       |    |     |             |      | 0 | COM 
+7    | parameters      |                 |       |    |     |             |      | 0 | COM 
+8    | add             |                 |       |    |     |             |      | 1 | VAR 
+8    | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+8    | aaa             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+8    | bbb             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+9    | multiply        |                 |       |    |     |             |      | 1 | VAR 
+9    | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+9    | xy              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+9    | yz              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+9    | za              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+11   | function        |                 |       |    |     |             |      | 0 | COM 
+11   | call            |                 |       |    |     |             |      | 0 | COM 
+12   | numbers         |                 |       |    |     |             |      | 1 | VAR 
+13   | squared         |                 |       |    |     |             |      | 1 | VAR 
+13   | list            |                 |       |    |     |             |      | 0 | CALL
+13   | map             |                 |       |    |     |             |      | 0 | CALL
+13   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+13   | xyz             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+13   | numbers         |                 |       |    |     | map         |      | 0 | ARG 
+14   | evens           |                 |       |    |     |             |      | 1 | VAR 
+14   | list            |                 |       |    |     |             |      | 0 | CALL
+14   | filter          |                 |       |    |     |             |      | 0 | CALL
+14   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+14   | xyz             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+14   | numbers         |                 |       |    |     | filter      |      | 0 | ARG 
+16   | sorting         |                 |       |    |     |             |      | 0 | COM 
+17   | pairs           |                 |       |    |     |             |      | 1 | VAR 
+17   | one             |                 |       |    |     |             |      | 0 | STR 
+17   | three           |                 |       |    |     |             |      | 0 | STR 
+17   | two             |                 |       |    |     |             |      | 0 | STR 
+18   | sorted_pairs    |                 |       |    |     |             |      | 1 | VAR 
+18   | sorted          |                 |       |    |     |             |      | 0 | CALL
+18   | pairs           |                 |       |    |     | sorted      |      | 0 | ARG 
+18   | key             |                 |       |    |     |             |      | 0 | VAR 
+18   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+18   | xyz             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+20   | conditional     |                 |       |    |     |             |      | 0 | COM 
+21   | absolute        |                 |       |    |     |             |      | 1 | VAR 
+21   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+21   | xyz             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+23   | reduce          |                 |       |    |     |             |      | 0 | COM 
+24   | functools       |                 |       |    |     |             |      | 0 | IMP 
+24   | reduce          |                 |       |    |     |             |      | 0 | IMP 
+25   | total           |                 |       |    |     |             |      | 1 | VAR 
+25   | reduce          |                 |       |    |     |             |      | 0 | CALL
+25   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+25   | acc             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+25   | xyz             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+25   | numbers         |                 |       |    |     | reduce      |      | 0 | ARG 
+27   | default         |                 |       |    |     |             |      | 0 | COM 
+27   | argument        |                 |       |    |     |             |      | 0 | COM 
+28   | process         |                 |       |    |     |             |      | 1 | FUNC
+28   | value           | process         |       |    |     |             |      | 0 | ARG 
+28   | transformer     | process         |       |    |     |             |      | 0 | ARG 
+29   | transformer     |                 |       |    |     |             |      | 0 | CALL
+29   | value           |                 |       |    |     | transformer |      | 0 | ARG 
+32   | dictionary      |                 |       |    |     |             |      | 0 | COM 
+33   | operations      |                 |       |    |     |             |      | 1 | VAR 
+34   | add             |                 |       |    |     |             |      | 0 | STR 
+34   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+34   | xy              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+34   | yz              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+35   | sub             |                 |       |    |     |             |      | 0 | STR 
+35   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+35   | xy              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+35   | yz              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+36   | mul             |                 |       |    |     |             |      | 0 | STR 
+36   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+36   | xy              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+36   | yz              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+37   | div             |                 |       |    |     |             |      | 0 | STR 
+37   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+37   | xy              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+37   | yz              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+41   | list            |                 |       |    |     |             |      | 0 | COM 
+41   | comprehension   |                 |       |    |     |             |      | 0 | COM 
+42   | squares         |                 |       |    |     |             |      | 1 | VAR 
+42   | xyz             |                 |       |    |     |             |      | 0 | VAR 
+42   | range           |                 |       |    |     |             |      | 0 | CALL
+45   | returning       |                 |       |    |     |             |      | 0 | COM 
+45   | closure         |                 |       |    |     |             |      | 0 | COM 
+46   | make_multiplier |                 |       |    |     |             |      | 1 | FUNC
+46   | nop             | make_multiplier |       |    |     |             |      | 0 | ARG 
+47   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+47   | xyz             | lambda          |       |    |     | lambda      |      | 0 | ARG 
+50   | double          |                 |       |    |     |             |      | 1 | VAR 
+50   | make_multiplier |                 |       |    |     |             |      | 0 | CALL
+51   | triple          |                 |       |    |     |             |      | 1 | VAR 
+51   | make_multiplier |                 |       |    |     |             |      | 0 | CALL
+54   | max/min         |                 |       |    |     |             |      | 0 | COM 
+55   | points          |                 |       |    |     |             |      | 1 | VAR 
+56   | max_by_x        |                 |       |    |     |             |      | 1 | VAR 
+56   | max             |                 |       |    |     |             |      | 0 | CALL
+56   | points          |                 |       |    |     | max         |      | 0 | ARG 
+56   | key             |                 |       |    |     |             |      | 0 | VAR 
+56   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+56   | pq              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+57   | max_by_y        |                 |       |    |     |             |      | 1 | VAR 
+57   | max             |                 |       |    |     |             |      | 0 | CALL
+57   | points          |                 |       |    |     | max         |      | 0 | ARG 
+57   | key             |                 |       |    |     |             |      | 0 | VAR 
+57   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+57   | pq              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+60   | sorted          |                 |       |    |     |             |      | 0 | COM 
+60   | multiple        |                 |       |    |     |             |      | 0 | COM 
+60   | criteria        |                 |       |    |     |             |      | 0 | COM 
+61   | students        |                 |       |    |     |             |      | 1 | VAR 
+62   | name            |                 |       |    |     |             |      | 0 | STR 
+62   | Alice           |                 |       |    |     |             |      | 0 | STR 
+62   | grade           |                 |       |    |     |             |      | 0 | STR 
+63   | name            |                 |       |    |     |             |      | 0 | STR 
+63   | Bob             |                 |       |    |     |             |      | 0 | STR 
+63   | grade           |                 |       |    |     |             |      | 0 | STR 
+64   | name            |                 |       |    |     |             |      | 0 | STR 
+64   | Charlie         |                 |       |    |     |             |      | 0 | STR 
+64   | grade           |                 |       |    |     |             |      | 0 | STR 
+66   | sorted_students |                 |       |    |     |             |      | 1 | VAR 
+66   | sorted          |                 |       |    |     |             |      | 0 | CALL
+66   | students        |                 |       |    |     | sorted      |      | 0 | ARG 
+66   | key             |                 |       |    |     |             |      | 0 | VAR 
+66   | <lambda>        |                 |       |    |     |             |      | 1 | LAM 
+66   | st              | lambda          |       |    |     | lambda      |      | 0 | ARG 
+66   | grade           |                 |       |    |     |             |      | 0 | STR 
+66   | name            |                 |       |    |     |             |      | 0 | STR 

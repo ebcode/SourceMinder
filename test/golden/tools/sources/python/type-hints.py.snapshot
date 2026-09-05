@@ -1,0 +1,126 @@
+LINE | SYM               | PAR               | SCOPE | NS | MOD | CLUE | TYPE                      | D | CTX  
+./tools/sources/python/type-hints.py:
+1    | type-hints        |                   |       |    |     |      |                           | 0 | FILE 
+1    | Python            |                   |       |    |     |      |                           | 0 | STR  
+1    | type              |                   |       |    |     |      |                           | 0 | STR  
+1    | hints             |                   |       |    |     |      |                           | 0 | STR  
+1    | annotations.      |                   |       |    |     |      |                           | 0 | STR  
+3    | typing            |                   |       |    |     |      |                           | 0 | IMP  
+3    | List              |                   |       |    |     |      |                           | 0 | IMP  
+3    | Dict              |                   |       |    |     |      |                           | 0 | IMP  
+3    | Set               |                   |       |    |     |      |                           | 0 | IMP  
+3    | Tuple             |                   |       |    |     |      |                           | 0 | IMP  
+3    | Optional          |                   |       |    |     |      |                           | 0 | IMP  
+3    | Union             |                   |       |    |     |      |                           | 0 | IMP  
+3    | Any               |                   |       |    |     |      |                           | 0 | IMP  
+3    | Callable          |                   |       |    |     |      |                           | 0 | IMP  
+3    | Iterator          |                   |       |    |     |      |                           | 0 | IMP  
+3    | Iterable          |                   |       |    |     |      |                           | 0 | IMP  
+3    | TypeVar           |                   |       |    |     |      |                           | 0 | IMP  
+3    | Generic           |                   |       |    |     |      |                           | 0 | IMP  
+9    | greet             |                   |       |    |     |      | str                       | 1 | FUNC 
+9    | name              | greet             |       |    |     |      | str                       | 0 | ARG  
+10   | Function          |                   |       |    |     |      |                           | 0 | STR  
+10   | basic             |                   |       |    |     |      |                           | 0 | STR  
+10   | type              |                   |       |    |     |      |                           | 0 | STR  
+10   | hints.            |                   |       |    |     |      |                           | 0 | STR  
+11   | f"Hello, {name}"  |                   |       |    |     |      |                           | 0 | STR  
+11   | Hello             |                   |       |    |     |      |                           | 0 | STR  
+11   | name              |                   |       |    |     |      |                           | 0 | VAR  
+14   | add_numbers       |                   |       |    |     |      | int                       | 1 | FUNC 
+14   | aa                | add_numbers       |       |    |     |      | int                       | 0 | ARG  
+14   | bb                | add_numbers       |       |    |     |      | int                       | 0 | ARG  
+15   | Function          |                   |       |    |     |      |                           | 0 | STR  
+15   | multiple          |                   |       |    |     |      |                           | 0 | STR  
+15   | parameters.       |                   |       |    |     |      |                           | 0 | STR  
+16   | aa                |                   |       |    |     |      |                           | 0 | VAR  
+16   | bb                |                   |       |    |     |      |                           | 0 | VAR  
+19   | process_items     |                   |       |    |     |      | Dict[str, int]            | 1 | FUNC 
+19   | items             | process_items     |       |    |     |      | List[str]                 | 0 | ARG  
+20   | Function          |                   |       |    |     |      |                           | 0 | STR  
+20   | collection        |                   |       |    |     |      |                           | 0 | STR  
+20   | type              |                   |       |    |     |      |                           | 0 | STR  
+20   | hints.            |                   |       |    |     |      |                           | 0 | STR  
+21   | item              |                   |       |    |     |      |                           | 0 | VAR  
+21   | len               |                   |       |    |     |      |                           | 0 | CALL 
+21   | item              |                   |       |    |     | len  |                           | 0 | ARG  
+21   | item              |                   |       |    |     |      |                           | 0 | VAR  
+21   | items             |                   |       |    |     |      |                           | 0 | VAR  
+24   | find_user         |                   |       |    |     |      | Optional[Dict[str, Any]]  | 1 | FUNC 
+24   | user_id           | find_user         |       |    |     |      | int                       | 0 | ARG  
+25   | Function          |                   |       |    |     |      |                           | 0 | STR  
+25   | Optional          |                   |       |    |     |      |                           | 0 | STR  
+25   | type.             |                   |       |    |     |      |                           | 0 | STR  
+26   | user_id           |                   |       |    |     |      |                           | 0 | VAR  
+27   | id                |                   |       |    |     |      |                           | 0 | STR  
+27   | user_id           |                   |       |    |     |      |                           | 0 | VAR  
+27   | name              |                   |       |    |     |      |                           | 0 | STR  
+27   | Alice             |                   |       |    |     |      |                           | 0 | STR  
+31   | parse_value       |                   |       |    |     |      | str                       | 1 | FUNC 
+31   | value             | parse_value       |       |    |     |      | Union[int, str, float]    | 0 | ARG  
+32   | Function          |                   |       |    |     |      |                           | 0 | STR  
+32   | Union             |                   |       |    |     |      |                           | 0 | STR  
+32   | type.             |                   |       |    |     |      |                           | 0 | STR  
+33   | str               |                   |       |    |     |      |                           | 0 | CALL 
+33   | value             |                   |       |    |     | str  |                           | 0 | ARG  
+36   | create_pair       |                   |       |    |     |      | Tuple[int, str]           | 1 | FUNC 
+36   | aa                | create_pair       |       |    |     |      | int                       | 0 | ARG  
+36   | bb                | create_pair       |       |    |     |      | str                       | 0 | ARG  
+37   | Function          |                   |       |    |     |      |                           | 0 | STR  
+37   | returning         |                   |       |    |     |      |                           | 0 | STR  
+37   | tuple.            |                   |       |    |     |      |                           | 0 | STR  
+38   | aa                |                   |       |    |     |      |                           | 0 | VAR  
+38   | bb                |                   |       |    |     |      |                           | 0 | VAR  
+41   | callback_function |                   |       |    |     |      | int                       | 1 | FUNC 
+41   | func              | callback_function |       |    |     |      | Callable[[int, int], int] | 0 | ARG  
+42   | Function          |                   |       |    |     |      |                           | 0 | STR  
+42   | accepting         |                   |       |    |     |      |                           | 0 | STR  
+42   | callable.         |                   |       |    |     |      |                           | 0 | STR  
+43   | func              |                   |       |    |     |      |                           | 0 | CALL 
+46   | Container         |                   |       |    |     |      |                           | 1 | CLASS
+47   | Generic           |                   |       |    |     |      |                           | 0 | STR  
+47   | type              |                   |       |    |     |      |                           | 0 | STR  
+47   | parameter.        |                   |       |    |     |      |                           | 0 | STR  
+49   | __init__          | Container         |       |    |     |      |                           | 1 | FUNC 
+49   | self              | __init__          |       |    |     |      |                           | 0 | ARG  
+49   | value             | __init__          |       |    |     |      | T                         | 0 | ARG  
+50   | value             | self              |       |    |     |      |                           | 1 | PROP 
+50   | value             |                   |       |    |     |      |                           | 0 | VAR  
+52   | get               | Container         |       |    |     |      | T                         | 1 | FUNC 
+52   | self              | get               |       |    |     |      |                           | 0 | ARG  
+53   | value             | self              |       |    |     |      |                           | 0 | PROP 
+53   | self              |                   |       |    |     |      |                           | 0 | VAR  
+55   | set               | Container         |       |    |     |      | None                      | 1 | FUNC 
+55   | self              | set               |       |    |     |      |                           | 0 | ARG  
+55   | value             | set               |       |    |     |      | T                         | 0 | ARG  
+56   | value             | self              |       |    |     |      |                           | 1 | PROP 
+56   | value             |                   |       |    |     |      |                           | 0 | VAR  
+62   | get_first         |                   |       |    |     |      | Optional[T]               | 1 | FUNC 
+62   | items             | get_first         |       |    |     |      | List[T]                   | 0 | ARG  
+63   | Generic           |                   |       |    |     |      |                           | 0 | STR  
+63   | function          |                   |       |    |     |      |                           | 0 | STR  
+63   | TypeVar.          |                   |       |    |     |      |                           | 0 | STR  
+64   | items             |                   |       |    |     |      |                           | 0 | VAR  
+64   | items             |                   |       |    |     |      |                           | 0 | VAR  
+67   | User              |                   |       |    |     |      |                           | 1 | CLASS
+68   | typed             |                   |       |    |     |      |                           | 0 | STR  
+68   | attributes.       |                   |       |    |     |      |                           | 0 | STR  
+70   | name              |                   |       |    |     |      | str                       | 1 | VAR  
+71   | age               |                   |       |    |     |      | int                       | 1 | VAR  
+72   | emails            |                   |       |    |     |      | List[str]                 | 1 | VAR  
+74   | __init__          | User              |       |    |     |      |                           | 1 | FUNC 
+74   | self              | __init__          |       |    |     |      |                           | 0 | ARG  
+74   | name              | __init__          |       |    |     |      | str                       | 0 | ARG  
+74   | age               | __init__          |       |    |     |      | int                       | 0 | ARG  
+75   | name              | self              |       |    |     |      |                           | 1 | PROP 
+75   | name              |                   |       |    |     |      |                           | 0 | VAR  
+76   | age               | self              |       |    |     |      |                           | 1 | PROP 
+76   | age               |                   |       |    |     |      |                           | 0 | VAR  
+77   | emails            | self              |       |    |     |      |                           | 1 | PROP 
+80   | iterate_values    |                   |       |    |     |      | Iterator[int]             | 1 | FUNC 
+80   | values            | iterate_values    |       |    |     |      | Iterable[int]             | 0 | ARG  
+81   | Function          |                   |       |    |     |      |                           | 0 | STR  
+81   | iterator          |                   |       |    |     |      |                           | 0 | STR  
+81   | types.            |                   |       |    |     |      |                           | 0 | STR  
+82   | value             |                   |       |    |     |      |                           | 0 | VAR  
+82   | values            |                   |       |    |     |      |                           | 0 | VAR  

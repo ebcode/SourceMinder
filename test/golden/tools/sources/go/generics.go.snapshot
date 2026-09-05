@@ -1,0 +1,56 @@
+LINE | SYM        | PAR       | SCOPE   | NS   | MOD | CLUE     | TYPE    | D | CTX  
+./tools/sources/go/generics.go:
+1    | generics   |           |         |      |     |          |         | 0 | FILE 
+1    | main       |           |         |      |     |          |         | 0 | NS   
+3    | Generic    |           |         |      |     |          |         | 0 | COM  
+3    | function   |           |         |      |     |          |         | 0 | COM  
+3    | parameter  |           |         |      |     |          |         | 0 | COM  
+4    | Max        |           | public  | main |     |          | T       | 1 | FUNC 
+11   | Generic    |           |         |      |     |          |         | 0 | COM  
+11   | constraint |           |         |      |     |          |         | 0 | COM  
+12   | Number     |           | public  | main |     |          |         | 1 | IFACE
+16   | Generic    |           |         |      |     |          |         | 0 | COM  
+16   | function   |           |         |      |     |          |         | 0 | COM  
+16   | constraint |           |         |      |     |          |         | 0 | COM  
+17   | Sum        |           | public  | main |     |          | T       | 1 | FUNC 
+17   | values     |           |         |      |     |          | []T     | 1 | ARG  
+18   | total      |           | private | main | var |          | T       | 1 | VAR  
+20   | total      |           |         | main |     |          |         | 0 | VAR  
+22   | total      |           |         | main |     |          |         | 0 | VAR  
+25   | Generic    |           |         |      |     |          |         | 0 | COM  
+26   | Stack      |           | public  | main |     |          |         | 1 | TYPE 
+30   | Push       | *Stack[T] | public  | main |     |          |         | 1 | FUNC 
+30   | item       |           |         |      |     |          | T       | 1 | ARG  
+31   | items      | s         |         | main |     |          |         | 0 | PROP 
+31   | append     |           |         |      |     | built-in |         | 0 | CALL 
+31   | items      | s         |         | main |     | append   |         | 0 | ARG  
+31   | item       |           |         | main |     | append   |         | 0 | ARG  
+34   | Pop        | *Stack[T] | public  | main |     |          | T       | 1 | FUNC 
+35   | len        |           |         |      |     | built-in |         | 0 | CALL 
+35   | items      | s         |         | main |     | len      |         | 0 | ARG  
+36   | zero       |           | private | main | var |          | T       | 1 | VAR  
+37   | zero       |           |         | main |     |          |         | 0 | VAR  
+39   | item       |           | private | main |     |          |         | 1 | VAR  
+39   | items      | s         |         | main |     |          |         | 0 | PROP 
+39   | len        |           |         |      |     | built-in |         | 0 | CALL 
+39   | items      | s         |         | main |     | len      |         | 0 | ARG  
+40   | items      | s         |         | main |     |          |         | 0 | PROP 
+40   | items      | s         |         | main |     |          |         | 0 | PROP 
+40   | len        |           |         |      |     | built-in |         | 0 | CALL 
+40   | items      | s         |         | main |     | len      |         | 0 | ARG  
+41   | item       |           |         | main |     |          |         | 0 | VAR  
+44   | Generic    |           |         |      |     |          |         | 0 | COM  
+45   | Container  |           | public  | main |     |          |         | 1 | TYPE 
+50   | Multiple   |           |         |      |     |          |         | 0 | COM  
+50   | parameters |           |         |      |     |          |         | 0 | COM  
+51   | Pair       |           | public  | main |     |          | map[K]V | 1 | FUNC 
+51   | key        |           |         |      |     |          | K       | 1 | ARG  
+51   | value      |           |         |      |     |          | V       | 1 | ARG  
+52   | key        |           |         | main |     |          |         | 0 | PROP 
+52   | value      |           |         | main |     |          |         | 0 | VAR  
+55   | Comparable |           |         |      |     |          |         | 0 | COM  
+55   | constraint |           |         |      |     |          |         | 0 | COM  
+56   | Contains   |           | public  | main |     |          | bool    | 1 | FUNC 
+56   | slice      |           |         |      |     |          | []T     | 1 | ARG  
+56   | value      |           |         |      |     |          | T       | 1 | ARG  
+58   | value      |           |         | main |     |          |         | 0 | VAR  

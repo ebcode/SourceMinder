@@ -1,0 +1,66 @@
+LINE | SYM         | PAR | SCOPE   | NS   | MOD | CLUE     | TYPE   | D | CTX 
+./tools/sources/go/variadic.go:
+1    | variadic    |     |         |      |     |          |        | 0 | FILE
+1    | main        |     |         |      |     |          |        | 0 | NS  
+3    | fmt         |     |         | main |     |          |        | 0 | IMP 
+5    | Variadic    |     |         |      |     |          |        | 0 | COM 
+5    | function    |     |         |      |     |          |        | 0 | COM 
+5    | int         |     |         |      |     |          |        | 0 | COM 
+5    | parameters  |     |         |      |     |          |        | 0 | COM 
+6    | sum         |     | private | main |     |          | int    | 1 | FUNC
+6    | numbers     |     |         | main |     |          |        | 0 | VAR 
+7    | total       |     | private | main |     |          |        | 1 | VAR 
+8    | num         |     | private | main |     | range    |        | 0 | VAR 
+9    | total       |     |         | main |     |          |        | 0 | VAR 
+9    | num         |     |         | main |     |          |        | 0 | VAR 
+11   | total       |     |         | main |     |          |        | 0 | VAR 
+14   | Variadic    |     |         |      |     |          |        | 0 | COM 
+14   | mixed       |     |         |      |     |          |        | 0 | COM 
+14   | parameters  |     |         |      |     |          |        | 0 | COM 
+15   | greet       |     | private | main |     |          |        | 1 | FUNC
+15   | prefix      |     |         |      |     |          | string | 1 | ARG 
+15   | names       |     |         | main |     |          |        | 0 | VAR 
+16   | name        |     | private | main |     | range    |        | 0 | VAR 
+17   | Println     | fmt |         |      |     |          |        | 0 | CALL
+17   | prefix      |     |         | main |     | Println  |        | 0 | ARG 
+17   | name        |     |         | main |     | Println  |        | 0 | ARG 
+21   | Variadic    |     |         |      |     |          |        | 0 | COM 
+22   | printAll    |     | private | main |     |          |        | 1 | FUNC
+22   | items       |     |         | main |     |          |        | 0 | VAR 
+23   | item        |     | private | main |     | range    |        | 0 | VAR 
+24   | Println     | fmt |         |      |     |          |        | 0 | CALL
+24   | item        |     |         | main |     | Println  |        | 0 | ARG 
+28   | Using       |     |         |      |     |          |        | 0 | COM 
+28   | variadic    |     |         |      |     |          |        | 0 | COM 
+28   | arguments   |     |         |      |     |          |        | 0 | COM 
+29   | useVariadic |     | private | main |     |          |        | 1 | FUNC
+30   | Call        |     |         |      |     |          |        | 0 | COM 
+30   | multiple    |     |         |      |     |          |        | 0 | COM 
+30   | arguments   |     |         |      |     |          |        | 0 | COM 
+31   | result      |     | private | main |     |          |        | 1 | VAR 
+31   | sum         |     |         |      |     |          |        | 0 | CALL
+33   | Call        |     |         |      |     |          |        | 0 | COM 
+33   | slice       |     |         |      |     |          |        | 0 | COM 
+34   | numbers     |     | private | main |     |          | []int  | 1 | VAR 
+35   | result      |     |         | main |     |          |        | 0 | VAR 
+35   | sum         |     |         |      |     |          |        | 0 | CALL
+35   | numbers     |     |         | main |     |          |        | 0 | VAR 
+37   | Mixed       |     |         |      |     |          |        | 0 | COM 
+37   | parameter   |     |         |      |     |          |        | 0 | COM 
+37   | variadic    |     |         |      |     |          |        | 0 | COM 
+38   | greet       |     |         |      |     |          |        | 0 | CALL
+38   | Hello       |     |         |      |     |          |        | 0 | STR 
+38   | Alice       |     |         |      |     |          |        | 0 | STR 
+38   | Bob         |     |         |      |     |          |        | 0 | STR 
+38   | Charlie     |     |         |      |     |          |        | 0 | STR 
+40   | variadic    |     |         |      |     |          |        | 0 | COM 
+41   | printAll    |     |         |      |     |          |        | 0 | CALL
+41   | hello       |     |         |      |     |          |        | 0 | STR 
+43   | result      |     |         | main |     |          |        | 0 | VAR 
+46   | Empty       |     |         |      |     |          |        | 0 | COM 
+46   | variadic    |     |         |      |     |          |        | 0 | COM 
+46   | call        |     |         |      |     |          |        | 0 | COM 
+47   | allowEmpty  |     | private | main |     |          | int    | 1 | FUNC
+47   | vals        |     |         | main |     |          |        | 0 | VAR 
+48   | len         |     |         |      |     | built-in |        | 0 | CALL
+48   | vals        |     |         | main |     | len      |        | 0 | ARG 

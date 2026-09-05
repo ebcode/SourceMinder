@@ -1,0 +1,173 @@
+LINE | SYM               | PAR    | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/data-structures.pl:
+1    | data-structures   |        |       |    |     |      |        | 0 | FILE
+1    | strict            |        |       |    |     |      |        | 0 | IMP 
+2    | warnings          |        |       |    |     |      |        | 0 | IMP 
+3    | Scalar::Util      |        |       |    |     |      |        | 0 | IMP 
+3    | blessed           |        |       |    |     |      |        | 0 | IMP 
+3    | reftype           |        |       |    |     |      |        | 0 | IMP 
+3    | weaken            |        |       |    |     |      |        | 0 | IMP 
+5    | Building          |        |       |    |     |      |        | 0 | COM 
+5    | nested            |        |       |    |     |      |        | 0 | COM 
+5    | structures        |        |       |    |     |      |        | 0 | COM 
+6    | make_user         |        |       |    |     |      |        | 1 | FUNC
+7    | args              |        |       |    | my  |      | hash   | 1 | ARG 
+9    | name              |        |       |    |     |      |        | 0 | PROP
+9    | args              |        |       |    |     |      | hash   | 0 | VAR 
+9    | name              | args   |       |    |     |      |        | 0 | PROP
+10   | email             |        |       |    |     |      |        | 0 | PROP
+10   | args              |        |       |    |     |      | hash   | 0 | VAR 
+10   | email             | args   |       |    |     |      |        | 0 | PROP
+11   | roles             |        |       |    |     |      |        | 0 | PROP
+11   | args              |        |       |    |     |      | hash   | 0 | VAR 
+11   | roles             | args   |       |    |     |      |        | 0 | PROP
+12   | address           |        |       |    |     |      |        | 0 | PROP
+13   | street            |        |       |    |     |      |        | 0 | PROP
+13   | args              |        |       |    |     |      | hash   | 0 | VAR 
+13   | street            | args   |       |    |     |      |        | 0 | PROP
+14   | city              |        |       |    |     |      |        | 0 | PROP
+14   | args              |        |       |    |     |      | hash   | 0 | VAR 
+14   | city              | args   |       |    |     |      |        | 0 | PROP
+15   | zip               |        |       |    |     |      |        | 0 | PROP
+15   | args              |        |       |    |     |      | hash   | 0 | VAR 
+15   | zip               | args   |       |    |     |      |        | 0 | PROP
+20   | Deep              |        |       |    |     |      |        | 0 | COM 
+20   | access            |        |       |    |     |      |        | 0 | COM 
+20   | arrow             |        |       |    |     |      |        | 0 | COM 
+20   | notation          |        |       |    |     |      |        | 0 | COM 
+21   | get_city          |        |       |    |     |      |        | 1 | FUNC
+22   | user              |        |       |    | my  |      | scalar | 1 | ARG 
+23   | user              |        |       |    |     |      | hash   | 0 | VAR 
+23   | address           | user   |       |    |     |      |        | 0 | PROP
+23   | city              |        |       |    |     |      |        | 0 | PROP
+26   | get_first_role    |        |       |    |     |      |        | 1 | FUNC
+27   | user              |        |       |    | my  |      | scalar | 1 | ARG 
+28   | user              |        |       |    |     |      | hash   | 0 | VAR 
+28   | roles             | user   |       |    |     |      |        | 0 | PROP
+31   | Dereferencing     |        |       |    |     |      |        | 0 | COM 
+32   | list_roles        |        |       |    |     |      |        | 1 | FUNC
+33   | user              |        |       |    | my  |      | scalar | 1 | ARG 
+34   | user              |        |       |    |     |      | scalar | 0 | VAR 
+37   | merge_address     |        |       |    |     |      |        | 1 | FUNC
+38   | user              |        |       |    | my  |      | scalar | 1 | ARG 
+38   | updates           |        |       |    | my  |      | scalar | 1 | ARG 
+39   | addr              |        |       |    | my  |      | hash   | 1 | VAR 
+39   | user              |        |       |    |     |      | scalar | 0 | VAR 
+40   | addr              |        |       |    |     |      | hash   | 0 | VAR 
+40   | addr              |        |       |    |     |      | hash   | 0 | VAR 
+40   | updates           |        |       |    |     |      | scalar | 0 | VAR 
+41   | user              |        |       |    |     |      | hash   | 0 | VAR 
+41   | address           | user   |       |    |     |      |        | 0 | PROP
+41   | addr              |        |       |    |     |      | hash   | 0 | VAR 
+44   | exists            |        |       |    |     |      |        | 0 | COM 
+44   | delete            |        |       |    |     |      |        | 0 | COM 
+45   | remove_field      |        |       |    |     |      |        | 1 | FUNC
+46   | hash              |        |       |    | my  |      | scalar | 1 | ARG 
+46   | key               |        |       |    | my  |      | scalar | 1 | ARG 
+47   | exists            |        |       |    |     |      |        | 0 | CALL
+47   | hash              |        |       |    |     |      | hash   | 0 | VAR 
+47   | key               |        |       |    |     |      | scalar | 0 | VAR 
+48   | delete            |        |       |    |     |      |        | 0 | CALL
+48   | hash              |        |       |    |     |      | hash   | 0 | VAR 
+48   | key               |        |       |    |     |      | scalar | 0 | VAR 
+51   | keys              |        |       |    |     |      |        | 0 | COM 
+51   | values            |        |       |    |     |      |        | 0 | COM 
+51   | each              |        |       |    |     |      |        | 0 | COM 
+52   | summarize         |        |       |    |     |      |        | 1 | FUNC
+53   | hash              |        |       |    | my  |      | scalar | 1 | ARG 
+54   | keys              |        |       |    | my  |      | array  | 1 | VAR 
+54   | keys              |        |       |    |     |      |        | 0 | CALL
+54   | hash              |        |       |    |     |      | scalar | 0 | VAR 
+55   | vals              |        |       |    | my  |      | array  | 1 | VAR 
+55   | values            |        |       |    |     |      |        | 0 | CALL
+55   | hash              |        |       |    |     |      | scalar | 0 | VAR 
+56   | scalar            |        |       |    |     |      |        | 0 | CALL
+56   | keys              |        |       |    |     |      | array  | 0 | VAR 
+59   | find_by_value     |        |       |    |     |      |        | 1 | FUNC
+60   | hash              |        |       |    | my  |      | scalar | 1 | ARG 
+60   | target            |        |       |    | my  |      | scalar | 1 | ARG 
+61   | each              |        |       |    |     |      |        | 0 | CALL
+61   | hash              |        |       |    |     |      | scalar | 0 | VAR 
+62   | target            |        |       |    |     |      | scalar | 0 | VAR 
+67   | Array             |        |       |    |     |      |        | 0 | COM 
+67   | hashrefs          |        |       |    |     |      |        | 0 | COM 
+68   | sort_users        |        |       |    |     |      |        | 1 | FUNC
+69   | users             |        |       |    | my  |      | scalar | 1 | ARG 
+70   | name              |        |       |    |     |      |        | 0 | PROP
+70   | name              |        |       |    |     |      |        | 0 | PROP
+70   | users             |        |       |    |     |      | scalar | 0 | VAR 
+73   | filter_by_role    |        |       |    |     |      |        | 1 | FUNC
+74   | users             |        |       |    | my  |      | scalar | 1 | ARG 
+74   | role              |        |       |    | my  |      | scalar | 1 | ARG 
+75   | exists            |        |       |    |     |      |        | 0 | CALL
+75   | roles             |        |       |    |     |      |        | 0 | PROP
+75   | role              |        |       |    |     |      | scalar | 0 | VAR 
+75   | users             |        |       |    |     |      | scalar | 0 | VAR 
+78   | Nested            |        |       |    |     |      |        | 0 | COM 
+78   | array             |        |       |    |     |      |        | 0 | COM 
+78   | dereference       |        |       |    |     |      |        | 0 | COM 
+79   | flatten           |        |       |    |     |      |        | 1 | FUNC
+80   | nested            |        |       |    | my  |      | scalar | 1 | ARG 
+81   | ref               |        |       |    |     |      |        | 0 | CALL
+81   | ARRAY             |        |       |    |     |      |        | 0 | STR 
+81   | nested            |        |       |    |     |      | scalar | 0 | VAR 
+84   | reftype           |        |       |    |     |      |        | 0 | COM 
+84   | blessed           |        |       |    |     |      |        | 0 | COM 
+85   | describe_ref      |        |       |    |     |      |        | 1 | FUNC
+86   | ref               |        |       |    | my  |      | scalar | 1 | ARG 
+87   | type              |        |       |    | my  |      | scalar | 1 | VAR 
+87   | reftype           |        |       |    |     |      |        | 0 | CALL
+87   | ref               |        |       |    |     |      | scalar | 0 | VAR 
+87   | ref               |        |       |    |     |      |        | 0 | STR 
+88   | class             |        |       |    | my  |      | scalar | 1 | VAR 
+88   | blessed           |        |       |    |     |      |        | 0 | CALL
+88   | ref               |        |       |    |     |      | scalar | 0 | VAR 
+88   | unblessed         |        |       |    |     |      |        | 0 | STR 
+89   | $class            |        |       |    |     |      |        | 0 | STR 
+89   | $type             |        |       |    |     |      |        | 0 | STR 
+89   | class             |        |       |    |     |      | scalar | 0 | VAR 
+89   | type              |        |       |    |     |      | scalar | 0 | VAR 
+92   | Weak              |        |       |    |     |      |        | 0 | COM 
+92   | references        |        |       |    |     |      |        | 0 | COM 
+93   | make_linked_nodes |        |       |    |     |      |        | 1 | FUNC
+94   | val_a             |        |       |    | my  |      | scalar | 1 | ARG 
+94   | val_b             |        |       |    | my  |      | scalar | 1 | ARG 
+95   | node_a            |        |       |    | my  |      | scalar | 1 | VAR 
+95   | value             |        |       |    |     |      |        | 0 | PROP
+95   | val_a             |        |       |    |     |      | scalar | 0 | VAR 
+96   | node_b            |        |       |    | my  |      | scalar | 1 | VAR 
+96   | value             |        |       |    |     |      |        | 0 | PROP
+96   | val_b             |        |       |    |     |      | scalar | 0 | VAR 
+96   | prev              |        |       |    |     |      |        | 0 | PROP
+96   | node_a            |        |       |    |     |      | scalar | 0 | VAR 
+97   | node_a            |        |       |    |     |      | hash   | 0 | VAR 
+97   | next              | node_a |       |    |     |      |        | 0 | PROP
+97   | node_b            |        |       |    |     |      | scalar | 0 | VAR 
+98   | weaken            |        |       |    |     |      |        | 0 | CALL
+98   | node_b            |        |       |    |     |      | hash   | 0 | VAR 
+98   | prev              | node_b |       |    |     |      |        | 0 | PROP
+99   | node_a            |        |       |    |     |      | scalar | 0 | VAR 
+99   | node_b            |        |       |    |     |      | scalar | 0 | VAR 
+102  | Hash              |        |       |    |     |      |        | 0 | COM 
+102  | slice             |        |       |    |     |      |        | 0 | COM 
+103  | pick_fields       |        |       |    |     |      |        | 1 | FUNC
+104  | hash              |        |       |    | my  |      | scalar | 1 | ARG 
+104  | fields            |        |       |    | my  |      | array  | 1 | ARG 
+105  | hash              |        |       |    |     |      | hash   | 0 | VAR 
+105  | exists            |        |       |    |     |      |        | 0 | CALL
+105  | hash              |        |       |    |     |      | hash   | 0 | VAR 
+105  | fields            |        |       |    |     |      | array  | 0 | VAR 
+108  | Array             |        |       |    |     |      |        | 0 | COM 
+108  | slice             |        |       |    |     |      |        | 0 | COM 
+109  | first_n           |        |       |    |     |      |        | 1 | FUNC
+110  | arr               |        |       |    | my  |      | scalar | 1 | ARG 
+111  | arr               |        |       |    |     |      | array  | 0 | VAR 
+114  | ref               |        |       |    |     |      |        | 0 | COM 
+115  | make_counter_ref  |        |       |    |     |      |        | 1 | FUNC
+116  | start             |        |       |    | my  |      | scalar | 1 | ARG 
+117  | count             |        |       |    | my  |      | scalar | 1 | VAR 
+117  | start             |        |       |    |     |      | scalar | 0 | VAR 
+118  | count             |        |       |    |     |      | scalar | 0 | VAR 
+121  | increment         |        |       |    |     |      |        | 1 | FUNC
+122  | ref               |        |       |    | my  |      | scalar | 1 | ARG 
+123  | ref               |        |       |    |     |      | scalar | 0 | VAR 

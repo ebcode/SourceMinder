@@ -1,0 +1,50 @@
+LINE | SYM                | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/regex.pl:
+1    | regex              |     |       |    |     |      |        | 0 | FILE
+2    | strict             |     |       |    |     |      |        | 0 | IMP 
+3    | warnings           |     |       |    |     |      |        | 0 | IMP 
+5    | Basic              |     |       |    |     |      |        | 0 | COM 
+5    | pattern            |     |       |    |     |      |        | 0 | COM 
+5    | matching           |     |       |    |     |      |        | 0 | COM 
+6    | is_valid_email     |     |       |    |     |      |        | 1 | FUNC
+7    | email              |     |       |    | my  |      | scalar | 1 | ARG 
+8    | email              |     |       |    |     |      | scalar | 0 | VAR 
+11   | extract_digits     |     |       |    |     |      |        | 1 | FUNC
+12   | str                |     |       |    | my  |      | scalar | 1 | ARG 
+13   | digits             |     |       |    | my  |      | array  | 1 | VAR 
+13   | str                |     |       |    |     |      | scalar | 0 | VAR 
+14   | digits             |     |       |    |     |      | array  | 0 | VAR 
+17   | Named              |     |       |    |     |      |        | 0 | COM 
+17   | captures           |     |       |    |     |      |        | 0 | COM 
+18   | parse_date         |     |       |    |     |      |        | 1 | FUNC
+19   | date_str           |     |       |    | my  |      | scalar | 1 | ARG 
+20   | date_str           |     |       |    |     |      | scalar | 0 | VAR 
+21   | year               |     |       |    |     |      |        | 0 | PROP
+21   | month              |     |       |    |     |      |        | 0 | PROP
+21   | day                |     |       |    |     |      |        | 0 | PROP
+26   | Substitution       |     |       |    |     |      |        | 0 | COM 
+27   | sanitize_input     |     |       |    |     |      |        | 1 | FUNC
+28   | input              |     |       |    | my  |      | scalar | 1 | ARG 
+29   | input              |     |       |    |     |      | scalar | 0 | VAR 
+30   | input              |     |       |    |     |      | scalar | 0 | VAR 
+33   | normalize_newlines |     |       |    |     |      |        | 1 | FUNC
+34   | text               |     |       |    | my  |      | scalar | 1 | ARG 
+35   | text               |     |       |    |     |      | scalar | 0 | VAR 
+36   | text               |     |       |    |     |      | scalar | 0 | VAR 
+39   | Compiled           |     |       |    |     |      |        | 0 | COM 
+39   | regex              |     |       |    |     |      |        | 0 | COM 
+39   | qr//               |     |       |    |     |      |        | 0 | COM 
+40   | ip_pattern         |     |       |    | my  |      | scalar | 1 | VAR 
+41   | email_pattern      |     |       |    | my  |      | scalar | 1 | VAR 
+42   | url_pattern        |     |       |    | my  |      | scalar | 1 | VAR 
+44   | extract_ips        |     |       |    |     |      |        | 1 | FUNC
+45   | text               |     |       |    | my  |      | scalar | 1 | ARG 
+46   | ips                |     |       |    | my  |      | array  | 1 | VAR 
+46   | text               |     |       |    |     |      | scalar | 0 | VAR 
+46   | ip_pattern         |     |       |    |     |      | scalar | 0 | VAR 
+47   | ips                |     |       |    |     |      | array  | 0 | VAR 
+50   | regex              |     |       |    |     |      |        | 0 | COM 
+51   | tokenize           |     |       |    |     |      |        | 1 | FUNC
+52   | str                |     |       |    | my  |      | scalar | 1 | ARG 
+53   | split              |     |       |    |     |      |        | 0 | CALL
+53   | str                |     |       |    |     |      | scalar | 0 | VAR 

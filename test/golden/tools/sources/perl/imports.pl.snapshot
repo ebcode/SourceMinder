@@ -1,0 +1,58 @@
+LINE | SYM               | PAR | SCOPE | NS | MOD   | CLUE | TYPE | D | CTX 
+./tools/sources/perl/imports.pl:
+1    | imports           |     |       |    |       |      |      | 0 | FILE
+2    | strict            |     |       |    |       |      |      | 0 | IMP 
+3    | warnings          |     |       |    |       |      |      | 0 | IMP 
+5    | Basic             |     |       |    |       |      |      | 0 | COM 
+5    | statements        |     |       |    |       |      |      | 0 | COM 
+6    | Scalar::Util      |     |       |    |       |      |      | 0 | IMP 
+6    | blessed           |     |       |    |       |      |      | 0 | IMP 
+6    | looks_like_number |     |       |    |       |      |      | 0 | IMP 
+6    | weaken            |     |       |    |       |      |      | 0 | IMP 
+7    | List::Util        |     |       |    |       |      |      | 0 | IMP 
+7    | min               |     |       |    |       |      |      | 0 | IMP 
+7    | max               |     |       |    |       |      |      | 0 | IMP 
+7    | sum               |     |       |    |       |      |      | 0 | IMP 
+7    | first             |     |       |    |       |      |      | 0 | IMP 
+7    | reduce            |     |       |    |       |      |      | 0 | IMP 
+7    | any               |     |       |    |       |      |      | 0 | IMP 
+7    | all               |     |       |    |       |      |      | 0 | IMP 
+7    | none              |     |       |    |       |      |      | 0 | IMP 
+8    | POSIX             |     |       |    |       |      |      | 0 | IMP 
+8    | floor             |     |       |    |       |      |      | 0 | IMP 
+8    | ceil              |     |       |    |       |      |      | 0 | IMP 
+9    | Carp              |     |       |    |       |      |      | 0 | IMP 
+9    | croak             |     |       |    |       |      |      | 0 | IMP 
+9    | confess           |     |       |    |       |      |      | 0 | IMP 
+9    | carp              |     |       |    |       |      |      | 0 | IMP 
+9    | cluck             |     |       |    |       |      |      | 0 | IMP 
+11   | Version           |     |       |    |       |      |      | 0 | COM 
+11   | requirements      |     |       |    |       |      |      | 0 | COM 
+15   | Pragma            |     |       |    |       |      |      | 0 | COM 
+15   | modules           |     |       |    |       |      |      | 0 | COM 
+16   | utf8              |     |       |    |       |      |      | 0 | IMP 
+17   | feature           |     |       |    |       |      |      | 0 | IMP 
+18   | feature           |     |       |    |       |      |      | 0 | IMP 
+18   | say               |     |       |    |       |      |      | 0 | IMP 
+18   | state             |     |       |    |       |      |      | 0 | IMP 
+18   | unicode_strings   |     |       |    |       |      |      | 0 | IMP 
+19   | constant          |     |       |    |       |      |      | 0 | IMP 
+19   | PI                |     |       |    | const |      |      | 1 | VAR 
+20   | constant          |     |       |    |       |      |      | 0 | IMP 
+20   | MAX_RETRIES       |     |       |    | const |      |      | 1 | VAR 
+20   | TIMEOUT           |     |       |    | const |      |      | 1 | VAR 
+20   | BASE_URL          |     |       |    | const |      |      | 1 | VAR 
+26   | OOP               |     |       |    |       |      |      | 0 | COM 
+26   | imports           |     |       |    |       |      |      | 0 | COM 
+27   | parent            |     |       |    |       |      |      | 0 | IMP 
+28   | base              |     |       |    |       |      |      | 0 | IMP 
+29   | Moo               |     |       |    |       |      |      | 0 | IMP 
+30   | Moose             |     |       |    |       |      |      | 0 | IMP 
+32   | runtime           |     |       |    |       |      |      | 0 | COM 
+32   | loading           |     |       |    |       |      |      | 0 | COM 
+33   | LWP::UserAgent    |     |       |    |       |      |      | 0 | IMP 
+34   | File::Path        |     |       |    |       |      |      | 0 | IMP 
+36   | Conditional       |     |       |    |       |      |      | 0 | COM 
+36   | loading           |     |       |    |       |      |      | 0 | COM 
+37   | JSON::XS          |     |       |    |       |      |      | 0 | IMP 
+39   | JSON::PP          |     |       |    |       |      |      | 0 | IMP 

@@ -1,0 +1,83 @@
+LINE | SYM              | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX  
+./tools/sources/perl/goto.pl:
+1    | goto             |     |       |    |     |      |        | 0 | FILE 
+2    | strict           |     |       |    |     |      |        | 0 | IMP  
+3    | warnings         |     |       |    |     |      |        | 0 | IMP  
+5    | ---              |     |       |    |     |      |        | 0 | COM  
+5    | Labels           |     |       |    |     |      |        | 0 | COM  
+5    | last/next/redo   |     |       |    |     |      |        | 0 | COM  
+5    | ---              |     |       |    |     |      |        | 0 | COM  
+7    | Simple           |     |       |    |     |      |        | 0 | COM  
+7    | labeled          |     |       |    |     |      |        | 0 | COM  
+7    | loop             |     |       |    |     |      |        | 0 | COM  
+8    | OUTER            |     |       |    |     |      |        | 1 | LABEL
+9    | INNER            |     |       |    |     |      |        | 1 | LABEL
+10   | OUTER            |     |       |    |     |      |        | 0 | GOTO 
+11   | OUTER            |     |       |    |     |      |        | 0 | GOTO 
+15   | Label            |     |       |    |     |      |        | 0 | COM  
+15   | loop             |     |       |    |     |      |        | 0 | COM  
+16   | RETRY            |     |       |    |     |      |        | 1 | LABEL
+17   | ok               |     |       |    | my  |      | scalar | 1 | VAR  
+18   | RETRY            |     |       |    |     |      |        | 0 | GOTO 
+18   | ok               |     |       |    |     |      | scalar | 0 | VAR  
+21   | restart          |     |       |    |     |      |        | 0 | COM  
+21   | current          |     |       |    |     |      |        | 0 | COM  
+21   | iteration        |     |       |    |     |      |        | 0 | COM  
+21   | without          |     |       |    |     |      |        | 0 | COM  
+21   | re-evaluating    |     |       |    |     |      |        | 0 | COM  
+21   | condition        |     |       |    |     |      |        | 0 | COM  
+22   | count            |     |       |    | my  |      | scalar | 1 | VAR  
+23   | LOOP             |     |       |    |     |      |        | 1 | LABEL
+23   | count            |     |       |    |     |      | scalar | 0 | VAR  
+24   | count            |     |       |    |     |      | scalar | 0 | VAR  
+25   | LOOP             |     |       |    |     |      |        | 0 | GOTO 
+25   | count            |     |       |    |     |      | scalar | 0 | VAR  
+25   | count            |     |       |    |     |      | scalar | 0 | VAR  
+26   | LOOP             |     |       |    |     |      |        | 0 | GOTO 
+29   | ---              |     |       |    |     |      |        | 0 | COM  
+29   | LABEL            |     |       |    |     |      |        | 0 | COM  
+29   | ---              |     |       |    |     |      |        | 0 | COM  
+30   | check_value      |     |       |    |     |      |        | 1 | FUNC 
+31   | val              |     |       |    | my  |      | scalar | 1 | ARG  
+32   | INVALID          |     |       |    |     |      |        | 0 | GOTO 
+32   | val              |     |       |    |     |      | scalar | 0 | VAR  
+33   | val              |     |       |    |     |      | scalar | 0 | VAR  
+34   | INVALID          |     |       |    |     |      |        | 1 | LABEL
+37   | ---              |     |       |    |     |      |        | 0 | COM  
+37   | &func            |     |       |    |     |      |        | 0 | COM  
+37   | tail-call        |     |       |    |     |      |        | 0 | COM  
+37   | ---              |     |       |    |     |      |        | 0 | COM  
+38   | log_and_dispatch |     |       |    |     |      |        | 1 | FUNC 
+39   | type             |     |       |    | my  |      | scalar | 1 | ARG  
+40   | handle_request   |     |       |    |     |      |        | 0 | GOTO 
+40   | type             |     |       |    |     |      | scalar | 0 | VAR  
+40   | request          |     |       |    |     |      |        | 0 | STR  
+41   | handle_event     |     |       |    |     |      |        | 0 | GOTO 
+41   | type             |     |       |    |     |      | scalar | 0 | VAR  
+41   | event            |     |       |    |     |      |        | 0 | STR  
+44   | handle_request   |     |       |    |     |      |        | 1 | FUNC 
+45   | type             |     |       |    | my  |      | scalar | 1 | ARG  
+46   | request:         |     |       |    |     |      |        | 0 | STR  
+46   | $type            |     |       |    |     |      |        | 0 | STR  
+46   | type             |     |       |    |     |      | scalar | 0 | VAR  
+49   | handle_event     |     |       |    |     |      |        | 1 | FUNC 
+50   | type             |     |       |    | my  |      | scalar | 1 | ARG  
+51   | event:           |     |       |    |     |      |        | 0 | STR  
+51   | $type            |     |       |    |     |      |        | 0 | STR  
+51   | type             |     |       |    |     |      | scalar | 0 | VAR  
+54   | ---              |     |       |    |     |      |        | 0 | COM  
+54   | EXPR             |     |       |    |     |      |        | 0 | COM  
+54   | computed         |     |       |    |     |      |        | 0 | COM  
+54   | ---              |     |       |    |     |      |        | 0 | COM  
+55   | dispatch_by_name |     |       |    |     |      |        | 1 | FUNC 
+56   | name             |     |       |    | my  |      | scalar | 1 | ARG  
+57   | table            |     |       |    | my  |      | hash   | 1 | VAR  
+58   | foo              |     |       |    |     |      |        | 0 | PROP 
+58   | handle_request   |     |       |    |     |      |        | 0 | CALL 
+59   | bar              |     |       |    |     |      |        | 0 | PROP 
+59   | handle_event     |     |       |    |     |      |        | 0 | CALL 
+61   | target           |     |       |    | my  |      | scalar | 1 | VAR  
+61   | table            |     |       |    |     |      | hash   | 0 | VAR  
+61   | name             |     |       |    |     |      | scalar | 0 | VAR  
+62   | defined          |     |       |    |     |      |        | 0 | CALL 
+62   | target           |     |       |    |     |      | scalar | 0 | VAR  

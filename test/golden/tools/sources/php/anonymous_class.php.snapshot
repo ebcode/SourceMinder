@@ -1,0 +1,34 @@
+LINE | SYM              | PAR              | SCOPE   | NS         | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/anonymous_class.php:
+1    | anonymous_class  |                  |         |            |     |      |      | 0 | FILE 
+3    | App\Models       |                  |         |            |     |      |      | 1 | NS   
+5    | Anonymous        |                  |         | App\Models |     |      |      | 0 | COM  
+5    | examples         |                  |         | App\Models |     |      |      | 0 | COM  
+8    | AnonymousExample |                  |         | App\Models |     |      |      | 1 | CLASS
+9    | getLogger        | AnonymousExample | public  | App\Models |     |      |      | 1 | FUNC 
+10   | Anonymous        |                  |         | App\Models |     |      |      | 0 | COM  
+10   | implementing     |                  |         | App\Models |     |      |      | 0 | COM  
+12   | log              | AnonymousExample | public  | App\Models |     |      |      | 1 | FUNC 
+13   | $message         |                  |         | App\Models |     |      |      | 0 | VAR  
+16   | error            | AnonymousExample | public  | App\Models |     |      |      | 1 | FUNC 
+17   | ERROR:           |                  |         | App\Models |     |      |      | 0 | STR  
+22   | getCounter       | AnonymousExample | public  | App\Models |     |      |      | 1 | FUNC 
+23   | Anonymous        |                  |         | App\Models |     |      |      | 0 | COM  
+23   | constructor      |                  |         | App\Models |     |      |      | 0 | COM  
+25   | $count           | AnonymousExample | private | App\Models |     |      |      | 1 | PROP 
+27   | __construct      | AnonymousExample | public  | App\Models |     |      |      | 1 | FUNC 
+28   | $initial         |                  |         | App\Models |     |      |      | 0 | VAR  
+28   | $this            |                  |         | App\Models |     |      |      | 0 | VAR  
+28   | count            | $this            |         | App\Models |     |      |      | 0 | PROP 
+31   | increment        | AnonymousExample | public  | App\Models |     |      |      | 1 | FUNC 
+32   | $this            |                  |         | App\Models |     |      |      | 0 | VAR  
+32   | count            | $this            |         | App\Models |     |      |      | 0 | PROP 
+35   | get              | AnonymousExample | public  | App\Models |     |      |      | 1 | FUNC 
+36   | $this            |                  |         | App\Models |     |      |      | 0 | VAR  
+36   | count            | $this            |         | App\Models |     |      |      | 0 | PROP 
+42   | Using            |                  |         | App\Models |     |      |      | 0 | COM  
+42   | anonymous        |                  |         | App\Models |     |      |      | 0 | COM  
+42   | directly         |                  |         | App\Models |     |      |      | 0 | COM  
+43   | $handler         |                  |         | App\Models |     |      |      | 0 | VAR  
+44   | handle           |                  | public  | App\Models |     |      |      | 1 | FUNC 
+45   | Handling:        |                  |         | App\Models |     |      |      | 0 | STR  

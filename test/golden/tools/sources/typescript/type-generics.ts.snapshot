@@ -1,0 +1,76 @@
+LINE | SYM             | PAR        | SCOPE | NS | MOD      | CLUE | TYPE                              | D | CTX  
+./tools/sources/typescript/type-generics.ts:
+1    | type-generics   |            |       |    |          |      |                                   | 0 | FILE 
+1    | annotation      |            |       |    |          |      |                                   | 0 | COM  
+1    | forms           |            |       |    |          |      |                                   | 0 | COM  
+1    | especially      |            |       |    |          |      |                                   | 0 | COM  
+1    | generics        |            |       |    |          |      |                                   | 0 | COM  
+1    | carrying        |            |       |    |          |      |                                   | 0 | COM  
+1    | commas.         |            |       |    |          |      |                                   | 0 | COM  
+3    | OperationType   |            |       |    |          |      |                                   | 0 | EXP  
+3    | OperationType   |            |       |    |          |      |                                   | 1 | TYPE 
+3    | move            |            |       |    |          |      |                                   | 0 | STR  
+3    | resize          |            |       |    |          |      |                                   | 0 | STR  
+5    | TypeShapes      |            |       |    |          |      |                                   | 0 | EXP  
+5    | TypeShapes      |            |       |    |          |      |                                   | 1 | CLASS
+7    | payload         | TypeShapes |       |    |          |      | any                               | 1 | PROP 
+9    | union           |            |       |    |          |      |                                   | 0 | COM  
+9    | literals        |            |       |    |          |      |                                   | 0 | COM  
+10   | kind            | TypeShapes |       |    |          |      | OperationType                     | 1 | PROP 
+12   | generic         |            |       |    |          |      |                                   | 0 | COM  
+12   | one             |            |       |    |          |      |                                   | 0 | COM  
+12   | argument        |            |       |    |          |      |                                   | 0 | COM  
+13   | deletedObjects  | TypeShapes |       |    |          |      | Array<object>                     | 1 | PROP 
+15   | generic         |            |       |    |          |      |                                   | 0 | COM  
+15   | two             |            |       |    |          |      |                                   | 0 | COM  
+15   | arguments       |            |       |    |          |      |                                   | 0 | COM  
+15   | --              |            |       |    |          |      |                                   | 0 | COM  
+15   | comma           |            |       |    |          |      |                                   | 0 | COM  
+15   | space           |            |       |    |          |      |                                   | 0 | COM  
+15   | sit             |            |       |    |          |      |                                   | 0 | COM  
+15   | inside          |            |       |    |          |      |                                   | 0 | COM  
+15   | one             |            |       |    |          |      |                                   | 0 | COM  
+16   | column          |            |       |    |          |      |                                   | 0 | COM  
+16   | value           |            |       |    |          |      |                                   | 0 | COM  
+16   | breaks          |            |       |    |          |      |                                   | 0 | COM  
+16   | parser          |            |       |    |          |      |                                   | 0 | COM  
+16   | splits          |            |       |    |          |      |                                   | 0 | COM  
+16   | punctuation     |            |       |    |          |      |                                   | 0 | COM  
+17   | cursorPositions | TypeShapes |       |    |          |      | Map<string, VisualPosition>       | 1 | PROP 
+19   | nested          |            |       |    |          |      |                                   | 0 | COM  
+19   | generic         |            |       |    |          |      |                                   | 0 | COM  
+19   | commas          |            |       |    |          |      |                                   | 0 | COM  
+19   | two             |            |       |    |          |      |                                   | 0 | COM  
+19   | depths          |            |       |    |          |      |                                   | 0 | COM  
+20   | buckets         | TypeShapes |       |    |          |      | Map<string, Array<number>>        | 1 | PROP 
+23   | onDone          | TypeShapes |       |    |          |      | () => void                        | 1 | PROP 
+25   | taking          |            |       |    |          |      |                                   | 0 | COM  
+25   | arguments       |            |       |    |          |      |                                   | 0 | COM  
+26   | compare         | TypeShapes |       |    |          |      | (a: number, b: number) => boolean | 1 | PROP 
+28   | array           |            |       |    |          |      |                                   | 0 | COM  
+28   | shorthand       |            |       |    |          |      |                                   | 0 | COM  
+29   | labels          | TypeShapes |       |    |          |      | array                             | 1 | PROP 
+31   | optional        |            |       |    |          |      |                                   | 0 | COM  
+32   | id              | TypeShapes |       |    | readonly |      | string                            | 1 | PROP 
+34   | constructor     | TypeShapes |       |    |          |      |                                   | 1 | FUNC 
+35   | payload         | this       |       |    |          |      |                                   | 1 | PROP 
+36   | kind            | this       |       |    |          |      |                                   | 1 | PROP 
+37   | deletedObjects  | this       |       |    |          |      |                                   | 1 | PROP 
+38   | cursorPositions | this       |       |    |          |      |                                   | 1 | PROP 
+38   | Map             |            |       |    |          |      |                                   | 0 | CALL 
+39   | buckets         | this       |       |    |          |      |                                   | 1 | PROP 
+39   | Map             |            |       |    |          |      |                                   | 0 | CALL 
+40   | onDone          | this       |       |    |          |      |                                   | 1 | FUNC 
+41   | compare         | this       |       |    |          |      |                                   | 1 | FUNC 
+41   | number          |            |       |    |          |      |                                   | 1 | TYPE 
+41   | number          |            |       |    |          |      |                                   | 1 | TYPE 
+42   | labels          | this       |       |    |          |      |                                   | 1 | PROP 
+46   | VisualPosition  |            |       |    |          |      |                                   | 0 | EXP  
+46   | VisualPosition  |            |       |    |          |      |                                   | 1 | IFACE
+51   | Generic         |            |       |    |          |      |                                   | 0 | COM  
+51   | constrained     |            |       |    |          |      |                                   | 0 | COM  
+51   | parameter       |            |       |    |          |      |                                   | 0 | COM  
+52   | firstOf         |            |       |    |          |      |                                   | 0 | EXP  
+52   | firstOf         |            |       |    |          |      | union                             | 1 | FUNC 
+52   | items           |            |       |    |          |      | Array<T>                          | 1 | ARG  
+53   | items           |            |       |    |          |      |                                   | 0 | VAR  

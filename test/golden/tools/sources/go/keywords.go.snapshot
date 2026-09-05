@@ -1,0 +1,293 @@
+LINE | SYM                    | PAR            | SCOPE  | NS       | MOD   | CLUE | TYPE | D | CTX  
+./tools/sources/go/keywords.go:
+1    | keywords               |                |        |          |       |      |      | 0 | FILE 
+1    | keywords               |                |        |          |       |      |      | 0 | COM  
+1    | uses                   |                |        |          |       |      |      | 0 | COM  
+1    | every                  |                |        |          |       |      |      | 0 | COM  
+1    | word                   |                |        |          |       |      |      | 0 | COM  
+1    | go/config/keywords.txt |                |        |          |       |      |      | 0 | COM  
+1    | naming                 |                |        |          |       |      |      | 0 | COM  
+2    | position.              |                |        |          |       |      |      | 0 | COM  
+4    | reserves               |                |        |          |       |      |      | 0 | COM  
+4    | none                   |                |        |          |       |      |      | 0 | COM  
+4    | appear                 |                |        |          |       |      |      | 0 | COM  
+4    | bare.                  |                |        |          |       |      |      | 0 | COM  
+4    | Each                   |                |        |          |       |      |      | 0 | COM  
+4    | exercised              |                |        |          |       |      |      | 0 | COM  
+5    | capitalized            |                |        |          |       |      |      | 0 | COM  
+5    | upper-case             |                |        |          |       |      |      | 0 | COM  
+5    | variant                |                |        |          |       |      |      | 0 | COM  
+5    | instead:               |                |        |          |       |      |      | 0 | COM  
+5    | legal                  |                |        |          |       |      |      | 0 | COM  
+5    | identifiers            |                |        |          |       |      |      | 0 | COM  
+6    | symbol                 |                |        |          |       |      |      | 0 | COM  
+6    | filter                 |                |        |          |       |      |      | 0 | COM  
+6    | folds                  |                |        |          |       |      |      | 0 | COM  
+6    | onto                   |                |        |          |       |      |      | 0 | COM  
+6    | keyword                |                |        |          |       |      |      | 0 | COM  
+6    | lowercases             |                |        |          |       |      |      | 0 | COM  
+6    | comparing.             |                |        |          |       |      |      | 0 | COM  
+8    | Package-scope          |                |        |          |       |      |      | 0 | COM  
+8    | names                  |                |        |          |       |      |      | 0 | COM  
+8    | must                   |                |        |          |       |      |      | 0 | COM  
+8    | unique                 |                |        |          |       |      |      | 0 | COM  
+8    | cannot                 |                |        |          |       |      |      | 0 | COM  
+8    | carry                  |                |        |          |       |      |      | 0 | COM  
+8    | field                  |                |        |          |       |      |      | 0 | COM  
+9    | method                 |                |        |          |       |      |      | 0 | COM  
+9    | name                   |                |        |          |       |      |      | 0 | COM  
+9    | variants               |                |        |          |       |      |      | 0 | COM  
+9    | spread                 |                |        |          |       |      |      | 0 | COM  
+9    | across                 |                |        |          |       |      |      | 0 | COM  
+9    | namespaces:            |                |        |          |       |      |      | 0 | COM  
+10   | capitalized            |                |        |          |       |      |      | 0 | COM  
+10   | vars                   |                |        |          |       |      |      | 0 | COM  
+10   | upper-case             |                |        |          |       |      |      | 0 | COM  
+10   | consts                 |                |        |          |       |      |      | 0 | COM  
+10   | fields                 |                |        |          |       |      |      | 0 | COM  
+10   | KeywordFields          |                |        |          |       |      |      | 0 | COM  
+11   | methods                |                |        |          |       |      |      | 0 | COM  
+11   | KeywordMethods.        |                |        |          |       |      |      | 0 | COM  
+11   | Named                  |                |        |          |       |      |      | 0 | COM  
+11   | types                  |                |        |          |       |      |      | 0 | COM  
+11   | carry                  |                |        |          |       |      |      | 0 | COM  
+11   | suffix                 |                |        |          |       |      |      | 0 | COM  
+11   | avoid                  |                |        |          |       |      |      | 0 | COM  
+11   | clashing               |                |        |          |       |      |      | 0 | COM  
+12   | vars                   |                |        |          |       |      |      | 0 | COM  
+12   | makes                  |                |        |          |       |      |      | 0 | COM  
+12   | controls               |                |        |          |       |      |      | 0 | COM  
+12   | rather                 |                |        |          |       |      |      | 0 | COM  
+12   | collisions.            |                |        |          |       |      |      | 0 | COM  
+14   | identifiers            |                |        |          |       |      |      | 0 | COM  
+14   | two                    |                |        |          |       |      |      | 0 | COM  
+14   | characters             |                |        |          |       |      |      | 0 | COM  
+14   | longer                 |                |        |          |       |      |      | 0 | COM  
+14   | nothing                |                |        |          |       |      |      | 0 | COM  
+14   | dropped                |                |        |          |       |      |      | 0 | COM  
+15   | minimum                |                |        |          |       |      |      | 0 | COM  
+15   | length                 |                |        |          |       |      |      | 0 | COM  
+15   | rather                 |                |        |          |       |      |      | 0 | COM  
+15   | keyword-ness.          |                |        |          |       |      |      | 0 | COM  
+16   | keywords               |                |        |          |       |      |      | 0 | NS   
+18   | Capitalized            |                |        |          |       |      |      | 0 | COM  
+18   | variants               |                |        |          |       |      |      | 0 | COM  
+18   | variables.             |                |        |          |       |      |      | 0 | COM  
+20   | Break                  |                | public | keywords | var   |      |      | 1 | VAR  
+21   | Case                   |                | public | keywords | var   |      |      | 1 | VAR  
+22   | Chan                   |                | public | keywords | var   |      |      | 1 | VAR  
+23   | Const                  |                | public | keywords | var   |      |      | 1 | VAR  
+24   | Continue               |                | public | keywords | var   |      |      | 1 | VAR  
+25   | Default                |                | public | keywords | var   |      |      | 1 | VAR  
+26   | Defer                  |                | public | keywords | var   |      |      | 1 | VAR  
+27   | Else                   |                | public | keywords | var   |      |      | 1 | VAR  
+28   | Fallthrough            |                | public | keywords | var   |      |      | 1 | VAR  
+29   | For                    |                | public | keywords | var   |      |      | 1 | VAR  
+30   | Func                   |                | public | keywords | var   |      |      | 1 | VAR  
+31   | Go                     |                | public | keywords | var   |      |      | 1 | VAR  
+32   | Goto                   |                | public | keywords | var   |      |      | 1 | VAR  
+33   | If                     |                | public | keywords | var   |      |      | 1 | VAR  
+34   | Import                 |                | public | keywords | var   |      |      | 1 | VAR  
+35   | Interface              |                | public | keywords | var   |      |      | 1 | VAR  
+36   | Map                    |                | public | keywords | var   |      |      | 1 | VAR  
+37   | Package                |                | public | keywords | var   |      |      | 1 | VAR  
+38   | Range                  |                | public | keywords | var   |      |      | 1 | VAR  
+39   | Return                 |                | public | keywords | var   |      |      | 1 | VAR  
+40   | Select                 |                | public | keywords | var   |      |      | 1 | VAR  
+41   | Struct                 |                | public | keywords | var   |      |      | 1 | VAR  
+42   | Switch                 |                | public | keywords | var   |      |      | 1 | VAR  
+43   | Type                   |                | public | keywords | var   |      |      | 1 | VAR  
+44   | Var                    |                | public | keywords | var   |      |      | 1 | VAR  
+47   | Upper-case             |                |        |          |       |      |      | 0 | COM  
+47   | variants               |                |        |          |       |      |      | 0 | COM  
+47   | constants.             |                |        |          |       |      |      | 0 | COM  
+49   | BREAK                  |                | public | keywords | const |      |      | 1 | VAR  
+50   | CASE                   |                | public | keywords | const |      |      | 1 | VAR  
+51   | CHAN                   |                | public | keywords | const |      |      | 1 | VAR  
+52   | CONST                  |                | public | keywords | const |      |      | 1 | VAR  
+53   | CONTINUE               |                | public | keywords | const |      |      | 1 | VAR  
+54   | DEFAULT                |                | public | keywords | const |      |      | 1 | VAR  
+55   | DEFER                  |                | public | keywords | const |      |      | 1 | VAR  
+56   | ELSE                   |                | public | keywords | const |      |      | 1 | VAR  
+57   | FALLTHROUGH            |                | public | keywords | const |      |      | 1 | VAR  
+58   | FOR                    |                | public | keywords | const |      |      | 1 | VAR  
+59   | FUNC                   |                | public | keywords | const |      |      | 1 | VAR  
+60   | GO                     |                | public | keywords | const |      |      | 1 | VAR  
+61   | GOTO                   |                | public | keywords | const |      |      | 1 | VAR  
+62   | IF                     |                | public | keywords | const |      |      | 1 | VAR  
+63   | IMPORT                 |                | public | keywords | const |      |      | 1 | VAR  
+64   | INTERFACE              |                | public | keywords | const |      |      | 1 | VAR  
+65   | MAP                    |                | public | keywords | const |      |      | 1 | VAR  
+66   | PACKAGE                |                | public | keywords | const |      |      | 1 | VAR  
+67   | RANGE                  |                | public | keywords | const |      |      | 1 | VAR  
+68   | RETURN                 |                | public | keywords | const |      |      | 1 | VAR  
+69   | SELECT                 |                | public | keywords | const |      |      | 1 | VAR  
+70   | STRUCT                 |                | public | keywords | const |      |      | 1 | VAR  
+71   | SWITCH                 |                | public | keywords | const |      |      | 1 | VAR  
+72   | TYPE                   |                | public | keywords | const |      |      | 1 | VAR  
+73   | VAR                    |                | public | keywords | const |      |      | 1 | VAR  
+76   | Capitalized            |                |        |          |       |      |      | 0 | COM  
+76   | variants               |                |        |          |       |      |      | 0 | COM  
+76   | suffix                 |                |        |          |       |      |      | 0 | COM  
+76   | named                  |                |        |          |       |      |      | 0 | COM  
+76   | types.                 |                |        |          |       |      |      | 0 | COM  
+77   | BreakType              |                | public | keywords |       |      |      | 1 | CLASS
+77   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+78   | CaseType               |                | public | keywords |       |      |      | 1 | CLASS
+78   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+79   | ChanType               |                | public | keywords |       |      |      | 1 | CLASS
+79   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+80   | ConstType              |                | public | keywords |       |      |      | 1 | CLASS
+80   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+81   | ContinueType           |                | public | keywords |       |      |      | 1 | CLASS
+81   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+82   | DefaultType            |                | public | keywords |       |      |      | 1 | CLASS
+82   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+83   | DeferType              |                | public | keywords |       |      |      | 1 | CLASS
+83   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+84   | ElseType               |                | public | keywords |       |      |      | 1 | CLASS
+84   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+85   | FallthroughType        |                | public | keywords |       |      |      | 1 | CLASS
+85   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+86   | ForType                |                | public | keywords |       |      |      | 1 | CLASS
+86   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+87   | FuncType               |                | public | keywords |       |      |      | 1 | CLASS
+87   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+88   | GoType                 |                | public | keywords |       |      |      | 1 | CLASS
+88   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+89   | GotoType               |                | public | keywords |       |      |      | 1 | CLASS
+89   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+90   | IfType                 |                | public | keywords |       |      |      | 1 | CLASS
+90   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+91   | ImportType             |                | public | keywords |       |      |      | 1 | CLASS
+91   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+92   | InterfaceType          |                | public | keywords |       |      |      | 1 | CLASS
+92   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+93   | MapType                |                | public | keywords |       |      |      | 1 | CLASS
+93   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+94   | PackageType            |                | public | keywords |       |      |      | 1 | CLASS
+94   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+95   | RangeType              |                | public | keywords |       |      |      | 1 | CLASS
+95   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+96   | ReturnType             |                | public | keywords |       |      |      | 1 | CLASS
+96   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+97   | SelectType             |                | public | keywords |       |      |      | 1 | CLASS
+97   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+98   | StructType             |                | public | keywords |       |      |      | 1 | CLASS
+98   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+99   | SwitchType             |                | public | keywords |       |      |      | 1 | CLASS
+99   | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+100  | TypeType               |                | public | keywords |       |      |      | 1 | CLASS
+100  | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+101  | VarType                |                | public | keywords |       |      |      | 1 | CLASS
+101  | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+103  | Capitalized            |                |        |          |       |      |      | 0 | COM  
+103  | variants               |                |        |          |       |      |      | 0 | COM  
+103  | fields.                |                |        |          |       |      |      | 0 | COM  
+104  | KeywordFields          |                | public | keywords |       |      |      | 1 | CLASS
+105  | Break                  |                | public | keywords |       |      | int  | 1 | PROP 
+106  | Case                   |                | public | keywords |       |      | int  | 1 | PROP 
+107  | Chan                   |                | public | keywords |       |      | int  | 1 | PROP 
+108  | Const                  |                | public | keywords |       |      | int  | 1 | PROP 
+109  | Continue               |                | public | keywords |       |      | int  | 1 | PROP 
+110  | Default                |                | public | keywords |       |      | int  | 1 | PROP 
+111  | Defer                  |                | public | keywords |       |      | int  | 1 | PROP 
+112  | Else                   |                | public | keywords |       |      | int  | 1 | PROP 
+113  | Fallthrough            |                | public | keywords |       |      | int  | 1 | PROP 
+114  | For                    |                | public | keywords |       |      | int  | 1 | PROP 
+115  | Func                   |                | public | keywords |       |      | int  | 1 | PROP 
+116  | Go                     |                | public | keywords |       |      | int  | 1 | PROP 
+117  | Goto                   |                | public | keywords |       |      | int  | 1 | PROP 
+118  | If                     |                | public | keywords |       |      | int  | 1 | PROP 
+119  | Import                 |                | public | keywords |       |      | int  | 1 | PROP 
+120  | Interface              |                | public | keywords |       |      | int  | 1 | PROP 
+121  | Map                    |                | public | keywords |       |      | int  | 1 | PROP 
+122  | Package                |                | public | keywords |       |      | int  | 1 | PROP 
+123  | Range                  |                | public | keywords |       |      | int  | 1 | PROP 
+124  | Return                 |                | public | keywords |       |      | int  | 1 | PROP 
+125  | Select                 |                | public | keywords |       |      | int  | 1 | PROP 
+126  | Struct                 |                | public | keywords |       |      | int  | 1 | PROP 
+127  | Switch                 |                | public | keywords |       |      | int  | 1 | PROP 
+128  | Type                   |                | public | keywords |       |      | int  | 1 | PROP 
+129  | Var                    |                | public | keywords |       |      | int  | 1 | PROP 
+132  | Capitalized            |                |        |          |       |      |      | 0 | COM  
+132  | variants               |                |        |          |       |      |      | 0 | COM  
+132  | method                 |                |        |          |       |      |      | 0 | COM  
+132  | names.                 |                |        |          |       |      |      | 0 | COM  
+133  | KeywordMethods         |                | public | keywords |       |      |      | 1 | CLASS
+133  | Mem                    |                | public | keywords |       |      | int  | 1 | PROP 
+135  | Break                  | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+135  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+135  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+136  | Case                   | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+136  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+136  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+137  | Chan                   | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+137  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+137  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+138  | Const                  | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+138  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+138  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+139  | Continue               | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+139  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+139  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+140  | Default                | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+140  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+140  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+141  | Defer                  | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+141  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+141  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+142  | Else                   | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+142  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+142  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+143  | Fallthrough            | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+143  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+143  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+144  | For                    | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+144  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+144  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+145  | Func                   | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+145  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+145  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+146  | Go                     | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+146  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+146  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+147  | Goto                   | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+147  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+147  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+148  | If                     | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+148  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+148  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+149  | Import                 | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+149  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+149  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+150  | Interface              | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+150  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+150  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+151  | Map                    | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+151  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+151  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+152  | Package                | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+152  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+152  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+153  | Range                  | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+153  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+153  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+154  | Return                 | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+154  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+154  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+155  | Select                 | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+155  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+155  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+156  | Struct                 | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+156  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+156  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+157  | Switch                 | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+157  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+157  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+158  | Type                   | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+158  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+158  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 
+159  | Var                    | KeywordMethods | public | keywords |       |      | int  | 1 | FUNC 
+159  | km                     |                |        | keywords |       |      |      | 0 | VAR  
+159  | Mem                    | km             |        | keywords |       |      |      | 0 | PROP 

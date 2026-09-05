@@ -1,0 +1,8 @@
+LINE | SYM       | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/c/test.c:
+1    | test      |     |       |    |     |      |      | 0 | FILE
+1    | <stdio.h> |     |       |    |     |      |      | 0 | IMP 
+3    | main      |     |       |    |     |      | int  | 1 | FUNC
+4    | printf    |     |       |    |     |      |      | 0 | CALL
+4    | Hello     |     |       |    |     |      |      | 0 | STR 
+4    | World!    |     |       |    |     |      |      | 0 | STR 

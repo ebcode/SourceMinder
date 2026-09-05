@@ -1,0 +1,176 @@
+LINE | SYM                           | PAR              | SCOPE | NS               | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/special-blocks.pl:
+1    | special-blocks                |                  |       |                  |     |      |        | 0 | FILE
+2    | MyApp::Component              |                  |       |                  |     |      |        | 1 | NS  
+4    | strict                        |                  |       |                  |     |      |        | 0 | IMP 
+5    | warnings                      |                  |       |                  |     |      |        | 0 | IMP 
+7    | ---                           |                  |       |                  |     |      |        | 0 | COM 
+7    | BEGIN:                        |                  |       |                  |     |      |        | 0 | COM 
+7    | runs                          |                  |       |                  |     |      |        | 0 | COM 
+7    | compile                       |                  |       |                  |     |      |        | 0 | COM 
+7    | time                          |                  |       |                  |     |      |        | 0 | COM 
+7    | anything                      |                  |       |                  |     |      |        | 0 | COM 
+7    | ---                           |                  |       |                  |     |      |        | 0 | COM 
+8    | BEGIN                         |                  |       |                  |     |      |        | 1 | FUNC
+9    | Typically                     |                  |       |                  |     |      |        | 0 | COM 
+9    | used                          |                  |       |                  |     |      |        | 0 | COM 
+9    | compile-time                  |                  |       |                  |     |      |        | 0 | COM 
+9    | setup                         |                  |       |                  |     |      |        | 0 | COM 
+9    | loading                       |                  |       |                  |     |      |        | 0 | COM 
+9    | optional                      |                  |       |                  |     |      |        | 0 | COM 
+9    | modules                       |                  |       |                  |     |      |        | 0 | COM 
+10   | ENV                           |                  |       |                  |     |      | hash   | 0 | VAR 
+10   | APP_ENV                       | ENV              |       |                  |     |      |        | 0 | PROP
+10   | development                   |                  |       |                  |     |      |        | 0 | STR 
+13   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+13   | END:                          |                  |       |                  |     |      |        | 0 | COM 
+13   | runs                          |                  |       |                  |     |      |        | 0 | COM 
+13   | program                       |                  |       |                  |     |      |        | 0 | COM 
+13   | exit                          |                  |       |                  |     |      |        | 0 | COM 
+13   | order                         |                  |       |                  |     |      |        | 0 | COM 
+13   | declaration                   |                  |       |                  |     |      |        | 0 | COM 
+13   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+14   | END                           |                  |       |                  |     |      |        | 1 | FUNC
+15   | Cleanup:                      |                  |       |                  |     |      |        | 0 | COM 
+15   | connections                   |                  |       |                  |     |      |        | 0 | COM 
+15   | flush                         |                  |       |                  |     |      |        | 0 | COM 
+15   | logs                          |                  |       |                  |     |      |        | 0 | COM 
+15   | etc.                          |                  |       |                  |     |      |        | 0 | COM 
+16   | $?                            |                  |       |                  |     |      |        | 0 | COM 
+16   | holds                         |                  |       |                  |     |      |        | 0 | COM 
+16   | exit                          |                  |       |                  |     |      |        | 0 | COM 
+16   | code                          |                  |       |                  |     |      |        | 0 | COM 
+17   | print                         |                  |       |                  |     |      |        | 0 | CALL
+17   | Shutting                      |                  |       |                  |     |      |        | 0 | STR 
+17   | exit                          |                  |       |                  |     |      |        | 0 | STR 
+17   | code:                         |                  |       |                  |     |      |        | 0 | STR 
+17   | $?n                           |                  |       |                  |     |      |        | 0 | STR 
+20   | Multiple                      |                  |       |                  |     |      |        | 0 | COM 
+20   | END                           |                  |       |                  |     |      |        | 0 | COM 
+20   | blocks                        |                  |       |                  |     |      |        | 0 | COM 
+20   | run                           |                  |       |                  |     |      |        | 0 | COM 
+20   | LIFO                          |                  |       |                  |     |      |        | 0 | COM 
+20   | order                         |                  |       |                  |     |      |        | 0 | COM 
+21   | END                           |                  |       |                  |     |      |        | 1 | FUNC
+22   | print                         |                  |       |                  |     |      |        | 0 | CALL
+22   | Final                         |                  |       |                  |     |      |        | 0 | STR 
+22   | cleanupn                      |                  |       |                  |     |      |        | 0 | STR 
+25   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+25   | INIT:                         |                  |       |                  |     |      |        | 0 | COM 
+25   | runs                          |                  |       |                  |     |      |        | 0 | COM 
+25   | BEGIN                         |                  |       |                  |     |      |        | 0 | COM 
+25   | main                          |                  |       |                  |     |      |        | 0 | COM 
+25   | execution                     |                  |       |                  |     |      |        | 0 | COM 
+25   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+26   | less                          |                  |       |                  |     |      |        | 0 | COM 
+26   | common                        |                  |       |                  |     |      |        | 0 | COM 
+26   | BEGIN/END                     |                  |       |                  |     |      |        | 0 | COM 
+27   | INIT                          |                  |       |                  |     |      |        | 0 | COM 
+29   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+29   | CHECK:                        |                  |       |                  |     |      |        | 0 | COM 
+29   | runs                          |                  |       |                  |     |      |        | 0 | COM 
+29   | compile                       |                  |       |                  |     |      |        | 0 | COM 
+29   | phase                         |                  |       |                  |     |      |        | 0 | COM 
+29   | run                           |                  |       |                  |     |      |        | 0 | COM 
+29   | phase                         |                  |       |                  |     |      |        | 0 | COM 
+29   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+30   | CHECK                         |                  |       |                  |     |      |        | 0 | COM 
+32   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+32   | Instance                      |                  |       |                  |     |      |        | 0 | COM 
+32   | lifecycle                     |                  |       |                  |     |      |        | 0 | COM 
+32   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+34   | new                           |                  |       | MyApp::Component |     |      |        | 1 | FUNC
+35   | class                         |                  |       |                  | my  |      | scalar | 1 | ARG 
+35   | args                          |                  |       |                  | my  |      | hash   | 1 | ARG 
+36   | bless                         |                  |       |                  |     |      |        | 0 | CALL
+37   | name                          |                  |       |                  |     |      |        | 0 | PROP
+37   | args                          |                  |       |                  |     |      | hash   | 0 | VAR 
+37   | name                          | args             |       |                  |     |      |        | 0 | PROP
+37   | unnamed                       |                  |       |                  |     |      |        | 0 | STR 
+38   | _active                       |                  |       |                  |     |      |        | 0 | PROP
+39   | class                         |                  |       |                  |     |      | scalar | 0 | VAR 
+42   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+42   | DESTROY:                      |                  |       |                  |     |      |        | 0 | COM 
+42   | called                        |                  |       |                  |     |      |        | 0 | COM 
+42   | object                        |                  |       |                  |     |      |        | 0 | COM 
+42   | garbage                       |                  |       |                  |     |      |        | 0 | COM 
+42   | collected                     |                  |       |                  |     |      |        | 0 | COM 
+42   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+43   | DESTROY                       |                  |       | MyApp::Component |     |      |        | 1 | FUNC
+44   | self                          |                  |       |                  | my  |      | scalar | 1 | ARG 
+45   | self                          |                  |       |                  |     |      | hash   | 0 | VAR 
+45   | _active                       | self             |       |                  |     |      |        | 0 | PROP
+46   | Release                       |                  |       |                  |     |      |        | 0 | COM 
+46   | resources                     |                  |       |                  |     |      |        | 0 | COM 
+46   | handles                       |                  |       |                  |     |      |        | 0 | COM 
+46   | etc.                          |                  |       |                  |     |      |        | 0 | COM 
+49   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+49   | AUTOLOAD:                     |                  |       |                  |     |      |        | 0 | COM 
+49   | called                        |                  |       |                  |     |      |        | 0 | COM 
+49   | undefined                     |                  |       |                  |     |      |        | 0 | COM 
+49   | method                        |                  |       |                  |     |      |        | 0 | COM 
+49   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+50   | AUTOLOAD                      |                  |       |                  | our |      | scalar | 1 | VAR 
+51   | AUTOLOAD                      |                  |       | MyApp::Component |     |      |        | 1 | FUNC
+52   | self                          |                  |       |                  | my  |      | scalar | 1 | ARG 
+53   | method                        |                  |       |                  | my  |      | scalar | 1 | VAR 
+53   | AUTOLOAD                      |                  |       |                  |     |      | scalar | 0 | VAR 
+54   | method                        |                  |       |                  |     |      | scalar | 0 | VAR 
+54   | strip                         |                  |       |                  |     |      |        | 0 | COM 
+54   | name                          |                  |       |                  |     |      |        | 0 | COM 
+56   | method                        |                  |       |                  |     |      | scalar | 0 | VAR 
+56   | DESTROY                       |                  |       |                  |     |      |        | 0 | STR 
+56   | avoid                         |                  |       |                  |     |      |        | 0 | COM 
+56   | AUTOLOAD                      |                  |       |                  |     |      |        | 0 | COM 
+56   | catching                      |                  |       |                  |     |      |        | 0 | COM 
+56   | DESTROY                       |                  |       |                  |     |      |        | 0 | COM 
+58   | Generate                      |                  |       |                  |     |      |        | 0 | COM 
+58   | accessor                      |                  |       |                  |     |      |        | 0 | COM 
+58   | hash-based                    |                  |       |                  |     |      |        | 0 | COM 
+58   | attributes                    |                  |       |                  |     |      |        | 0 | COM 
+59   | exists                        |                  |       |                  |     |      |        | 0 | CALL
+59   | self                          |                  |       |                  |     |      | hash   | 0 | VAR 
+59   | method                        |                  |       |                  |     |      | scalar | 0 | VAR 
+60   | strict                        |                  |       |                  |     |      |        | 0 | IMP 
+61   | MyApp::Component::$method     |                  |       |                  |     |      |        | 0 | STR 
+61   | method                        |                  |       |                  |     |      | scalar | 0 | VAR 
+61   | <lambda>                      |                  |       |                  |     |      |        | 1 | LAM 
+62   | obj                           |                  |       |                  | my  |      | scalar | 1 | ARG 
+62   | val                           |                  |       |                  | my  |      | scalar | 1 | ARG 
+63   | obj                           |                  |       |                  |     |      | hash   | 0 | VAR 
+63   | method                        |                  |       |                  |     |      | scalar | 0 | VAR 
+63   | val                           |                  |       |                  |     |      | scalar | 0 | VAR 
+63   | defined                       |                  |       |                  |     |      |        | 0 | CALL
+63   | val                           |                  |       |                  |     |      | scalar | 0 | VAR 
+64   | obj                           |                  |       |                  |     |      | hash   | 0 | VAR 
+64   | method                        |                  |       |                  |     |      | scalar | 0 | VAR 
+66   | {"MyApp::Component::$method"} |                  |       |                  |     |      |        | 0 | GOTO
+69   | die                           |                  |       |                  |     |      |        | 0 | CALL
+69   | Unknown                       |                  |       |                  |     |      |        | 0 | STR 
+69   | method                        |                  |       |                  |     |      |        | 0 | STR 
+69   | $method                       |                  |       |                  |     |      |        | 0 | STR 
+69   | method                        |                  |       |                  |     |      | scalar | 0 | VAR 
+69   | ref                           |                  |       |                  |     |      |        | 0 | CALL
+69   | self                          |                  |       |                  |     |      | scalar | 0 | VAR 
+72   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+72   | Regular                       |                  |       |                  |     |      |        | 0 | COM 
+72   | methods                       |                  |       |                  |     |      |        | 0 | COM 
+72   | ---                           |                  |       |                  |     |      |        | 0 | COM 
+74   | name                          |                  |       | MyApp::Component |     |      |        | 1 | FUNC
+74   | name                          |                  |       |                  |     |      |        | 0 | PROP
+75   | active                        |                  |       | MyApp::Component |     |      |        | 1 | FUNC
+75   | _active                       |                  |       |                  |     |      |        | 0 | PROP
+77   | deactivate                    |                  |       | MyApp::Component |     |      |        | 1 | FUNC
+78   | self                          |                  |       |                  | my  |      | scalar | 1 | ARG 
+79   | self                          |                  |       |                  |     |      | hash   | 0 | VAR 
+79   | _active                       | self             |       |                  |     |      |        | 0 | PROP
+82   | main                          |                  |       |                  |     |      |        | 1 | NS  
+84   | obj                           |                  |       |                  | my  |      | scalar | 1 | VAR 
+84   | new                           | MyApp::Component |       |                  |     |      |        | 0 | CALL
+84   | name                          |                  |       |                  |     |      |        | 0 | PROP
+84   | widget                        |                  |       |                  |     |      |        | 0 | STR 
+85   | print                         |                  |       |                  |     |      |        | 0 | CALL
+85   | name                          | obj              |       |                  |     |      |        | 0 | CALL
+85   | obj                           |                  |       |                  |     |      | scalar | 0 | VAR 
+86   | deactivate                    | obj              |       |                  |     |      |        | 0 | CALL
+86   | obj                           |                  |       |                  |     |      | scalar | 0 | VAR 

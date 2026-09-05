@@ -1,0 +1,47 @@
+LINE | SYM        | PAR       | SCOPE   | NS | MOD | CLUE      | TYPE   | D | CTX  
+./tools/sources/rust/structs.rs:
+1    | structs    |           |         |    |     |           |        | 0 | FILE 
+1    | Plain      |           |         |    |     |           |        | 0 | COM  
+1    | named      |           |         |    |     |           |        | 0 | COM  
+1    | fields     |           |         |    |     |           |        | 0 | COM  
+2    | User       |           | pub     |    |     |           |        | 1 | CLASS
+3    | id         | User      | pub     |    |     |           | u64    | 1 | PROP 
+4    | name       | User      | pub     |    |     |           | String | 1 | PROP 
+5    | email      | User      | private |    |     |           | String | 1 | PROP 
+6    | active     | User      | private |    |     |           | bool   | 1 | PROP 
+9    | Tuple      |           |         |    |     |           |        | 0 | COM  
+10   | Point      |           | pub     |    |     |           |        | 1 | CLASS
+12   | Unit       |           |         |    |     |           |        | 0 | COM  
+13   | Marker     |           | pub     |    |     |           |        | 1 | CLASS
+15   | generic    |           |         |    |     |           |        | 0 | COM  
+15   | lifetime   |           |         |    |     |           |        | 0 | COM  
+15   | params     |           |         |    |     |           |        | 0 | COM  
+16   | Container  |           | pub     |    |     |           |        | 1 | CLASS
+17   | inner      | Container | private |    |     |           | &'a T  | 1 | PROP 
+18   | count      | Container | private |    |     |           | usize  | 1 | PROP 
+21   | derive     |           |         |    |     |           |        | 0 | COM  
+21   | attribute  |           |         |    |     |           |        | 0 | COM  
+22   | Debug      |           |         |    |     | derive    |        | 0 | TRAIT
+22   | Clone      |           |         |    |     | derive    |        | 0 | TRAIT
+22   | PartialEq  |           |         |    |     | derive    |        | 0 | TRAIT
+23   | Config     |           | pub     |    |     | #[derive] |        | 1 | CLASS
+24   | host       | Config    | pub     |    |     |           | String | 1 | PROP 
+25   | port       | Config    | pub     |    |     |           | u16    | 1 | PROP 
+28   | block      |           |         |    |     |           |        | 0 | COM  
+28   | methods    |           |         |    |     |           |        | 0 | COM  
+28   | associated |           |         |    |     |           |        | 0 | COM  
+28   | function   |           |         |    |     |           |        | 0 | COM  
+29   | User       |           |         |    |     | impl      |        | 1 | CLASS
+30   | new        | User      | pub     |    |     |           | Self   | 1 | FUNC 
+30   | id         |           |         |    |     |           | u64    | 0 | ARG  
+30   | name       |           |         |    |     |           | String | 0 | ARG  
+30   | email      |           |         |    |     |           | String | 0 | ARG  
+31   | User       |           |         |    |     |           |        | 0 | CLASS
+31   | id         | User      |         |    |     |           |        | 0 | PROP 
+31   | name       | User      |         |    |     |           |        | 0 | PROP 
+31   | email      | User      |         |    |     |           |        | 0 | PROP 
+31   | active     | User      |         |    |     |           |        | 0 | PROP 
+34   | deactivate | User      | pub     |    |     |           |        | 1 | FUNC 
+35   | active     | self      |         |    |     |           |        | 0 | PROP 
+38   | email      | User      | pub     |    |     |           | &str   | 1 | FUNC 
+39   | email      | self      |         |    |     |           |        | 0 | PROP 

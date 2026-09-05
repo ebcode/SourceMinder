@@ -1,0 +1,243 @@
+LINE | SYM              | PAR        | SCOPE   | NS | MOD | CLUE  | TYPE         | D | CTX  
+./tools/sources/typescript/lambdas.ts:
+1    | lambdas          |            |         |    |     |       |              | 0 | FILE 
+1    | TypeScript       |            |         |    |     |       |              | 0 | COM  
+1    | arrow            |            |         |    |     |       |              | 0 | COM  
+1    | functions        |            |         |    |     |       |              | 0 | COM  
+1    | anonymous        |            |         |    |     |       |              | 0 | COM  
+1    | functions        |            |         |    |     |       |              | 0 | COM  
+3    | Basic            |            |         |    |     |       |              | 0 | COM  
+3    | arrow            |            |         |    |     |       |              | 0 | COM  
+4    | square           |            |         |    |     |       |              | 1 | FUNC 
+4    | number           |            |         |    |     |       |              | 1 | TYPE 
+4    | xx               |            |         |    |     |       | number       | 1 | ARG  
+6    | Multi-parameter  |            |         |    |     |       |              | 0 | COM  
+6    | arrow            |            |         |    |     |       |              | 0 | COM  
+7    | add              |            |         |    |     |       |              | 1 | FUNC 
+7    | number           |            |         |    |     |       |              | 1 | TYPE 
+7    | aa               |            |         |    |     |       | number       | 1 | ARG  
+7    | number           |            |         |    |     |       |              | 1 | TYPE 
+7    | bb               |            |         |    |     |       | number       | 1 | ARG  
+8    | multiply         |            |         |    |     |       |              | 1 | FUNC 
+8    | number           |            |         |    |     |       |              | 1 | TYPE 
+8    | xx               |            |         |    |     |       | number       | 1 | ARG  
+8    | number           |            |         |    |     |       |              | 1 | TYPE 
+8    | yy               |            |         |    |     |       | number       | 1 | ARG  
+8    | number           |            |         |    |     |       |              | 1 | TYPE 
+8    | zz               |            |         |    |     |       | number       | 1 | ARG  
+10   | Arrow            |            |         |    |     |       |              | 0 | COM  
+10   | block            |            |         |    |     |       |              | 0 | COM  
+10   | body             |            |         |    |     |       |              | 0 | COM  
+11   | greet            |            |         |    |     |       |              | 1 | FUNC 
+11   | string           |            |         |    |     |       |              | 1 | TYPE 
+11   | name             |            |         |    |     |       | string       | 1 | ARG  
+12   | greeting         |            |         |    |     |       |              | 1 | VAR  
+12   | Hello            |            |         |    |     |       |              | 0 | STR  
+12   | name             |            |         |    |     |       |              | 0 | VAR  
+13   | greeting         |            |         |    |     |       |              | 0 | VAR  
+16   | Arrow            |            |         |    |     |       |              | 0 | COM  
+16   | array            |            |         |    |     |       |              | 0 | COM  
+16   | methods          |            |         |    |     |       |              | 0 | COM  
+17   | numbers          |            |         |    |     |       |              | 1 | VAR  
+18   | squared          |            |         |    |     |       |              | 1 | VAR  
+18   | map              | numbers    |         |    |     |       |              | 0 | CALL 
+18   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+19   | evens            |            |         |    |     |       |              | 1 | VAR  
+19   | filter           | numbers    |         |    |     |       |              | 0 | CALL 
+19   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+20   | total            |            |         |    |     |       |              | 1 | VAR  
+20   | reduce           | numbers    |         |    |     |       |              | 0 | CALL 
+20   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+20   | acc              |            |         |    |     |       |              | 1 | ARG  
+20   | xx               |            |         |    |     |       |              | 1 | ARG  
+22   | Arrow            |            |         |    |     |       |              | 0 | COM  
+22   | inference        |            |         |    |     |       |              | 0 | COM  
+23   | double           |            |         |    |     |       |              | 1 | FUNC 
+23   | number           |            |         |    |     |       |              | 1 | TYPE 
+23   | xx               |            |         |    |     |       | number       | 1 | ARG  
+25   | arrow            |            |         |    |     |       |              | 0 | COM  
+26   | fetchData        |            |         |    |     |       |              | 1 | FUNC 
+26   | string           |            |         |    |     |       |              | 1 | TYPE 
+26   | url              |            |         |    |     |       | string       | 1 | ARG  
+27   | response         |            |         |    |     |       |              | 1 | VAR  
+27   | fetch            |            |         |    |     |       |              | 0 | CALL 
+27   | url              |            |         |    |     | fetch |              | 0 | ARG  
+28   | text             | response   |         |    |     |       |              | 0 | CALL 
+31   | Arrow            |            |         |    |     |       |              | 0 | COM  
+31   | returning        |            |         |    |     |       |              | 0 | COM  
+31   | object           |            |         |    |     |       |              | 0 | COM  
+31   | requires         |            |         |    |     |       |              | 0 | COM  
+31   | parentheses      |            |         |    |     |       |              | 0 | COM  
+32   | makePoint        |            |         |    |     |       |              | 1 | FUNC 
+32   | number           |            |         |    |     |       |              | 1 | TYPE 
+32   | xx               |            |         |    |     |       | number       | 1 | ARG  
+32   | number           |            |         |    |     |       |              | 1 | TYPE 
+32   | yy               |            |         |    |     |       | number       | 1 | ARG  
+32   | xx               |            |         |    |     |       |              | 0 | PROP 
+32   | yy               |            |         |    |     |       |              | 0 | PROP 
+34   | Anonymous        |            |         |    |     |       |              | 0 | COM  
+34   | expression       |            |         |    |     |       |              | 0 | COM  
+35   | oldStyleFunc     |            |         |    |     |       |              | 1 | FUNC 
+35   | number           |            |         |    |     |       |              | 1 | TYPE 
+35   | xx               |            |         |    |     |       | number       | 1 | ARG  
+36   | xx               |            |         |    |     |       |              | 0 | VAR  
+39   | Anonymous        |            |         |    |     |       |              | 0 | COM  
+40   | asyncFunc        |            |         |    |     |       |              | 1 | FUNC 
+40   | number           |            |         |    |     |       |              | 1 | TYPE 
+40   | id               |            |         |    |     |       | number       | 1 | ARG  
+41   | log              | console    |         |    |     |       |              | 0 | CALL 
+41   | id               |            |         |    |     | log   |              | 0 | ARG  
+44   | Arrow            |            |         |    |     |       |              | 0 | COM  
+44   | object           |            |         |    |     |       |              | 0 | COM  
+45   | operations       |            |         |    |     |       |              | 1 | VAR  
+46   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+46   | number           |            |         |    |     |       |              | 1 | TYPE 
+46   | xx               |            |         |    |     |       | number       | 1 | ARG  
+46   | number           |            |         |    |     |       |              | 1 | TYPE 
+46   | yy               |            |         |    |     |       | number       | 1 | ARG  
+47   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+47   | number           |            |         |    |     |       |              | 1 | TYPE 
+47   | xx               |            |         |    |     |       | number       | 1 | ARG  
+47   | number           |            |         |    |     |       |              | 1 | TYPE 
+47   | yy               |            |         |    |     |       | number       | 1 | ARG  
+48   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+48   | number           |            |         |    |     |       |              | 1 | TYPE 
+48   | xx               |            |         |    |     |       | number       | 1 | ARG  
+48   | number           |            |         |    |     |       |              | 1 | TYPE 
+48   | yy               |            |         |    |     |       | number       | 1 | ARG  
+49   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+49   | number           |            |         |    |     |       |              | 1 | TYPE 
+49   | xx               |            |         |    |     |       | number       | 1 | ARG  
+49   | number           |            |         |    |     |       |              | 1 | TYPE 
+49   | yy               |            |         |    |     |       | number       | 1 | ARG  
+52   | Arrow            |            |         |    |     |       |              | 0 | COM  
+52   | callback         |            |         |    |     |       |              | 0 | COM  
+53   | setTimeout       |            |         |    |     |       |              | 0 | CALL 
+53   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+54   | log              | console    |         |    |     |       |              | 0 | CALL 
+54   | Delayed          |            |         |    |     |       |              | 0 | STR  
+54   | execution        |            |         |    |     |       |              | 0 | STR  
+57   | Arrow            |            |         |    |     |       |              | 0 | COM  
+57   | destructuring    |            |         |    |     |       |              | 0 | COM  
+58   | getFullName      |            |         |    |     |       |              | 1 | FUNC 
+59   | firstName        |            |         |    |     |       |              | 0 | VAR  
+59   | lastName         |            |         |    |     |       |              | 0 | VAR  
+61   | Closure          |            |         |    |     |       |              | 0 | COM  
+61   | arrow            |            |         |    |     |       |              | 0 | COM  
+62   | makeMultiplier   |            |         |    |     |       |              | 1 | FUNC 
+62   | number           |            |         |    |     |       |              | 1 | TYPE 
+62   | factor           |            |         |    |     |       | number       | 1 | ARG  
+63   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+63   | number           |            |         |    |     |       |              | 1 | TYPE 
+63   | xx               |            |         |    |     |       | number       | 1 | ARG  
+66   | triple           |            |         |    |     |       |              | 1 | VAR  
+66   | makeMultiplier   |            |         |    |     |       |              | 0 | CALL 
+67   | quadruple        |            |         |    |     |       |              | 1 | VAR  
+67   | makeMultiplier   |            |         |    |     |       |              | 0 | CALL 
+69   | Arrow            |            |         |    |     |       |              | 0 | COM  
+69   | returning        |            |         |    |     |       |              | 0 | COM  
+69   | arrow            |            |         |    |     |       |              | 0 | COM  
+70   | curry            |            |         |    |     |       |              | 1 | FUNC 
+70   | number           |            |         |    |     |       |              | 1 | TYPE 
+70   | aa               |            |         |    |     |       | number       | 1 | ARG  
+71   | addFive          |            |         |    |     |       |              | 1 | VAR  
+71   | curry            |            |         |    |     |       |              | 0 | CALL 
+72   | result           |            |         |    |     |       |              | 1 | VAR  
+72   | addFive          |            |         |    |     |       |              | 0 | CALL 
+74   | Generic          |            |         |    |     |       |              | 0 | COM  
+74   | arrow            |            |         |    |     |       |              | 0 | COM  
+75   | identity         |            |         |    |     |       |              | 1 | FUNC 
+75   | xx               |            |         |    |     |       | T            | 1 | ARG  
+76   | first            |            |         |    |     |       |              | 1 | FUNC 
+76   | arr              |            |         |    |     |       | array        | 1 | ARG  
+78   | Arrow            |            |         |    |     |       |              | 0 | COM  
+78   | definition       |            |         |    |     |       |              | 0 | COM  
+79   | Transformer      |            |         |    |     |       |              | 1 | TYPE 
+80   | toString         |            |         |    |     |       |              | 1 | FUNC 
+80   | nn               |            |         |    |     |       |              | 1 | ARG  
+82   | Immediately      |            |         |    |     |       |              | 0 | COM  
+82   | invoked          |            |         |    |     |       |              | 0 | COM  
+82   | arrow            |            |         |    |     |       |              | 0 | COM  
+83   | immediateResult  |            |         |    |     |       |              | 1 | VAR  
+83   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+83   | number           |            |         |    |     |       |              | 1 | TYPE 
+83   | xx               |            |         |    |     |       | number       | 1 | ARG  
+85   | Arrow            |            |         |    |     |       |              | 0 | COM  
+85   | rest             |            |         |    |     |       |              | 0 | COM  
+85   | parameters       |            |         |    |     |       |              | 0 | COM  
+86   | sum              |            |         |    |     |       |              | 1 | FUNC 
+86   | ...args          |            |         |    |     |       | array        | 1 | ARG  
+86   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+86   | aa               |            |         |    |     |       |              | 1 | ARG  
+86   | bb               |            |         |    |     |       |              | 1 | ARG  
+88   | Arrow            |            |         |    |     |       |              | 0 | COM  
+88   | parameters       |            |         |    |     |       |              | 0 | COM  
+89   | greetWithDefault |            |         |    |     |       |              | 1 | FUNC 
+89   | string           |            |         |    |     |       |              | 1 | TYPE 
+89   | name             |            |         |    |     |       | string       | 1 | ARG  
+89   | name             |            |         |    |     |       |              | 0 | VAR  
+91   | Nested           |            |         |    |     |       |              | 0 | COM  
+91   | arrow            |            |         |    |     |       |              | 0 | COM  
+91   | functions        |            |         |    |     |       |              | 0 | COM  
+92   | outer            |            |         |    |     |       |              | 1 | FUNC 
+92   | number           |            |         |    |     |       |              | 1 | TYPE 
+92   | xx               |            |         |    |     |       | number       | 1 | ARG  
+93   | inner            |            |         |    |     |       |              | 1 | FUNC 
+93   | number           |            |         |    |     |       |              | 1 | TYPE 
+93   | yy               |            |         |    |     |       | number       | 1 | ARG  
+94   | inner            |            |         |    |     |       |              | 0 | VAR  
+97   | Arrow            |            |         |    |     |       |              | 0 | COM  
+97   | promise          |            |         |    |     |       |              | 0 | COM  
+97   | chain            |            |         |    |     |       |              | 0 | COM  
+98   | catch            |            |         |    |     |       |              | 0 | CALL 
+98   | then             |            |         |    |     |       |              | 0 | CALL 
+98   | then             |            |         |    |     |       |              | 0 | CALL 
+98   | resolve          | Promise    |         |    |     |       |              | 0 | CALL 
+99   | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+100  | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+101  | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+101  | error            | console    |         |    |     |       |              | 0 | CALL 
+101  | err              |            |         |    |     | error |              | 0 | ARG  
+103  | Arrow            |            |         |    |     |       |              | 0 | COM  
+103  | conditional      |            |         |    |     |       |              | 0 | COM  
+104  | abs              |            |         |    |     |       |              | 1 | FUNC 
+104  | number           |            |         |    |     |       |              | 1 | TYPE 
+104  | xx               |            |         |    |     |       | number       | 1 | ARG  
+106  | Arrow            |            |         |    |     |       |              | 0 | COM  
+107  | Calculator       |            |         |    |     |       |              | 1 | CLASS
+108  | multiplier       | Calculator | private |    |     |       |              | 1 | PROP 
+110  | Arrow            |            |         |    |     |       |              | 0 | COM  
+110  | property         |            |         |    |     |       |              | 0 | COM  
+110  | binds            |            |         |    |     |       |              | 0 | COM  
+111  | multiply         | Calculator |         |    |     |       |              | 1 | PROP 
+113  | Regular          |            |         |    |     |       |              | 0 | COM  
+113  | method           |            |         |    |     |       |              | 0 | COM  
+113  | comparison       |            |         |    |     |       |              | 0 | COM  
+114  | divide           | Calculator |         |    |     |       | number       | 1 | FUNC 
+114  | number           |            |         |    |     |       |              | 1 | TYPE 
+114  | xx               |            |         |    |     |       | number       | 1 | ARG  
+115  | xx               |            |         |    |     |       |              | 0 | VAR  
+115  | multiplier       | this       |         |    |     |       |              | 0 | PROP 
+119  | Higher-order     |            |         |    |     |       |              | 0 | COM  
+119  | arrow            |            |         |    |     |       |              | 0 | COM  
+119  | parameter        |            |         |    |     |       |              | 0 | COM  
+120  | applyTwice       |            |         |    |     |       | T            | 1 | FUNC 
+120  | fn               |            |         |    |     |       | (xx: T) => T | 1 | ARG  
+120  | value            |            |         |    |     |       | T            | 1 | ARG  
+121  | fn               |            |         |    |     |       |              | 0 | CALL 
+121  | fn               |            |         |    |     |       |              | 0 | CALL 
+121  | value            |            |         |    |     | fn    |              | 0 | ARG  
+124  | doubledTwice     |            |         |    |     |       |              | 1 | VAR  
+124  | applyTwice       |            |         |    |     |       |              | 0 | CALL 
+124  | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+126  | Arrow            |            |         |    |     |       |              | 0 | COM  
+126  | array            |            |         |    |     |       |              | 0 | COM  
+126  | sorting          |            |         |    |     |       |              | 0 | COM  
+127  | students         |            |         |    |     |       |              | 1 | VAR  
+132  | sorted           |            |         |    |     |       |              | 1 | VAR  
+132  | sort             | students   |         |    |     |       |              | 0 | CALL 
+132  | <lambda>         |            |         |    |     |       |              | 1 | LAM  
+132  | aa               |            |         |    |     |       |              | 1 | ARG  
+132  | bb               |            |         |    |     |       |              | 1 | ARG  
+132  | grade            | aa         |         |    |     |       |              | 0 | PROP 
+132  | grade            | bb         |         |    |     |       |              | 0 | PROP 

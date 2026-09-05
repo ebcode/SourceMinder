@@ -1,0 +1,21 @@
+LINE | SYM               | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/typescript/test-export.ts:
+1    | test-export       |     |       |    |     |      |      | 0 | FILE 
+1    | Test              |     |       |    |     |      |      | 0 | COM  
+1    | file              |     |       |    |     |      |      | 0 | COM  
+1    | query             |     |       |    |     |      |      | 0 | COM  
+1    | patterns          |     |       |    |     |      |      | 0 | COM  
+2    | ExportedClass     |     |       |    |     |      |      | 0 | EXP  
+2    | ExportedClass     |     |       |    |     |      |      | 1 | CLASS
+3    | exportedFunction  |     |       |    |     |      |      | 0 | EXP  
+3    | exportedFunction  |     |       |    |     |      |      | 1 | FUNC 
+4    | ExportedInterface |     |       |    |     |      |      | 0 | EXP  
+4    | ExportedInterface |     |       |    |     |      |      | 1 | IFACE
+5    | ExportedType      |     |       |    |     |      |      | 0 | EXP  
+5    | ExportedType      |     |       |    |     |      |      | 1 | TYPE 
+6    | exportedConst     |     |       |    |     |      |      | 0 | EXP  
+6    | exportedConst     |     |       |    |     |      |      | 1 | VAR  
+7    | exportedLet       |     |       |    |     |      |      | 0 | EXP  
+7    | exportedLet       |     |       |    |     |      |      | 1 | VAR  
+8    | Component         |     |       |    |     |      |      | 0 | EXP  
+8    | ReactNode         |     |       |    |     |      |      | 0 | EXP  

@@ -1,0 +1,26 @@
+LINE | SYM       | PAR | SCOPE | NS | MOD   | CLUE | TYPE          | D | CTX 
+./tools/sources/c/test-vars.c:
+1    | test-vars |     |       |    |       |      |               | 0 | FILE
+1    | jx        |     |       |    |       |      | int           | 1 | VAR 
+2    | name      |     |       |    |       |      | char*         | 1 | VAR 
+2    | test      |     |       |    |       |      |               | 0 | STR 
+3    | count     |     |       |    |       |      | unsigned long | 1 | VAR 
+4    | MAX       |     |       |    | const |      | int           | 1 | VAR 
+6    | Point     |     |       |    |       |      |               | 1 | TYPE
+7    | int       |     |       |    |       |      |               | 0 | TYPE
+8    | int       |     |       |    |       |      |               | 0 | TYPE
+11   | Point     |     |       |    |       |      |               | 1 | TYPE
+11   | origin    |     |       |    |       |      | struct Point  | 1 | VAR 
+12   | Point     |     |       |    |       |      |               | 1 | TYPE
+12   | cursor    |     |       |    |       |      | struct Point* | 1 | VAR 
+14   | Rectangle |     |       |    |       |      |               | 1 | TYPE
+15   | double    |     |       |    |       |      |               | 0 | TYPE
+15   | width     |     |       |    |       |      | double        | 1 | PROP
+16   | double    |     |       |    |       |      |               | 0 | TYPE
+16   | height    |     |       |    |       |      | double        | 1 | PROP
+19   | rect      |     |       |    |       |      | Rectangle     | 1 | VAR 
+21   | process   |     |       |    |       |      | void          | 1 | FUNC
+22   | local_var |     |       |    |       |      | int           | 1 | VAR 
+23   | pi        |     |       |    |       |      | double        | 1 | VAR 
+24   | Point     |     |       |    |       |      |               | 1 | TYPE
+24   | temp      |     |       |    |       |      | struct Point  | 1 | VAR 

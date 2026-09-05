@@ -1,0 +1,286 @@
+LINE | SYM                      | PAR           | SCOPE | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/ruby/keywords.rb:
+1    | keywords                 |               |       |    |     |      |      | 0 | FILE 
+1    | Every                    |               |       |    |     |      |      | 0 | COM  
+1    | word                     |               |       |    |     |      |      | 0 | COM  
+1    | ruby/config/keywords.txt |               |       |    |     |      |      | 0 | COM  
+1    | used                     |               |       |    |     |      |      | 0 | COM  
+1    | naming                   |               |       |    |     |      |      | 0 | COM  
+1    | position.                |               |       |    |     |      |      | 0 | COM  
+3    | Ruby                     |               |       |    |     |      |      | 0 | COM  
+3    | accepts                  |               |       |    |     |      |      | 0 | COM  
+3    | method                   |               |       |    |     |      |      | 0 | COM  
+3    | names                    |               |       |    |     |      |      | 0 | COM  
+3    | hash                     |               |       |    |     |      |      | 0 | COM  
+3    | keys                     |               |       |    |     |      |      | 0 | COM  
+3    | symbols                  |               |       |    |     |      |      | 0 | COM  
+3    | accepts                  |               |       |    |     |      |      | 0 | COM  
+4    | nearly                   |               |       |    |     |      |      | 0 | COM  
+4    | capitalized              |               |       |    |     |      |      | 0 | COM  
+4    | constants                |               |       |    |     |      |      | 0 | COM  
+4    | instance                 |               |       |    |     |      |      | 0 | COM  
+4    | variables.               |               |       |    |     |      |      | 0 | COM  
+4    | four                     |               |       |    |     |      |      | 0 | COM  
+5    | legal                    |               |       |    |     |      |      | 0 | COM  
+5    | bare                     |               |       |    |     |      |      | 0 | COM  
+5    | local                    |               |       |    |     |      |      | 0 | COM  
+5    | variables.               |               |       |    |     |      |      | 0 | COM  
+7    | Ruby                     |               |       |    |     |      |      | 0 | COM  
+7    | already                  |               |       |    |     |      |      | 0 | COM  
+7    | exempts                  |               |       |    |     |      |      | 0 | COM  
+7    | naming                   |               |       |    |     |      |      | 0 | COM  
+7    | positions                |               |       |    |     |      |      | 0 | COM  
+7    | keyword                  |               |       |    |     |      |      | 0 | COM  
+7    | list                     |               |       |    |     |      |      | 0 | COM  
+7    | index_name               |               |       |    |     |      |      | 0 | COM  
+8    | file                     |               |       |    |     |      |      | 0 | COM  
+8    | regression               |               |       |    |     |      |      | 0 | COM  
+8    | cover:                   |               |       |    |     |      |      | 0 | COM  
+8    | stay                     |               |       |    |     |      |      | 0 | COM  
+8    | fully                    |               |       |    |     |      |      | 0 | COM  
+8    | indexed.                 |               |       |    |     |      |      | 0 | COM  
+10   | identifiers              |               |       |    |     |      |      | 0 | COM  
+10   | two                      |               |       |    |     |      |      | 0 | COM  
+10   | characters               |               |       |    |     |      |      | 0 | COM  
+10   | longer                   |               |       |    |     |      |      | 0 | COM  
+10   | nothing                  |               |       |    |     |      |      | 0 | COM  
+10   | dropped                  |               |       |    |     |      |      | 0 | COM  
+11   | minimum                  |               |       |    |     |      |      | 0 | COM  
+11   | length                   |               |       |    |     |      |      | 0 | COM  
+11   | rather                   |               |       |    |     |      |      | 0 | COM  
+11   | keyword-ness.            |               |       |    |     |      |      | 0 | COM  
+13   | Keywords                 |               |       |    |     |      |      | 0 | COM  
+13   | legal                    |               |       |    |     |      |      | 0 | COM  
+13   | bare                     |               |       |    |     |      |      | 0 | COM  
+13   | local                    |               |       |    |     |      |      | 0 | COM  
+13   | variables.               |               |       |    |     |      |      | 0 | COM  
+14   | __dir__                  |               |       |    |     |      |      | 1 | VAR  
+15   | __encoding__             |               |       |    |     |      |      | 1 | VAR  
+16   | __file__                 |               |       |    |     |      |      | 1 | VAR  
+17   | __line__                 |               |       |    |     |      |      | 1 | VAR  
+19   | Capitalized              |               |       |    |     |      |      | 0 | COM  
+19   | variants                 |               |       |    |     |      |      | 0 | COM  
+19   | constants.               |               |       |    |     |      |      | 0 | COM  
+20   | __dir__                  |               |       |    |     |      |      | 1 | VAR  
+21   | __encoding__             |               |       |    |     |      |      | 1 | VAR  
+22   | __file__                 |               |       |    |     |      |      | 1 | VAR  
+23   | __line__                 |               |       |    |     |      |      | 1 | VAR  
+24   | Begin                    |               |       |    |     |      |      | 1 | VAR  
+25   | End                      |               |       |    |     |      |      | 1 | VAR  
+26   | Alias                    |               |       |    |     |      |      | 1 | VAR  
+27   | And                      |               |       |    |     |      |      | 1 | VAR  
+28   | Begin                    |               |       |    |     |      |      | 1 | VAR  
+29   | Break                    |               |       |    |     |      |      | 1 | VAR  
+30   | Case                     |               |       |    |     |      |      | 1 | VAR  
+31   | Class                    |               |       |    |     |      |      | 1 | VAR  
+32   | Def                      |               |       |    |     |      |      | 1 | VAR  
+33   | Do                       |               |       |    |     |      |      | 1 | VAR  
+34   | Else                     |               |       |    |     |      |      | 1 | VAR  
+35   | Elsif                    |               |       |    |     |      |      | 1 | VAR  
+36   | End                      |               |       |    |     |      |      | 1 | VAR  
+37   | Ensure                   |               |       |    |     |      |      | 1 | VAR  
+38   | False                    |               |       |    |     |      |      | 1 | VAR  
+39   | For                      |               |       |    |     |      |      | 1 | VAR  
+40   | If                       |               |       |    |     |      |      | 1 | VAR  
+41   | In                       |               |       |    |     |      |      | 1 | VAR  
+42   | Module                   |               |       |    |     |      |      | 1 | VAR  
+43   | Next                     |               |       |    |     |      |      | 1 | VAR  
+44   | Nil                      |               |       |    |     |      |      | 1 | VAR  
+45   | Not                      |               |       |    |     |      |      | 1 | VAR  
+46   | Or                       |               |       |    |     |      |      | 1 | VAR  
+47   | Redo                     |               |       |    |     |      |      | 1 | VAR  
+48   | Rescue                   |               |       |    |     |      |      | 1 | VAR  
+49   | Retry                    |               |       |    |     |      |      | 1 | VAR  
+50   | Return                   |               |       |    |     |      |      | 1 | VAR  
+51   | Self                     |               |       |    |     |      |      | 1 | VAR  
+52   | Super                    |               |       |    |     |      |      | 1 | VAR  
+53   | Then                     |               |       |    |     |      |      | 1 | VAR  
+54   | True                     |               |       |    |     |      |      | 1 | VAR  
+55   | Undef                    |               |       |    |     |      |      | 1 | VAR  
+56   | Unless                   |               |       |    |     |      |      | 1 | VAR  
+57   | Until                    |               |       |    |     |      |      | 1 | VAR  
+58   | When                     |               |       |    |     |      |      | 1 | VAR  
+59   | While                    |               |       |    |     |      |      | 1 | VAR  
+60   | Yield                    |               |       |    |     |      |      | 1 | VAR  
+62   | Keywords                 |               |       |    |     |      |      | 0 | COM  
+62   | symbols.                 |               |       |    |     |      |      | 0 | COM  
+63   | SYMBOLS                  |               |       |    |     |      |      | 1 | VAR  
+63   | freeze                   |               |       |    |     |      |      | 0 | CALL 
+64   | __dir__                  |               |       |    |     |      |      | 0 | VAR  
+65   | __encoding__             |               |       |    |     |      |      | 0 | VAR  
+66   | __file__                 |               |       |    |     |      |      | 0 | VAR  
+67   | __line__                 |               |       |    |     |      |      | 0 | VAR  
+68   | BEGIN                    |               |       |    |     |      |      | 0 | VAR  
+69   | END                      |               |       |    |     |      |      | 0 | VAR  
+70   | alias                    |               |       |    |     |      |      | 0 | VAR  
+71   | and                      |               |       |    |     |      |      | 0 | VAR  
+72   | begin                    |               |       |    |     |      |      | 0 | VAR  
+73   | break                    |               |       |    |     |      |      | 0 | VAR  
+74   | case                     |               |       |    |     |      |      | 0 | VAR  
+75   | class                    |               |       |    |     |      |      | 0 | VAR  
+76   | def                      |               |       |    |     |      |      | 0 | VAR  
+77   | defined?                 |               |       |    |     |      |      | 0 | VAR  
+78   | do                       |               |       |    |     |      |      | 0 | VAR  
+79   | else                     |               |       |    |     |      |      | 0 | VAR  
+80   | elsif                    |               |       |    |     |      |      | 0 | VAR  
+81   | end                      |               |       |    |     |      |      | 0 | VAR  
+82   | ensure                   |               |       |    |     |      |      | 0 | VAR  
+83   | false                    |               |       |    |     |      |      | 0 | VAR  
+84   | for                      |               |       |    |     |      |      | 0 | VAR  
+85   | if                       |               |       |    |     |      |      | 0 | VAR  
+86   | in                       |               |       |    |     |      |      | 0 | VAR  
+87   | module                   |               |       |    |     |      |      | 0 | VAR  
+88   | next                     |               |       |    |     |      |      | 0 | VAR  
+89   | nil                      |               |       |    |     |      |      | 0 | VAR  
+90   | not                      |               |       |    |     |      |      | 0 | VAR  
+91   | or                       |               |       |    |     |      |      | 0 | VAR  
+92   | redo                     |               |       |    |     |      |      | 0 | VAR  
+93   | rescue                   |               |       |    |     |      |      | 0 | VAR  
+94   | retry                    |               |       |    |     |      |      | 0 | VAR  
+95   | return                   |               |       |    |     |      |      | 0 | VAR  
+96   | self                     |               |       |    |     |      |      | 0 | VAR  
+97   | super                    |               |       |    |     |      |      | 0 | VAR  
+98   | then                     |               |       |    |     |      |      | 0 | VAR  
+99   | true                     |               |       |    |     |      |      | 0 | VAR  
+100  | undef                    |               |       |    |     |      |      | 0 | VAR  
+101  | unless                   |               |       |    |     |      |      | 0 | VAR  
+102  | until                    |               |       |    |     |      |      | 0 | VAR  
+103  | when                     |               |       |    |     |      |      | 0 | VAR  
+104  | while                    |               |       |    |     |      |      | 0 | VAR  
+105  | yield                    |               |       |    |     |      |      | 0 | VAR  
+108  | Keywords                 |               |       |    |     |      |      | 0 | COM  
+108  | hash                     |               |       |    |     |      |      | 0 | COM  
+108  | keys.                    |               |       |    |     |      |      | 0 | COM  
+109  | SETTINGS                 |               |       |    |     |      |      | 1 | VAR  
+109  | freeze                   |               |       |    |     |      |      | 0 | CALL 
+110  | __dir__                  | SETTINGS      |       |    |     |      |      | 0 | PROP 
+111  | __encoding__             | SETTINGS      |       |    |     |      |      | 0 | PROP 
+112  | __file__                 | SETTINGS      |       |    |     |      |      | 0 | PROP 
+113  | __line__                 | SETTINGS      |       |    |     |      |      | 0 | PROP 
+114  | BEGIN                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+115  | END                      | SETTINGS      |       |    |     |      |      | 0 | PROP 
+116  | alias                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+117  | and                      | SETTINGS      |       |    |     |      |      | 0 | PROP 
+118  | begin                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+119  | break                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+120  | case                     | SETTINGS      |       |    |     |      |      | 0 | PROP 
+121  | class                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+122  | def                      | SETTINGS      |       |    |     |      |      | 0 | PROP 
+124  | do                       | SETTINGS      |       |    |     |      |      | 0 | PROP 
+125  | else                     | SETTINGS      |       |    |     |      |      | 0 | PROP 
+126  | elsif                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+127  | end                      | SETTINGS      |       |    |     |      |      | 0 | PROP 
+128  | ensure                   | SETTINGS      |       |    |     |      |      | 0 | PROP 
+129  | false                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+130  | for                      | SETTINGS      |       |    |     |      |      | 0 | PROP 
+131  | if                       | SETTINGS      |       |    |     |      |      | 0 | PROP 
+132  | in                       | SETTINGS      |       |    |     |      |      | 0 | PROP 
+133  | module                   | SETTINGS      |       |    |     |      |      | 0 | PROP 
+134  | next                     | SETTINGS      |       |    |     |      |      | 0 | PROP 
+135  | nil                      | SETTINGS      |       |    |     |      |      | 0 | PROP 
+136  | not                      | SETTINGS      |       |    |     |      |      | 0 | PROP 
+137  | or                       | SETTINGS      |       |    |     |      |      | 0 | PROP 
+138  | redo                     | SETTINGS      |       |    |     |      |      | 0 | PROP 
+139  | rescue                   | SETTINGS      |       |    |     |      |      | 0 | PROP 
+140  | retry                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+141  | return                   | SETTINGS      |       |    |     |      |      | 0 | PROP 
+142  | self                     | SETTINGS      |       |    |     |      |      | 0 | PROP 
+143  | super                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+144  | then                     | SETTINGS      |       |    |     |      |      | 0 | PROP 
+145  | true                     | SETTINGS      |       |    |     |      |      | 0 | PROP 
+146  | undef                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+147  | unless                   | SETTINGS      |       |    |     |      |      | 0 | PROP 
+148  | until                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+149  | when                     | SETTINGS      |       |    |     |      |      | 0 | PROP 
+150  | while                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+151  | yield                    | SETTINGS      |       |    |     |      |      | 0 | PROP 
+154  | Keywords                 |               |       |    |     |      |      | 0 | COM  
+154  | method                   |               |       |    |     |      |      | 0 | COM  
+154  | names                    |               |       |    |     |      |      | 0 | COM  
+154  | instance                 |               |       |    |     |      |      | 0 | COM  
+154  | variables.               |               |       |    |     |      |      | 0 | COM  
+155  | KeywordHolder            |               |       |    |     |      |      | 1 | CLASS
+156  | initialize               | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+157  | @__dir__                 | KeywordHolder |       |    |     |      |      | 0 | PROP 
+158  | @__encoding__            | KeywordHolder |       |    |     |      |      | 0 | PROP 
+159  | @__file__                | KeywordHolder |       |    |     |      |      | 0 | PROP 
+160  | @__line__                | KeywordHolder |       |    |     |      |      | 0 | PROP 
+161  | @BEGIN                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+162  | @END                     | KeywordHolder |       |    |     |      |      | 0 | PROP 
+163  | @alias                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+164  | @and                     | KeywordHolder |       |    |     |      |      | 0 | PROP 
+165  | @begin                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+166  | @break                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+167  | @case                    | KeywordHolder |       |    |     |      |      | 0 | PROP 
+168  | @class                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+169  | @def                     | KeywordHolder |       |    |     |      |      | 0 | PROP 
+170  | @do                      | KeywordHolder |       |    |     |      |      | 0 | PROP 
+171  | @else                    | KeywordHolder |       |    |     |      |      | 0 | PROP 
+172  | @elsif                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+173  | @end                     | KeywordHolder |       |    |     |      |      | 0 | PROP 
+174  | @ensure                  | KeywordHolder |       |    |     |      |      | 0 | PROP 
+175  | @false                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+176  | @for                     | KeywordHolder |       |    |     |      |      | 0 | PROP 
+177  | @if                      | KeywordHolder |       |    |     |      |      | 0 | PROP 
+178  | @in                      | KeywordHolder |       |    |     |      |      | 0 | PROP 
+179  | @module                  | KeywordHolder |       |    |     |      |      | 0 | PROP 
+180  | @next                    | KeywordHolder |       |    |     |      |      | 0 | PROP 
+181  | @nil                     | KeywordHolder |       |    |     |      |      | 0 | PROP 
+182  | @not                     | KeywordHolder |       |    |     |      |      | 0 | PROP 
+183  | @or                      | KeywordHolder |       |    |     |      |      | 0 | PROP 
+184  | @redo                    | KeywordHolder |       |    |     |      |      | 0 | PROP 
+185  | @rescue                  | KeywordHolder |       |    |     |      |      | 0 | PROP 
+186  | @retry                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+187  | @return                  | KeywordHolder |       |    |     |      |      | 0 | PROP 
+188  | @self                    | KeywordHolder |       |    |     |      |      | 0 | PROP 
+189  | @super                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+190  | @then                    | KeywordHolder |       |    |     |      |      | 0 | PROP 
+191  | @true                    | KeywordHolder |       |    |     |      |      | 0 | PROP 
+192  | @undef                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+193  | @unless                  | KeywordHolder |       |    |     |      |      | 0 | PROP 
+194  | @until                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+195  | @when                    | KeywordHolder |       |    |     |      |      | 0 | PROP 
+196  | @while                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+197  | @yield                   | KeywordHolder |       |    |     |      |      | 0 | PROP 
+200  | __dir__                  | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+204  | __encoding__             | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+208  | __file__                 | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+212  | __line__                 | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+216  | BEGIN                    | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+220  | END                      | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+224  | alias                    | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+228  | and                      | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+232  | begin                    | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+236  | break                    | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+240  | case                     | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+244  | class                    | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+248  | def                      | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+252  | defined?                 | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+256  | do                       | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+260  | else                     | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+264  | elsif                    | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+268  | end                      | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+272  | ensure                   | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+276  | false                    | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+280  | for                      | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+284  | if                       | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+288  | in                       | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+292  | module                   | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+296  | next                     | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+300  | nil                      | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+304  | not                      | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+308  | or                       | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+312  | redo                     | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+316  | rescue                   | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+320  | retry                    | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+324  | return                   | KeywordHolder |       |    |     |      |      | 1 | FUNC 
+334  | end                      |               |       |    |     |      |      | 0 | VAR  
+336  | then                     |               |       |    |     |      |      | 1 | FUNC 
+340  | true                     |               |       |    |     |      |      | 1 | FUNC 
+344  | undef                    |               |       |    |     |      |      | 1 | FUNC 
+348  | unless                   |               |       |    |     |      |      | 1 | FUNC 
+352  | until                    |               |       |    |     |      |      | 1 | FUNC 
+356  | when                     |               |       |    |     |      |      | 1 | FUNC 
+360  | while                    |               |       |    |     |      |      | 1 | FUNC 
+364  | yield                    |               |       |    |     |      |      | 1 | FUNC 
+368  | end                      |               |       |    |     |      |      | 0 | VAR  

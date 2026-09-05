@@ -1,0 +1,262 @@
+LINE | SYM              | PAR        | SCOPE | NS | MOD   | CLUE  | TYPE | D | CTX  
+./tools/sources/javascript/lambdas.js:
+1    | lambdas          |            |       |    |       |       |      | 0 | FILE 
+1    | JavaScript       |            |       |    |       |       |      | 0 | COM  
+1    | arrow            |            |       |    |       |       |      | 0 | COM  
+1    | functions        |            |       |    |       |       |      | 0 | COM  
+1    | anonymous        |            |       |    |       |       |      | 0 | COM  
+1    | functions        |            |       |    |       |       |      | 0 | COM  
+3    | Basic            |            |       |    |       |       |      | 0 | COM  
+3    | arrow            |            |       |    |       |       |      | 0 | COM  
+4    | square           |            |       |    |       |       |      | 1 | FUNC 
+6    | Multi-parameter  |            |       |    |       |       |      | 0 | COM  
+6    | arrow            |            |       |    |       |       |      | 0 | COM  
+7    | add              |            |       |    |       |       |      | 1 | FUNC 
+8    | multiply         |            |       |    |       |       |      | 1 | FUNC 
+10   | Arrow            |            |       |    |       |       |      | 0 | COM  
+10   | block            |            |       |    |       |       |      | 0 | COM  
+10   | body             |            |       |    |       |       |      | 0 | COM  
+11   | greet            |            |       |    |       |       |      | 1 | FUNC 
+12   | greeting         |            |       |    |       |       |      | 1 | VAR  
+12   | Hello            |            |       |    |       |       |      | 0 | STR  
+12   | name             |            |       |    |       |       |      | 0 | VAR  
+13   | greeting         |            |       |    |       |       |      | 0 | VAR  
+16   | Arrow            |            |       |    |       |       |      | 0 | COM  
+16   | array            |            |       |    |       |       |      | 0 | COM  
+16   | methods          |            |       |    |       |       |      | 0 | COM  
+17   | numbers          |            |       |    |       |       |      | 1 | VAR  
+18   | squared          |            |       |    |       |       |      | 1 | VAR  
+18   | map              | numbers    |       |    |       |       |      | 0 | CALL 
+18   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+19   | evens            |            |       |    |       |       |      | 1 | VAR  
+19   | filter           | numbers    |       |    |       |       |      | 0 | CALL 
+19   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+20   | total            |            |       |    |       |       |      | 1 | VAR  
+20   | reduce           | numbers    |       |    |       |       |      | 0 | CALL 
+20   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+20   | acc              |            |       |    |       |       |      | 1 | ARG  
+22   | arrow            |            |       |    |       |       |      | 0 | COM  
+23   | fetchData        |            |       |    |       |       |      | 1 | FUNC 
+23   | url              |            |       |    |       |       |      | 1 | ARG  
+24   | response         |            |       |    |       |       |      | 1 | VAR  
+24   | fetch            |            |       |    |       |       |      | 0 | CALL 
+24   | url              |            |       |    |       | fetch |      | 0 | ARG  
+25   | text             | response   |       |    |       |       |      | 0 | CALL 
+28   | Arrow            |            |       |    |       |       |      | 0 | COM  
+28   | returning        |            |       |    |       |       |      | 0 | COM  
+28   | object           |            |       |    |       |       |      | 0 | COM  
+28   | requires         |            |       |    |       |       |      | 0 | COM  
+28   | parentheses      |            |       |    |       |       |      | 0 | COM  
+29   | makePoint        |            |       |    |       |       |      | 1 | FUNC 
+31   | Anonymous        |            |       |    |       |       |      | 0 | COM  
+31   | expression       |            |       |    |       |       |      | 0 | COM  
+32   | oldStyleFunc     |            |       |    |       |       |      | 1 | FUNC 
+36   | Named            |            |       |    |       |       |      | 0 | COM  
+36   | expression       |            |       |    |       |       |      | 0 | COM  
+37   | namedFunc        |            |       |    |       |       |      | 1 | FUNC 
+41   | Anonymous        |            |       |    |       |       |      | 0 | COM  
+42   | asyncFunc        |            |       |    |       |       |      | 1 | FUNC 
+42   | id               |            |       |    |       |       |      | 1 | ARG  
+43   | log              | console    |       |    |       |       |      | 0 | CALL 
+43   | id               |            |       |    |       | log   |      | 0 | ARG  
+46   | Arrow            |            |       |    |       |       |      | 0 | COM  
+46   | object           |            |       |    |       |       |      | 0 | COM  
+47   | operations       |            |       |    |       |       |      | 1 | VAR  
+48   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+49   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+50   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+51   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+54   | Arrow            |            |       |    |       |       |      | 0 | COM  
+54   | callback         |            |       |    |       |       |      | 0 | COM  
+55   | setTimeout       |            |       |    |       |       |      | 0 | CALL 
+55   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+56   | log              | console    |       |    |       |       |      | 0 | CALL 
+56   | Delayed          |            |       |    |       |       |      | 0 | STR  
+56   | execution        |            |       |    |       |       |      | 0 | STR  
+59   | Arrow            |            |       |    |       |       |      | 0 | COM  
+59   | destructuring    |            |       |    |       |       |      | 0 | COM  
+60   | getFullName      |            |       |    |       |       |      | 1 | FUNC 
+60   | firstName        |            |       |    |       |       |      | 0 | VAR  
+60   | lastName         |            |       |    |       |       |      | 0 | VAR  
+62   | Closure          |            |       |    |       |       |      | 0 | COM  
+62   | arrow            |            |       |    |       |       |      | 0 | COM  
+63   | makeMultiplier   |            |       |    |       |       |      | 1 | FUNC 
+63   | factor           |            |       |    |       |       |      | 1 | ARG  
+64   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+67   | triple           |            |       |    |       |       |      | 1 | VAR  
+67   | makeMultiplier   |            |       |    |       |       |      | 0 | CALL 
+68   | quadruple        |            |       |    |       |       |      | 1 | VAR  
+68   | makeMultiplier   |            |       |    |       |       |      | 0 | CALL 
+70   | Arrow            |            |       |    |       |       |      | 0 | COM  
+70   | returning        |            |       |    |       |       |      | 0 | COM  
+70   | arrow            |            |       |    |       |       |      | 0 | COM  
+71   | curry            |            |       |    |       |       |      | 1 | FUNC 
+72   | addFive          |            |       |    |       |       |      | 1 | VAR  
+72   | curry            |            |       |    |       |       |      | 0 | CALL 
+73   | result           |            |       |    |       |       |      | 1 | VAR  
+73   | addFive          |            |       |    |       |       |      | 0 | CALL 
+75   | Immediately      |            |       |    |       |       |      | 0 | COM  
+75   | invoked          |            |       |    |       |       |      | 0 | COM  
+75   | arrow            |            |       |    |       |       |      | 0 | COM  
+75   | IIAFE            |            |       |    |       |       |      | 0 | COM  
+76   | immediateResult  |            |       |    |       |       |      | 1 | VAR  
+76   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+78   | IIFE             |            |       |    |       |       |      | 0 | COM  
+78   | anonymous        |            |       |    |       |       |      | 0 | COM  
+79   | config           |            |       |    |       |       |      | 1 | VAR  
+79   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+80   | privateVar       |            |       |    |       |       |      | 1 | VAR  
+82   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+86   | Arrow            |            |       |    |       |       |      | 0 | COM  
+86   | rest             |            |       |    |       |       |      | 0 | COM  
+86   | parameters       |            |       |    |       |       |      | 0 | COM  
+87   | sum              |            |       |    |       |       |      | 1 | FUNC 
+87   | ...args          |            |       |    |       |       |      | 1 | ARG  
+87   | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+89   | Arrow            |            |       |    |       |       |      | 0 | COM  
+89   | parameters       |            |       |    |       |       |      | 0 | COM  
+90   | greetWithDefault |            |       |    |       |       |      | 1 | FUNC 
+90   | name             |            |       |    |       |       |      | 1 | ARG  
+90   | name             |            |       |    |       |       |      | 0 | VAR  
+92   | Nested           |            |       |    |       |       |      | 0 | COM  
+92   | arrow            |            |       |    |       |       |      | 0 | COM  
+92   | functions        |            |       |    |       |       |      | 0 | COM  
+93   | outer            |            |       |    |       |       |      | 1 | FUNC 
+94   | inner            |            |       |    |       |       |      | 1 | FUNC 
+95   | inner            |            |       |    |       |       |      | 0 | VAR  
+98   | Arrow            |            |       |    |       |       |      | 0 | COM  
+98   | promise          |            |       |    |       |       |      | 0 | COM  
+98   | chain            |            |       |    |       |       |      | 0 | COM  
+99   | catch            |            |       |    |       |       |      | 0 | CALL 
+99   | then             |            |       |    |       |       |      | 0 | CALL 
+99   | then             |            |       |    |       |       |      | 0 | CALL 
+99   | resolve          | Promise    |       |    |       |       |      | 0 | CALL 
+100  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+101  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+102  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+102  | error            | console    |       |    |       |       |      | 0 | CALL 
+102  | err              |            |       |    |       | error |      | 0 | ARG  
+104  | Arrow            |            |       |    |       |       |      | 0 | COM  
+104  | conditional      |            |       |    |       |       |      | 0 | COM  
+105  | abs              |            |       |    |       |       |      | 1 | FUNC 
+107  | Arrow            |            |       |    |       |       |      | 0 | COM  
+108  | Calculator       |            |       |    |       |       |      | 1 | CLASS
+109  | constructor      | Calculator |       |    |       |       |      | 1 | FUNC 
+110  | multiplier       | this       |       |    |       |       |      | 1 | PROP 
+113  | Arrow            |            |       |    |       |       |      | 0 | COM  
+113  | property         |            |       |    |       |       |      | 0 | COM  
+113  | binds            |            |       |    |       |       |      | 0 | COM  
+114  | multiply         | Calculator |       |    |       |       |      | 1 | PROP 
+116  | Regular          |            |       |    |       |       |      | 0 | COM  
+116  | method           |            |       |    |       |       |      | 0 | COM  
+116  | comparison       |            |       |    |       |       |      | 0 | COM  
+117  | divide           | Calculator |       |    |       |       |      | 1 | FUNC 
+118  | multiplier       | this       |       |    |       |       |      | 0 | PROP 
+122  | Higher-order     |            |       |    |       |       |      | 0 | COM  
+122  | arrow            |            |       |    |       |       |      | 0 | COM  
+122  | parameter        |            |       |    |       |       |      | 0 | COM  
+123  | applyTwice       |            |       |    |       |       |      | 1 | FUNC 
+123  | fn               |            |       |    |       |       |      | 1 | ARG  
+123  | value            |            |       |    |       |       |      | 1 | ARG  
+124  | fn               |            |       |    |       |       |      | 0 | CALL 
+124  | fn               |            |       |    |       |       |      | 0 | CALL 
+124  | value            |            |       |    |       | fn    |      | 0 | ARG  
+127  | doubledTwice     |            |       |    |       |       |      | 1 | VAR  
+127  | applyTwice       |            |       |    |       |       |      | 0 | CALL 
+127  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+129  | Arrow            |            |       |    |       |       |      | 0 | COM  
+129  | array            |            |       |    |       |       |      | 0 | COM  
+129  | sorting          |            |       |    |       |       |      | 0 | COM  
+130  | students         |            |       |    |       |       |      | 1 | VAR  
+135  | sorted           |            |       |    |       |       |      | 1 | VAR  
+135  | sort             | students   |       |    |       |       |      | 0 | CALL 
+135  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+135  | grade            | a          |       |    |       |       |      | 0 | PROP 
+135  | grade            | b          |       |    |       |       |      | 0 | PROP 
+137  | Arrow            |            |       |    |       |       |      | 0 | COM  
+137  | array            |            |       |    |       |       |      | 0 | COM  
+137  | methods          |            |       |    |       |       |      | 0 | COM  
+137  | chained          |            |       |    |       |       |      | 0 | COM  
+138  | processedNumbers |            |       |    |       |       |      | 1 | VAR  
+138  | reduce           |            |       |    |       |       |      | 0 | CALL 
+138  | map              |            |       |    |       |       |      | 0 | CALL 
+138  | filter           |            |       |    |       |       |      | 0 | CALL 
+139  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+140  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+141  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+141  | acc              |            |       |    |       |       |      | 1 | ARG  
+143  | Arrow            |            |       |    |       |       |      | 0 | COM  
+143  | forEach          |            |       |    |       |       |      | 0 | COM  
+144  | forEach          | numbers    |       |    |       |       |      | 0 | CALL 
+144  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+144  | log              | console    |       |    |       |       |      | 0 | CALL 
+144  | x                |            |       |    |       | log   |      | 0 | ARG  
+146  | Arrow            |            |       |    |       |       |      | 0 | COM  
+146  | find/findIndex   |            |       |    |       |       |      | 0 | COM  
+147  | firstEven        |            |       |    |       |       |      | 1 | VAR  
+147  | find             | numbers    |       |    |       |       |      | 0 | CALL 
+147  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+148  | firstEvenIndex   |            |       |    |       |       |      | 1 | VAR  
+148  | findIndex        | numbers    |       |    |       |       |      | 0 | CALL 
+148  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+150  | Arrow            |            |       |    |       |       |      | 0 | COM  
+150  | some/every       |            |       |    |       |       |      | 0 | COM  
+151  | hasEven          |            |       |    |       |       |      | 1 | VAR  
+151  | some             | numbers    |       |    |       |       |      | 0 | CALL 
+151  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+152  | allPositive      |            |       |    |       |       |      | 1 | VAR  
+152  | every            | numbers    |       |    |       |       |      | 0 | CALL 
+152  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+154  | Callback         |            |       |    |       |       |      | 0 | COM  
+154  | anonymous        |            |       |    |       |       |      | 0 | COM  
+155  | addEventListener | document   |       |    |       |       |      | 0 | CALL 
+155  | click            |            |       |    |       |       |      | 0 | STR  
+155  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+155  | event            |            |       |    |       |       |      | 1 | ARG  
+156  | log              | console    |       |    |       |       |      | 0 | CALL 
+156  | clientX          | event      |       |    |       | log   |      | 0 | ARG  
+156  | clientY          | event      |       |    |       | log   |      | 0 | ARG  
+156  | Clicked          |            |       |    |       |       |      | 0 | STR  
+159  | Callback         |            |       |    |       |       |      | 0 | COM  
+159  | arrow            |            |       |    |       |       |      | 0 | COM  
+159  | browser          |            |       |    |       |       |      | 0 | COM  
+160  | addEventListener | document   |       |    |       |       |      | 0 | CALL 
+160  | keydown          |            |       |    |       |       |      | 0 | STR  
+160  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+161  | log              | console    |       |    |       |       |      | 0 | CALL 
+161  | key              | e          |       |    |       | log   |      | 0 | ARG  
+161  | Key              |            |       |    |       |       |      | 0 | STR  
+161  | pressed:         |            |       |    |       |       |      | 0 | STR  
+164  | Generator        |            |       |    |       |       |      | 0 | COM  
+164  | anonymous        |            |       |    |       |       |      | 0 | COM  
+165  | generator        |            |       |    |       |       |      | 1 | FUNC 
+171  | generator        |            |       |    |       |       |      | 0 | COM  
+172  | asyncGenerator   |            |       |    |       |       |      | 1 | FUNC 
+173  | resolve          | Promise    |       |    |       |       |      | 0 | CALL 
+174  | resolve          | Promise    |       |    |       |       |      | 0 | CALL 
+177  | Arrow            |            |       |    |       |       |      | 0 | COM  
+177  | object           |            |       |    |       |       |      | 0 | COM  
+177  | method           |            |       |    |       |       |      | 0 | COM  
+177  | shorthand        |            |       |    |       |       |      | 0 | COM  
+177  | context          |            |       |    |       |       |      | 0 | COM  
+178  | api              |            |       |    |       |       |      | 1 | VAR  
+179  | <lambda>         |            |       |    | async |       |      | 1 | LAM  
+179  | id               |            |       |    |       |       |      | 1 | ARG  
+180  | fetch            |            |       |    |       |       |      | 0 | CALL 
+180  | /api/items/      |            |       |    |       |       |      | 0 | STR  
+180  | id               |            |       |    |       |       |      | 0 | VAR  
+182  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+182  | map              | data       |       |    |       |       |      | 0 | CALL 
+182  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+185  | Nested           |            |       |    |       |       |      | 0 | COM  
+185  | anonymous        |            |       |    |       |       |      | 0 | COM  
+185  | functions        |            |       |    |       |       |      | 0 | COM  
+186  | complex          |            |       |    |       |       |      | 1 | FUNC 
+187  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+188  | <lambda>         |            |       |    |       |       |      | 1 | LAM  
+194  | partial1         |            |       |    |       |       |      | 1 | VAR  
+194  | complex          |            |       |    |       |       |      | 0 | CALL 
+195  | partial2         |            |       |    |       |       |      | 1 | VAR  
+195  | partial1         |            |       |    |       |       |      | 0 | CALL 
+196  | finalResult      |            |       |    |       |       |      | 1 | VAR  
+196  | partial2         |            |       |    |       |       |      | 0 | CALL 

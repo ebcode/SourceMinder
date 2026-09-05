@@ -1,0 +1,109 @@
+LINE | SYM                   | PAR                 | SCOPE | NS | MOD | CLUE          | TYPE | D | CTX  
+./tools/sources/ruby/metaprogramming.rb:
+1    | metaprogramming       |                     |       |    |     |               |      | 0 | FILE 
+1    | Metaprogramming:      |                     |       |    |     |               |      | 0 | COM  
+1    | define_method         |                     |       |    |     |               |      | 0 | COM  
+1    | method_missing        |                     |       |    |     |               |      | 0 | COM  
+1    | Struct                |                     |       |    |     |               |      | 0 | COM  
+1    | DSL-style             |                     |       |    |     |               |      | 0 | COM  
+1    | calls.                |                     |       |    |     |               |      | 0 | COM  
+2    | DynamicBuilder        |                     |       |    |     |               |      | 1 | CLASS
+3    | each                  |                     |       |    |     |               |      | 0 | CALL 
+3    | name                  |                     |       |    |     |               |      | 0 | VAR  
+3    | email                 |                     |       |    |     |               |      | 0 | VAR  
+3    | phone                 |                     |       |    |     |               |      | 0 | VAR  
+3    | field                 | DynamicBuilder      |       |    |     |               |      | 0 | ARG  
+5    | instance_variable_get |                     |       |    |     |               |      | 0 | CALL 
+5    | field                 |                     |       |    |     |               |      | 0 | VAR  
+8    | field                 | DynamicBuilder      |       |    |     | define_method |      | 0 | VAR  
+8    | value                 | DynamicBuilder      |       |    |     |               |      | 0 | ARG  
+9    | instance_variable_set |                     |       |    |     |               |      | 0 | CALL 
+9    | field                 |                     |       |    |     |               |      | 0 | VAR  
+9    | value                 |                     |       |    |     |               |      | 0 | VAR  
+13   | Literal               |                     |       |    |     |               |      | 0 | COM  
+13   | define_method         |                     |       |    |     |               |      | 0 | COM  
+13   | names:                |                     |       |    |     |               |      | 0 | COM  
+13   | symbol                |                     |       |    |     |               |      | 0 | COM  
+13   | string                |                     |       |    |     |               |      | 0 | COM  
+13   | forms                 |                     |       |    |     |               |      | 0 | COM  
+13   | item                  |                     |       |    |     |               |      | 0 | COM  
+13   | 2.                    |                     |       |    |     |               |      | 0 | COM  
+14   | save                  | DynamicBuilder      |       |    |     | define_method |      | 1 | FUNC 
+15   | saved                 |                     |       |    |     |               |      | 0 | STR  
+18   | reload                | DynamicBuilder      |       |    |     | define_method |      | 1 | FUNC 
+19   | reloaded              |                     |       |    |     |               |      | 0 | STR  
+22   | Nested                |                     |       |    |     |               |      | 0 | COM  
+22   | hash                  |                     |       |    |     |               |      | 0 | COM  
+22   | literal:              |                     |       |    |     |               |      | 0 | COM  
+22   | keys                  |                     |       |    |     |               |      | 0 | COM  
+22   | inner                 |                     |       |    |     |               |      | 0 | COM  
+22   | hash                  |                     |       |    |     |               |      | 0 | COM  
+22   | belong                |                     |       |    |     |               |      | 0 | COM  
+22   | outer                 |                     |       |    |     |               |      | 0 | COM  
+22   | key                   |                     |       |    |     |               |      | 0 | COM  
+22   | item                  |                     |       |    |     |               |      | 0 | COM  
+22   | 11.                   |                     |       |    |     |               |      | 0 | COM  
+23   | Rocket-symbol         |                     |       |    |     |               |      | 0 | COM  
+23   | keys                  |                     |       |    |     |               |      | 0 | COM  
+23   | index                 |                     |       |    |     |               |      | 0 | COM  
+23   | PROP                  |                     |       |    |     |               |      | 0 | COM  
+23   | like                  |                     |       |    |     |               |      | 0 | COM  
+23   | shorthand             |                     |       |    |     |               |      | 0 | COM  
+23   | form                  |                     |       |    |     |               |      | 0 | COM  
+23   | item                  |                     |       |    |     |               |      | 0 | COM  
+23   | 10.                   |                     |       |    |     |               |      | 0 | COM  
+24   | SETTINGS              | DynamicBuilder      |       |    |     |               |      | 1 | VAR  
+24   | freeze                |                     |       |    |     |               |      | 0 | CALL 
+25   | limits                | SETTINGS            |       |    |     |               |      | 0 | PROP 
+25   | max                   | limits              |       |    |     |               |      | 0 | PROP 
+25   | min                   | limits              |       |    |     |               |      | 0 | PROP 
+26   | retries               | SETTINGS            |       |    |     |               |      | 0 | PROP 
+27   | timeout               | SETTINGS            |       |    |     |               |      | 0 | PROP 
+30   | method_missing        | DynamicBuilder      |       |    |     |               |      | 1 | FUNC 
+30   | method_name           | method_missing      |       |    |     |               |      | 0 | ARG  
+30   | args                  | method_missing      |       |    |     |               |      | 0 | ARG  
+30   | block                 | method_missing      |       |    |     |               |      | 0 | ARG  
+31   | start_with?           | to_s                |       |    |     |               |      | 0 | CALL 
+31   | to_s                  | method_name         |       |    |     |               |      | 0 | CALL 
+31   | method_name           |                     |       |    |     |               |      | 0 | VAR  
+31   | find_by_              |                     |       |    |     |               |      | 0 | STR  
+32   | searching             |                     |       |    |     |               |      | 0 | STR  
+35   | respond_to_missing?   | DynamicBuilder      |       |    |     |               |      | 1 | FUNC 
+35   | method_name           | respond_to_missing? |       |    |     |               |      | 0 | ARG  
+35   | include_private       | respond_to_missing? |       |    |     |               |      | 0 | ARG  
+36   | start_with?           | to_s                |       |    |     |               |      | 0 | CALL 
+36   | to_s                  | method_name         |       |    |     |               |      | 0 | CALL 
+36   | method_name           |                     |       |    |     |               |      | 0 | VAR  
+36   | find_by_              |                     |       |    |     |               |      | 0 | STR  
+40   | Struct-based          |                     |       |    |     |               |      | 0 | COM  
+40   | value                 |                     |       |    |     |               |      | 0 | COM  
+40   | object                |                     |       |    |     |               |      | 0 | COM  
+41   | Point                 |                     |       |    |     | Struct.new    |      | 1 | CLASS
+41   | new                   | Struct              |       |    |     |               |      | 0 | CALL 
+41   | Struct                |                     |       |    |     |               |      | 0 | VAR  
+41   | xpos                  | Point               |       |    |     | Struct.new    |      | 1 | PROP 
+41   | ypos                  | Point               |       |    |     | Struct.new    |      | 1 | PROP 
+42   | distance              | Point               |       |    |     |               |      | 1 | FUNC 
+43   | sqrt                  | Math                |       |    |     |               |      | 0 | CALL 
+43   | Math                  |                     |       |    |     |               |      | 0 | VAR  
+43   | xpos                  |                     |       |    |     |               |      | 0 | VAR  
+43   | ypos                  |                     |       |    |     |               |      | 0 | VAR  
+47   | Data.define           |                     |       |    |     |               |      | 0 | COM  
+47   | Ruby                  |                     |       |    |     |               |      | 0 | COM  
+47   | 3.2+                  |                     |       |    |     |               |      | 0 | COM  
+48   | Coord                 |                     |       |    |     | Data.define   |      | 1 | CLASS
+48   | define                | Data                |       |    |     |               |      | 0 | CALL 
+48   | Data                  |                     |       |    |     |               |      | 0 | VAR  
+48   | lat                   | Coord               |       |    |     | Data.define   |      | 1 | PROP 
+48   | lng                   | Coord               |       |    |     | Data.define   |      | 1 | PROP 
+50   | mixed                 |                     |       |    |     |               |      | 0 | COM  
+50   | visibility            |                     |       |    |     |               |      | 0 | COM  
+51   | Service               |                     |       |    |     |               |      | 1 | CLASS
+52   | call                  | Service             |       |    |     |               |      | 1 | FUNC 
+53   | perform               |                     |       |    |     |               |      | 0 | VAR  
+56   | private               |                     |       |    |     |               |      | 0 | VAR  
+58   | perform               | Service             |       |    |     |               |      | 1 | FUNC 
+59   | working               |                     |       |    |     |               |      | 0 | STR  
+62   | protected             |                     |       |    |     |               |      | 0 | VAR  
+64   | helper                | Service             |       |    |     |               |      | 1 | FUNC 
+65   | assist                |                     |       |    |     |               |      | 0 | STR  

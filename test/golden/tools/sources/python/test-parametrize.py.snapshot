@@ -1,0 +1,57 @@
+LINE | SYM              | PAR             | SCOPE | NS | MOD | CLUE                     | TYPE | D | CTX  
+./tools/sources/python/test-parametrize.py:
+1    | test-parametrize |                 |       |    |     |                          |      | 0 | FILE 
+1    | Test             |                 |       |    |     |                          |      | 0 | STR  
+1    | fixture          |                 |       |    |     |                          |      | 0 | STR  
+1    | pytest           |                 |       |    |     |                          |      | 0 | STR  
+1    | parametrize      |                 |       |    |     |                          |      | 0 | STR  
+1    | bytes            |                 |       |    |     |                          |      | 0 | STR  
+1    | literals.        |                 |       |    |     |                          |      | 0 | STR  
+2    | pytest           |                 |       |    |     |                          |      | 0 | IMP  
+5    | _AnsibleUnicode  | str             |       |    |     |                          |      | 1 | CLASS
+6    | __new__          | _AnsibleUnicode |       |    |     |                          |      | 1 | FUNC 
+6    | cls              | __new__         |       |    |     |                          |      | 0 | ARG  
+6    | value            | __new__         |       |    |     |                          |      | 0 | ARG  
+7    | str              |                 |       |    |     |                          |      | 0 | CALL 
+7    | value            |                 |       |    |     | str                      |      | 0 | ARG  
+10   | parametrize      | mark            |       |    |     |                          |      | 0 | CALL 
+10   | mark             | pytest          |       |    |     |                          |      | 0 | PROP 
+10   | pytest           |                 |       |    |     |                          |      | 0 | VAR  
+10   | cls              |                 |       |    |     |                          |      | 0 | STR  
+10   | args             |                 |       |    |     |                          |      | 0 | STR  
+10   | kwargs           |                 |       |    |     |                          |      | 0 | STR  
+10   | parametrize      | mark            |       |    |     |                          |      | 0 | CALL 
+10   | mark             | pytest          |       |    |     |                          |      | 0 | PROP 
+10   | pytest           |                 |       |    |     |                          |      | 0 | VAR  
+10   | cls              |                 |       |    |     |                          |      | 0 | STR  
+10   | args             |                 |       |    |     |                          |      | 0 | STR  
+10   | kwargs           |                 |       |    |     |                          |      | 0 | STR  
+11   | _AnsibleUnicode  |                 |       |    |     |                          |      | 0 | VAR  
+11   | Hello            |                 |       |    |     |                          |      | 0 | STR  
+11   | _AnsibleUnicode  |                 |       |    |     |                          |      | 0 | VAR  
+11   | Hello            |                 |       |    |     |                          |      | 0 | STR  
+12   | _AnsibleUnicode  |                 |       |    |     |                          |      | 0 | VAR  
+12   | b'Hello'         |                 |       |    |     |                          |      | 0 | STR  
+12   | Hello            |                 |       |    |     |                          |      | 0 | STR  
+12   | _AnsibleUnicode  |                 |       |    |     |                          |      | 0 | VAR  
+12   | b'Hello'         |                 |       |    |     |                          |      | 0 | STR  
+12   | Hello            |                 |       |    |     |                          |      | 0 | STR  
+13   | _AnsibleUnicode  |                 |       |    |     |                          |      | 0 | VAR  
+13   | Hello            |                 |       |    |     |                          |      | 0 | STR  
+13   | encoding         |                 |       |    |     |                          |      | 0 | STR  
+13   | utf-8            |                 |       |    |     |                          |      | 0 | STR  
+13   | _AnsibleUnicode  |                 |       |    |     |                          |      | 0 | VAR  
+13   | Hello            |                 |       |    |     |                          |      | 0 | STR  
+13   | encoding         |                 |       |    |     |                          |      | 0 | STR  
+13   | utf-8            |                 |       |    |     |                          |      | 0 | STR  
+15   | test_objects     |                 |       |    |     | @pytest.mark.parametrize |      | 1 | FUNC 
+15   | cls              | test_objects    |       |    |     |                          |      | 0 | ARG  
+15   | args             | test_objects    |       |    |     |                          |      | 0 | ARG  
+15   | kwargs           | test_objects    |       |    |     |                          |      | 0 | ARG  
+16   | result           |                 |       |    |     |                          |      | 1 | VAR  
+16   | cls              |                 |       |    |     |                          |      | 0 | CALL 
+16   | args             |                 |       |    |     |                          |      | 0 | VAR  
+16   | kwargs           |                 |       |    |     |                          |      | 0 | VAR  
+17   | isinstance       |                 |       |    |     |                          |      | 0 | CALL 
+17   | result           |                 |       |    |     | isinstance               |      | 0 | ARG  
+17   | str              |                 |       |    |     | isinstance               |      | 0 | ARG  

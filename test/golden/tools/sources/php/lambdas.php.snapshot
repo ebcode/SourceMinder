@@ -1,0 +1,440 @@
+LINE | SYM                | PAR          | SCOPE   | NS | MOD | CLUE         | TYPE | D | CTX  
+./tools/sources/php/lambdas.php:
+1    | lambdas            |              |         |    |     |              |      | 0 | FILE 
+2    | PHP                |              |         |    |     |              |      | 0 | COM  
+2    | anonymous          |              |         |    |     |              |      | 0 | COM  
+2    | functions          |              |         |    |     |              |      | 0 | COM  
+2    | closures           |              |         |    |     |              |      | 0 | COM  
+2    | arrow              |              |         |    |     |              |      | 0 | COM  
+2    | functions          |              |         |    |     |              |      | 0 | COM  
+4    | Basic              |              |         |    |     |              |      | 0 | COM  
+4    | anonymous          |              |         |    |     |              |      | 0 | COM  
+5    | $square            |              |         |    |     |              |      | 0 | VAR  
+5    | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+5    | $x                 |              |         |    |     |              |      | 0 | ARG  
+6    | $x                 |              |         |    |     |              |      | 0 | VAR  
+9    | Multi-parameter    |              |         |    |     |              |      | 0 | COM  
+9    | anonymous          |              |         |    |     |              |      | 0 | COM  
+10   | $add               |              |         |    |     |              |      | 0 | VAR  
+10   | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+10   | $a                 |              |         |    |     |              |      | 0 | ARG  
+10   | $b                 |              |         |    |     |              |      | 0 | ARG  
+11   | $a                 |              |         |    |     |              |      | 0 | VAR  
+11   | $b                 |              |         |    |     |              |      | 0 | VAR  
+14   | $multiply          |              |         |    |     |              |      | 0 | VAR  
+14   | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+14   | $x                 |              |         |    |     |              |      | 0 | ARG  
+14   | $y                 |              |         |    |     |              |      | 0 | ARG  
+14   | $z                 |              |         |    |     |              |      | 0 | ARG  
+15   | $x                 |              |         |    |     |              |      | 0 | VAR  
+15   | $y                 |              |         |    |     |              |      | 0 | VAR  
+15   | $z                 |              |         |    |     |              |      | 0 | VAR  
+18   | Arrow              |              |         |    |     |              |      | 0 | COM  
+18   | PHP                |              |         |    |     |              |      | 0 | COM  
+18   | 7.4+               |              |         |    |     |              |      | 0 | COM  
+19   | $double            |              |         |    |     |              |      | 0 | VAR  
+19   | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+19   | $x                 |              |         |    |     |              |      | 0 | ARG  
+19   | $x                 |              |         |    |     |              |      | 0 | VAR  
+20   | $triple            |              |         |    |     |              |      | 0 | VAR  
+20   | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+20   | $x                 |              |         |    |     |              |      | 0 | ARG  
+20   | $x                 |              |         |    |     |              |      | 0 | VAR  
+22   | Arrow              |              |         |    |     |              |      | 0 | COM  
+22   | multiple           |              |         |    |     |              |      | 0 | COM  
+22   | parameters         |              |         |    |     |              |      | 0 | COM  
+23   | $sum               |              |         |    |     |              |      | 0 | VAR  
+23   | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+23   | $a                 |              |         |    |     |              |      | 0 | ARG  
+23   | $b                 |              |         |    |     |              |      | 0 | ARG  
+23   | $a                 |              |         |    |     |              |      | 0 | VAR  
+23   | $b                 |              |         |    |     |              |      | 0 | VAR  
+25   | Anonymous          |              |         |    |     |              |      | 0 | COM  
+25   | array_map          |              |         |    |     |              |      | 0 | COM  
+26   | $numbers           |              |         |    |     |              |      | 0 | VAR  
+27   | $squared           |              |         |    |     |              |      | 0 | VAR  
+27   | array_map          |              |         |    |     |              |      | 0 | CALL 
+27   | $x                 |              |         |    |     |              |      | 0 | VAR  
+28   | $x                 |              |         |    |     |              |      | 0 | VAR  
+29   | $numbers           |              |         |    |     | array_map    |      | 0 | ARG  
+29   | $numbers           |              |         |    |     |              |      | 0 | VAR  
+31   | Arrow              |              |         |    |     |              |      | 0 | COM  
+31   | array_map          |              |         |    |     |              |      | 0 | COM  
+32   | $doubled           |              |         |    |     |              |      | 0 | VAR  
+32   | array_map          |              |         |    |     |              |      | 0 | CALL 
+32   | $x                 |              |         |    |     |              |      | 0 | VAR  
+32   | $x                 |              |         |    |     |              |      | 0 | VAR  
+32   | $numbers           |              |         |    |     | array_map    |      | 0 | ARG  
+32   | $numbers           |              |         |    |     |              |      | 0 | VAR  
+34   | Anonymous          |              |         |    |     |              |      | 0 | COM  
+34   | array_filter       |              |         |    |     |              |      | 0 | COM  
+35   | $evens             |              |         |    |     |              |      | 0 | VAR  
+35   | array_filter       |              |         |    |     |              |      | 0 | CALL 
+35   | $numbers           |              |         |    |     | array_filter |      | 0 | ARG  
+35   | $numbers           |              |         |    |     |              |      | 0 | VAR  
+35   | $x                 |              |         |    |     |              |      | 0 | VAR  
+36   | $x                 |              |         |    |     |              |      | 0 | VAR  
+39   | Arrow              |              |         |    |     |              |      | 0 | COM  
+39   | array_filter       |              |         |    |     |              |      | 0 | COM  
+40   | $odds              |              |         |    |     |              |      | 0 | VAR  
+40   | array_filter       |              |         |    |     |              |      | 0 | CALL 
+40   | $numbers           |              |         |    |     | array_filter |      | 0 | ARG  
+40   | $numbers           |              |         |    |     |              |      | 0 | VAR  
+40   | $x                 |              |         |    |     |              |      | 0 | VAR  
+40   | $x                 |              |         |    |     |              |      | 0 | VAR  
+42   | Anonymous          |              |         |    |     |              |      | 0 | COM  
+42   | array_reduce       |              |         |    |     |              |      | 0 | COM  
+43   | $total             |              |         |    |     |              |      | 0 | VAR  
+43   | array_reduce       |              |         |    |     |              |      | 0 | CALL 
+43   | $numbers           |              |         |    |     | array_reduce |      | 0 | ARG  
+43   | $numbers           |              |         |    |     |              |      | 0 | VAR  
+43   | $acc               |              |         |    |     |              |      | 0 | VAR  
+43   | $x                 |              |         |    |     |              |      | 0 | VAR  
+44   | $acc               |              |         |    |     |              |      | 0 | VAR  
+44   | $x                 |              |         |    |     |              |      | 0 | VAR  
+47   | Arrow              |              |         |    |     |              |      | 0 | COM  
+47   | array_reduce       |              |         |    |     |              |      | 0 | COM  
+48   | $product           |              |         |    |     |              |      | 0 | VAR  
+48   | array_reduce       |              |         |    |     |              |      | 0 | CALL 
+48   | $numbers           |              |         |    |     | array_reduce |      | 0 | ARG  
+48   | $numbers           |              |         |    |     |              |      | 0 | VAR  
+48   | $acc               |              |         |    |     |              |      | 0 | VAR  
+48   | $x                 |              |         |    |     |              |      | 0 | VAR  
+48   | $acc               |              |         |    |     |              |      | 0 | VAR  
+48   | $x                 |              |         |    |     |              |      | 0 | VAR  
+50   | Closure            |              |         |    |     |              |      | 0 | COM  
+50   | clause             |              |         |    |     |              |      | 0 | COM  
+50   | capturing          |              |         |    |     |              |      | 0 | COM  
+50   | variables          |              |         |    |     |              |      | 0 | COM  
+51   | $multiplier        |              |         |    |     |              |      | 0 | VAR  
+52   | $multiplyByTen     |              |         |    |     |              |      | 0 | VAR  
+52   | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+52   | $x                 |              |         |    |     |              |      | 0 | ARG  
+53   | $x                 |              |         |    |     |              |      | 0 | VAR  
+53   | $multiplier        |              |         |    |     |              |      | 0 | VAR  
+56   | Closure            |              |         |    |     |              |      | 0 | COM  
+56   | capturing          |              |         |    |     |              |      | 0 | COM  
+56   | reference          |              |         |    |     |              |      | 0 | COM  
+57   | $counter           |              |         |    |     |              |      | 0 | VAR  
+58   | $increment         |              |         |    |     |              |      | 0 | VAR  
+58   | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+62   | $increment         |              |         |    |     |              |      | 0 | CALL 
+63   | $increment         |              |         |    |     |              |      | 0 | CALL 
+65   | Anonymous          |              |         |    |     |              |      | 0 | COM  
+65   | returning          |              |         |    |     |              |      | 0 | COM  
+65   | anonymous          |              |         |    |     |              |      | 0 | COM  
+66   | makeMultiplier     |              |         |    |     |              |      | 1 | FUNC 
+67   | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+67   | $x                 |              |         |    |     |              |      | 0 | ARG  
+68   | $x                 |              |         |    |     |              |      | 0 | VAR  
+68   | $factor            |              |         |    |     |              |      | 0 | VAR  
+72   | $timesTwo          |              |         |    |     |              |      | 0 | VAR  
+72   | makeMultiplier     |              |         |    |     |              |      | 0 | CALL 
+73   | $timesFive         |              |         |    |     |              |      | 0 | VAR  
+73   | makeMultiplier     |              |         |    |     |              |      | 0 | CALL 
+75   | Arrow              |              |         |    |     |              |      | 0 | COM  
+75   | usort              |              |         |    |     |              |      | 0 | COM  
+76   | $students          |              |         |    |     |              |      | 0 | VAR  
+77   | name               |              |         |    |     |              |      | 0 | STR  
+77   | Alice              |              |         |    |     |              |      | 0 | STR  
+77   | grade              |              |         |    |     |              |      | 0 | STR  
+78   | name               |              |         |    |     |              |      | 0 | STR  
+78   | Bob                |              |         |    |     |              |      | 0 | STR  
+78   | grade              |              |         |    |     |              |      | 0 | STR  
+79   | name               |              |         |    |     |              |      | 0 | STR  
+79   | Charlie            |              |         |    |     |              |      | 0 | STR  
+79   | grade              |              |         |    |     |              |      | 0 | STR  
+81   | usort              |              |         |    |     |              |      | 0 | CALL 
+81   | $students          |              |         |    |     | usort        |      | 0 | ARG  
+81   | $students          |              |         |    |     |              |      | 0 | VAR  
+81   | $a                 |              |         |    |     |              |      | 0 | VAR  
+81   | $b                 |              |         |    |     |              |      | 0 | VAR  
+81   | $a                 |              |         |    |     |              |      | 0 | VAR  
+81   | grade              |              |         |    |     |              |      | 0 | STR  
+81   | $b                 |              |         |    |     |              |      | 0 | VAR  
+81   | grade              |              |         |    |     |              |      | 0 | STR  
+83   | Anonymous          |              |         |    |     |              |      | 0 | COM  
+83   | usort              |              |         |    |     |              |      | 0 | COM  
+84   | usort              |              |         |    |     |              |      | 0 | CALL 
+84   | $students          |              |         |    |     | usort        |      | 0 | ARG  
+84   | $students          |              |         |    |     |              |      | 0 | VAR  
+84   | $a                 |              |         |    |     |              |      | 0 | VAR  
+84   | $b                 |              |         |    |     |              |      | 0 | VAR  
+85   | strcmp             |              |         |    |     |              |      | 0 | CALL 
+85   | $a                 |              |         |    |     |              |      | 0 | VAR  
+85   | name               |              |         |    |     |              |      | 0 | STR  
+85   | $b                 |              |         |    |     |              |      | 0 | VAR  
+85   | name               |              |         |    |     |              |      | 0 | STR  
+88   | Closure            |              |         |    |     |              |      | 0 | COM  
+88   | object             |              |         |    |     |              |      | 0 | COM  
+89   | $operations        |              |         |    |     |              |      | 0 | VAR  
+90   | add                |              |         |    |     |              |      | 0 | STR  
+90   | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+90   | $x                 |              |         |    |     |              |      | 0 | ARG  
+90   | $y                 |              |         |    |     |              |      | 0 | ARG  
+90   | $x                 |              |         |    |     |              |      | 0 | VAR  
+90   | $y                 |              |         |    |     |              |      | 0 | VAR  
+91   | sub                |              |         |    |     |              |      | 0 | STR  
+91   | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+91   | $x                 |              |         |    |     |              |      | 0 | ARG  
+91   | $y                 |              |         |    |     |              |      | 0 | ARG  
+91   | $x                 |              |         |    |     |              |      | 0 | VAR  
+91   | $y                 |              |         |    |     |              |      | 0 | VAR  
+92   | mul                |              |         |    |     |              |      | 0 | STR  
+92   | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+92   | $x                 |              |         |    |     |              |      | 0 | ARG  
+92   | $y                 |              |         |    |     |              |      | 0 | ARG  
+92   | $x                 |              |         |    |     |              |      | 0 | VAR  
+92   | $y                 |              |         |    |     |              |      | 0 | VAR  
+93   | div                |              |         |    |     |              |      | 0 | STR  
+93   | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+93   | $x                 |              |         |    |     |              |      | 0 | ARG  
+93   | $y                 |              |         |    |     |              |      | 0 | ARG  
+93   | $y                 |              |         |    |     |              |      | 0 | VAR  
+93   | $x                 |              |         |    |     |              |      | 0 | VAR  
+93   | $y                 |              |         |    |     |              |      | 0 | VAR  
+96   | Immediately        |              |         |    |     |              |      | 0 | COM  
+96   | invoked            |              |         |    |     |              |      | 0 | COM  
+96   | anonymous          |              |         |    |     |              |      | 0 | COM  
+97   | $result            |              |         |    |     |              |      | 0 | VAR  
+101  | Immediately        |              |         |    |     |              |      | 0 | COM  
+101  | invoked            |              |         |    |     |              |      | 0 | COM  
+101  | arrow              |              |         |    |     |              |      | 0 | COM  
+102  | $arrowResult       |              |         |    |     |              |      | 0 | VAR  
+104  | Anonymous          |              |         |    |     |              |      | 0 | COM  
+104  | type               |              |         |    |     |              |      | 0 | COM  
+104  | declarations       |              |         |    |     |              |      | 0 | COM  
+105  | $typedFunc         |              |         |    |     |              |      | 0 | VAR  
+105  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+105  | $x                 |              |         |    |     |              |      | 0 | ARG  
+105  | $y                 |              |         |    |     |              |      | 0 | ARG  
+106  | $x                 |              |         |    |     |              |      | 0 | VAR  
+106  | $y                 |              |         |    |     |              |      | 0 | VAR  
+109  | Arrow              |              |         |    |     |              |      | 0 | COM  
+109  | type               |              |         |    |     |              |      | 0 | COM  
+109  | declaration        |              |         |    |     |              |      | 0 | COM  
+110  | $typedArrow        |              |         |    |     |              |      | 0 | VAR  
+110  | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+110  | $name              |              |         |    |     |              |      | 0 | ARG  
+110  | Hello              |              |         |    |     |              |      | 0 | STR  
+112  | Closure            |              |         |    |     |              |      | 0 | COM  
+112  | capturing          |              |         |    |     |              |      | 0 | COM  
+112  | multiple           |              |         |    |     |              |      | 0 | COM  
+112  | variables          |              |         |    |     |              |      | 0 | COM  
+113  | $prefix            |              |         |    |     |              |      | 0 | VAR  
+113  | Mr.                |              |         |    |     |              |      | 0 | STR  
+114  | $suffix            |              |         |    |     |              |      | 0 | VAR  
+114  | Esq.               |              |         |    |     |              |      | 0 | STR  
+115  | $formatName        |              |         |    |     |              |      | 0 | VAR  
+115  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+115  | $name              |              |         |    |     |              |      | 0 | ARG  
+116  | $prefix            |              |         |    |     |              |      | 0 | VAR  
+116  | $name              |              |         |    |     |              |      | 0 | VAR  
+116  | $suffix            |              |         |    |     |              |      | 0 | VAR  
+119  | Nested             |              |         |    |     |              |      | 0 | COM  
+119  | closures           |              |         |    |     |              |      | 0 | COM  
+120  | $outer             |              |         |    |     |              |      | 0 | VAR  
+120  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+120  | $x                 |              |         |    |     |              |      | 0 | ARG  
+121  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+121  | $y                 |              |         |    |     |              |      | 0 | ARG  
+122  | $x                 |              |         |    |     |              |      | 0 | VAR  
+122  | $y                 |              |         |    |     |              |      | 0 | VAR  
+125  | $partial           |              |         |    |     |              |      | 0 | VAR  
+125  | $outer             |              |         |    |     |              |      | 0 | CALL 
+126  | $finalResult       |              |         |    |     |              |      | 0 | VAR  
+126  | $partial           |              |         |    |     |              |      | 0 | CALL 
+128  | Anonymous          |              |         |    |     |              |      | 0 | COM  
+128  | array_walk         |              |         |    |     |              |      | 0 | COM  
+129  | $items             |              |         |    |     |              |      | 0 | VAR  
+130  | array_walk         |              |         |    |     |              |      | 0 | CALL 
+130  | $items             |              |         |    |     | array_walk   |      | 0 | ARG  
+130  | $items             |              |         |    |     |              |      | 0 | VAR  
+130  | $value             |              |         |    |     |              |      | 0 | VAR  
+130  | $key               |              |         |    |     |              |      | 0 | VAR  
+131  | $value             |              |         |    |     |              |      | 0 | VAR  
+131  | $value             |              |         |    |     |              |      | 0 | VAR  
+134  | Arrow              |              |         |    |     |              |      | 0 | COM  
+134  | cannot             |              |         |    |     |              |      | 0 | COM  
+134  | modify             |              |         |    |     |              |      | 0 | COM  
+134  | reference          |              |         |    |     |              |      | 0 | COM  
+134  | anonymous          |              |         |    |     |              |      | 0 | COM  
+135  | $mutable           |              |         |    |     |              |      | 0 | VAR  
+136  | array_walk         |              |         |    |     |              |      | 0 | CALL 
+136  | $mutable           |              |         |    |     | array_walk   |      | 0 | ARG  
+136  | $mutable           |              |         |    |     |              |      | 0 | VAR  
+136  | $val               |              |         |    |     |              |      | 0 | VAR  
+137  | $val               |              |         |    |     |              |      | 0 | VAR  
+140  | Closure            |              |         |    |     |              |      | 0 | COM  
+140  | callback           |              |         |    |     |              |      | 0 | COM  
+141  | $callback          |              |         |    |     |              |      | 0 | VAR  
+141  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+141  | $message           |              |         |    |     |              |      | 0 | ARG  
+142  | Callback:          |              |         |    |     |              |      | 0 | STR  
+145  | Anonymous          |              |         |    |     |              |      | 0 | COM  
+145  | parameter          |              |         |    |     |              |      | 0 | COM  
+146  | $greet             |              |         |    |     |              |      | 0 | VAR  
+146  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+146  | $name              |              |         |    |     |              |      | 0 | ARG  
+147  | Hello              |              |         |    |     |              |      | 0 | STR  
+150  | Arrow              |              |         |    |     |              |      | 0 | COM  
+150  | conditional        |              |         |    |     |              |      | 0 | COM  
+151  | $abs               |              |         |    |     |              |      | 0 | VAR  
+151  | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+151  | $x                 |              |         |    |     |              |      | 0 | ARG  
+151  | $x                 |              |         |    |     |              |      | 0 | VAR  
+153  | Anonymous          |              |         |    |     |              |      | 0 | COM  
+154  | Calculator         |              |         |    |     |              |      | 1 | CLASS
+155  | $multiplier        | Calculator   | private |    |     |              |      | 1 | PROP 
+157  | getMultiplier      | Calculator   | public  |    |     |              |      | 1 | FUNC 
+158  | closure            |              |         |    |     |              |      | 0 | COM  
+158  | uses               |              |         |    |     |              |      | 0 | COM  
+158  | $this              |              |         |    |     |              |      | 0 | COM  
+159  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+159  | $x                 |              |         |    |     |              |      | 0 | ARG  
+160  | $x                 |              |         |    |     |              |      | 0 | VAR  
+160  | $this              |              |         |    |     |              |      | 0 | VAR  
+164  | getArrowMultiplier | Calculator   | public  |    |     |              |      | 1 | FUNC 
+165  | Arrow              |              |         |    |     |              |      | 0 | COM  
+165  | functions          |              |         |    |     |              |      | 0 | COM  
+165  | automatically      |              |         |    |     |              |      | 0 | COM  
+165  | capture            |              |         |    |     |              |      | 0 | COM  
+165  | $this              |              |         |    |     |              |      | 0 | COM  
+166  | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+166  | $x                 |              |         |    |     |              |      | 0 | ARG  
+166  | $x                 |              |         |    |     |              |      | 0 | VAR  
+166  | $this              |              |         |    |     |              |      | 0 | VAR  
+170  | $calc              |              |         |    |     |              |      | 0 | VAR  
+171  | $multiplyFunc      |              |         |    |     |              |      | 0 | VAR  
+171  | $calc              |              |         |    |     |              |      | 0 | VAR  
+171  | getMultiplier      | $calc        |         |    |     |              |      | 0 | CALL 
+172  | $arrowMultiplyFunc |              |         |    |     |              |      | 0 | VAR  
+172  | $calc              |              |         |    |     |              |      | 0 | VAR  
+172  | getArrowMultiplier | $calc        |         |    |     |              |      | 0 | CALL 
+174  | Closure            |              |         |    |     |              |      | 0 | COM  
+174  | multiple           |              |         |    |     |              |      | 0 | COM  
+174  | variables          |              |         |    |     |              |      | 0 | COM  
+175  | $a                 |              |         |    |     |              |      | 0 | VAR  
+176  | $b                 |              |         |    |     |              |      | 0 | VAR  
+177  | $c                 |              |         |    |     |              |      | 0 | VAR  
+178  | $complexClosure    |              |         |    |     |              |      | 0 | VAR  
+178  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+178  | $x                 |              |         |    |     |              |      | 0 | ARG  
+179  | $x                 |              |         |    |     |              |      | 0 | VAR  
+179  | $a                 |              |         |    |     |              |      | 0 | VAR  
+179  | $b                 |              |         |    |     |              |      | 0 | VAR  
+179  | $c                 |              |         |    |     |              |      | 0 | VAR  
+182  | Anonymous          |              |         |    |     |              |      | 0 | COM  
+182  | array_map          |              |         |    |     |              |      | 0 | COM  
+182  | keys               |              |         |    |     |              |      | 0 | COM  
+183  | $keyedArray        |              |         |    |     |              |      | 0 | VAR  
+184  | $mapped            |              |         |    |     |              |      | 0 | VAR  
+184  | array_map          |              |         |    |     |              |      | 0 | CALL 
+184  | $value             |              |         |    |     |              |      | 0 | VAR  
+184  | $key               |              |         |    |     |              |      | 0 | VAR  
+186  | $keyedArray        |              |         |    |     | array_map    |      | 0 | ARG  
+186  | $keyedArray        |              |         |    |     |              |      | 0 | VAR  
+186  | array_keys         |              |         |    |     |              |      | 0 | CALL 
+186  | $keyedArray        |              |         |    |     | array_keys   |      | 0 | ARG  
+186  | $keyedArray        |              |         |    |     |              |      | 0 | VAR  
+188  | Closure            |              |         |    |     |              |      | 0 | COM  
+188  | returning          |              |         |    |     |              |      | 0 | COM  
+188  | arrow              |              |         |    |     |              |      | 0 | COM  
+189  | $makeAdder         |              |         |    |     |              |      | 0 | VAR  
+189  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+189  | $x                 |              |         |    |     |              |      | 0 | ARG  
+190  | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+190  | $y                 |              |         |    |     |              |      | 0 | ARG  
+190  | $x                 |              |         |    |     |              |      | 0 | VAR  
+190  | $y                 |              |         |    |     |              |      | 0 | VAR  
+192  | $addTen            |              |         |    |     |              |      | 0 | VAR  
+192  | $makeAdder         |              |         |    |     |              |      | 0 | CALL 
+194  | Anonymous          |              |         |    |     |              |      | 0 | COM  
+194  | variadic           |              |         |    |     |              |      | 0 | COM  
+194  | parameters         |              |         |    |     |              |      | 0 | COM  
+195  | $sumAll            |              |         |    |     |              |      | 0 | VAR  
+195  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+196  | array_sum          |              |         |    |     |              |      | 0 | CALL 
+196  | $numbers           |              |         |    |     | array_sum    |      | 0 | ARG  
+196  | $numbers           |              |         |    |     |              |      | 0 | VAR  
+199  | Arrow              |              |         |    |     |              |      | 0 | COM  
+199  | cannot             |              |         |    |     |              |      | 0 | COM  
+199  | variadic           |              |         |    |     |              |      | 0 | COM  
+199  | params             |              |         |    |     |              |      | 0 | COM  
+199  | complex            |              |         |    |     |              |      | 0 | COM  
+199  | logic              |              |         |    |     |              |      | 0 | COM  
+200  | arrow              |              |         |    |     |              |      | 0 | COM  
+200  | functions          |              |         |    |     |              |      | 0 | COM  
+200  | single             |              |         |    |     |              |      | 0 | COM  
+200  | expression         |              |         |    |     |              |      | 0 | COM  
+201  | $variadicArrow     |              |         |    |     |              |      | 0 | VAR  
+201  | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+201  | array_sum          |              |         |    |     |              |      | 0 | CALL 
+201  | $args              |              |         |    |     | array_sum    |      | 0 | ARG  
+201  | $args              |              |         |    |     |              |      | 0 | VAR  
+203  | Anonymous          |              |         |    |     |              |      | 0 | COM  
+203  | uasort             |              |         |    |     |              |      | 0 | COM  
+203  | maintains          |              |         |    |     |              |      | 0 | COM  
+203  | keys               |              |         |    |     |              |      | 0 | COM  
+204  | $assocArray        |              |         |    |     |              |      | 0 | VAR  
+205  | uasort             |              |         |    |     |              |      | 0 | CALL 
+205  | $assocArray        |              |         |    |     | uasort       |      | 0 | ARG  
+205  | $assocArray        |              |         |    |     |              |      | 0 | VAR  
+205  | $a                 |              |         |    |     |              |      | 0 | VAR  
+205  | $b                 |              |         |    |     |              |      | 0 | VAR  
+205  | $a                 |              |         |    |     |              |      | 0 | VAR  
+205  | $b                 |              |         |    |     |              |      | 0 | VAR  
+207  | Closure            |              |         |    |     |              |      | 0 | COM  
+207  | object             |              |         |    |     |              |      | 0 | COM  
+207  | property           |              |         |    |     |              |      | 0 | COM  
+208  | EventHandler       |              |         |    |     |              |      | 1 | CLASS
+209  | $handlers          | EventHandler | private |    |     |              |      | 1 | PROP 
+211  | on                 | EventHandler | public  |    |     |              |      | 1 | FUNC 
+212  | $handler           |              |         |    |     |              |      | 0 | VAR  
+212  | $this              |              |         |    |     |              |      | 0 | VAR  
+212  | $event             |              |         |    |     |              |      | 0 | VAR  
+215  | trigger            | EventHandler | public  |    |     |              |      | 1 | FUNC 
+216  | isset              |              |         |    |     |              |      | 0 | CALL 
+216  | $this              |              |         |    |     |              |      | 0 | VAR  
+216  | $event             |              |         |    |     |              |      | 0 | VAR  
+217  | $data              |              |         |    |     |              |      | 0 | VAR  
+222  | $handler           |              |         |    |     |              |      | 0 | VAR  
+223  | $handler           |              |         |    |     |              |      | 0 | VAR  
+223  | on                 | $handler     |         |    |     |              |      | 0 | CALL 
+224  | $handler           |              |         |    |     |              |      | 0 | VAR  
+224  | on                 | $handler     |         |    |     |              |      | 0 | CALL 
+228  | Recursive          |              |         |    |     |              |      | 0 | COM  
+228  | anonymous          |              |         |    |     |              |      | 0 | COM  
+228  | requires           |              |         |    |     |              |      | 0 | COM  
+228  | variable           |              |         |    |     |              |      | 0 | COM  
+228  | reference          |              |         |    |     |              |      | 0 | COM  
+229  | $factorial         |              |         |    |     |              |      | 0 | VAR  
+229  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+229  | $n                 |              |         |    |     |              |      | 0 | ARG  
+230  | $n                 |              |         |    |     |              |      | 0 | VAR  
+231  | $n                 |              |         |    |     |              |      | 0 | VAR  
+231  | $factorial         |              |         |    |     |              |      | 0 | CALL 
+231  | $n                 |              |         |    |     |              |      | 0 | VAR  
+234  | closures           |              |         |    |     |              |      | 0 | COM  
+235  | $filters           |              |         |    |     |              |      | 0 | VAR  
+236  | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+236  | $x                 |              |         |    |     |              |      | 0 | ARG  
+236  | $x                 |              |         |    |     |              |      | 0 | VAR  
+237  | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+237  | $x                 |              |         |    |     |              |      | 0 | ARG  
+237  | $x                 |              |         |    |     |              |      | 0 | VAR  
+238  | <lambda>           |              |         |    |     | arrow        |      | 1 | LAM  
+238  | $x                 |              |         |    |     |              |      | 0 | ARG  
+238  | $x                 |              |         |    |     |              |      | 0 | VAR  
+241  | Apply              |              |         |    |     |              |      | 0 | COM  
+241  | multiple           |              |         |    |     |              |      | 0 | COM  
+241  | filters            |              |         |    |     |              |      | 0 | COM  
+241  | using              |              |         |    |     |              |      | 0 | COM  
+241  | closures           |              |         |    |     |              |      | 0 | COM  
+242  | $applyFilters      |              |         |    |     |              |      | 0 | VAR  
+242  | <lambda>           |              |         |    |     |              |      | 1 | LAM  
+242  | $value             |              |         |    |     |              |      | 0 | ARG  
+242  | $filters           |              |         |    |     |              |      | 0 | ARG  
+244  | $filter            |              |         |    |     |              |      | 0 | CALL 
+244  | $value             |              |         |    |     | $filter      |      | 0 | ARG  
+244  | $value             |              |         |    |     |              |      | 0 | VAR  

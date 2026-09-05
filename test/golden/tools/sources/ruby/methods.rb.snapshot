@@ -1,0 +1,63 @@
+LINE | SYM               | PAR               | SCOPE | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/ruby/methods.rb:
+1    | methods           |                   |       |    |     |      |      | 0 | FILE 
+1    | Method            |                   |       |    |     |      |      | 0 | COM  
+1    | definition        |                   |       |    |     |      |      | 0 | COM  
+1    | variety:          |                   |       |    |     |      |      | 0 | COM  
+1    | default           |                   |       |    |     |      |      | 0 | COM  
+1    | args              |                   |       |    |     |      |      | 0 | COM  
+1    | keyword           |                   |       |    |     |      |      | 0 | COM  
+1    | args              |                   |       |    |     |      |      | 0 | COM  
+1    | splat             |                   |       |    |     |      |      | 0 | COM  
+1    | block             |                   |       |    |     |      |      | 0 | COM  
+1    | args.             |                   |       |    |     |      |      | 0 | COM  
+2    | simple            |                   |       |    |     |      |      | 1 | FUNC 
+6    | with_args         |                   |       |    |     |      |      | 1 | FUNC 
+6    | lhs               | with_args         |       |    |     |      |      | 0 | ARG  
+6    | rhs               | with_args         |       |    |     |      |      | 0 | ARG  
+7    | lhs               |                   |       |    |     |      |      | 0 | VAR  
+7    | rhs               |                   |       |    |     |      |      | 0 | VAR  
+10   | with_defaults     |                   |       |    |     |      |      | 1 | FUNC 
+10   | base              | with_defaults     |       |    |     |      |      | 0 | ARG  
+10   | step              | with_defaults     |       |    |     |      |      | 0 | ARG  
+10   | span              | with_defaults     |       |    |     |      |      | 0 | ARG  
+11   | base              |                   |       |    |     |      |      | 0 | VAR  
+11   | step              |                   |       |    |     |      |      | 0 | VAR  
+11   | span              |                   |       |    |     |      |      | 0 | VAR  
+14   | with_keywords     |                   |       |    |     |      |      | 1 | FUNC 
+14   | name              | with_keywords     |       |    |     |      |      | 0 | ARG  
+14   | greeting          | with_keywords     |       |    |     |      |      | 0 | ARG  
+14   | hi                |                   |       |    |     |      |      | 0 | STR  
+15   | greeting          |                   |       |    |     |      |      | 0 | VAR  
+15   | name              |                   |       |    |     |      |      | 0 | VAR  
+18   | with_splat        |                   |       |    |     |      |      | 1 | FUNC 
+18   | first             | with_splat        |       |    |     |      |      | 0 | ARG  
+18   | rest              | with_splat        |       |    |     |      |      | 0 | ARG  
+19   | first             |                   |       |    |     |      |      | 0 | VAR  
+19   | rest              |                   |       |    |     |      |      | 0 | VAR  
+22   | with_double_splat |                   |       |    |     |      |      | 1 | FUNC 
+22   | opts              | with_double_splat |       |    |     |      |      | 0 | ARG  
+23   | opts              |                   |       |    |     |      |      | 0 | VAR  
+26   | with_block        |                   |       |    |     |      |      | 1 | FUNC 
+26   | blk               | with_block        |       |    |     |      |      | 0 | ARG  
+27   | call              | blk               |       |    |     |      |      | 0 | CALL 
+27   | blk               |                   |       |    |     |      |      | 0 | VAR  
+30   | yields_values     |                   |       |    |     |      |      | 1 | FUNC 
+35   | Endless           |                   |       |    |     |      |      | 0 | COM  
+35   | method            |                   |       |    |     |      |      | 0 | COM  
+35   | definition        |                   |       |    |     |      |      | 0 | COM  
+35   | Ruby              |                   |       |    |     |      |      | 0 | COM  
+35   | 3.0+.             |                   |       |    |     |      |      | 0 | COM  
+36   | square            |                   |       |    |     |      |      | 1 | FUNC 
+36   | num               | square            |       |    |     |      |      | 0 | ARG  
+36   | num               |                   |       |    |     |      |      | 0 | VAR  
+36   | num               |                   |       |    |     |      |      | 0 | VAR  
+38   | Operator          |                   |       |    |     |      |      | 0 | COM  
+38   | methods.          |                   |       |    |     |      |      | 0 | COM  
+39   | Vector            |                   |       |    |     |      |      | 1 | CLASS
+40   | other             | +                 |       |    |     |      |      | 0 | ARG  
+41   | new               | Vector            |       |    |     |      |      | 0 | CALL 
+41   | Vector            |                   |       |    |     |      |      | 0 | VAR  
+44   | []                | Vector            |       |    |     |      |      | 1 | FUNC 
+44   | index             | []                |       |    |     |      |      | 0 | ARG  
+45   | index             |                   |       |    |     |      |      | 0 | VAR  

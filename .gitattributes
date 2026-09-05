@@ -1,0 +1,5 @@
+# Golden snapshots are qi's terminal output byte for byte. Most lines end in
+# the spaces qi used to pad its columns, so they must survive untouched.
+# -whitespace stops git flagging or fixing them; -text stops any line-ending
+# conversion.
+test/golden/**/*.snapshot -whitespace -text

@@ -1,0 +1,31 @@
+LINE | SYM               | PAR               | SCOPE     | NS         | MOD      | CLUE | TYPE | D | CTX  
+./tools/sources/php/abstract_final.php:
+1    | abstract_final    |                   |           |            |          |      |      | 0 | FILE 
+3    | App\Models        |                   |           |            |          |      |      | 1 | NS   
+5    | methods           |                   |           | App\Models |          |      |      | 0 | COM  
+8    | BaseRepository    |                   |           | App\Models | abstract |      |      | 1 | CLASS
+9    | $table            | BaseRepository    | protected | App\Models |          |      |      | 1 | PROP 
+11   | find              | BaseRepository    | public    | App\Models | abstract |      |      | 1 | FUNC 
+12   | validate          | BaseRepository    | protected | App\Models | abstract |      |      | 1 | FUNC 
+14   | getTable          | BaseRepository    | public    | App\Models |          |      |      | 1 | FUNC 
+15   | $this             |                   |           | App\Models |          |      |      | 0 | VAR  
+15   | table             | $this             |           | App\Models |          |      |      | 0 | PROP 
+19   | Concrete          |                   |           | App\Models |          |      |      | 0 | COM  
+19   | implementation    |                   |           | App\Models |          |      |      | 0 | COM  
+22   | ProductRepository |                   |           | App\Models |          |      |      | 1 | CLASS
+23   | $table            | ProductRepository | protected | App\Models |          |      |      | 1 | PROP 
+25   | find              | ProductRepository | public    | App\Models |          |      |      | 1 | FUNC 
+29   | validate          | ProductRepository | protected | App\Models |          |      |      | 1 | FUNC 
+30   | isset             |                   |           | App\Models |          |      |      | 0 | CALL 
+30   | $data             |                   |           | App\Models |          |      |      | 0 | VAR  
+30   | name              |                   |           | App\Models |          |      |      | 0 | STR  
+30   | isset             |                   |           | App\Models |          |      |      | 0 | CALL 
+30   | $data             |                   |           | App\Models |          |      |      | 0 | VAR  
+30   | price             |                   |           | App\Models |          |      |      | 0 | STR  
+34   | cannot            |                   |           | App\Models |          |      |      | 0 | COM  
+34   | extended          |                   |           | App\Models |          |      |      | 0 | COM  
+37   | ImmutableConfig   |                   |           | App\Models | final    |      |      | 1 | CLASS
+38   | __construct       | ImmutableConfig   | public    | App\Models |          |      |      | 1 | FUNC 
+42   | get               | ImmutableConfig   | public    | App\Models | final    |      |      | 1 | FUNC 
+43   | $this             |                   |           | App\Models |          |      |      | 0 | VAR  
+43   | $key              |                   |           | App\Models |          |      |      | 0 | VAR  

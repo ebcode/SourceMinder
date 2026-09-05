@@ -1,0 +1,29 @@
+LINE | SYM                                    | PAR | SCOPE | NS | MOD | CLUE | TYPE  | D | CTX 
+./tools/sources/c/test-special.c:
+1    | test-special                           |     |       |    |     |      |       | 0 | FILE
+1    | <stdio.h>                              |     |       |    |     |      |       | 0 | IMP 
+3    | main                                   |     |       |    |     |      | int   | 1 | FUNC
+4    | Test                                   |     |       |    |     |      |       | 0 | COM 
+4    | special                                |     |       |    |     |      |       | 0 | COM 
+4    | characters:                            |     |       |    |     |      |       | 0 | COM 
+4    | @email                                 |     |       |    |     |      |       | 0 | COM 
+4    | #issue                                 |     |       |    |     |      |       | 0 | COM 
+4    | ?query                                 |     |       |    |     |      |       | 0 | COM 
+4    | &param                                 |     |       |    |     |      |       | 0 | COM 
+5    | email                                  |     |       |    |     |      | char* | 1 | VAR 
+5    | user@example.com                       |     |       |    |     |      |       | 0 | STR 
+6    | url                                    |     |       |    |     |      | char* | 1 | VAR 
+6    | https://api.com/users?id=123&sort=name |     |       |    |     |      |       | 0 | STR 
+7    | issue                                  |     |       |    |     |      | char* | 1 | VAR 
+7    | See                                    |     |       |    |     |      |       | 0 | STR 
+7    | issue                                  |     |       |    |     |      |       | 0 | STR 
+7    | details                                |     |       |    |     |      |       | 0 | STR 
+8    | format                                 |     |       |    |     |      | char* | 1 | VAR 
+8    | Value:                                 |     |       |    |     |      |       | 0 | STR 
+9    | placeholder                            |     |       |    |     |      | char* | 1 | VAR 
+9    | %user%                                 |     |       |    |     |      |       | 0 | STR 
+10   | regex                                  |     |       |    |     |      | char* | 1 | VAR 
+10   | ^[a-z]+$                               |     |       |    |     |      |       | 0 | STR 
+11   | template                               |     |       |    |     |      | char* | 1 | VAR 
+11   | <div>Hello                             |     |       |    |     |      |       | 0 | STR 
+11   | $name!</div>                           |     |       |    |     |      |       | 0 | STR 

@@ -1,0 +1,44 @@
+LINE | SYM        | PAR        | SCOPE   | NS   | MOD | CLUE | TYPE    | D | CTX  
+./tools/sources/go/methods.go:
+1    | methods    |            |         |      |     |      |         | 0 | FILE 
+1    | main       |            |         |      |     |      |         | 0 | NS   
+3    | Rectangle  |            | public  | main |     |      |         | 1 | CLASS
+4    | Width      |            | public  | main |     |      | float64 | 1 | PROP 
+5    | Height     |            | public  | main |     |      | float64 | 1 | PROP 
+8    | Value      |            |         |      |     |      |         | 0 | COM  
+8    | receiver   |            |         |      |     |      |         | 0 | COM  
+8    | method     |            |         |      |     |      |         | 0 | COM  
+9    | Area       | Rectangle  | public  | main |     |      | float64 | 1 | FUNC 
+10   | Width      | r          |         | main |     |      |         | 0 | PROP 
+10   | Height     | r          |         | main |     |      |         | 0 | PROP 
+13   | Pointer    |            |         |      |     |      |         | 0 | COM  
+13   | receiver   |            |         |      |     |      |         | 0 | COM  
+13   | method     |            |         |      |     |      |         | 0 | COM  
+14   | Scale      | *Rectangle | public  | main |     |      |         | 1 | FUNC 
+14   | factor     |            |         |      |     |      | float64 | 1 | ARG  
+15   | Width      | r          |         | main |     |      |         | 0 | PROP 
+15   | factor     |            |         | main |     |      |         | 0 | VAR  
+16   | Height     | r          |         | main |     |      |         | 0 | PROP 
+16   | factor     |            |         | main |     |      |         | 0 | VAR  
+19   | Counter    |            | public  | main |     |      |         | 1 | CLASS
+20   | count      |            | private | main |     |      | int     | 1 | PROP 
+23   | Pointer    |            |         |      |     |      |         | 0 | COM  
+23   | receiver   |            |         |      |     |      |         | 0 | COM  
+23   | mutation   |            |         |      |     |      |         | 0 | COM  
+24   | Increment  | *Counter   | public  | main |     |      |         | 1 | FUNC 
+25   | count      | c          |         | main |     |      |         | 0 | PROP 
+28   | Value      |            |         |      |     |      |         | 0 | COM  
+28   | receiver   |            |         |      |     |      |         | 0 | COM  
+28   | read-only  |            |         |      |     |      |         | 0 | COM  
+29   | Value      | Counter    | public  | main |     |      | int     | 1 | FUNC 
+30   | count      | c          |         | main |     |      |         | 0 | PROP 
+33   | Method     |            |         |      |     |      |         | 0 | COM  
+33   | multiple   |            |         |      |     |      |         | 0 | COM  
+33   | parameters |            |         |      |     |      |         | 0 | COM  
+34   | Resize     | Rectangle  | public  | main |     |      |         | 1 | FUNC 
+34   | width      |            |         |      |     |      | float64 | 1 | ARG  
+34   | height     |            |         |      |     |      | float64 | 1 | ARG  
+35   | Width      | r          |         | main |     |      |         | 0 | PROP 
+35   | width      |            |         | main |     |      |         | 0 | VAR  
+36   | Height     | r          |         | main |     |      |         | 0 | PROP 
+36   | height     |            |         | main |     |      |         | 0 | VAR  

@@ -1,0 +1,61 @@
+LINE | SYM             | PAR | SCOPE   | NS   | MOD | CLUE            | TYPE   | D | CTX 
+./tools/sources/go/defer.go:
+1    | defer           |     |         |      |     |                 |        | 0 | FILE
+1    | main            |     |         |      |     |                 |        | 0 | NS  
+3    | fmt             |     |         | main |     |                 |        | 0 | IMP 
+5    | openFile        |     | private | main |     |                 |        | 1 | FUNC
+5    | filename        |     |         |      |     |                 | string | 1 | ARG 
+6    | executes        |     |         |      |     |                 |        | 0 | COM 
+6    | end             |     |         |      |     |                 |        | 0 | COM 
+6    | function        |     |         |      |     |                 |        | 0 | COM 
+7    | Println         | fmt |         | main |     | defer           |        | 0 | CALL
+7    | fmt             |     |         | main |     |                 |        | 0 | VAR 
+7    | Println         | fmt |         | main |     |                 |        | 0 | PROP
+7    | File            |     |         |      |     |                 |        | 0 | STR 
+7    | closed          |     |         |      |     |                 |        | 0 | STR 
+9    | Println         | fmt |         |      |     |                 |        | 0 | CALL
+9    | File            |     |         |      |     |                 |        | 0 | STR 
+9    | opened          |     |         |      |     |                 |        | 0 | STR 
+12   | multipleDefers  |     | private | main |     |                 |        | 1 | FUNC
+13   | Defers          |     |         |      |     |                 |        | 0 | COM 
+13   | execute         |     |         |      |     |                 |        | 0 | COM 
+13   | LIFO            |     |         |      |     |                 |        | 0 | COM 
+13   | order           |     |         |      |     |                 |        | 0 | COM 
+14   | Println         | fmt |         | main |     | defer           |        | 0 | CALL
+14   | fmt             |     |         | main |     |                 |        | 0 | VAR 
+14   | Println         | fmt |         | main |     |                 |        | 0 | PROP
+14   | First           |     |         |      |     |                 |        | 0 | STR 
+15   | Println         | fmt |         | main |     | defer           |        | 0 | CALL
+15   | fmt             |     |         | main |     |                 |        | 0 | VAR 
+15   | Println         | fmt |         | main |     |                 |        | 0 | PROP
+15   | Second          |     |         |      |     |                 |        | 0 | STR 
+16   | Println         | fmt |         | main |     | defer           |        | 0 | CALL
+16   | fmt             |     |         | main |     |                 |        | 0 | VAR 
+16   | Println         | fmt |         | main |     |                 |        | 0 | PROP
+16   | Third           |     |         |      |     |                 |        | 0 | STR 
+19   | deferWithPanic  |     | private | main |     |                 |        | 1 | FUNC
+20   | func            |     |         | main |     | defer           |        | 0 | CALL
+20   | <lambda>        |     |         | main |     |                 |        | 1 | LAM 
+21   | recover         |     |         |      |     | built-in        |        | 0 | CALL
+22   | Println         | fmt |         |      |     |                 |        | 0 | CALL
+22   | Recovered:      |     |         |      |     |                 |        | 0 | STR 
+26   | panic           |     |         |      |     | built-in        |        | 0 | CALL
+26   | something       |     |         |      |     |                 |        | 0 | STR 
+26   | went            |     |         |      |     |                 |        | 0 | STR 
+26   | wrong           |     |         |      |     |                 |        | 0 | STR 
+29   | cleanup         |     | private | main |     |                 |        | 1 | FUNC
+30   | resource        |     | private | main |     |                 |        | 1 | VAR 
+30   | acquireResource |     |         |      |     |                 |        | 0 | CALL
+31   | releaseResource |     |         | main |     | defer           |        | 0 | CALL
+31   | releaseResource |     |         | main |     |                 |        | 0 | VAR 
+31   | resource        |     |         | main |     | releaseResource |        | 0 | ARG 
+33   | Use             |     |         |      |     |                 |        | 0 | COM 
+33   | resource        |     |         |      |     |                 |        | 0 | COM 
+34   | processResource |     |         |      |     |                 |        | 0 | CALL
+34   | resource        |     |         | main |     | processResource |        | 0 | ARG 
+37   | acquireResource |     | private | main |     |                 | int    | 1 | FUNC
+41   | releaseResource |     | private | main |     |                 |        | 1 | FUNC
+42   | Println         | fmt |         |      |     |                 |        | 0 | CALL
+42   | Released:       |     |         |      |     |                 |        | 0 | STR 
+45   | processResource |     | private | main |     |                 |        | 1 | FUNC
+46   | Processing      |     |         |      |     |                 |        | 0 | COM 

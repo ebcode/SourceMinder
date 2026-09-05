@@ -1,0 +1,17 @@
+LINE | SYM               | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/typescript/export-test.ts:
+1    | export-test       |     |       |    |     |      |      | 0 | FILE 
+1    | Test              |     |       |    |     |      |      | 0 | COM  
+1    | various           |     |       |    |     |      |      | 0 | COM  
+1    | patterns          |     |       |    |     |      |      | 0 | COM  
+2    | ExportedClass     |     |       |    |     |      |      | 0 | EXP  
+2    | ExportedClass     |     |       |    |     |      |      | 1 | CLASS
+3    | ExportedInterface |     |       |    |     |      |      | 0 | EXP  
+3    | ExportedInterface |     |       |    |     |      |      | 1 | IFACE
+4    | exportedFunction  |     |       |    |     |      |      | 0 | EXP  
+4    | exportedFunction  |     |       |    |     |      |      | 1 | FUNC 
+5    | exportedConst     |     |       |    |     |      |      | 0 | EXP  
+5    | exportedConst     |     |       |    |     |      |      | 1 | VAR  
+6    | LocalA            |     |       |    |     |      |      | 0 | EXP  
+6    | LocalB            |     |       |    |     |      |      | 0 | EXP  
+7    | RenamedC          |     |       |    |     |      |      | 0 | EXP  

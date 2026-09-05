@@ -1,0 +1,125 @@
+LINE | SYM               | PAR  | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/shift-unshift.pl:
+1    | shift-unshift     |      |       |    |     |      |        | 0 | FILE
+2    | strict            |      |       |    |     |      |        | 0 | IMP 
+3    | warnings          |      |       |    |     |      |        | 0 | IMP 
+5    | ---               |      |       |    |     |      |        | 0 | COM 
+5    | extracting        |      |       |    |     |      |        | 0 | COM 
+5    | single            |      |       |    |     |      |        | 0 | COM 
+5    | parameter         |      |       |    |     |      |        | 0 | COM 
+5    | @_                |      |       |    |     |      |        | 0 | COM 
+5    | ---               |      |       |    |     |      |        | 0 | COM 
+7    | Classic           |      |       |    |     |      |        | 0 | COM 
+7    | OOP:              |      |       |    |     |      |        | 0 | COM 
+7    | $self             |      |       |    |     |      |        | 0 | COM 
+7    | via               |      |       |    |     |      |        | 0 | COM 
+8    | new               |      |       |    |     |      |        | 1 | FUNC
+9    | class             |      |       |    | my  |      | scalar | 1 | ARG 
+9    | shift             |      |       |    |     |      |        | 0 | CALL
+10   | self              |      |       |    | my  |      | scalar | 1 | VAR 
+10   | name              |      |       |    |     |      |        | 0 | PROP
+11   | bless             |      |       |    |     |      |        | 0 | CALL
+11   | self              |      |       |    |     |      | scalar | 0 | VAR 
+11   | class             |      |       |    |     |      | scalar | 0 | VAR 
+14   | get_name          |      |       |    |     |      |        | 1 | FUNC
+15   | self              |      |       |    | my  |      | scalar | 1 | ARG 
+15   | shift             |      |       |    |     |      |        | 0 | CALL
+16   | self              |      |       |    |     |      | hash   | 0 | VAR 
+16   | name              | self |       |    |     |      |        | 0 | PROP
+19   | Extracting        |      |       |    |     |      |        | 0 | COM 
+19   | multiple          |      |       |    |     |      |        | 0 | COM 
+19   | params            |      |       |    |     |      |        | 0 | COM 
+19   | successive        |      |       |    |     |      |        | 0 | COM 
+19   | shifts            |      |       |    |     |      |        | 0 | COM 
+20   | connect           |      |       |    |     |      |        | 1 | FUNC
+21   | host              |      |       |    | my  |      | scalar | 1 | ARG 
+21   | shift             |      |       |    |     |      |        | 0 | CALL
+22   | port              |      |       |    | my  |      | scalar | 1 | ARG 
+22   | shift             |      |       |    |     |      |        | 0 | CALL
+23   | user              |      |       |    | my  |      | scalar | 1 | ARG 
+23   | shift             |      |       |    |     |      |        | 0 | CALL
+24   | $user@$host:$port |      |       |    |     |      |        | 0 | STR 
+24   | user              |      |       |    |     |      | scalar | 0 | VAR 
+24   | host              |      |       |    |     |      | scalar | 0 | VAR 
+24   | port              |      |       |    |     |      | scalar | 0 | VAR 
+27   | explicit          |      |       |    |     |      |        | 0 | COM 
+27   | array             |      |       |    |     |      |        | 0 | COM 
+27   | @_                |      |       |    |     |      |        | 0 | COM 
+28   | pop_queue         |      |       |    |     |      |        | 1 | FUNC
+29   | queue             |      |       |    | my  |      | scalar | 1 | ARG 
+30   | item              |      |       |    | my  |      | scalar | 1 | VAR 
+30   | shift             |      |       |    |     |      |        | 0 | CALL
+30   | queue             |      |       |    |     |      | scalar | 0 | VAR 
+31   | item              |      |       |    |     |      | scalar | 0 | VAR 
+34   | inside            |      |       |    |     |      |        | 0 | COM 
+34   | loop              |      |       |    |     |      |        | 0 | COM 
+35   | drain             |      |       |    |     |      |        | 1 | FUNC
+36   | items             |      |       |    | my  |      | scalar | 1 | ARG 
+37   | results           |      |       |    | my  |      | array  | 1 | VAR 
+38   | val               |      |       |    | my  |      | scalar | 1 | VAR 
+38   | shift             |      |       |    |     |      |        | 0 | CALL
+38   | items             |      |       |    |     |      | scalar | 0 | VAR 
+39   | push              |      |       |    |     |      |        | 0 | CALL
+39   | results           |      |       |    |     |      | array  | 0 | VAR 
+39   | val               |      |       |    |     |      | scalar | 0 | VAR 
+41   | results           |      |       |    |     |      | array  | 0 | VAR 
+44   | peel              |      |       |    |     |      |        | 0 | COM 
+44   | flag              |      |       |    |     |      |        | 0 | COM 
+44   | argument          |      |       |    |     |      |        | 0 | COM 
+45   | maybe_verbose     |      |       |    |     |      |        | 1 | FUNC
+46   | verbose           |      |       |    | my  |      | scalar | 1 | ARG 
+46   | shift             |      |       |    |     |      |        | 0 | CALL
+46   | --verbose         |      |       |    |     |      |        | 0 | STR 
+47   | message           |      |       |    | my  |      | scalar | 1 | ARG 
+48   | print             |      |       |    |     |      |        | 0 | CALL
+48   | message           |      |       |    |     |      | scalar | 0 | VAR 
+48   | verbose           |      |       |    |     |      | scalar | 0 | VAR 
+51   | ---               |      |       |    |     |      |        | 0 | COM 
+51   | prepending        |      |       |    |     |      |        | 0 | COM 
+51   | arrays            |      |       |    |     |      |        | 0 | COM 
+51   | ---               |      |       |    |     |      |        | 0 | COM 
+53   | onto              |      |       |    |     |      |        | 0 | COM 
+53   | array             |      |       |    |     |      |        | 0 | COM 
+54   | prepend_header    |      |       |    |     |      |        | 1 | FUNC
+55   | lines             |      |       |    | my  |      | scalar | 1 | ARG 
+55   | header            |      |       |    | my  |      | scalar | 1 | ARG 
+56   | unshift           |      |       |    |     |      |        | 0 | CALL
+56   | lines             |      |       |    |     |      | scalar | 0 | VAR 
+56   | header            |      |       |    |     |      | scalar | 0 | VAR 
+57   | lines             |      |       |    |     |      | scalar | 0 | VAR 
+60   | multiple          |      |       |    |     |      |        | 0 | COM 
+60   | values            |      |       |    |     |      |        | 0 | COM 
+61   | prepend_defaults  |      |       |    |     |      |        | 1 | FUNC
+62   | args              |      |       |    | my  |      | scalar | 1 | ARG 
+63   | unshift           |      |       |    |     |      |        | 0 | CALL
+63   | args              |      |       |    |     |      | scalar | 0 | VAR 
+63   | --verbose         |      |       |    |     |      |        | 0 | STR 
+63   | --strict          |      |       |    |     |      |        | 0 | STR 
+64   | args              |      |       |    |     |      | scalar | 0 | VAR 
+67   | loop              |      |       |    |     |      |        | 0 | COM 
+67   | build             |      |       |    |     |      |        | 0 | COM 
+67   | list              |      |       |    |     |      |        | 0 | COM 
+68   | reverse_build     |      |       |    |     |      |        | 1 | FUNC
+69   | source            |      |       |    | my  |      | array  | 1 | VAR 
+70   | result            |      |       |    | my  |      | array  | 1 | VAR 
+71   | item              |      |       |    |     |      | scalar | 0 | VAR 
+71   | source            |      |       |    |     |      | array  | 0 | VAR 
+72   | unshift           |      |       |    |     |      |        | 0 | CALL
+72   | result            |      |       |    |     |      | array  | 0 | VAR 
+72   | item              |      |       |    |     |      | scalar | 0 | VAR 
+74   | result            |      |       |    |     |      | array  | 0 | VAR 
+77   | Combined:         |      |       |    |     |      |        | 0 | COM 
+77   | command           |      |       |    |     |      |        | 0 | COM 
+77   | replacement       |      |       |    |     |      |        | 0 | COM 
+78   | normalize_command |      |       |    |     |      |        | 1 | FUNC
+79   | argv              |      |       |    | my  |      | scalar | 1 | ARG 
+80   | cmd               |      |       |    | my  |      | scalar | 1 | VAR 
+80   | shift             |      |       |    |     |      |        | 0 | CALL
+80   | argv              |      |       |    |     |      | scalar | 0 | VAR 
+81   | cmd               |      |       |    |     |      | scalar | 0 | VAR 
+81   | lc                |      |       |    |     |      |        | 0 | CALL
+81   | cmd               |      |       |    |     |      | scalar | 0 | VAR 
+82   | unshift           |      |       |    |     |      |        | 0 | CALL
+82   | argv              |      |       |    |     |      | scalar | 0 | VAR 
+82   | cmd               |      |       |    |     |      | scalar | 0 | VAR 
+83   | argv              |      |       |    |     |      | scalar | 0 | VAR 

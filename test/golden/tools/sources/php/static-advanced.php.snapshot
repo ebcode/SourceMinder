@@ -1,0 +1,42 @@
+LINE | SYM                 | PAR               | SCOPE     | NS         | MOD    | CLUE | TYPE | D | CTX  
+./tools/sources/php/static-advanced.php:
+1    | static-advanced     |                   |           |            |        |      |      | 0 | FILE 
+3    | App\Models          |                   |           |            |        |      |      | 1 | NS   
+5    | Base                |                   |           | App\Models |        |      |      | 1 | CLASS
+6    | $config             | Base              | protected | App\Models | static |      |      | 1 | PROP 
+7    | VERSION             | Base              | protected | App\Models | const  |      |      | 1 | VAR  
+8    | init                | Base              | public    | App\Models | static |      |      | 1 | FUNC 
+11   | Child               |                   |           | App\Models |        |      |      | 1 | CLASS
+12   | setup               | Child             | public    | App\Models | static |      |      | 1 | FUNC 
+13   | init                | parent            |           | App\Models | static |      |      | 0 | CALL 
+14   | $config             | parent            |           | App\Models | static |      |      | 0 | PROP 
+14   | key                 |                   |           | App\Models |        |      |      | 0 | STR  
+14   | value               |                   |           | App\Models |        |      |      | 0 | STR  
+15   | VERSION             | parent            |           | App\Models | const  |      |      | 0 | VAR  
+16   | configure           | static            |           | App\Models | static |      |      | 0 | CALL 
+19   | configure           | Child             | private   | App\Models | static |      |      | 1 | FUNC 
+20   | $config             |                   |           | App\Models |        |      |      | 0 | VAR  
+20   | active              |                   |           | App\Models |        |      |      | 0 | STR  
+23   | run                 | Child             | public    | App\Models |        |      |      | 1 | FUNC 
+26   | Namespaced          |                   |           | App\Models |        |      |      | 0 | COM  
+26   | access              |                   |           | App\Models |        |      |      | 0 | COM  
+27   | setup               | \App\Models\Child |           | App\Models | static |      |      | 0 | CALL 
+28   | init                | \App\Models\Base  |           | App\Models | static |      |      | 0 | CALL 
+30   | Variable            |                   |           | App\Models |        |      |      | 0 | COM  
+30   | names               |                   |           | App\Models |        |      |      | 0 | COM  
+31   | $class              |                   |           | App\Models |        |      |      | 0 | VAR  
+31   | Child               |                   |           | App\Models |        |      |      | 0 | STR  
+32   | setup               | $class            |           | App\Models | static |      |      | 0 | CALL 
+33   | $model              |                   |           | App\Models |        |      |      | 0 | VAR  
+34   | init                | $model            |           | App\Models | static |      |      | 0 | CALL 
+36   | Chained             |                   |           | App\Models |        |      |      | 0 | COM  
+36   | instance            |                   |           | App\Models |        |      |      | 0 | COM  
+36   | method              |                   |           | App\Models |        |      |      | 0 | COM  
+37   | run                 |                   |           | App\Models |        |      |      | 0 | CALL 
+39   | Test                |                   |           | App\Models |        |      |      | 0 | COM  
+39   | chained             |                   |           | App\Models |        |      |      | 0 | COM  
+39   | property            |                   |           | App\Models |        |      |      | 0 | COM  
+39   | access              |                   |           | App\Models |        |      |      | 0 | COM  
+39   | valid               |                   |           | App\Models |        |      |      | 0 | COM  
+39   | PHP                 |                   |           | App\Models |        |      |      | 0 | COM  
+40   | $obj1::$obj2::$prop |                   |           | App\Models |        |      |      | 0 | COM  

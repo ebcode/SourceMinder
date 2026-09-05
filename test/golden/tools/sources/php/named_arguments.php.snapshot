@@ -1,0 +1,37 @@
+LINE | SYM              | PAR         | SCOPE  | NS         | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/named_arguments.php:
+1    | named_arguments  |             |        |            |     |      |      | 0 | FILE 
+3    | App\Models       |             |        |            |     |      |      | 1 | NS   
+5    | many             |             |        | App\Models |     |      |      | 0 | COM  
+5    | parameters       |             |        | App\Models |     |      |      | 0 | COM  
+8    | createUser       |             |        | App\Models |     |      |      | 1 | FUNC 
+15   | compact          |             |        | App\Models |     |      |      | 0 | CALL 
+15   | name             |             |        | App\Models |     |      |      | 0 | STR  
+15   | email            |             |        | App\Models |     |      |      | 0 | STR  
+15   | age              |             |        | App\Models |     |      |      | 0 | STR  
+15   | active           |             |        | App\Models |     |      |      | 0 | STR  
+15   | role             |             |        | App\Models |     |      |      | 0 | STR  
+18   | Named            |             |        | App\Models |     |      |      | 0 | COM  
+18   | arguments        |             |        | App\Models |     |      |      | 0 | COM  
+18   | usage            |             |        | App\Models |     |      |      | 0 | COM  
+18   | PHP              |             |        | App\Models |     |      |      | 0 | COM  
+18   | 8.0+             |             |        | App\Models |     |      |      | 0 | COM  
+21   | UserFactory      |             |        | App\Models |     |      |      | 1 | CLASS
+22   | create           | UserFactory | public | App\Models |     |      |      | 1 | FUNC 
+23   | Call             |             |        | App\Models |     |      |      | 0 | COM  
+23   | named            |             |        | App\Models |     |      |      | 0 | COM  
+23   | arguments        |             |        | App\Models |     |      |      | 0 | COM  
+23   | order            |             |        | App\Models |     |      |      | 0 | COM  
+24   | createUser       |             |        | App\Models |     |      |      | 0 | CALL 
+25   | test@example.com |             |        | App\Models |     |      |      | 0 | STR  
+26   | John             |             |        | App\Models |     |      |      | 0 | STR  
+26   | Doe              |             |        | App\Models |     |      |      | 0 | STR  
+27   | admin            |             |        | App\Models |     |      |      | 0 | STR  
+32   | createMinimal    | UserFactory | public | App\Models |     |      |      | 1 | FUNC 
+33   | Skip             |             |        | App\Models |     |      |      | 0 | COM  
+33   | optional         |             |        | App\Models |     |      |      | 0 | COM  
+33   | parameters       |             |        | App\Models |     |      |      | 0 | COM  
+34   | createUser       |             |        | App\Models |     |      |      | 0 | CALL 
+35   | Jane             |             |        | App\Models |     |      |      | 0 | STR  
+35   | Doe              |             |        | App\Models |     |      |      | 0 | STR  
+36   | jane@example.com |             |        | App\Models |     |      |      | 0 | STR  

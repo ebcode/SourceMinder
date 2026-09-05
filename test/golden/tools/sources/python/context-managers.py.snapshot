@@ -1,0 +1,140 @@
+LINE | SYM                               | PAR                | SCOPE | NS | MOD | CLUE            | TYPE | D | CTX  
+./tools/sources/python/context-managers.py:
+1    | context-managers                  |                    |       |    |     |                 |      | 0 | FILE 
+1    | Python                            |                    |       |    |     |                 |      | 0 | STR  
+1    | context                           |                    |       |    |     |                 |      | 0 | STR  
+1    | manager                           |                    |       |    |     |                 |      | 0 | STR  
+1    | patterns.                         |                    |       |    |     |                 |      | 0 | STR  
+4    | FileManager                       |                    |       |    |     |                 |      | 1 | CLASS
+5    | Basic                             |                    |       |    |     |                 |      | 0 | STR  
+5    | context                           |                    |       |    |     |                 |      | 0 | STR  
+5    | manager.                          |                    |       |    |     |                 |      | 0 | STR  
+7    | __init__                          | FileManager        |       |    |     |                 |      | 1 | FUNC 
+7    | self                              | __init__           |       |    |     |                 |      | 0 | ARG  
+7    | filename                          | __init__           |       |    |     |                 |      | 0 | ARG  
+7    | mode                              | __init__           |       |    |     |                 |      | 0 | ARG  
+8    | filename                          | self               |       |    |     |                 |      | 1 | PROP 
+8    | filename                          |                    |       |    |     |                 |      | 0 | VAR  
+9    | mode                              | self               |       |    |     |                 |      | 1 | PROP 
+9    | mode                              |                    |       |    |     |                 |      | 0 | VAR  
+10   | file                              | self               |       |    |     |                 |      | 1 | PROP 
+12   | __enter__                         | FileManager        |       |    |     |                 |      | 1 | FUNC 
+12   | self                              | __enter__          |       |    |     |                 |      | 0 | ARG  
+13   | file                              | self               |       |    |     |                 |      | 1 | PROP 
+13   | open                              |                    |       |    |     |                 |      | 0 | CALL 
+13   | filename                          | self               |       |    |     |                 |      | 0 | PROP 
+13   | self                              |                    |       |    |     |                 |      | 0 | VAR  
+13   | mode                              | self               |       |    |     |                 |      | 0 | PROP 
+13   | self                              |                    |       |    |     |                 |      | 0 | VAR  
+14   | file                              | self               |       |    |     |                 |      | 0 | PROP 
+14   | self                              |                    |       |    |     |                 |      | 0 | VAR  
+16   | __exit__                          | FileManager        |       |    |     |                 |      | 1 | FUNC 
+16   | self                              | __exit__           |       |    |     |                 |      | 0 | ARG  
+16   | exc_type                          | __exit__           |       |    |     |                 |      | 0 | ARG  
+16   | exc_val                           | __exit__           |       |    |     |                 |      | 0 | ARG  
+16   | exc_tb                            | __exit__           |       |    |     |                 |      | 0 | ARG  
+17   | file                              | self               |       |    |     |                 |      | 0 | PROP 
+17   | self                              |                    |       |    |     |                 |      | 0 | VAR  
+18   | close                             | file               |       |    |     |                 |      | 0 | CALL 
+18   | file                              | self               |       |    |     |                 |      | 0 | PROP 
+18   | self                              |                    |       |    |     |                 |      | 0 | VAR  
+22   | use_file_manager                  |                    |       |    |     |                 |      | 1 | FUNC 
+23   | Using                             |                    |       |    |     |                 |      | 0 | STR  
+23   | custom                            |                    |       |    |     |                 |      | 0 | STR  
+23   | context                           |                    |       |    |     |                 |      | 0 | STR  
+23   | manager.                          |                    |       |    |     |                 |      | 0 | STR  
+24   | FileManager                       |                    |       |    |     |                 |      | 0 | CALL 
+24   | test.txt                          |                    |       |    |     |                 |      | 0 | STR  
+25   | write                             | ff                 |       |    |     |                 |      | 0 | CALL 
+25   | ff                                |                    |       |    |     |                 |      | 0 | VAR  
+25   | Hello                             |                    |       |    |     |                 |      | 0 | STR  
+25   | World!                            |                    |       |    |     |                 |      | 0 | STR  
+28   | DatabaseConnection                |                    |       |    |     |                 |      | 1 | CLASS
+29   | Context                           |                    |       |    |     |                 |      | 0 | STR  
+29   | manager                           |                    |       |    |     |                 |      | 0 | STR  
+29   | resource                          |                    |       |    |     |                 |      | 0 | STR  
+29   | cleanup.                          |                    |       |    |     |                 |      | 0 | STR  
+31   | __enter__                         | DatabaseConnection |       |    |     |                 |      | 1 | FUNC 
+31   | self                              | __enter__          |       |    |     |                 |      | 0 | ARG  
+32   | print                             |                    |       |    |     |                 |      | 0 | CALL 
+32   | Connecting                        |                    |       |    |     |                 |      | 0 | STR  
+32   | database                          |                    |       |    |     |                 |      | 0 | STR  
+33   | self                              |                    |       |    |     |                 |      | 0 | VAR  
+35   | __exit__                          | DatabaseConnection |       |    |     |                 |      | 1 | FUNC 
+35   | self                              | __exit__           |       |    |     |                 |      | 0 | ARG  
+35   | exc_type                          | __exit__           |       |    |     |                 |      | 0 | ARG  
+35   | exc_val                           | __exit__           |       |    |     |                 |      | 0 | ARG  
+35   | exc_tb                            | __exit__           |       |    |     |                 |      | 0 | ARG  
+36   | print                             |                    |       |    |     |                 |      | 0 | CALL 
+36   | Closing                           |                    |       |    |     |                 |      | 0 | STR  
+36   | database                          |                    |       |    |     |                 |      | 0 | STR  
+36   | connection                        |                    |       |    |     |                 |      | 0 | STR  
+37   | exc_type                          |                    |       |    |     |                 |      | 0 | VAR  
+38   | print                             |                    |       |    |     |                 |      | 0 | CALL 
+38   | f"Exception occurred: {exc_type}" |                    |       |    |     |                 |      | 0 | STR  
+38   | Exception                         |                    |       |    |     |                 |      | 0 | STR  
+38   | occurred:                         |                    |       |    |     |                 |      | 0 | STR  
+38   | exc_type                          |                    |       |    |     |                 |      | 0 | VAR  
+41   | query                             | DatabaseConnection |       |    |     |                 |      | 1 | FUNC 
+41   | self                              | query              |       |    |     |                 |      | 0 | ARG  
+41   | sql                               | query              |       |    |     |                 |      | 0 | ARG  
+42   | f"Executing: {sql}"               |                    |       |    |     |                 |      | 0 | STR  
+42   | Executing:                        |                    |       |    |     |                 |      | 0 | STR  
+42   | sql                               |                    |       |    |     |                 |      | 0 | VAR  
+45   | use_database                      |                    |       |    |     |                 |      | 1 | FUNC 
+46   | Using                             |                    |       |    |     |                 |      | 0 | STR  
+46   | database                          |                    |       |    |     |                 |      | 0 | STR  
+46   | context                           |                    |       |    |     |                 |      | 0 | STR  
+46   | manager.                          |                    |       |    |     |                 |      | 0 | STR  
+47   | DatabaseConnection                |                    |       |    |     |                 |      | 0 | CALL 
+48   | result                            |                    |       |    |     |                 |      | 1 | VAR  
+48   | query                             | db                 |       |    |     |                 |      | 0 | CALL 
+48   | db                                |                    |       |    |     |                 |      | 0 | VAR  
+48   | SELECT                            |                    |       |    |     |                 |      | 0 | STR  
+48   | users                             |                    |       |    |     |                 |      | 0 | STR  
+49   | result                            |                    |       |    |     |                 |      | 0 | VAR  
+52   | contextlib                        |                    |       |    |     |                 |      | 0 | IMP  
+52   | contextmanager                    |                    |       |    |     |                 |      | 0 | IMP  
+56   | timer_context                     |                    |       |    |     | @contextmanager |      | 1 | FUNC 
+57   | Context                           |                    |       |    |     |                 |      | 0 | STR  
+57   | manager                           |                    |       |    |     |                 |      | 0 | STR  
+57   | using                             |                    |       |    |     |                 |      | 0 | STR  
+57   | decorator.                        |                    |       |    |     |                 |      | 0 | STR  
+58   | time                              |                    |       |    |     |                 |      | 0 | IMP  
+59   | start                             |                    |       |    |     |                 |      | 1 | VAR  
+59   | time                              | time               |       |    |     |                 |      | 0 | CALL 
+59   | time                              |                    |       |    |     |                 |      | 0 | VAR  
+61   | end                               |                    |       |    |     |                 |      | 1 | VAR  
+61   | time                              | time               |       |    |     |                 |      | 0 | CALL 
+61   | time                              |                    |       |    |     |                 |      | 0 | VAR  
+62   | print                             |                    |       |    |     |                 |      | 0 | CALL 
+62   | f"Elapsed: {end - start:.2f}s"    |                    |       |    |     |                 |      | 0 | STR  
+62   | Elapsed:                          |                    |       |    |     |                 |      | 0 | STR  
+62   | end                               |                    |       |    |     |                 |      | 0 | VAR  
+62   | start                             |                    |       |    |     |                 |      | 0 | VAR  
+65   | use_timer                         |                    |       |    |     |                 |      | 1 | FUNC 
+66   | Using                             |                    |       |    |     |                 |      | 0 | STR  
+66   | timer                             |                    |       |    |     |                 |      | 0 | STR  
+66   | context                           |                    |       |    |     |                 |      | 0 | STR  
+66   | manager.                          |                    |       |    |     |                 |      | 0 | STR  
+67   | timer_context                     |                    |       |    |     |                 |      | 0 | CALL 
+68   | sum                               |                    |       |    |     |                 |      | 0 | CALL 
+68   | range                             |                    |       |    |     |                 |      | 0 | CALL 
+71   | MultipleResources                 |                    |       |    |     |                 |      | 1 | CLASS
+72   | Multiple                          |                    |       |    |     |                 |      | 0 | STR  
+72   | context                           |                    |       |    |     |                 |      | 0 | STR  
+72   | managers.                         |                    |       |    |     |                 |      | 0 | STR  
+74   | use_multiple                      | MultipleResources  |       |    |     |                 |      | 1 | FUNC 
+74   | self                              | use_multiple       |       |    |     |                 |      | 0 | ARG  
+75   | open                              |                    |       |    |     |                 |      | 0 | CALL 
+75   | file1.txt                         |                    |       |    |     |                 |      | 0 | STR  
+75   | open                              |                    |       |    |     |                 |      | 0 | CALL 
+75   | file2.txt                         |                    |       |    |     |                 |      | 0 | STR  
+76   | data1                             |                    |       |    |     |                 |      | 1 | VAR  
+76   | read                              | f1                 |       |    |     |                 |      | 0 | CALL 
+76   | f1                                |                    |       |    |     |                 |      | 0 | VAR  
+77   | data2                             |                    |       |    |     |                 |      | 1 | VAR  
+77   | read                              | f2                 |       |    |     |                 |      | 0 | CALL 
+77   | f2                                |                    |       |    |     |                 |      | 0 | VAR  
+78   | data1                             |                    |       |    |     |                 |      | 0 | VAR  
+78   | data2                             |                    |       |    |     |                 |      | 0 | VAR  

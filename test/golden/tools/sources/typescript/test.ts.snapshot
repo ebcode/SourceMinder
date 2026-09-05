@@ -1,0 +1,7 @@
+LINE | SYM          | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/typescript/test.ts:
+1    | test         |     |       |    |     |      |      | 0 | FILE
+1    | testFunction |     |       |    |     |      |      | 1 | FUNC
+2    | userName     |     |       |    |     |      |      | 1 | VAR 
+3    | width        |     |       |    |     |      |      | 1 | VAR 
+4    | myVariable   |     |       |    |     |      |      | 1 | VAR 

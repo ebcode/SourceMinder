@@ -1,0 +1,16 @@
+LINE | SYM              | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/c/test-param-types.c:
+1    | test-param-types |     |       |    |     |      |      | 0 | FILE
+1    | Test             |     |       |    |     |      |      | 0 | COM 
+1    | file             |     |       |    |     |      |      | 0 | COM 
+1    | parameter        |     |       |    |     |      |      | 0 | COM 
+1    | type             |     |       |    |     |      |      | 0 | COM 
+1    | extraction       |     |       |    |     |      |      | 0 | COM 
+3    | FileFilterList   |     |       |    |     |      |      | 1 | TYPE
+4    | int              |     |       |    |     |      |      | 0 | TYPE
+4    | count            |     |       |    |     |      | int  | 1 | PROP
+7    | Test             |     |       |    |     |      |      | 0 | COM 
+7    | various          |     |       |    |     |      |      | 0 | COM 
+7    | parameter        |     |       |    |     |      |      | 0 | COM 
+7    | type             |     |       |    |     |      |      | 0 | COM 
+7    | patterns         |     |       |    |     |      |      | 0 | COM 

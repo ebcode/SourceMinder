@@ -1,0 +1,399 @@
+LINE | SYM                      | PAR            | SCOPE | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/rust/keywords.rs:
+1    | keywords                 |                |       |    |     |      |      | 0 | FILE 
+1    | Every                    |                |       |    |     |      |      | 0 | COM  
+1    | word                     |                |       |    |     |      |      | 0 | COM  
+1    | rust/config/keywords.txt |                |       |    |     |      |      | 0 | COM  
+1    | used                     |                |       |    |     |      |      | 0 | COM  
+1    | naming                   |                |       |    |     |      |      | 0 | COM  
+1    | position.                |                |       |    |     |      |      | 0 | COM  
+3    | Rust                     |                |       |    |     |      |      | 0 | COM  
+3    | reserves                 |                |       |    |     |      |      | 0 | COM  
+3    | contextual               |                |       |    |     |      |      | 0 | COM  
+3    | bare                     |                |       |    |     |      |      | 0 | COM  
+3    | almost                   |                |       |    |     |      |      | 0 | COM  
+4    | impossible.              |                |       |    |     |      |      | 0 | COM  
+4    | Raw                      |                |       |    |     |      |      | 0 | COM  
+4    | identifiers              |                |       |    |     |      |      | 0 | COM  
+4    | r#type                   |                |       |    |     |      |      | 0 | COM  
+4    | cover                    |                |       |    |     |      |      | 0 | COM  
+4    | capitalized              |                |       |    |     |      |      | 0 | COM  
+5    | upper-case               |                |       |    |     |      |      | 0 | COM  
+5    | variants                 |                |       |    |     |      |      | 0 | COM  
+5    | cover                    |                |       |    |     |      |      | 0 | COM  
+5    | rest                     |                |       |    |     |      |      | 0 | COM  
+5    | --                       |                |       |    |     |      |      | 0 | COM  
+5    | ordinary                 |                |       |    |     |      |      | 0 | COM  
+5    | Rust                     |                |       |    |     |      |      | 0 | COM  
+5    | identifiers              |                |       |    |     |      |      | 0 | COM  
+6    | symbol                   |                |       |    |     |      |      | 0 | COM  
+6    | filter                   |                |       |    |     |      |      | 0 | COM  
+6    | folds                    |                |       |    |     |      |      | 0 | COM  
+6    | onto                     |                |       |    |     |      |      | 0 | COM  
+6    | keyword                  |                |       |    |     |      |      | 0 | COM  
+6    | lowercases               |                |       |    |     |      |      | 0 | COM  
+6    | comparing.               |                |       |    |     |      |      | 0 | COM  
+8    | collapse                 |                |       |    |     |      |      | 0 | COM  
+8    | variant                  |                |       |    |     |      |      | 0 | COM  
+8    | case-variant             |                |       |    |     |      |      | 0 | COM  
+9    | sections                 |                |       |    |     |      |      | 0 | COM  
+9    | carry                    |                |       |    |     |      |      | 0 | COM  
+9    | one                      |                |       |    |     |      |      | 0 | COM  
+9    | each                     |                |       |    |     |      |      | 0 | COM  
+9    | pair.                    |                |       |    |     |      |      | 0 | COM  
+11   | Note:                    |                |       |    |     |      |      | 0 | COM  
+11   | list                     |                |       |    |     |      |      | 0 | COM  
+11   | entry                    |                |       |    |     |      |      | 0 | COM  
+11   | carries                  |                |       |    |     |      |      | 0 | COM  
+11   | capital                  |                |       |    |     |      |      | 0 | COM  
+11   | compared                 |                |       |    |     |      |      | 0 | COM  
+11   | strcmp                   |                |       |    |     |      |      | 0 | COM  
+12   | already                  |                |       |    |     |      |      | 0 | COM  
+12   | lowercased               |                |       |    |     |      |      | 0 | COM  
+12   | symbol                   |                |       |    |     |      |      | 0 | COM  
+12   | never                    |                |       |    |     |      |      | 0 | COM  
+12   | anything.                |                |       |    |     |      |      | 0 | COM  
+14   | identifiers              |                |       |    |     |      |      | 0 | COM  
+14   | two                      |                |       |    |     |      |      | 0 | COM  
+14   | characters               |                |       |    |     |      |      | 0 | COM  
+14   | longer                   |                |       |    |     |      |      | 0 | COM  
+14   | nothing                  |                |       |    |     |      |      | 0 | COM  
+14   | dropped                  |                |       |    |     |      |      | 0 | COM  
+15   | minimum                  |                |       |    |     |      |      | 0 | COM  
+15   | length                   |                |       |    |     |      |      | 0 | COM  
+15   | rather                   |                |       |    |     |      |      | 0 | COM  
+15   | keyword-ness.            |                |       |    |     |      |      | 0 | COM  
+17   | Case                     |                |       |    |     |      |      | 0 | COM  
+17   | variants                 |                |       |    |     |      |      | 0 | COM  
+17   | deliberately             |                |       |    |     |      |      | 0 | COM  
+17   | snake_case:              |                |       |    |     |      |      | 0 | COM  
+17   | point                    |                |       |    |     |      |      | 0 | COM  
+17   | collide                  |                |       |    |     |      |      | 0 | COM  
+18   | keyword                  |                |       |    |     |      |      | 0 | COM  
+18   | list                     |                |       |    |     |      |      | 0 | COM  
+18   | lowercasing.             |                |       |    |     |      |      | 0 | COM  
+21   | Upper-case               |                |       |    |     |      |      | 0 | COM  
+21   | variants                 |                |       |    |     |      |      | 0 | COM  
+21   | consts.                  |                |       |    |     |      |      | 0 | COM  
+22   | AS                       |                | pub   |    |     |      | i32  | 1 | VAR  
+23   | ASYNC                    |                | pub   |    |     |      | i32  | 1 | VAR  
+24   | AWAIT                    |                | pub   |    |     |      | i32  | 1 | VAR  
+25   | BREAK                    |                | pub   |    |     |      | i32  | 1 | VAR  
+26   | CONST                    |                | pub   |    |     |      | i32  | 1 | VAR  
+27   | CONTINUE                 |                | pub   |    |     |      | i32  | 1 | VAR  
+28   | CRATE                    |                | pub   |    |     |      | i32  | 1 | VAR  
+29   | DYN                      |                | pub   |    |     |      | i32  | 1 | VAR  
+30   | ELSE                     |                | pub   |    |     |      | i32  | 1 | VAR  
+31   | ENUM                     |                | pub   |    |     |      | i32  | 1 | VAR  
+32   | EXTERN                   |                | pub   |    |     |      | i32  | 1 | VAR  
+33   | FALSE                    |                | pub   |    |     |      | i32  | 1 | VAR  
+34   | FN                       |                | pub   |    |     |      | i32  | 1 | VAR  
+35   | FOR                      |                | pub   |    |     |      | i32  | 1 | VAR  
+36   | IF                       |                | pub   |    |     |      | i32  | 1 | VAR  
+37   | IMPL                     |                | pub   |    |     |      | i32  | 1 | VAR  
+38   | IN                       |                | pub   |    |     |      | i32  | 1 | VAR  
+39   | LET                      |                | pub   |    |     |      | i32  | 1 | VAR  
+40   | LOOP                     |                | pub   |    |     |      | i32  | 1 | VAR  
+41   | MATCH                    |                | pub   |    |     |      | i32  | 1 | VAR  
+42   | MOD                      |                | pub   |    |     |      | i32  | 1 | VAR  
+43   | MOVE                     |                | pub   |    |     |      | i32  | 1 | VAR  
+44   | MUT                      |                | pub   |    |     |      | i32  | 1 | VAR  
+45   | PUB                      |                | pub   |    |     |      | i32  | 1 | VAR  
+46   | REF                      |                | pub   |    |     |      | i32  | 1 | VAR  
+47   | RETURN                   |                | pub   |    |     |      | i32  | 1 | VAR  
+48   | SELF                     |                | pub   |    |     |      | i32  | 1 | VAR  
+49   | STATIC                   |                | pub   |    |     |      | i32  | 1 | VAR  
+50   | STRUCT                   |                | pub   |    |     |      | i32  | 1 | VAR  
+51   | SUPER                    |                | pub   |    |     |      | i32  | 1 | VAR  
+52   | TRAIT                    |                | pub   |    |     |      | i32  | 1 | VAR  
+53   | TRUE                     |                | pub   |    |     |      | i32  | 1 | VAR  
+54   | TYPE                     |                | pub   |    |     |      | i32  | 1 | VAR  
+55   | UNSAFE                   |                | pub   |    |     |      | i32  | 1 | VAR  
+56   | USE                      |                | pub   |    |     |      | i32  | 1 | VAR  
+57   | WHERE                    |                | pub   |    |     |      | i32  | 1 | VAR  
+58   | WHILE                    |                | pub   |    |     |      | i32  | 1 | VAR  
+59   | ABSTRACT                 |                | pub   |    |     |      | i32  | 1 | VAR  
+60   | BECOME                   |                | pub   |    |     |      | i32  | 1 | VAR  
+61   | BOX                      |                | pub   |    |     |      | i32  | 1 | VAR  
+62   | DO                       |                | pub   |    |     |      | i32  | 1 | VAR  
+63   | FINAL                    |                | pub   |    |     |      | i32  | 1 | VAR  
+64   | MACRO                    |                | pub   |    |     |      | i32  | 1 | VAR  
+65   | OVERRIDE                 |                | pub   |    |     |      | i32  | 1 | VAR  
+66   | PRIV                     |                | pub   |    |     |      | i32  | 1 | VAR  
+67   | TYPEOF                   |                | pub   |    |     |      | i32  | 1 | VAR  
+68   | UNSIZED                  |                | pub   |    |     |      | i32  | 1 | VAR  
+69   | VIRTUAL                  |                | pub   |    |     |      | i32  | 1 | VAR  
+70   | YIELD                    |                | pub   |    |     |      | i32  | 1 | VAR  
+71   | TRY                      |                | pub   |    |     |      | i32  | 1 | VAR  
+72   | UNION                    |                | pub   |    |     |      | i32  | 1 | VAR  
+74   | Capitalized              |                |       |    |     |      |      | 0 | COM  
+74   | variants                 |                |       |    |     |      |      | 0 | COM  
+74   | names.                   |                |       |    |     |      |      | 0 | COM  
+75   | AsHolder                 |                | pub   |    |     |      |      | 1 | CLASS
+75   | mem                      | AsHolder       | pub   |    |     |      | i32  | 1 | PROP 
+76   | AsyncHolder              |                | pub   |    |     |      |      | 1 | CLASS
+76   | mem                      | AsyncHolder    | pub   |    |     |      | i32  | 1 | PROP 
+77   | AwaitHolder              |                | pub   |    |     |      |      | 1 | CLASS
+77   | mem                      | AwaitHolder    | pub   |    |     |      | i32  | 1 | PROP 
+78   | BreakHolder              |                | pub   |    |     |      |      | 1 | CLASS
+78   | mem                      | BreakHolder    | pub   |    |     |      | i32  | 1 | PROP 
+79   | ConstHolder              |                | pub   |    |     |      |      | 1 | CLASS
+79   | mem                      | ConstHolder    | pub   |    |     |      | i32  | 1 | PROP 
+80   | ContinueHolder           |                | pub   |    |     |      |      | 1 | CLASS
+80   | mem                      | ContinueHolder | pub   |    |     |      | i32  | 1 | PROP 
+81   | CrateHolder              |                | pub   |    |     |      |      | 1 | CLASS
+81   | mem                      | CrateHolder    | pub   |    |     |      | i32  | 1 | PROP 
+82   | DynHolder                |                | pub   |    |     |      |      | 1 | CLASS
+82   | mem                      | DynHolder      | pub   |    |     |      | i32  | 1 | PROP 
+83   | ElseHolder               |                | pub   |    |     |      |      | 1 | CLASS
+83   | mem                      | ElseHolder     | pub   |    |     |      | i32  | 1 | PROP 
+84   | EnumHolder               |                | pub   |    |     |      |      | 1 | CLASS
+84   | mem                      | EnumHolder     | pub   |    |     |      | i32  | 1 | PROP 
+85   | ExternHolder             |                | pub   |    |     |      |      | 1 | CLASS
+85   | mem                      | ExternHolder   | pub   |    |     |      | i32  | 1 | PROP 
+86   | FalseHolder              |                | pub   |    |     |      |      | 1 | CLASS
+86   | mem                      | FalseHolder    | pub   |    |     |      | i32  | 1 | PROP 
+87   | FnHolder                 |                | pub   |    |     |      |      | 1 | CLASS
+87   | mem                      | FnHolder       | pub   |    |     |      | i32  | 1 | PROP 
+88   | ForHolder                |                | pub   |    |     |      |      | 1 | CLASS
+88   | mem                      | ForHolder      | pub   |    |     |      | i32  | 1 | PROP 
+89   | IfHolder                 |                | pub   |    |     |      |      | 1 | CLASS
+89   | mem                      | IfHolder       | pub   |    |     |      | i32  | 1 | PROP 
+90   | ImplHolder               |                | pub   |    |     |      |      | 1 | CLASS
+90   | mem                      | ImplHolder     | pub   |    |     |      | i32  | 1 | PROP 
+91   | InHolder                 |                | pub   |    |     |      |      | 1 | CLASS
+91   | mem                      | InHolder       | pub   |    |     |      | i32  | 1 | PROP 
+92   | LetHolder                |                | pub   |    |     |      |      | 1 | CLASS
+92   | mem                      | LetHolder      | pub   |    |     |      | i32  | 1 | PROP 
+93   | LoopHolder               |                | pub   |    |     |      |      | 1 | CLASS
+93   | mem                      | LoopHolder     | pub   |    |     |      | i32  | 1 | PROP 
+94   | MatchHolder              |                | pub   |    |     |      |      | 1 | CLASS
+94   | mem                      | MatchHolder    | pub   |    |     |      | i32  | 1 | PROP 
+95   | ModHolder                |                | pub   |    |     |      |      | 1 | CLASS
+95   | mem                      | ModHolder      | pub   |    |     |      | i32  | 1 | PROP 
+96   | MoveHolder               |                | pub   |    |     |      |      | 1 | CLASS
+96   | mem                      | MoveHolder     | pub   |    |     |      | i32  | 1 | PROP 
+97   | MutHolder                |                | pub   |    |     |      |      | 1 | CLASS
+97   | mem                      | MutHolder      | pub   |    |     |      | i32  | 1 | PROP 
+98   | PubHolder                |                | pub   |    |     |      |      | 1 | CLASS
+98   | mem                      | PubHolder      | pub   |    |     |      | i32  | 1 | PROP 
+99   | RefHolder                |                | pub   |    |     |      |      | 1 | CLASS
+99   | mem                      | RefHolder      | pub   |    |     |      | i32  | 1 | PROP 
+100  | ReturnHolder             |                | pub   |    |     |      |      | 1 | CLASS
+100  | mem                      | ReturnHolder   | pub   |    |     |      | i32  | 1 | PROP 
+101  | SelfHolder               |                | pub   |    |     |      |      | 1 | CLASS
+101  | mem                      | SelfHolder     | pub   |    |     |      | i32  | 1 | PROP 
+102  | StaticHolder             |                | pub   |    |     |      |      | 1 | CLASS
+102  | mem                      | StaticHolder   | pub   |    |     |      | i32  | 1 | PROP 
+103  | StructHolder             |                | pub   |    |     |      |      | 1 | CLASS
+103  | mem                      | StructHolder   | pub   |    |     |      | i32  | 1 | PROP 
+104  | SuperHolder              |                | pub   |    |     |      |      | 1 | CLASS
+104  | mem                      | SuperHolder    | pub   |    |     |      | i32  | 1 | PROP 
+105  | TraitHolder              |                | pub   |    |     |      |      | 1 | CLASS
+105  | mem                      | TraitHolder    | pub   |    |     |      | i32  | 1 | PROP 
+106  | TrueHolder               |                | pub   |    |     |      |      | 1 | CLASS
+106  | mem                      | TrueHolder     | pub   |    |     |      | i32  | 1 | PROP 
+107  | TypeHolder               |                | pub   |    |     |      |      | 1 | CLASS
+107  | mem                      | TypeHolder     | pub   |    |     |      | i32  | 1 | PROP 
+108  | UnsafeHolder             |                | pub   |    |     |      |      | 1 | CLASS
+108  | mem                      | UnsafeHolder   | pub   |    |     |      | i32  | 1 | PROP 
+109  | UseHolder                |                | pub   |    |     |      |      | 1 | CLASS
+109  | mem                      | UseHolder      | pub   |    |     |      | i32  | 1 | PROP 
+110  | WhereHolder              |                | pub   |    |     |      |      | 1 | CLASS
+110  | mem                      | WhereHolder    | pub   |    |     |      | i32  | 1 | PROP 
+111  | WhileHolder              |                | pub   |    |     |      |      | 1 | CLASS
+111  | mem                      | WhileHolder    | pub   |    |     |      | i32  | 1 | PROP 
+112  | AbstractHolder           |                | pub   |    |     |      |      | 1 | CLASS
+112  | mem                      | AbstractHolder | pub   |    |     |      | i32  | 1 | PROP 
+113  | BecomeHolder             |                | pub   |    |     |      |      | 1 | CLASS
+113  | mem                      | BecomeHolder   | pub   |    |     |      | i32  | 1 | PROP 
+114  | BoxHolder                |                | pub   |    |     |      |      | 1 | CLASS
+114  | mem                      | BoxHolder      | pub   |    |     |      | i32  | 1 | PROP 
+115  | DoHolder                 |                | pub   |    |     |      |      | 1 | CLASS
+115  | mem                      | DoHolder       | pub   |    |     |      | i32  | 1 | PROP 
+116  | FinalHolder              |                | pub   |    |     |      |      | 1 | CLASS
+116  | mem                      | FinalHolder    | pub   |    |     |      | i32  | 1 | PROP 
+117  | MacroHolder              |                | pub   |    |     |      |      | 1 | CLASS
+117  | mem                      | MacroHolder    | pub   |    |     |      | i32  | 1 | PROP 
+118  | OverrideHolder           |                | pub   |    |     |      |      | 1 | CLASS
+118  | mem                      | OverrideHolder | pub   |    |     |      | i32  | 1 | PROP 
+119  | PrivHolder               |                | pub   |    |     |      |      | 1 | CLASS
+119  | mem                      | PrivHolder     | pub   |    |     |      | i32  | 1 | PROP 
+120  | TypeofHolder             |                | pub   |    |     |      |      | 1 | CLASS
+120  | mem                      | TypeofHolder   | pub   |    |     |      | i32  | 1 | PROP 
+121  | UnsizedHolder            |                | pub   |    |     |      |      | 1 | CLASS
+121  | mem                      | UnsizedHolder  | pub   |    |     |      | i32  | 1 | PROP 
+122  | VirtualHolder            |                | pub   |    |     |      |      | 1 | CLASS
+122  | mem                      | VirtualHolder  | pub   |    |     |      | i32  | 1 | PROP 
+123  | YieldHolder              |                | pub   |    |     |      |      | 1 | CLASS
+123  | mem                      | YieldHolder    | pub   |    |     |      | i32  | 1 | PROP 
+124  | TryHolder                |                | pub   |    |     |      |      | 1 | CLASS
+124  | mem                      | TryHolder      | pub   |    |     |      | i32  | 1 | PROP 
+125  | UnionHolder              |                | pub   |    |     |      |      | 1 | CLASS
+125  | mem                      | UnionHolder    | pub   |    |     |      | i32  | 1 | PROP 
+127  | Capitalized              |                |       |    |     |      |      | 0 | COM  
+127  | variants                 |                |       |    |     |      |      | 0 | COM  
+127  | fields.                  |                |       |    |     |      |      | 0 | COM  
+128  | KeywordHolder            |                | pub   |    |     |      |      | 1 | CLASS
+129  | As                       | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+130  | Async                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+131  | Await                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+132  | Break                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+133  | Const                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+134  | Continue                 | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+135  | Crate                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+136  | Dyn                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+137  | Else                     | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+138  | Enum                     | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+139  | Extern                   | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+140  | False                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+141  | Fn                       | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+142  | For                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+143  | If                       | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+144  | Impl                     | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+145  | In                       | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+146  | Let                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+147  | Loop                     | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+148  | Match                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+149  | Mod                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+150  | Move                     | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+151  | Mut                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+152  | Pub                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+153  | Ref                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+154  | Return                   | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+155  | Static                   | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+156  | Struct                   | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+157  | Super                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+158  | Trait                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+159  | True                     | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+160  | Type                     | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+161  | Unsafe                   | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+162  | Use                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+163  | Where                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+164  | While                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+165  | Abstract                 | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+166  | Become                   | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+167  | Box                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+168  | Do                       | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+169  | Final                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+170  | Macro                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+171  | Override                 | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+172  | Priv                     | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+173  | Typeof                   | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+174  | Unsized                  | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+175  | Virtual                  | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+176  | Yield                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+177  | Try                      | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+178  | Union                    | KeywordHolder  | pub   |    |     |      | i32  | 1 | PROP 
+181  | Capitalized              |                |       |    |     |      |      | 0 | COM  
+181  | variants                 |                |       |    |     |      |      | 0 | COM  
+181  | function                 |                |       |    |     |      |      | 0 | COM  
+181  | names.                   |                |       |    |     |      |      | 0 | COM  
+182  | AsFn                     |                | pub   |    |     |      | i32  | 1 | FUNC 
+183  | AsyncFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+184  | AwaitFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+185  | BreakFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+186  | ConstFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+187  | ContinueFn               |                | pub   |    |     |      | i32  | 1 | FUNC 
+188  | CrateFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+189  | DynFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+190  | ElseFn                   |                | pub   |    |     |      | i32  | 1 | FUNC 
+191  | EnumFn                   |                | pub   |    |     |      | i32  | 1 | FUNC 
+192  | ExternFn                 |                | pub   |    |     |      | i32  | 1 | FUNC 
+193  | FalseFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+194  | FnFn                     |                | pub   |    |     |      | i32  | 1 | FUNC 
+195  | ForFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+196  | IfFn                     |                | pub   |    |     |      | i32  | 1 | FUNC 
+197  | ImplFn                   |                | pub   |    |     |      | i32  | 1 | FUNC 
+198  | InFn                     |                | pub   |    |     |      | i32  | 1 | FUNC 
+199  | LetFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+200  | LoopFn                   |                | pub   |    |     |      | i32  | 1 | FUNC 
+201  | MatchFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+202  | ModFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+203  | MoveFn                   |                | pub   |    |     |      | i32  | 1 | FUNC 
+204  | MutFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+205  | PubFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+206  | RefFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+207  | ReturnFn                 |                | pub   |    |     |      | i32  | 1 | FUNC 
+208  | StaticFn                 |                | pub   |    |     |      | i32  | 1 | FUNC 
+209  | StructFn                 |                | pub   |    |     |      | i32  | 1 | FUNC 
+210  | SuperFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+211  | TraitFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+212  | TrueFn                   |                | pub   |    |     |      | i32  | 1 | FUNC 
+213  | TypeFn                   |                | pub   |    |     |      | i32  | 1 | FUNC 
+214  | UnsafeFn                 |                | pub   |    |     |      | i32  | 1 | FUNC 
+215  | UseFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+216  | WhereFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+217  | WhileFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+218  | AbstractFn               |                | pub   |    |     |      | i32  | 1 | FUNC 
+219  | BecomeFn                 |                | pub   |    |     |      | i32  | 1 | FUNC 
+220  | BoxFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+221  | DoFn                     |                | pub   |    |     |      | i32  | 1 | FUNC 
+222  | FinalFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+223  | MacroFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+224  | OverrideFn               |                | pub   |    |     |      | i32  | 1 | FUNC 
+225  | PrivFn                   |                | pub   |    |     |      | i32  | 1 | FUNC 
+226  | TypeofFn                 |                | pub   |    |     |      | i32  | 1 | FUNC 
+227  | UnsizedFn                |                | pub   |    |     |      | i32  | 1 | FUNC 
+228  | VirtualFn                |                | pub   |    |     |      | i32  | 1 | FUNC 
+229  | YieldFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+230  | TryFn                    |                | pub   |    |     |      | i32  | 1 | FUNC 
+231  | UnionFn                  |                | pub   |    |     |      | i32  | 1 | FUNC 
+233  | Raw                      |                |       |    |     |      |      | 0 | COM  
+233  | identifiers              |                |       |    |     |      |      | 0 | COM  
+233  | bindings:                |                |       |    |     |      |      | 0 | COM  
+233  | keyword                  |                |       |    |     |      |      | 0 | COM  
+233  | escaped.                 |                |       |    |     |      |      | 0 | COM  
+234  | raw_bindings             |                | pub   |    |     |      | i32  | 1 | FUNC 
+235  | r#as                     |                |       |    |     |      |      | 1 | VAR  
+236  | r#async                  |                |       |    |     |      |      | 1 | VAR  
+237  | r#await                  |                |       |    |     |      |      | 1 | VAR  
+238  | r#break                  |                |       |    |     |      |      | 1 | VAR  
+239  | r#const                  |                |       |    |     |      |      | 1 | VAR  
+240  | r#continue               |                |       |    |     |      |      | 1 | VAR  
+241  | r#dyn                    |                |       |    |     |      |      | 1 | VAR  
+242  | r#else                   |                |       |    |     |      |      | 1 | VAR  
+243  | r#enum                   |                |       |    |     |      |      | 1 | VAR  
+244  | r#extern                 |                |       |    |     |      |      | 1 | VAR  
+245  | r#false                  |                |       |    |     |      |      | 1 | VAR  
+246  | r#fn                     |                |       |    |     |      |      | 1 | VAR  
+247  | r#for                    |                |       |    |     |      |      | 1 | VAR  
+248  | r#if                     |                |       |    |     |      |      | 1 | VAR  
+249  | r#impl                   |                |       |    |     |      |      | 1 | VAR  
+250  | r#in                     |                |       |    |     |      |      | 1 | VAR  
+251  | r#let                    |                |       |    |     |      |      | 1 | VAR  
+252  | r#loop                   |                |       |    |     |      |      | 1 | VAR  
+253  | r#match                  |                |       |    |     |      |      | 1 | VAR  
+254  | r#mod                    |                |       |    |     |      |      | 1 | VAR  
+255  | r#move                   |                |       |    |     |      |      | 1 | VAR  
+256  | r#mut                    |                |       |    |     |      |      | 1 | VAR  
+257  | r#pub                    |                |       |    |     |      |      | 1 | VAR  
+258  | r#ref                    |                |       |    |     |      |      | 1 | VAR  
+259  | r#return                 |                |       |    |     |      |      | 1 | VAR  
+260  | r#static                 |                |       |    |     |      |      | 1 | VAR  
+261  | r#struct                 |                |       |    |     |      |      | 1 | VAR  
+262  | r#trait                  |                |       |    |     |      |      | 1 | VAR  
+263  | r#true                   |                |       |    |     |      |      | 1 | VAR  
+264  | r#type                   |                |       |    |     |      |      | 1 | VAR  
+265  | r#unsafe                 |                |       |    |     |      |      | 1 | VAR  
+266  | r#use                    |                |       |    |     |      |      | 1 | VAR  
+267  | r#where                  |                |       |    |     |      |      | 1 | VAR  
+268  | r#while                  |                |       |    |     |      |      | 1 | VAR  
+269  | r#abstract               |                |       |    |     |      |      | 1 | VAR  
+270  | r#become                 |                |       |    |     |      |      | 1 | VAR  
+271  | r#box                    |                |       |    |     |      |      | 1 | VAR  
+272  | r#do                     |                |       |    |     |      |      | 1 | VAR  
+273  | r#final                  |                |       |    |     |      |      | 1 | VAR  
+274  | r#macro                  |                |       |    |     |      |      | 1 | VAR  
+275  | r#override               |                |       |    |     |      |      | 1 | VAR  
+276  | r#priv                   |                |       |    |     |      |      | 1 | VAR  
+277  | r#typeof                 |                |       |    |     |      |      | 1 | VAR  
+278  | r#unsized                |                |       |    |     |      |      | 1 | VAR  
+279  | r#virtual                |                |       |    |     |      |      | 1 | VAR  
+280  | r#yield                  |                |       |    |     |      |      | 1 | VAR  
+281  | r#try                    |                |       |    |     |      |      | 1 | VAR  
+282  | r#union                  |                |       |    |     |      |      | 1 | VAR  
+286  | contextual               |                |       |    |     |      |      | 0 | COM  
+286  | legal                    |                |       |    |     |      |      | 0 | COM  
+286  | bare.                    |                |       |    |     |      |      | 0 | COM  
+287  | union                    |                | pub   |    |     |      | i32  | 1 | FUNC 

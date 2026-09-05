@@ -1,0 +1,79 @@
+LINE | SYM               | PAR | SCOPE   | NS   | MOD | CLUE     | TYPE           | D | CTX 
+./tools/sources/go/maps-slices.go:
+1    | maps-slices       |     |         |      |     |          |                | 0 | FILE
+1    | main              |     |         |      |     |          |                | 0 | NS  
+3    | sliceOperations   |     | private | main |     |          |                | 1 | FUNC
+4    | Slice             |     |         |      |     |          |                | 0 | COM 
+4    | declaration       |     |         |      |     |          |                | 0 | COM 
+5    | numbers           |     | private | main | var |          | []int          | 1 | VAR 
+7    | Slice             |     |         |      |     |          |                | 0 | COM 
+7    | literal           |     |         |      |     |          |                | 0 | COM 
+8    | names             |     | private | main |     |          | []string       | 1 | VAR 
+8    | Alice             |     |         |      |     |          |                | 0 | STR 
+8    | Bob               |     |         |      |     |          |                | 0 | STR 
+8    | Charlie           |     |         |      |     |          |                | 0 | STR 
+10   | Make              |     |         |      |     |          |                | 0 | COM 
+10   | slice             |     |         |      |     |          |                | 0 | COM 
+10   | length            |     |         |      |     |          |                | 0 | COM 
+10   | capacity          |     |         |      |     |          |                | 0 | COM 
+11   | data              |     | private | main |     |          |                | 1 | VAR 
+11   | make              |     |         |      |     | built-in |                | 0 | CALL
+13   | Append            |     |         |      |     |          |                | 0 | COM 
+13   | slice             |     |         |      |     |          |                | 0 | COM 
+14   | numbers           |     |         | main |     |          |                | 0 | VAR 
+14   | append            |     |         |      |     | built-in |                | 0 | CALL
+14   | numbers           |     |         | main |     | append   |                | 0 | ARG 
+16   | Slice             |     |         |      |     |          |                | 0 | COM 
+16   | slice             |     |         |      |     |          |                | 0 | COM 
+17   | subset            |     | private | main |     |          |                | 1 | VAR 
+17   | names             |     |         | main |     |          |                | 0 | VAR 
+19   | over              |     |         |      |     |          |                | 0 | COM 
+19   | slice             |     |         |      |     |          |                | 0 | COM 
+20   | name              |     | private | main |     | range    |                | 0 | VAR 
+22   | name              |     |         | main |     |          |                | 0 | VAR 
+25   | Multi-dimensional |     |         |      |     |          |                | 0 | COM 
+25   | slice             |     |         |      |     |          |                | 0 | COM 
+26   | matrix            |     | private | main |     |          | [][]int        | 1 | VAR 
+31   | data              |     |         | main |     |          |                | 0 | VAR 
+31   | subset            |     |         | main |     |          |                | 0 | VAR 
+31   | matrix            |     |         | main |     |          |                | 0 | VAR 
+34   | mapOperations     |     | private | main |     |          |                | 1 | FUNC
+35   | declaration       |     |         |      |     |          |                | 0 | COM 
+36   | users             |     | private | main | var |          | map[string]int | 1 | VAR 
+38   | literal           |     |         |      |     |          |                | 0 | COM 
+39   | ages              |     | private | main |     |          | map[string]int | 1 | VAR 
+40   | Alice             |     |         |      |     |          |                | 0 | STR 
+41   | Bob               |     |         |      |     |          |                | 0 | STR 
+44   | Make              |     |         |      |     |          |                | 0 | COM 
+45   | scores            |     | private | main |     |          |                | 1 | VAR 
+45   | make              |     |         |      |     | built-in |                | 0 | CALL
+47   | Add/update        |     |         |      |     |          |                | 0 | COM 
+47   | entry             |     |         |      |     |          |                | 0 | COM 
+48   | scores            |     |         | main |     |          |                | 0 | VAR 
+48   | test              |     |         |      |     |          |                | 0 | STR 
+50   | Get               |     |         |      |     |          |                | 0 | COM 
+50   | value             |     |         |      |     |          |                | 0 | COM 
+51   | age               |     | private | main |     |          |                | 1 | VAR 
+51   | ages              |     |         | main |     |          |                | 0 | VAR 
+51   | Alice             |     |         |      |     |          |                | 0 | STR 
+53   | Get               |     |         |      |     |          |                | 0 | COM 
+53   | ok                |     |         |      |     |          |                | 0 | COM 
+53   | check             |     |         |      |     |          |                | 0 | COM 
+54   | value             |     | private | main |     |          |                | 1 | VAR 
+54   | exists            |     | private | main |     |          |                | 1 | VAR 
+54   | ages              |     |         | main |     |          |                | 0 | VAR 
+54   | Charlie           |     |         |      |     |          |                | 0 | STR 
+56   | Delete            |     |         |      |     |          |                | 0 | COM 
+56   | entry             |     |         |      |     |          |                | 0 | COM 
+57   | delete            |     |         |      |     | built-in |                | 0 | CALL
+57   | ages              |     |         | main |     | delete   |                | 0 | ARG 
+57   | Bob               |     |         |      |     |          |                | 0 | STR 
+59   | over              |     |         |      |     |          |                | 0 | COM 
+60   | key               |     | private | main |     | range    |                | 0 | VAR 
+60   | val               |     | private | main |     | range    |                | 0 | VAR 
+61   | key               |     |         | main |     |          |                | 0 | VAR 
+62   | val               |     |         | main |     |          |                | 0 | VAR 
+65   | users             |     |         | main |     |          |                | 0 | VAR 
+65   | age               |     |         | main |     |          |                | 0 | VAR 
+65   | value             |     |         | main |     |          |                | 0 | VAR 
+66   | exists            |     |         | main |     |          |                | 0 | VAR 

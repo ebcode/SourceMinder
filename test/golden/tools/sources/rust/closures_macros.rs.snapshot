@@ -1,0 +1,50 @@
+LINE | SYM             | PAR    | SCOPE | NS     | MOD | CLUE        | TYPE         | D | CTX  
+./tools/sources/rust/closures_macros.rs:
+1    | closures_macros |        |       |        |     |             |              | 0 | FILE 
+1    | definition      |        |       |        |     |             |              | 0 | COM  
+2    | debug_print     |        |       |        |     |             | macro_rules! | 1 | MACRO
+11   | closures_demo   |        | pub   |        |     |             |              | 1 | FUNC 
+12   | Simple          |        |       |        |     |             |              | 0 | COM  
+12   | closure         |        |       |        |     |             |              | 0 | COM  
+13   | add_one         |        |       |        |     |             |              | 1 | VAR  
+13   | <closure>       |        |       |        |     |             |              | 1 | LAM  
+14   | result          |        |       |        |     |             |              | 1 | VAR  
+14   | add_one         |        |       |        |     |             |              | 0 | CALL 
+16   | Closure         |        |       |        |     |             |              | 0 | COM  
+16   | multiple        |        |       |        |     |             |              | 0 | COM  
+16   | args            |        |       |        |     |             |              | 0 | COM  
+16   | annotations     |        |       |        |     |             |              | 0 | COM  
+17   | multiply        |        |       |        |     |             |              | 1 | VAR  
+17   | <closure>       |        |       |        |     |             |              | 1 | LAM  
+18   | product         |        |       |        |     |             |              | 1 | VAR  
+18   | multiply        |        |       |        |     |             |              | 0 | CALL 
+20   | closure         |        |       |        |     |             |              | 0 | COM  
+21   | captured        |        |       |        |     |             |              | 1 | VAR  
+21   | from            |        |       | String |     |             |              | 0 | CALL 
+21   | hello           |        |       |        |     |             |              | 0 | STR  
+22   | printer         |        |       |        |     |             |              | 1 | VAR  
+22   | <closure>       |        |       |        |     |             |              | 1 | LAM  
+22   | println         |        |       |        |     |             | macro        | 0 | CALL 
+22   | captured        |        |       |        |     | println     |              | 0 | ARG  
+23   | printer         |        |       |        |     |             |              | 0 | CALL 
+25   | Closure         |        |       |        |     |             |              | 0 | COM  
+25   | passed          |        |       |        |     |             |              | 0 | COM  
+25   | higher-order    |        |       |        |     |             |              | 0 | COM  
+25   | function        |        |       |        |     |             |              | 0 | COM  
+26   | nums            |        |       |        |     |             |              | 1 | VAR  
+26   | vec             |        |       |        |     |             | macro        | 0 | CALL 
+27   | doubled         |        |       |        |     |             | Vec<i32>     | 1 | VAR  
+27   | collect         | map    |       |        |     |             |              | 0 | CALL 
+27   | map             | iter   |       |        |     |             |              | 0 | CALL 
+27   | iter            | nums   |       |        |     |             |              | 0 | CALL 
+27   | <closure>       |        |       |        |     |             |              | 1 | LAM  
+28   | total           |        |       |        |     |             | i32          | 1 | VAR  
+28   | sum             | filter |       |        |     |             |              | 0 | CALL 
+28   | filter          | iter   |       |        |     |             |              | 0 | CALL 
+28   | iter            | nums   |       |        |     |             |              | 0 | CALL 
+28   | <closure>       |        |       |        |     |             |              | 1 | LAM  
+30   | debug_print     |        |       |        |     |             | macro        | 0 | CALL 
+30   | result          |        |       |        |     | debug_print |              | 0 | ARG  
+31   | debug_print     |        |       |        |     |             | macro        | 0 | CALL 
+31   | product         |        |       |        |     |             |              | 0 | STR  
+31   | product         |        |       |        |     | debug_print |              | 0 | ARG  

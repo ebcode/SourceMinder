@@ -1,0 +1,19 @@
+LINE | SYM                 | PAR | SCOPE | NS | MOD | CLUE    | TYPE  | D | CTX 
+./tools/sources/rust/labels_loops.rs:
+1    | labels_loops        |     |       |    |     |         |       | 0 | FILE
+1    | labels              |     |       |    |     |         |       | 0 | COM 
+1    | break-with-value    |     |       |    |     |         |       | 0 | COM 
+1    | complex             |     |       |    |     |         |       | 0 | COM 
+1    | expressions         |     |       |    |     |         |       | 0 | COM 
+3    | nested_break        |     | pub   |    |     |         | i32   | 1 | FUNC
+4    | result              |     |       |    |     |         |       | 1 | VAR 
+5    | count               |     |       |    | mut |         |       | 1 | VAR 
+19   | loop_returns_value  |     | pub   |    |     |         | u32   | 1 | FUNC
+21   | final_value         |     |       |    |     |         |       | 1 | VAR 
+30   | labeled_for         |     | pub   |    |     |         |       | 1 | FUNC
+31   | row                 |     |       |    |     |         |       | 1 | VAR 
+32   | col                 |     |       |    |     |         |       | 1 | VAR 
+36   | println             |     |       |    |     |         | macro | 0 | CALL
+36   | row                 |     |       |    |     | println |       | 0 | ARG 
+36   | col                 |     |       |    |     | println |       | 0 | ARG 
+41   | block_as_expression |     | pub   |    |     |         | i32   | 1 | FUNC

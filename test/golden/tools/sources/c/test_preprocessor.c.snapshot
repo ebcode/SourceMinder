@@ -1,0 +1,36 @@
+LINE | SYM                | PAR | SCOPE | NS | MOD | CLUE   | TYPE          | D | CTX  
+./tools/sources/c/test_preprocessor.c:
+1    | test_preprocessor  |     |       |    |     |        |               | 0 | FILE 
+1    | Test               |     |       |    |     |        |               | 0 | COM  
+1    | preprocessor       |     |       |    |     |        |               | 0 | COM  
+1    | directives         |     |       |    |     |        |               | 0 | COM  
+3    | Simple             |     |       |    |     |        |               | 0 | COM  
+3    | includes           |     |       |    |     |        |               | 0 | COM  
+4    | <stdio.h>          |     |       |    |     |        |               | 0 | IMP  
+5    | "myheader.h"       |     |       |    |     |        |               | 0 | IMP  
+7    | Defines            |     |       |    |     |        |               | 0 | COM  
+7    | already            |     |       |    |     |        |               | 0 | COM  
+7    | tested             |     |       |    |     |        |               | 0 | COM  
+8    | MAX_SIZE           |     |       |    |     |        | object-like   | 1 | MACRO
+9    | MIN                |     |       |    |     |        | function-like | 1 | MACRO
+11   | Conditional        |     |       |    |     |        |               | 0 | COM  
+11   | compilation        |     |       |    |     |        |               | 0 | COM  
+12   | DEBUG              |     |       |    |     | ifdef  |               | 0 | VAR  
+13   | LOG                |     |       |    |     |        | function-like | 1 | MACRO
+15   | LOG                |     |       |    |     |        | function-like | 1 | MACRO
+18   | BUFFER_SIZE        |     |       |    |     | ifndef |               | 0 | VAR  
+19   | BUFFER_SIZE        |     |       |    |     |        | object-like   | 1 | MACRO
+22   | USE_OPENGL         |     |       |    |     | if     |               | 0 | VAR  
+23   | GRAPHICS_API       |     |       |    |     |        | object-like   | 1 | MACRO
+24   | USE_VULKAN         |     |       |    |     | elif   |               | 0 | VAR  
+25   | GRAPHICS_API       |     |       |    |     |        | object-like   | 1 | MACRO
+27   | GRAPHICS_API       |     |       |    |     |        | object-like   | 1 | MACRO
+30   | Undefine           |     |       |    |     |        |               | 0 | COM  
+33   | Pragmas            |     |       |    |     |        |               | 0 | COM  
+37   | Line               |     |       |    |     |        |               | 0 | COM  
+37   | directive          |     |       |    |     |        |               | 0 | COM  
+40   | Error              |     |       |    |     |        |               | 0 | COM  
+40   | warning            |     |       |    |     |        |               | 0 | COM  
+41   | INVALID_CONFIG     |     |       |    |     | ifdef  |               | 0 | VAR  
+45   | DEPRECATED_FEATURE |     |       |    |     | ifdef  |               | 0 | VAR  
+49   | main               |     |       |    |     |        | int           | 1 | FUNC 

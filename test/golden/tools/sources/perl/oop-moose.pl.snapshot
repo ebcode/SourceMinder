@@ -1,0 +1,94 @@
+LINE | SYM                  | PAR  | SCOPE | NS              | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/oop-moose.pl:
+1    | oop-moose            |      |       |                 |     |      |        | 0 | FILE
+2    | Person               |      |       |                 |     |      |        | 1 | NS  
+4    | Moose                |      |       |                 |     |      |        | 0 | IMP 
+5    | namespace::autoclean |      |       |                 |     |      |        | 0 | IMP 
+7    | has                  |      |       |                 |     |      |        | 0 | CALL
+7    | name                 |      |       |                 |     |      |        | 0 | STR 
+8    | is                   |      |       |                 |     |      |        | 0 | PROP
+8    | ro                   |      |       |                 |     |      |        | 0 | STR 
+9    | isa                  |      |       |                 |     |      |        | 0 | PROP
+9    | Str                  |      |       |                 |     |      |        | 0 | STR 
+10   | required             |      |       |                 |     |      |        | 0 | PROP
+13   | has                  |      |       |                 |     |      |        | 0 | CALL
+13   | age                  |      |       |                 |     |      |        | 0 | STR 
+14   | is                   |      |       |                 |     |      |        | 0 | PROP
+14   | rw                   |      |       |                 |     |      |        | 0 | STR 
+15   | isa                  |      |       |                 |     |      |        | 0 | PROP
+15   | Int                  |      |       |                 |     |      |        | 0 | STR 
+16   | default              |      |       |                 |     |      |        | 0 | PROP
+19   | has                  |      |       |                 |     |      |        | 0 | CALL
+19   | email                |      |       |                 |     |      |        | 0 | STR 
+20   | is                   |      |       |                 |     |      |        | 0 | PROP
+20   | rw                   |      |       |                 |     |      |        | 0 | STR 
+21   | isa                  |      |       |                 |     |      |        | 0 | PROP
+21   | Str                  |      |       |                 |     |      |        | 0 | STR 
+22   | predicate            |      |       |                 |     |      |        | 0 | PROP
+22   | has_email            |      |       |                 |     |      |        | 0 | STR 
+23   | clearer              |      |       |                 |     |      |        | 0 | PROP
+23   | clear_email          |      |       |                 |     |      |        | 0 | STR 
+26   | greet                |      |       | Person          |     |      |        | 1 | FUNC
+27   | self                 |      |       |                 | my  |      | scalar | 1 | ARG 
+28   | Hi                   |      |       |                 |     |      |        | 0 | STR 
+28   | Im                   |      |       |                 |     |      |        | 0 | STR 
+28   | name                 | self |       |                 |     |      |        | 0 | CALL
+28   | self                 |      |       |                 |     |      | scalar | 0 | VAR 
+31   | birthday             |      |       | Person          |     |      |        | 1 | FUNC
+32   | self                 |      |       |                 | my  |      | scalar | 1 | ARG 
+33   | age                  | self |       |                 |     |      |        | 0 | CALL
+33   | self                 |      |       |                 |     |      | scalar | 0 | VAR 
+33   | age                  | self |       |                 |     |      |        | 0 | CALL
+33   | self                 |      |       |                 |     |      | scalar | 0 | VAR 
+36   | make_immutable       |      |       |                 |     |      |        | 0 | CALL
+36   | meta                 |      |       |                 |     |      |        | 0 | CALL
+36   | __PACKAGE__          |      |       |                 |     |      |        | 0 | CALL
+38   | Employee             |      |       |                 |     |      |        | 1 | NS  
+40   | Moose                |      |       |                 |     |      |        | 0 | IMP 
+41   | namespace::autoclean |      |       |                 |     |      |        | 0 | IMP 
+43   | extends              |      |       |                 |     |      |        | 0 | CALL
+43   | Person               |      |       |                 |     |      |        | 0 | STR 
+45   | has                  |      |       |                 |     |      |        | 0 | CALL
+45   | company              |      |       |                 |     |      |        | 0 | STR 
+46   | is                   |      |       |                 |     |      |        | 0 | PROP
+46   | ro                   |      |       |                 |     |      |        | 0 | STR 
+47   | isa                  |      |       |                 |     |      |        | 0 | PROP
+47   | Str                  |      |       |                 |     |      |        | 0 | STR 
+48   | required             |      |       |                 |     |      |        | 0 | PROP
+51   | has                  |      |       |                 |     |      |        | 0 | CALL
+51   | salary               |      |       |                 |     |      |        | 0 | STR 
+52   | is                   |      |       |                 |     |      |        | 0 | PROP
+52   | rw                   |      |       |                 |     |      |        | 0 | STR 
+53   | isa                  |      |       |                 |     |      |        | 0 | PROP
+53   | Num                  |      |       |                 |     |      |        | 0 | STR 
+54   | default              |      |       |                 |     |      |        | 0 | PROP
+57   | around               |      |       |                 |     |      |        | 0 | CALL
+57   | greet                |      |       |                 |     |      |        | 0 | STR 
+57   | <lambda>             |      |       |                 |     |      |        | 1 | LAM 
+58   | orig                 |      |       |                 | my  |      | scalar | 1 | ARG 
+58   | self                 |      |       |                 | my  |      | scalar | 1 | ARG 
+59   | orig                 | self |       |                 |     |      |        | 0 | CALL
+59   | self                 |      |       |                 |     |      | scalar | 0 | VAR 
+59   | orig                 |      |       |                 |     |      | scalar | 0 | VAR 
+59   | company              | self |       |                 |     |      |        | 0 | CALL
+59   | self                 |      |       |                 |     |      | scalar | 0 | VAR 
+62   | give_raise           |      |       | Employee        |     |      |        | 1 | FUNC
+63   | self                 |      |       |                 | my  |      | scalar | 1 | ARG 
+63   | amount               |      |       |                 | my  |      | scalar | 1 | ARG 
+64   | salary               | self |       |                 |     |      |        | 0 | CALL
+64   | self                 |      |       |                 |     |      | scalar | 0 | VAR 
+64   | salary               | self |       |                 |     |      |        | 0 | CALL
+64   | self                 |      |       |                 |     |      | scalar | 0 | VAR 
+64   | amount               |      |       |                 |     |      | scalar | 0 | VAR 
+67   | make_immutable       |      |       |                 |     |      |        | 0 | CALL
+67   | meta                 |      |       |                 |     |      |        | 0 | CALL
+67   | __PACKAGE__          |      |       |                 |     |      |        | 0 | CALL
+69   | Role::Printable      |      |       |                 |     |      |        | 1 | NS  
+71   | Moose::Role          |      |       |                 |     |      |        | 0 | IMP 
+73   | requires             |      |       |                 |     |      |        | 0 | CALL
+73   | to_string            |      |       |                 |     |      |        | 0 | STR 
+75   | print_self           |      |       | Role::Printable |     |      |        | 1 | FUNC
+76   | self                 |      |       |                 | my  |      | scalar | 1 | ARG 
+77   | print                |      |       |                 |     |      |        | 0 | CALL
+77   | to_string            | self |       |                 |     |      |        | 0 | CALL
+77   | self                 |      |       |                 |     |      | scalar | 0 | VAR 

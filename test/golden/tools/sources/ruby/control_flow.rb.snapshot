@@ -1,0 +1,73 @@
+LINE | SYM           | PAR           | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/ruby/control_flow.rb:
+1    | control_flow  |               |       |    |     |      |      | 0 | FILE
+1    | Control       |               |       |    |     |      |      | 0 | COM 
+1    | flow          |               |       |    |     |      |      | 0 | COM 
+1    | exceptions    |               |       |    |     |      |      | 0 | COM 
+1    | expressions.  |               |       |    |     |      |      | 0 | COM 
+2    | classify      |               |       |    |     |      |      | 1 | FUNC
+2    | value         | classify      |       |    |     |      |      | 0 | ARG 
+3    | value         |               |       |    |     |      |      | 0 | VAR 
+4    | negative      |               |       |    |     |      |      | 0 | STR 
+5    | zero?         | value         |       |    |     |      |      | 0 | CALL
+5    | value         |               |       |    |     |      |      | 0 | VAR 
+6    | zero          |               |       |    |     |      |      | 0 | STR 
+8    | positive      |               |       |    |     |      |      | 0 | STR 
+12   | describe      |               |       |    |     |      |      | 1 | FUNC
+12   | shape         | describe      |       |    |     |      |      | 0 | ARG 
+13   | shape         |               |       |    |     |      |      | 0 | VAR 
+14   | circle        |               |       |    |     |      |      | 0 | VAR 
+14   | round         |               |       |    |     |      |      | 0 | STR 
+15   | square        |               |       |    |     |      |      | 0 | VAR 
+15   | rectangle     |               |       |    |     |      |      | 0 | VAR 
+15   | boxy          |               |       |    |     |      |      | 0 | STR 
+16   | unknown       |               |       |    |     |      |      | 0 | STR 
+20   | fetch_data    |               |       |    |     |      |      | 1 | FUNC
+20   | source        | fetch_data    |       |    |     |      |      | 0 | ARG 
+21   | attempts      | fetch_data    |       |    |     |      |      | 1 | VAR 
+23   | attempts      | fetch_data    |       |    |     |      |      | 0 | VAR 
+24   | raise         |               |       |    |     |      |      | 0 | CALL
+24   | IOError       |               |       |    |     |      |      | 0 | VAR 
+24   | source        |               |       |    |     |      |      | 0 | STR 
+24   | nil?          | source        |       |    |     |      |      | 0 | CALL
+24   | source        |               |       |    |     |      |      | 0 | VAR 
+25   | read          | source        |       |    |     |      |      | 0 | CALL
+25   | source        |               |       |    |     |      |      | 0 | VAR 
+26   | IOError       |               |       |    |     |      |      | 0 | VAR 
+26   | error         |               |       |    |     |      |      | 0 | VAR 
+27   | attempts      |               |       |    |     |      |      | 0 | VAR 
+28   | raise         |               |       |    |     |      |      | 0 | VAR 
+29   | StandardError |               |       |    |     |      |      | 0 | VAR 
+29   | error         |               |       |    |     |      |      | 0 | VAR 
+30   | failed:       |               |       |    |     |      |      | 0 | STR 
+30   | message       | error         |       |    |     |      |      | 0 | CALL
+30   | error         |               |       |    |     |      |      | 0 | VAR 
+32   | puts          |               |       |    |     |      |      | 0 | CALL
+32   | done          |               |       |    |     |      |      | 0 | STR 
+36   | loop_examples |               |       |    |     |      |      | 1 | FUNC
+36   | items         | loop_examples |       |    |     |      |      | 0 | ARG 
+37   | each          | items         |       |    |     |      |      | 0 | CALL
+37   | items         |               |       |    |     |      |      | 0 | VAR 
+37   | item          | loop_examples |       |    |     |      |      | 0 | ARG 
+37   | nil?          | item          |       |    |     |      |      | 0 | CALL
+37   | item          |               |       |    |     |      |      | 0 | VAR 
+38   | count         | loop_examples |       |    |     |      |      | 1 | VAR 
+39   | count         |               |       |    |     |      |      | 0 | VAR 
+40   | count         | loop_examples |       |    |     |      |      | 0 | VAR 
+41   | count         |               |       |    |     |      |      | 0 | VAR 
+43   | times         | count         |       |    |     |      |      | 0 | CALL
+43   | count         |               |       |    |     |      |      | 0 | VAR 
+43   | index         | loop_examples |       |    |     |      |      | 0 | ARG 
+43   | puts          |               |       |    |     |      |      | 0 | CALL
+43   | index         |               |       |    |     |      |      | 0 | VAR 
+44   | zero?         | count         |       |    |     |      |      | 0 | CALL
+44   | count         |               |       |    |     |      |      | 0 | VAR 
+45   | count         | loop_examples |       |    |     |      |      | 0 | VAR 
+49   | Guard         |               |       |    |     |      |      | 0 | COM 
+49   | clause        |               |       |    |     |      |      | 0 | COM 
+50   | process       |               |       |    |     |      |      | 1 | FUNC
+50   | record        | process       |       |    |     |      |      | 0 | ARG 
+51   | valid?        | record        |       |    |     |      |      | 0 | CALL
+51   | record        |               |       |    |     |      |      | 0 | VAR 
+52   | save          | record        |       |    |     |      |      | 0 | CALL
+52   | record        |               |       |    |     |      |      | 0 | VAR 

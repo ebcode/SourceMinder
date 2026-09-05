@@ -1,0 +1,112 @@
+LINE | SYM                  | PAR    | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/comments.pl:
+1    | comments             |        |       |    |     |      |        | 0 | FILE
+2    | comment              |        |       |    |     |      |        | 0 | COM 
+2    | module               |        |       |    |     |      |        | 0 | COM 
+2    | purpose              |        |       |    |     |      |        | 0 | COM 
+3    | handles              |        |       |    |     |      |        | 0 | COM 
+3    | authentication       |        |       |    |     |      |        | 0 | COM 
+3    | session              |        |       |    |     |      |        | 0 | COM 
+3    | management           |        |       |    |     |      |        | 0 | COM 
+5    | strict               |        |       |    |     |      |        | 0 | IMP 
+6    | warnings             |        |       |    |     |      |        | 0 | IMP 
+8    | Initialize           |        |       |    |     |      |        | 0 | COM 
+8    | authentication       |        |       |    |     |      |        | 0 | COM 
+8    | system               |        |       |    |     |      |        | 0 | COM 
+9    | init_auth            |        |       |    |     |      |        | 1 | FUNC
+10   | config               |        |       |    | my  |      | scalar | 1 | ARG 
+11   | Validate             |        |       |    |     |      |        | 0 | COM 
+11   | configuration        |        |       |    |     |      |        | 0 | COM 
+11   | proceeding           |        |       |    |     |      |        | 0 | COM 
+12   | ensures              |        |       |    |     |      |        | 0 | COM 
+12   | required             |        |       |    |     |      |        | 0 | COM 
+12   | fields               |        |       |    |     |      |        | 0 | COM 
+13   | secret               |        |       |    | my  |      | scalar | 1 | VAR 
+13   | config               |        |       |    |     |      | hash   | 0 | VAR 
+13   | secret               | config |       |    |     |      |        | 0 | PROP
+13   | die                  |        |       |    |     |      |        | 0 | CALL
+13   | secret               |        |       |    |     |      |        | 0 | STR 
+13   | key                  |        |       |    |     |      |        | 0 | STR 
+13   | required             |        |       |    |     |      |        | 0 | STR 
+14   | secret               |        |       |    |     |      |        | 0 | PROP
+14   | secret               |        |       |    |     |      | scalar | 0 | VAR 
+14   | initialized          |        |       |    |     |      |        | 0 | PROP
+19   | NAME                 |        |       |    |     |      |        | 0 | COM 
+21   | MyModule             |        |       |    |     |      |        | 0 | COM 
+21   | example              |        |       |    |     |      |        | 0 | COM 
+21   | Perl                 |        |       |    |     |      |        | 0 | COM 
+21   | module               |        |       |    |     |      |        | 0 | COM 
+23   | SYNOPSIS             |        |       |    |     |      |        | 0 | COM 
+25   | MyModule             |        |       |    |     |      |        | 0 | COM 
+26   | $obj                 |        |       |    |     |      |        | 0 | COM 
+26   | MyModule->newname    |        |       |    |     |      |        | 0 | COM 
+26   | =>                   |        |       |    |     |      |        | 0 | COM 
+26   | test                 |        |       |    |     |      |        | 0 | COM 
+27   | $obj->process        |        |       |    |     |      |        | 0 | COM 
+29   | DESCRIPTION          |        |       |    |     |      |        | 0 | COM 
+31   | module               |        |       |    |     |      |        | 0 | COM 
+31   | provides             |        |       |    |     |      |        | 0 | COM 
+31   | example              |        |       |    |     |      |        | 0 | COM 
+31   | functionality        |        |       |    |     |      |        | 0 | COM 
+31   | demonstrating        |        |       |    |     |      |        | 0 | COM 
+32   | SourceMinder         |        |       |    |     |      |        | 0 | COM 
+32   | Perl                 |        |       |    |     |      |        | 0 | COM 
+32   | indexer.             |        |       |    |     |      |        | 0 | COM 
+32   | shows                |        |       |    |     |      |        | 0 | COM 
+32   | POD                  |        |       |    |     |      |        | 0 | COM 
+32   | documentation        |        |       |    |     |      |        | 0 | COM 
+33   | structured           |        |       |    |     |      |        | 0 | COM 
+33   | real-world           |        |       |    |     |      |        | 0 | COM 
+33   | Perl                 |        |       |    |     |      |        | 0 | COM 
+33   | modules.             |        |       |    |     |      |        | 0 | COM 
+35   | METHODS              |        |       |    |     |      |        | 0 | COM 
+37   | new                  |        |       |    |     |      |        | 0 | COM 
+39   | Constructor.         |        |       |    |     |      |        | 0 | COM 
+39   | Accepts              |        |       |    |     |      |        | 0 | COM 
+39   | named                |        |       |    |     |      |        | 0 | COM 
+39   | parameters.          |        |       |    |     |      |        | 0 | COM 
+41   | process              |        |       |    |     |      |        | 0 | COM 
+43   | Process              |        |       |    |     |      |        | 0 | COM 
+43   | data                 |        |       |    |     |      |        | 0 | COM 
+43   | results.             |        |       |    |     |      |        | 0 | COM 
+45   | AUTHOR               |        |       |    |     |      |        | 0 | COM 
+47   | Example              |        |       |    |     |      |        | 0 | COM 
+47   | Author               |        |       |    |     |      |        | 0 | COM 
+47   | <author@example.com> |        |       |    |     |      |        | 0 | COM 
+49   | LICENSE              |        |       |    |     |      |        | 0 | COM 
+51   | library              |        |       |    |     |      |        | 0 | COM 
+51   | free                 |        |       |    |     |      |        | 0 | COM 
+51   | software             |        |       |    |     |      |        | 0 | COM 
+51   | redistribute         |        |       |    |     |      |        | 0 | COM 
+51   | and/or               |        |       |    |     |      |        | 0 | COM 
+51   | modify               |        |       |    |     |      |        | 0 | COM 
+52   | under                |        |       |    |     |      |        | 0 | COM 
+52   | terms                |        |       |    |     |      |        | 0 | COM 
+52   | Perl                 |        |       |    |     |      |        | 0 | COM 
+56   | authenticate         |        |       |    |     |      |        | 1 | FUNC
+57   | self                 |        |       |    | my  |      | scalar | 1 | ARG 
+57   | username             |        |       |    | my  |      | scalar | 1 | ARG 
+57   | password             |        |       |    | my  |      | scalar | 1 | ARG 
+58   | Verify               |        |       |    |     |      |        | 0 | COM 
+58   | credentials          |        |       |    |     |      |        | 0 | COM 
+58   | database             |        |       |    |     |      |        | 0 | COM 
+59   | Returns              |        |       |    |     |      |        | 0 | COM 
+59   | session              |        |       |    |     |      |        | 0 | COM 
+59   | token                |        |       |    |     |      |        | 0 | COM 
+59   | success              |        |       |    |     |      |        | 0 | COM 
+60   | _verify              | self   |       |    |     |      |        | 0 | CALL
+60   | self                 |        |       |    |     |      | scalar | 0 | VAR 
+60   | username             |        |       |    |     |      | scalar | 0 | VAR 
+60   | password             |        |       |    |     |      | scalar | 0 | VAR 
+63   | _verify              |        |       |    |     |      |        | 1 | FUNC
+64   | self                 |        |       |    | my  |      | scalar | 1 | ARG 
+64   | username             |        |       |    | my  |      | scalar | 1 | ARG 
+64   | password             |        |       |    | my  |      | scalar | 1 | ARG 
+65   | Internal             |        |       |    |     |      |        | 0 | COM 
+65   | verification         |        |       |    |     |      |        | 0 | COM 
+65   | logic                |        |       |    |     |      |        | 0 | COM 
+66   | defined              |        |       |    |     |      |        | 0 | CALL
+66   | username             |        |       |    |     |      | scalar | 0 | VAR 
+67   | defined              |        |       |    |     |      |        | 0 | CALL
+67   | password             |        |       |    |     |      | scalar | 0 | VAR 
+68   | session_token_here   |        |       |    |     |      |        | 0 | STR 

@@ -1,0 +1,106 @@
+LINE | SYM               | PAR            | SCOPE   | NS   | MOD   | CLUE     | TYPE           | D | CTX  
+./tools/sources/go/test.go:
+1    | test              |                |         |      |       |          |                | 0 | FILE 
+1    | main              |                |         |      |       |          |                | 0 | NS   
+4    | fmt               |                |         | main |       |          |                | 0 | IMP  
+5    | strings           |                |         | main |       |          |                | 0 | IMP  
+8    | User              |                |         |      |       |          |                | 0 | COM  
+8    | represents        |                |         |      |       |          |                | 0 | COM  
+8    | system            |                |         |      |       |          |                | 0 | COM  
+8    | user              |                |         |      |       |          |                | 0 | COM  
+9    | User              |                | public  | main |       |          |                | 1 | CLASS
+10   | ID                |                | public  | main |       |          | int            | 1 | PROP 
+11   | Username          |                | public  | main |       |          | string         | 1 | PROP 
+12   | Email             |                | public  | main |       |          | string         | 1 | PROP 
+15   | UserManager       |                |         |      |       |          |                | 0 | COM  
+15   | handles           |                |         |      |       |          |                | 0 | COM  
+15   | user              |                |         |      |       |          |                | 0 | COM  
+15   | operations        |                |         |      |       |          |                | 0 | COM  
+16   | UserManager       |                | public  | main |       |          |                | 1 | CLASS
+17   | users             |                | private | main |       |          | map[int]*User  | 1 | PROP 
+20   | NewUserManager    |                |         |      |       |          |                | 0 | COM  
+20   | creates           |                |         |      |       |          |                | 0 | COM  
+20   | new               |                |         |      |       |          |                | 0 | COM  
+20   | user              |                |         |      |       |          |                | 0 | COM  
+20   | manager           |                |         |      |       |          |                | 0 | COM  
+21   | NewUserManager    |                | public  | main |       |          | *UserManager   | 1 | FUNC 
+23   | users             |                |         | main |       |          |                | 0 | PROP 
+23   | make              |                |         |      |       | built-in |                | 0 | CALL 
+27   | AddUser           |                |         |      |       |          |                | 0 | COM  
+27   | adds              |                |         |      |       |          |                | 0 | COM  
+27   | new               |                |         |      |       |          |                | 0 | COM  
+27   | user              |                |         |      |       |          |                | 0 | COM  
+27   | system            |                |         |      |       |          |                | 0 | COM  
+28   | AddUser           | *UserManager   | public  | main |       |          | error          | 1 | FUNC 
+28   | id                |                |         |      |       |          | int            | 1 | ARG  
+28   | username          |                |         |      |       |          | string         | 1 | ARG  
+28   | email             |                |         |      |       |          | string         | 1 | ARG  
+29   | exists            |                | private | main |       |          |                | 1 | VAR  
+29   | um                |                |         | main |       |          |                | 0 | VAR  
+29   | users             | um             |         | main |       |          |                | 0 | PROP 
+29   | id                |                |         | main |       |          |                | 0 | VAR  
+29   | exists            |                |         | main |       |          |                | 0 | VAR  
+30   | Errorf            | fmt            |         |      |       |          |                | 0 | CALL 
+30   | user              |                |         |      |       |          |                | 0 | STR  
+30   | ID                |                |         |      |       |          |                | 0 | STR  
+30   | %d                |                |         |      |       |          |                | 0 | STR  
+30   | already           |                |         |      |       |          |                | 0 | STR  
+30   | exists            |                |         |      |       |          |                | 0 | STR  
+30   | id                |                |         | main |       | Errorf   |                | 0 | ARG  
+33   | um                |                |         | main |       |          |                | 0 | VAR  
+33   | users             | um             |         | main |       |          |                | 0 | PROP 
+33   | id                |                |         | main |       |          |                | 0 | VAR  
+34   | ID                |                |         | main |       |          |                | 0 | PROP 
+34   | id                |                |         | main |       |          |                | 0 | VAR  
+35   | Username          |                |         | main |       |          |                | 0 | PROP 
+35   | username          |                |         | main |       |          |                | 0 | VAR  
+36   | Email             |                |         | main |       |          |                | 0 | PROP 
+36   | email             |                |         | main |       |          |                | 0 | VAR  
+41   | GetUser           |                |         |      |       |          |                | 0 | COM  
+41   | retrieves         |                |         |      |       |          |                | 0 | COM  
+41   | user              |                |         |      |       |          |                | 0 | COM  
+41   | ID                |                |         |      |       |          |                | 0 | COM  
+42   | GetUser           | *UserManager   | public  | main |       |          | (*User, error) | 1 | FUNC 
+42   | id                |                |         |      |       |          | int            | 1 | ARG  
+43   | user              |                | private | main |       |          |                | 1 | VAR  
+43   | exists            |                | private | main |       |          |                | 1 | VAR  
+43   | um                |                |         | main |       |          |                | 0 | VAR  
+43   | users             | um             |         | main |       |          |                | 0 | PROP 
+43   | id                |                |         | main |       |          |                | 0 | VAR  
+44   | exists            |                |         | main |       |          |                | 0 | VAR  
+45   | Errorf            | fmt            |         |      |       |          |                | 0 | CALL 
+45   | user              |                |         |      |       |          |                | 0 | STR  
+45   | found             |                |         |      |       |          |                | 0 | STR  
+47   | user              |                |         | main |       |          |                | 0 | VAR  
+50   | Helper            |                |         |      |       |          |                | 0 | COM  
+50   | function          |                |         |      |       |          |                | 0 | COM  
+50   | validate          |                |         |      |       |          |                | 0 | COM  
+50   | email             |                |         |      |       |          |                | 0 | COM  
+51   | validateEmail     |                | private | main |       |          | bool           | 1 | FUNC 
+51   | email             |                |         |      |       |          | string         | 1 | ARG  
+52   | Contains          | strings        |         |      |       |          |                | 0 | CALL 
+52   | email             |                |         | main |       | Contains |                | 0 | ARG  
+56   | MaxUsers          |                | public  | main | const |          |                | 1 | VAR  
+57   | MinAge            |                | public  | main | const |          |                | 1 | VAR  
+60   | defaultManager    |                | private | main | var   |          | *UserManager   | 1 | VAR  
+62   | main              |                | private | main |       |          |                | 1 | FUNC 
+63   | defaultManager    |                |         | main |       |          |                | 0 | VAR  
+63   | NewUserManager    |                |         |      |       |          |                | 0 | CALL 
+64   | err               |                | private | main |       |          |                | 1 | VAR  
+64   | AddUser           | defaultManager |         |      |       |          |                | 0 | CALL 
+64   | alice             |                |         |      |       |          |                | 0 | STR  
+64   | alice@example.com |                |         |      |       |          |                | 0 | STR  
+65   | err               |                |         | main |       |          |                | 0 | VAR  
+66   | Println           | fmt            |         |      |       |          |                | 0 | CALL 
+66   | Error:            |                |         |      |       |          |                | 0 | STR  
+66   | err               |                |         | main |       | Println  |                | 0 | ARG  
+70   | user              |                | private | main |       |          |                | 1 | VAR  
+70   | GetUser           | defaultManager |         |      |       |          |                | 0 | CALL 
+71   | Printf            | fmt            |         |      |       |          |                | 0 | CALL 
+71   | User:             |                |         |      |       |          |                | 0 | STR  
+71   | %s                |                |         |      |       |          |                | 0 | STR  
+71   | %sn               |                |         |      |       |          |                | 0 | STR  
+71   | user              |                |         | main |       | Printf   |                | 0 | ARG  
+71   | Username          | user           |         | main |       | Printf   |                | 0 | ARG  
+71   | user              |                |         | main |       | Printf   |                | 0 | ARG  
+71   | Email             | user           |         | main |       | Printf   |                | 0 | ARG  

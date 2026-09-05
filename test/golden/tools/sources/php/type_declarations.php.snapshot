@@ -1,0 +1,51 @@
+LINE | SYM               | PAR         | SCOPE   | NS         | MOD | CLUE | TYPE             | D | CTX  
+./tools/sources/php/type_declarations.php:
+1    | type_declarations |             |         |            |     |      |                  | 0 | FILE 
+3    | App\Models        |             |         |            |     |      |                  | 1 | NS   
+5    | demonstrating     |             |         | App\Models |     |      |                  | 0 | COM  
+5    | type              |             |         | App\Models |     |      |                  | 0 | COM  
+5    | declarations      |             |         | App\Models |     |      |                  | 0 | COM  
+8    | TypeExample       |             |         | App\Models |     |      |                  | 1 | CLASS
+9    | Nullable          |             |         | App\Models |     |      |                  | 0 | COM  
+9    | types             |             |         | App\Models |     |      |                  | 0 | COM  
+10   | $optionalName     | TypeExample | private | App\Models |     |      |                  | 1 | PROP 
+11   | $optionalId       | TypeExample | private | App\Models |     |      |                  | 1 | PROP 
+13   | Union             |             |         | App\Models |     |      |                  | 0 | COM  
+13   | types             |             |         | App\Models |     |      |                  | 0 | COM  
+13   | PHP               |             |         | App\Models |     |      |                  | 0 | COM  
+13   | 8.0+              |             |         | App\Models |     |      |                  | 0 | COM  
+14   | $number           | TypeExample | private | App\Models |     |      | int|float        | 1 | PROP 
+15   | $data             | TypeExample | private | App\Models |     |      | string|array     | 1 | PROP 
+17   | Mixed             |             |         | App\Models |     |      |                  | 0 | COM  
+17   | type              |             |         | App\Models |     |      |                  | 0 | COM  
+18   | $anything         | TypeExample | private | App\Models |     |      |                  | 1 | PROP 
+20   | processValue      | TypeExample | public  | App\Models |     |      |                  | 1 | FUNC 
+21   | $value            |             |         | App\Models |     |      |                  | 0 | VAR  
+24   | getValue          | TypeExample | public  | App\Models |     |      | string|int|float | 1 | FUNC 
+25   | $this             |             |         | App\Models |     |      |                  | 0 | VAR  
+25   | number            | $this       |         | App\Models |     |      |                  | 0 | PROP 
+28   | handleData        | TypeExample | public  | App\Models |     |      |                  | 1 | FUNC 
+29   | $input            |             |         | App\Models |     |      |                  | 0 | VAR  
+29   | $this             |             |         | App\Models |     |      |                  | 0 | VAR  
+29   | anything          | $this       |         | App\Models |     |      |                  | 0 | PROP 
+32   | Intersection      |             |         | App\Models |     |      |                  | 0 | COM  
+32   | types             |             |         | App\Models |     |      |                  | 0 | COM  
+32   | PHP               |             |         | App\Models |     |      |                  | 0 | COM  
+32   | 8.1+              |             |         | App\Models |     |      |                  | 0 | COM  
+32   | requires          |             |         | App\Models |     |      |                  | 0 | COM  
+32   | interfaces        |             |         | App\Models |     |      |                  | 0 | COM  
+33   | process           | TypeExample | public  | App\Models |     |      |                  | 1 | FUNC 
+36   | complex           |             |         | App\Models |     |      |                  | 0 | COM  
+36   | type              |             |         | App\Models |     |      |                  | 0 | COM  
+36   | declarations      |             |         | App\Models |     |      |                  | 0 | COM  
+39   | transformData     |             |         | App\Models |     |      |                  | 0 | COM  
+39   | intstring         |             |         | App\Models |     |      |                  | 0 | COM  
+39   | $input            |             |         | App\Models |     |      |                  | 0 | COM  
+39   | ?callable         |             |         | App\Models |     |      |                  | 0 | COM  
+39   | $transformer      |             |         | App\Models |     |      |                  | 0 | COM  
+39   | null              |             |         | App\Models |     |      |                  | 0 | COM  
+39   | boolarray         |             |         | App\Models |     |      |                  | 0 | COM  
+39   | $options          |             |         | App\Models |     |      |                  | 0 | COM  
+39   | false             |             |         | App\Models |     |      |                  | 0 | COM  
+39   | stringarraynull   |             |         | App\Models |     |      |                  | 0 | COM  
+39   | null              |             |         | App\Models |     |      |                  | 0 | COM  

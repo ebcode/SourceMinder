@@ -1,0 +1,84 @@
+LINE | SYM                | PAR | SCOPE   | NS   | MOD | CLUE | TYPE               | D | CTX 
+./tools/sources/go/lambdas.go:
+1    | lambdas            |     |         |      |     |      |                    | 0 | FILE
+1    | main               |     |         |      |     |      |                    | 0 | NS  
+3    | fmt                |     |         | main |     |      |                    | 0 | IMP 
+5    | anonymousFunctions |     | private | main |     |      |                    | 1 | FUNC
+6    | Anonymous          |     |         |      |     |      |                    | 0 | COM 
+6    | function           |     |         |      |     |      |                    | 0 | COM 
+6    | assigned           |     |         |      |     |      |                    | 0 | COM 
+6    | variable           |     |         |      |     |      |                    | 0 | COM 
+7    | add                |     | private | main |     |      |                    | 1 | VAR 
+7    | <lambda>           |     |         | main |     |      |                    | 1 | LAM 
+10   | result             |     | private | main |     |      |                    | 1 | VAR 
+10   | add                |     |         |      |     |      |                    | 0 | CALL
+12   | Immediately        |     |         |      |     |      |                    | 0 | COM 
+12   | invoked            |     |         |      |     |      |                    | 0 | COM 
+12   | function           |     |         |      |     |      |                    | 0 | COM 
+13   | message            |     | private | main |     |      |                    | 1 | VAR 
+15   | Alice              |     |         |      |     |      |                    | 0 | STR 
+17   | Anonymous          |     |         |      |     |      |                    | 0 | COM 
+17   | function           |     |         |      |     |      |                    | 0 | COM 
+17   | closure            |     |         |      |     |      |                    | 0 | COM 
+18   | counter            |     | private | main |     |      |                    | 1 | VAR 
+19   | increment          |     | private | main |     |      |                    | 1 | VAR 
+19   | <lambda>           |     |         | main |     |      |                    | 1 | LAM 
+20   | counter            |     |         | main |     |      |                    | 0 | VAR 
+21   | counter            |     |         | main |     |      |                    | 0 | VAR 
+23   | increment          |     |         |      |     |      |                    | 0 | CALL
+24   | increment          |     |         |      |     |      |                    | 0 | CALL
+26   | Function           |     |         |      |     |      |                    | 0 | COM 
+26   | returning          |     |         |      |     |      |                    | 0 | COM 
+26   | function           |     |         |      |     |      |                    | 0 | COM 
+27   | multiplier         |     | private | main |     |      |                    | 1 | VAR 
+27   | <lambda>           |     |         | main |     |      |                    | 1 | LAM 
+27   | factor             |     |         |      |     |      | int                | 1 | ARG 
+28   | <lambda>           |     |         | main |     |      |                    | 1 | LAM 
+29   | factor             |     |         | main |     |      |                    | 0 | VAR 
+32   | double             |     | private | main |     |      |                    | 1 | VAR 
+32   | multiplier         |     |         |      |     |      |                    | 0 | CALL
+33   | triple             |     | private | main |     |      |                    | 1 | VAR 
+33   | multiplier         |     |         |      |     |      |                    | 0 | CALL
+35   | result             |     |         | main |     |      |                    | 0 | VAR 
+35   | message            |     |         | main |     |      |                    | 0 | VAR 
+35   | double             |     |         | main |     |      |                    | 0 | VAR 
+35   | triple             |     |         | main |     |      |                    | 0 | VAR 
+38   | Higher-order       |     |         |      |     |      |                    | 0 | COM 
+38   | function           |     |         |      |     |      |                    | 0 | COM 
+39   | applyOperation     |     | private | main |     |      | int                | 1 | FUNC
+39   | op                 |     |         |      |     |      | func(int, int) int | 1 | ARG 
+40   | op                 |     |         |      |     |      |                    | 0 | CALL
+43   | useHigherOrder     |     | private | main |     |      |                    | 1 | FUNC
+44   | Pass               |     |         |      |     |      |                    | 0 | COM 
+44   | anonymous          |     |         |      |     |      |                    | 0 | COM 
+44   | function           |     |         |      |     |      |                    | 0 | COM 
+44   | argument           |     |         |      |     |      |                    | 0 | COM 
+45   | sum                |     | private | main |     |      |                    | 1 | VAR 
+45   | applyOperation     |     |         |      |     |      |                    | 0 | CALL
+45   | <lambda>           |     |         | main |     |      |                    | 1 | LAM 
+49   | product            |     | private | main |     |      |                    | 1 | VAR 
+49   | applyOperation     |     |         |      |     |      |                    | 0 | CALL
+49   | <lambda>           |     |         | main |     |      |                    | 1 | LAM 
+53   | sum                |     |         | main |     |      |                    | 0 | VAR 
+53   | product            |     |         | main |     |      |                    | 0 | VAR 
+56   | Closure            |     |         |      |     |      |                    | 0 | COM 
+56   | capturing          |     |         |      |     |      |                    | 0 | COM 
+56   | variables          |     |         |      |     |      |                    | 0 | COM 
+57   | makeCounter        |     | private | main |     |      | func() int         | 1 | FUNC
+57   | start              |     |         |      |     |      | int                | 1 | ARG 
+58   | count              |     | private | main |     |      |                    | 1 | VAR 
+58   | start              |     |         | main |     |      |                    | 0 | VAR 
+59   | <lambda>           |     |         | main |     |      |                    | 1 | LAM 
+60   | count              |     |         | main |     |      |                    | 0 | VAR 
+61   | count              |     |         | main |     |      |                    | 0 | VAR 
+65   | closureExample     |     | private | main |     |      |                    | 1 | FUNC
+66   | c1                 |     | private | main |     |      |                    | 1 | VAR 
+66   | makeCounter        |     |         |      |     |      |                    | 0 | CALL
+67   | c2                 |     | private | main |     |      |                    | 1 | VAR 
+67   | makeCounter        |     |         |      |     |      |                    | 0 | CALL
+69   | Println            | fmt |         |      |     |      |                    | 0 | CALL
+69   | c1                 |     |         |      |     |      |                    | 0 | CALL
+70   | Println            | fmt |         |      |     |      |                    | 0 | CALL
+70   | c1                 |     |         |      |     |      |                    | 0 | CALL
+71   | Println            | fmt |         |      |     |      |                    | 0 | CALL
+71   | c2                 |     |         |      |     |      |                    | 0 | CALL

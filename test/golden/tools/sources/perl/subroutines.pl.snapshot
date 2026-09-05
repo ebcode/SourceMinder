@@ -1,0 +1,51 @@
+LINE | SYM           | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/subroutines.pl:
+1    | subroutines   |     |       |    |     |      |        | 0 | FILE
+2    | strict        |     |       |    |     |      |        | 0 | IMP 
+3    | warnings      |     |       |    |     |      |        | 0 | IMP 
+5    | Simple        |     |       |    |     |      |        | 0 | COM 
+5    | named         |     |       |    |     |      |        | 0 | COM 
+5    | subroutine    |     |       |    |     |      |        | 0 | COM 
+6    | greet         |     |       |    |     |      |        | 1 | FUNC
+7    | name          |     |       |    | my  |      | scalar | 1 | ARG 
+8    | Hello         |     |       |    |     |      |        | 0 | STR 
+8    | $name!        |     |       |    |     |      |        | 0 | STR 
+8    | name          |     |       |    |     |      | scalar | 0 | VAR 
+11   | Subroutine    |     |       |    |     |      |        | 0 | COM 
+11   | multiple      |     |       |    |     |      |        | 0 | COM 
+11   | parameters    |     |       |    |     |      |        | 0 | COM 
+12   | add_numbers   |     |       |    |     |      |        | 1 | FUNC
+17   | Subroutine    |     |       |    |     |      |        | 0 | COM 
+17   | args          |     |       |    |     |      |        | 0 | COM 
+18   | get_version   |     |       |    |     |      |        | 1 | FUNC
+19   | 1.0.0         |     |       |    |     |      |        | 0 | STR 
+22   | Subroutine    |     |       |    |     |      |        | 0 | COM 
+22   | variables     |     |       |    |     |      |        | 0 | COM 
+23   | process_data  |     |       |    |     |      |        | 1 | FUNC
+24   | input         |     |       |    | my  |      | scalar | 1 | ARG 
+25   | result        |     |       |    | my  |      | scalar | 1 | VAR 
+26   | count         |     |       |    | my  |      | scalar | 1 | VAR 
+28   | item          |     |       |    |     |      | scalar | 0 | VAR 
+28   | input         |     |       |    |     |      | scalar | 0 | VAR 
+29   | result        |     |       |    |     |      | scalar | 0 | VAR 
+29   | item          |     |       |    |     |      | scalar | 0 | VAR 
+30   | count         |     |       |    |     |      | scalar | 0 | VAR 
+33   | count         |     |       |    |     |      | scalar | 0 | VAR 
+33   | result        |     |       |    |     |      | scalar | 0 | VAR 
+33   | count         |     |       |    |     |      | scalar | 0 | VAR 
+36   | Nested        |     |       |    |     |      |        | 0 | COM 
+36   | subroutine    |     |       |    |     |      |        | 0 | COM 
+36   | call          |     |       |    |     |      |        | 0 | COM 
+37   | format_output |     |       |    |     |      |        | 1 | FUNC
+38   | value         |     |       |    | my  |      | scalar | 1 | ARG 
+39   | formatted     |     |       |    | my  |      | scalar | 1 | VAR 
+39   | sprintf       |     |       |    |     |      |        | 0 | CALL
+39   | %.2f          |     |       |    |     |      |        | 0 | STR 
+39   | value         |     |       |    |     |      | scalar | 0 | VAR 
+40   | formatted     |     |       |    |     |      | scalar | 0 | VAR 
+43   | Subroutine    |     |       |    |     |      |        | 0 | COM 
+43   | returning     |     |       |    |     |      |        | 0 | COM 
+43   | multiple      |     |       |    |     |      |        | 0 | COM 
+43   | values        |     |       |    |     |      |        | 0 | COM 
+44   | divmod        |     |       |    |     |      |        | 1 | FUNC
+46   | int           |     |       |    |     |      |        | 0 | CALL

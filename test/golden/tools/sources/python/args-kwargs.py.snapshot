@@ -1,0 +1,165 @@
+LINE | SYM                  | PAR                 | SCOPE | NS | MOD | CLUE         | TYPE | D | CTX  
+./tools/sources/python/args-kwargs.py:
+1    | args-kwargs          |                     |       |    |     |              |      | 0 | FILE 
+1    | Python               |                     |       |    |     |              |      | 0 | STR  
+1    | args                 |                     |       |    |     |              |      | 0 | STR  
+1    | kwargs               |                     |       |    |     |              |      | 0 | STR  
+1    | patterns.            |                     |       |    |     |              |      | 0 | STR  
+4    | var_args             |                     |       |    |     |              |      | 1 | FUNC 
+4    | args                 | var_args            |       |    |     | *args        |      | 0 | ARG  
+5    | Function             |                     |       |    |     |              |      | 0 | STR  
+5    | variable             |                     |       |    |     |              |      | 0 | STR  
+5    | positional           |                     |       |    |     |              |      | 0 | STR  
+5    | arguments.           |                     |       |    |     |              |      | 0 | STR  
+6    | arg                  |                     |       |    |     |              |      | 0 | VAR  
+6    | args                 |                     |       |    |     |              |      | 0 | VAR  
+7    | print                |                     |       |    |     |              |      | 0 | CALL 
+7    | arg                  |                     |       |    |     | print        |      | 0 | ARG  
+10   | var_kwargs           |                     |       |    |     |              |      | 1 | FUNC 
+10   | kwargs               | var_kwargs          |       |    |     | **kwargs     |      | 0 | ARG  
+11   | Function             |                     |       |    |     |              |      | 0 | STR  
+11   | variable             |                     |       |    |     |              |      | 0 | STR  
+11   | keyword              |                     |       |    |     |              |      | 0 | STR  
+11   | arguments.           |                     |       |    |     |              |      | 0 | STR  
+12   | key                  |                     |       |    |     |              |      | 0 | VAR  
+12   | value                |                     |       |    |     |              |      | 0 | VAR  
+12   | items                | kwargs              |       |    |     |              |      | 0 | CALL 
+12   | kwargs               |                     |       |    |     |              |      | 0 | VAR  
+13   | print                |                     |       |    |     |              |      | 0 | CALL 
+13   | f"{key}: {value}"    |                     |       |    |     |              |      | 0 | STR  
+13   | key                  |                     |       |    |     |              |      | 0 | VAR  
+13   | value                |                     |       |    |     |              |      | 0 | VAR  
+16   | mixed_args           |                     |       |    |     |              |      | 1 | FUNC 
+16   | args                 | mixed_args          |       |    |     | *args        |      | 0 | ARG  
+16   | kwargs               | mixed_args          |       |    |     | **kwargs     |      | 0 | ARG  
+17   | Function             |                     |       |    |     |              |      | 0 | STR  
+17   | mixed                |                     |       |    |     |              |      | 0 | STR  
+17   | argument             |                     |       |    |     |              |      | 0 | STR  
+17   | types.               |                     |       |    |     |              |      | 0 | STR  
+18   | print                |                     |       |    |     |              |      | 0 | CALL 
+18   | f"a={a}, b={b}"      |                     |       |    |     |              |      | 0 | STR  
+18   | a=                   |                     |       |    |     |              |      | 0 | STR  
+18   | b=                   |                     |       |    |     |              |      | 0 | STR  
+19   | print                |                     |       |    |     |              |      | 0 | CALL 
+19   | f"args={args}"       |                     |       |    |     |              |      | 0 | STR  
+19   | args=                |                     |       |    |     |              |      | 0 | STR  
+19   | args                 |                     |       |    |     |              |      | 0 | VAR  
+20   | print                |                     |       |    |     |              |      | 0 | CALL 
+20   | f"kwargs={kwargs}"   |                     |       |    |     |              |      | 0 | STR  
+20   | kwargs=              |                     |       |    |     |              |      | 0 | STR  
+20   | kwargs               |                     |       |    |     |              |      | 0 | VAR  
+23   | call_with_args       |                     |       |    |     |              |      | 1 | FUNC 
+24   | Calling              |                     |       |    |     |              |      | 0 | STR  
+24   | functions            |                     |       |    |     |              |      | 0 | STR  
+24   | unpacking.           |                     |       |    |     |              |      | 0 | STR  
+25   | numbers              |                     |       |    |     |              |      | 1 | VAR  
+26   | var_args             |                     |       |    |     |              |      | 0 | CALL 
+26   | numbers              |                     |       |    |     |              |      | 0 | VAR  
+28   | config               |                     |       |    |     |              |      | 1 | VAR  
+28   | host                 |                     |       |    |     |              |      | 0 | STR  
+28   | localhost            |                     |       |    |     |              |      | 0 | STR  
+28   | port                 |                     |       |    |     |              |      | 0 | STR  
+29   | var_kwargs           |                     |       |    |     |              |      | 0 | CALL 
+29   | config               |                     |       |    |     |              |      | 0 | VAR  
+32   | keyword_only_args    |                     |       |    |     |              |      | 1 | FUNC 
+33   | Function             |                     |       |    |     |              |      | 0 | STR  
+33   | keyword-only         |                     |       |    |     |              |      | 0 | STR  
+33   | arguments.           |                     |       |    |     |              |      | 0 | STR  
+37   | positional_only_args |                     |       |    |     |              |      | 1 | FUNC 
+38   | Function             |                     |       |    |     |              |      | 0 | STR  
+38   | positional-only      |                     |       |    |     |              |      | 0 | STR  
+38   | arguments            |                     |       |    |     |              |      | 0 | STR  
+38   | Python               |                     |       |    |     |              |      | 0 | STR  
+38   | 3.8+.                |                     |       |    |     |              |      | 0 | STR  
+42   | combined_args        |                     |       |    |     |              |      | 1 | FUNC 
+42   | pos_only             | combined_args       |       |    |     |              |      | 0 | ARG  
+42   | standard             | combined_args       |       |    |     |              |      | 0 | ARG  
+42   | kw_only              | combined_args       |       |    |     |              |      | 0 | ARG  
+43   | Combining            |                     |       |    |     |              |      | 0 | STR  
+43   | positional-only      |                     |       |    |     |              |      | 0 | STR  
+43   | standard             |                     |       |    |     |              |      | 0 | STR  
+43   | keyword-only.        |                     |       |    |     |              |      | 0 | STR  
+44   | pos_only             |                     |       |    |     |              |      | 0 | VAR  
+44   | standard             |                     |       |    |     |              |      | 0 | VAR  
+44   | kw_only              |                     |       |    |     |              |      | 0 | VAR  
+47   | default_with_kwargs  |                     |       |    |     |              |      | 1 | FUNC 
+47   | kwargs               | default_with_kwargs |       |    |     | **kwargs     |      | 0 | ARG  
+48   | Default              |                     |       |    |     |              |      | 0 | STR  
+48   | arguments            |                     |       |    |     |              |      | 0 | STR  
+48   | kwargs.              |                     |       |    |     |              |      | 0 | STR  
+49   | get                  | kwargs              |       |    |     |              |      | 0 | CALL 
+49   | kwargs               |                     |       |    |     |              |      | 0 | VAR  
+52   | forwarding_args      |                     |       |    |     |              |      | 1 | FUNC 
+52   | args                 | forwarding_args     |       |    |     | *args        |      | 0 | ARG  
+52   | kwargs               | forwarding_args     |       |    |     | **kwargs     |      | 0 | ARG  
+53   | Forwarding           |                     |       |    |     |              |      | 0 | STR  
+53   | arguments            |                     |       |    |     |              |      | 0 | STR  
+53   | another              |                     |       |    |     |              |      | 0 | STR  
+53   | function.            |                     |       |    |     |              |      | 0 | STR  
+54   | another_function     |                     |       |    |     |              |      | 0 | CALL 
+54   | args                 |                     |       |    |     |              |      | 0 | VAR  
+54   | kwargs               |                     |       |    |     |              |      | 0 | VAR  
+57   | another_function     |                     |       |    |     |              |      | 1 | FUNC 
+61   | args_and_defaults    |                     |       |    |     |              |      | 1 | FUNC 
+61   | args                 | args_and_defaults   |       |    |     | *args        |      | 0 | ARG  
+61   | kwargs               | args_and_defaults   |       |    |     | **kwargs     |      | 0 | ARG  
+62   | Args                 |                     |       |    |     |              |      | 0 | STR  
+62   | defaults             |                     |       |    |     |              |      | 0 | STR  
+62   | kwargs.              |                     |       |    |     |              |      | 0 | STR  
+63   | total                |                     |       |    |     |              |      | 1 | VAR  
+64   | total                |                     |       |    |     |              |      | 1 | VAR  
+64   | sum                  |                     |       |    |     |              |      | 0 | CALL 
+64   | args                 |                     |       |    |     | sum          |      | 0 | ARG  
+65   | total                |                     |       |    |     |              |      | 1 | VAR  
+65   | sum                  |                     |       |    |     |              |      | 0 | CALL 
+65   | values               | kwargs              |       |    |     |              |      | 0 | CALL 
+65   | kwargs               |                     |       |    |     |              |      | 0 | VAR  
+66   | total                |                     |       |    |     |              |      | 0 | VAR  
+69   | MyClass              |                     |       |    |     |              |      | 1 | CLASS
+70   | various              |                     |       |    |     |              |      | 0 | STR  
+70   | argument             |                     |       |    |     |              |      | 0 | STR  
+70   | patterns.            |                     |       |    |     |              |      | 0 | STR  
+72   | __init__             | MyClass             |       |    |     |              |      | 1 | FUNC 
+72   | self                 | __init__            |       |    |     |              |      | 0 | ARG  
+72   | args                 | __init__            |       |    |     | *args        |      | 0 | ARG  
+72   | kwargs               | __init__            |       |    |     | **kwargs     |      | 0 | ARG  
+73   | args                 | self                |       |    |     |              |      | 1 | PROP 
+73   | args                 |                     |       |    |     |              |      | 0 | VAR  
+74   | kwargs               | self                |       |    |     |              |      | 1 | PROP 
+74   | kwargs               |                     |       |    |     |              |      | 0 | VAR  
+76   | method               | MyClass             |       |    |     |              |      | 1 | FUNC 
+76   | self                 | method              |       |    |     |              |      | 0 | ARG  
+76   | args                 | method              |       |    |     | *args        |      | 0 | ARG  
+76   | kwargs               | method              |       |    |     | **kwargs     |      | 0 | ARG  
+77   | Instance             |                     |       |    |     |              |      | 0 | STR  
+77   | method               |                     |       |    |     |              |      | 0 | STR  
+77   | args                 |                     |       |    |     |              |      | 0 | STR  
+77   | kwargs.              |                     |       |    |     |              |      | 0 | STR  
+78   | args                 |                     |       |    |     |              |      | 0 | VAR  
+78   | kwargs               |                     |       |    |     |              |      | 0 | VAR  
+81   | unpack_in_call       |                     |       |    |     |              |      | 1 | FUNC 
+82   | Unpacking            |                     |       |    |     |              |      | 0 | STR  
+82   | function             |                     |       |    |     |              |      | 0 | STR  
+82   | calls.               |                     |       |    |     |              |      | 0 | STR  
+83   | add                  |                     |       |    |     |              |      | 1 | FUNC 
+86   | numbers              |                     |       |    |     |              |      | 1 | VAR  
+87   | result               |                     |       |    |     |              |      | 1 | VAR  
+87   | add                  |                     |       |    |     |              |      | 0 | CALL 
+87   | numbers              |                     |       |    |     |              |      | 0 | VAR  
+89   | params               |                     |       |    |     |              |      | 1 | VAR  
+90   | result2              |                     |       |    |     |              |      | 1 | VAR  
+90   | add                  |                     |       |    |     |              |      | 0 | CALL 
+90   | params               |                     |       |    |     |              |      | 0 | VAR  
+92   | result               |                     |       |    |     |              |      | 0 | VAR  
+92   | result2              |                     |       |    |     |              |      | 0 | VAR  
+95   | args_in_lambda       |                     |       |    |     |              |      | 1 | FUNC 
+96   | Args                 |                     |       |    |     |              |      | 0 | STR  
+96   | expressions.         |                     |       |    |     |              |      | 0 | STR  
+97   | sum_all              |                     |       |    |     |              |      | 1 | VAR  
+97   | <lambda>             |                     |       |    |     |              |      | 1 | LAM  
+97   | args                 | lambda              |       |    |     | lambda,*args |      | 0 | ARG  
+97   | sum                  |                     |       |    |     |              |      | 0 | CALL 
+97   | args                 |                     |       |    |     | sum          |      | 0 | ARG  
+98   | result               |                     |       |    |     |              |      | 1 | VAR  
+98   | sum_all              |                     |       |    |     |              |      | 0 | CALL 
+99   | result               |                     |       |    |     |              |      | 0 | VAR  

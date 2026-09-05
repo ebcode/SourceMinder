@@ -1,0 +1,192 @@
+LINE | SYM            | PAR         | SCOPE | NS          | MOD | CLUE | TYPE       | D | CTX 
+./tools/sources/perl/error-handling.pl:
+1    | error-handling |             |       |             |     |      |            | 0 | FILE
+1    | strict         |             |       |             |     |      |            | 0 | IMP 
+2    | warnings       |             |       |             |     |      |            | 0 | IMP 
+3    | Carp           |             |       |             |     |      |            | 0 | IMP 
+3    | croak          |             |       |             |     |      |            | 0 | IMP 
+3    | confess        |             |       |             |     |      |            | 0 | IMP 
+3    | carp           |             |       |             |     |      |            | 0 | IMP 
+3    | cluck          |             |       |             |     |      |            | 0 | IMP 
+4    | Scalar::Util   |             |       |             |     |      |            | 0 | IMP 
+4    | blessed        |             |       |             |     |      |            | 0 | IMP 
+6    | Basic          |             |       |             |     |      |            | 0 | COM 
+6    | eval/die       |             |       |             |     |      |            | 0 | COM 
+6    | pattern        |             |       |             |     |      |            | 0 | COM 
+7    | safe_divide    |             |       |             |     |      |            | 1 | FUNC
+9    | die            |             |       |             |     |      |            | 0 | CALL
+9    | Division       |             |       |             |     |      |            | 0 | STR 
+9    | zeron          |             |       |             |     |      |            | 0 | STR 
+13   | try_divide     |             |       |             |     |      |            | 1 | FUNC
+15   | result         |             |       |             | my  |      | scalar     | 1 | VAR 
+15   | safe_divide    |             |       |             |     |      |            | 0 | CALL
+17   | warn           |             |       |             |     |      |            | 0 | CALL
+17   | Caught:        |             |       |             |     |      |            | 0 | STR 
+17   | $@             |             |       |             |     |      |            | 0 | STR 
+20   | result         |             |       |             |     |      | scalar     | 0 | VAR 
+23   | $@             |             |       |             |     |      |            | 0 | COM 
+23   | preserve       |             |       |             |     |      |            | 0 | COM 
+23   | error          |             |       |             |     |      |            | 0 | COM 
+23   | across         |             |       |             |     |      |            | 0 | COM 
+23   | nested         |             |       |             |     |      |            | 0 | COM 
+23   | evals          |             |       |             |     |      |            | 0 | COM 
+24   | nested_eval    |             |       |             |     |      |            | 1 | FUNC
+25   | code           |             |       |             | my  |      | scalar     | 1 | ARG 
+27   | result         |             |       |             | my  |      | scalar     | 1 | VAR 
+27   | code           |             |       |             |     |      |            | 0 | CALL
+28   | result         |             |       |             |     |      | scalar     | 0 | VAR 
+31   | Carp-based     |             |       |             |     |      |            | 0 | COM 
+31   | error          |             |       |             |     |      |            | 0 | COM 
+31   | reporting      |             |       |             |     |      |            | 0 | COM 
+32   | parse_config   |             |       |             |     |      |            | 1 | FUNC
+33   | file           |             |       |             | my  |      | scalar     | 1 | ARG 
+34   | croak          |             |       |             |     |      |            | 0 | CALL
+34   | File           |             |       |             |     |      |            | 0 | STR 
+34   | specified      |             |       |             |     |      |            | 0 | STR 
+34   | defined        |             |       |             |     |      |            | 0 | CALL
+34   | file           |             |       |             |     |      | scalar     | 0 | VAR 
+35   | open           |             |       |             |     |      |            | 0 | CALL
+35   | fh             |             |       |             | my  |      | filehandle | 1 | VAR 
+35   | file           |             |       |             |     |      | scalar     | 0 | VAR 
+35   | croak          |             |       |             |     |      |            | 0 | CALL
+35   | Cannot         |             |       |             |     |      |            | 0 | STR 
+35   | $file:         |             |       |             |     |      |            | 0 | STR 
+35   | $!             |             |       |             |     |      |            | 0 | STR 
+35   | file           |             |       |             |     |      | scalar     | 0 | VAR 
+36   | close          |             |       |             |     |      |            | 0 | CALL
+36   | fh             |             |       |             |     |      | filehandle | 0 | VAR 
+39   | validate_age   |             |       |             |     |      |            | 1 | FUNC
+40   | age            |             |       |             | my  |      | scalar     | 1 | ARG 
+41   | carp           |             |       |             |     |      |            | 0 | CALL
+41   | Age            |             |       |             |     |      |            | 0 | STR 
+41   | negative       |             |       |             |     |      |            | 0 | STR 
+41   | age            |             |       |             |     |      | scalar     | 0 | VAR 
+42   | cluck          |             |       |             |     |      |            | 0 | CALL
+42   | Age            |             |       |             |     |      |            | 0 | STR 
+42   | over           |             |       |             |     |      |            | 0 | STR 
+42   | suspicious     |             |       |             |     |      |            | 0 | STR 
+42   | age            |             |       |             |     |      | scalar     | 0 | VAR 
+43   | confess        |             |       |             |     |      |            | 0 | CALL
+43   | Age            |             |       |             |     |      |            | 0 | STR 
+43   | must           |             |       |             |     |      |            | 0 | STR 
+43   | numeric        |             |       |             |     |      |            | 0 | STR 
+43   | age            |             |       |             |     |      | scalar     | 0 | VAR 
+44   | age            |             |       |             |     |      | scalar     | 0 | VAR 
+47   | Exception      |             |       |             |     |      |            | 0 | COM 
+47   | object         |             |       |             |     |      |            | 0 | COM 
+47   | pattern        |             |       |             |     |      |            | 0 | COM 
+48   | Exception      |             |       |             |     |      |            | 1 | NS  
+50   | new            |             |       | Exception   |     |      |            | 1 | FUNC
+51   | class          |             |       |             | my  |      | scalar     | 1 | ARG 
+51   | args           |             |       |             | my  |      | hash       | 1 | ARG 
+52   | bless          |             |       |             |     |      |            | 0 | CALL
+53   | message        |             |       |             |     |      |            | 0 | PROP
+53   | args           |             |       |             |     |      | hash       | 0 | VAR 
+53   | message        | args        |       |             |     |      |            | 0 | PROP
+53   | Unknown        |             |       |             |     |      |            | 0 | STR 
+53   | error          |             |       |             |     |      |            | 0 | STR 
+54   | code           |             |       |             |     |      |            | 0 | PROP
+54   | args           |             |       |             |     |      | hash       | 0 | VAR 
+54   | code           | args        |       |             |     |      |            | 0 | PROP
+55   | trace          |             |       |             |     |      |            | 0 | PROP
+55   | args           |             |       |             |     |      | hash       | 0 | VAR 
+55   | trace          | args        |       |             |     |      |            | 0 | PROP
+56   | class          |             |       |             |     |      | scalar     | 0 | VAR 
+59   | message        |             |       | Exception   |     |      |            | 1 | FUNC
+59   | message        |             |       |             |     |      |            | 0 | PROP
+60   | code           |             |       | Exception   |     |      |            | 1 | FUNC
+60   | code           |             |       |             |     |      |            | 0 | PROP
+61   | trace          |             |       | Exception   |     |      |            | 1 | FUNC
+61   | trace          |             |       |             |     |      |            | 0 | PROP
+63   | throw          |             |       | Exception   |     |      |            | 1 | FUNC
+64   | class          |             |       |             | my  |      | scalar     | 1 | ARG 
+64   | args           |             |       |             | my  |      | hash       | 1 | ARG 
+65   | die            |             |       |             |     |      |            | 0 | CALL
+65   | new            | class       |       |             |     |      |            | 0 | CALL
+65   | class          |             |       |             |     |      | scalar     | 0 | VAR 
+65   | args           |             |       |             |     |      | hash       | 0 | VAR 
+68   | stringify      |             |       | Exception   |     |      |            | 1 | FUNC
+69   | self           |             |       |             | my  |      | scalar     | 1 | ARG 
+70   | sprintf        |             |       |             |     |      |            | 0 | CALL
+70   | Exception%d:   |             |       |             |     |      |            | 0 | STR 
+70   | %s             |             |       |             |     |      |            | 0 | STR 
+70   | self           |             |       |             |     |      | hash       | 0 | VAR 
+70   | code           | self        |       |             |     |      |            | 0 | PROP
+70   | self           |             |       |             |     |      | hash       | 0 | VAR 
+70   | message        | self        |       |             |     |      |            | 0 | PROP
+73   | IOException    |             |       |             |     |      |            | 1 | NS  
+74   | parent         |             |       |             |     |      |            | 0 | IMP 
+76   | new            |             |       | IOException |     |      |            | 1 | FUNC
+77   | class          |             |       |             | my  |      | scalar     | 1 | ARG 
+77   | args           |             |       |             | my  |      | hash       | 1 | ARG 
+78   | args           |             |       |             |     |      | hash       | 0 | VAR 
+78   | code           | args        |       |             |     |      |            | 0 | PROP
+79   | SUPER::new     | class       |       |             |     |      |            | 0 | CALL
+79   | class          |             |       |             |     |      | scalar     | 0 | VAR 
+79   | args           |             |       |             |     |      | hash       | 0 | VAR 
+82   | main           |             |       |             |     |      |            | 1 | NS  
+84   | Catching       |             |       |             |     |      |            | 0 | COM 
+84   | typed          |             |       |             |     |      |            | 0 | COM 
+84   | exceptions     |             |       |             |     |      |            | 0 | COM 
+85   | read_file      |             |       | main        |     |      |            | 1 | FUNC
+86   | path           |             |       |             | my  |      | scalar     | 1 | ARG 
+87   | open           |             |       |             |     |      |            | 0 | CALL
+87   | fh             |             |       |             | my  |      | filehandle | 1 | VAR 
+87   | path           |             |       |             |     |      | scalar     | 0 | VAR 
+88   | throw          | IOException |       |             |     |      |            | 0 | CALL
+88   | message        |             |       |             |     |      |            | 0 | PROP
+88   | Cannot         |             |       |             |     |      |            | 0 | STR 
+88   | $path:         |             |       |             |     |      |            | 0 | STR 
+88   | $!             |             |       |             |     |      |            | 0 | STR 
+88   | path           |             |       |             |     |      | scalar     | 0 | VAR 
+88   | code           |             |       |             |     |      |            | 0 | PROP
+90   | content        |             |       |             | my  |      | scalar     | 1 | VAR 
+90   | fh             |             |       |             |     |      | filehandle | 0 | VAR 
+91   | close          |             |       |             |     |      |            | 0 | CALL
+91   | fh             |             |       |             |     |      | filehandle | 0 | VAR 
+92   | content        |             |       |             |     |      | scalar     | 0 | VAR 
+95   | handle_errors  |             |       | main        |     |      |            | 1 | FUNC
+96   | code           |             |       |             | my  |      | scalar     | 1 | ARG 
+97   | result         |             |       |             | my  |      | scalar     | 1 | VAR 
+97   | code           |             |       |             |     |      |            | 0 | CALL
+98   | err            |             |       |             | my  |      | scalar     | 1 | VAR 
+99   | blessed        |             |       |             |     |      |            | 0 | CALL
+99   | err            |             |       |             |     |      | scalar     | 0 | VAR 
+99   | isa            | err         |       |             |     |      |            | 0 | CALL
+99   | err            |             |       |             |     |      | scalar     | 0 | VAR 
+99   | IOException    |             |       |             |     |      |            | 0 | STR 
+100  | warn           |             |       |             |     |      |            | 0 | CALL
+100  | IO             |             |       |             |     |      |            | 0 | STR 
+100  | error:         |             |       |             |     |      |            | 0 | STR 
+100  | message        | err         |       |             |     |      |            | 0 | CALL
+100  | err            |             |       |             |     |      | scalar     | 0 | VAR 
+101  | blessed        |             |       |             |     |      |            | 0 | CALL
+101  | err            |             |       |             |     |      | scalar     | 0 | VAR 
+101  | isa            | err         |       |             |     |      |            | 0 | CALL
+101  | err            |             |       |             |     |      | scalar     | 0 | VAR 
+101  | Exception      |             |       |             |     |      |            | 0 | STR 
+102  | warn           |             |       |             |     |      |            | 0 | CALL
+102  | Error          |             |       |             |     |      |            | 0 | STR 
+102  | code           | err         |       |             |     |      |            | 0 | CALL
+102  | err            |             |       |             |     |      | scalar     | 0 | VAR 
+102  | message        | err         |       |             |     |      |            | 0 | CALL
+102  | err            |             |       |             |     |      | scalar     | 0 | VAR 
+104  | die            |             |       |             |     |      |            | 0 | CALL
+104  | err            |             |       |             |     |      | scalar     | 0 | VAR 
+104  | rethrow        |             |       |             |     |      |            | 0 | COM 
+104  | unknown        |             |       |             |     |      |            | 0 | COM 
+104  | errors         |             |       |             |     |      |            | 0 | COM 
+107  | result         |             |       |             |     |      | scalar     | 0 | VAR 
+110  | $!             |             |       |             |     |      |            | 0 | COM 
+110  | errno          |             |       |             |     |      |            | 0 | COM 
+110  | usage          |             |       |             |     |      |            | 0 | COM 
+111  | check_file     |             |       | main        |     |      |            | 1 | FUNC
+112  | path           |             |       |             | my  |      | scalar     | 1 | ARG 
+113  | -e             |             |       |             |     |      |            | 0 | CALL
+113  | path           |             |       |             |     |      | scalar     | 0 | VAR 
+114  | croak          |             |       |             |     |      |            | 0 | CALL
+114  | File           |             |       |             |     |      |            | 0 | STR 
+114  | $path          |             |       |             |     |      |            | 0 | STR 
+114  | found:         |             |       |             |     |      |            | 0 | STR 
+114  | $!             |             |       |             |     |      |            | 0 | STR 
+114  | path           |             |       |             |     |      | scalar     | 0 | VAR 

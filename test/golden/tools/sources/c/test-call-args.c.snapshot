@@ -1,0 +1,52 @@
+LINE | SYM              | PAR          | SCOPE | NS | MOD | CLUE         | TYPE    | D | CTX 
+./tools/sources/c/test-call-args.c:
+1    | test-call-args   |              |       |    |     |              |         | 0 | FILE
+1    | Test             |              |       |    |     |              |         | 0 | COM 
+1    | file             |              |       |    |     |              |         | 0 | COM 
+1    | argument-to-call |              |       |    |     |              |         | 0 | COM 
+1    | indexing         |              |       |    |     |              |         | 0 | COM 
+2    | <stdio.h>        |              |       |    |     |              |         | 0 | IMP 
+4    | Point            |              |       |    |     |              |         | 1 | TYPE
+5    | int              |              |       |    |     |              |         | 0 | TYPE
+6    | int              |              |       |    |     |              |         | 0 | TYPE
+9    | process_data     |              |       |    |     |              | void    | 1 | FUNC
+9    | value            | process_data |       |    |     |              | int     | 1 | ARG 
+9    | buffer           | process_data |       |    |     |              | char *  | 1 | ARG 
+9    | Point            |              |       |    |     |              |         | 0 | TYPE
+9    | point            | process_data |       |    |     |              | Point * | 1 | ARG 
+10   | printf           |              |       |    |     |              |         | 0 | CALL
+10   | Processing:      |              |       |    |     |              |         | 0 | STR 
+10   | %d               |              |       |    |     |              |         | 0 | STR 
+10   | value            |              |       |    |     | printf       |         | 0 | ARG 
+13   | init_system      |              |       |    |     |              | void    | 1 | FUNC
+14   | printf           |              |       |    |     |              |         | 0 | CALL
+14   | System           |              |       |    |     |              |         | 0 | STR 
+14   | initialized      |              |       |    |     |              |         | 0 | STR 
+17   | main             |              |       |    |     |              | int     | 1 | FUNC
+18   | my_value         |              |       |    |     |              | int     | 1 | VAR 
+19   | my_buffer        |              |       |    |     |              | char    | 1 | VAR 
+20   | my_point         |              |       |    |     |              | Point   | 1 | VAR 
+22   | Simple           |              |       |    |     |              |         | 0 | COM 
+22   | identifier       |              |       |    |     |              |         | 0 | COM 
+22   | arguments        |              |       |    |     |              |         | 0 | COM 
+23   | process_data     |              |       |    |     |              |         | 0 | CALL
+23   | my_value         |              |       |    |     | process_data |         | 0 | ARG 
+23   | my_buffer        |              |       |    |     | process_data |         | 0 | ARG 
+23   | my_point         |              |       |    |     | address      |         | 0 | VAR 
+25   | Mixed:           |              |       |    |     |              |         | 0 | COM 
+25   | identifier       |              |       |    |     |              |         | 0 | COM 
+25   | literal          |              |       |    |     |              |         | 0 | COM 
+25   | expression       |              |       |    |     |              |         | 0 | COM 
+26   | process_data     |              |       |    |     |              |         | 0 | CALL
+26   | my_value         |              |       |    |     | process_data |         | 0 | ARG 
+26   | literal          |              |       |    |     |              |         | 0 | STR 
+26   | string           |              |       |    |     |              |         | 0 | STR 
+26   | my_point         |              |       |    |     | address      |         | 0 | VAR 
+28   | arguments        |              |       |    |     |              |         | 0 | COM 
+29   | init_system      |              |       |    |     |              |         | 0 | CALL
+31   | Nested           |              |       |    |     |              |         | 0 | COM 
+31   | call             |              |       |    |     |              |         | 0 | COM 
+32   | printf           |              |       |    |     |              |         | 0 | CALL
+32   | Value:           |              |       |    |     |              |         | 0 | STR 
+32   | %d               |              |       |    |     |              |         | 0 | STR 
+32   | my_value         |              |       |    |     | printf       |         | 0 | ARG 

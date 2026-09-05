@@ -1,0 +1,80 @@
+LINE | SYM                | PAR  | SCOPE   | NS   | MOD | CLUE     | TYPE          | D | CTX 
+./tools/sources/go/(null):
+11   | msg1               |      | private | main |     | select   |               | 0 | VAR 
+13   | msg2               |      | private | main |     | select   |               | 0 | VAR 
+27   | msg                |      | private | main |     | select   |               | 0 | VAR 
+35   | msg                |      | private | main |     | select   |               | 0 | VAR 
+47   | msg                |      | private | main |     | select   |               | 0 | VAR 
+49   | msg                |      | private | main |     | select   |               | 0 | VAR 
+59   | val                |      | private | main |     | select   |               | 0 | VAR 
+
+./tools/sources/go/select.go:
+1    | select             |      |         |      |     |          |               | 0 | FILE
+1    | main               |      |         |      |     |          |               | 0 | NS  
+3    | time               |      |         | main |     |          |               | 0 | IMP 
+5    | selectOperations   |      | private | main |     |          |               | 1 | FUNC
+6    | ch1                |      | private | main |     |          |               | 1 | VAR 
+6    | make               |      |         |      |     | built-in |               | 0 | CALL
+7    | ch2                |      | private | main |     |          |               | 1 | VAR 
+7    | make               |      |         |      |     | built-in |               | 0 | CALL
+9    | Basic              |      |         |      |     |          |               | 0 | COM 
+11   | msg1               |      |         | main |     |          |               | 0 | VAR 
+11   | ch1                |      | private | main |     | receive  |               | 0 | VAR 
+12   | println            |      |         |      |     | built-in |               | 0 | CALL
+12   | msg1               |      |         | main |     | println  |               | 0 | ARG 
+13   | msg2               |      |         | main |     |          |               | 0 | VAR 
+13   | ch2                |      | private | main |     | receive  |               | 0 | VAR 
+14   | println            |      |         |      |     | built-in |               | 0 | CALL
+14   | msg2               |      |         | main |     | println  |               | 0 | ARG 
+17   | send               |      |         |      |     |          |               | 0 | COM 
+19   | ch1                |      | private | main |     | send     |               | 0 | VAR 
+19   | hello              |      |         |      |     |          |               | 0 | STR 
+20   | println            |      |         |      |     | built-in |               | 0 | CALL
+20   | sent               |      |         |      |     |          |               | 0 | STR 
+20   | ch1                |      |         |      |     |          |               | 0 | STR 
+21   | ch2                |      | private | main |     | send     |               | 0 | VAR 
+21   | world              |      |         |      |     |          |               | 0 | STR 
+22   | println            |      |         |      |     | built-in |               | 0 | CALL
+22   | sent               |      |         |      |     |          |               | 0 | STR 
+22   | ch2                |      |         |      |     |          |               | 0 | STR 
+27   | msg                |      |         | main |     |          |               | 0 | VAR 
+27   | ch1                |      | private | main |     | receive  |               | 0 | VAR 
+28   | println            |      |         |      |     | built-in |               | 0 | CALL
+28   | msg                |      |         | main |     | println  |               | 0 | ARG 
+30   | println            |      |         |      |     | built-in |               | 0 | CALL
+30   | message            |      |         |      |     |          |               | 0 | STR 
+33   | timeout            |      |         |      |     |          |               | 0 | COM 
+35   | msg                |      |         | main |     |          |               | 0 | VAR 
+35   | ch1                |      | private | main |     | receive  |               | 0 | VAR 
+36   | println            |      |         |      |     | built-in |               | 0 | CALL
+36   | msg                |      |         | main |     | println  |               | 0 | ARG 
+37   | After              | time |         |      |     |          |               | 0 | CALL
+37   | time               |      |         | main |     |          |               | 0 | VAR 
+37   | Second             | time |         | main |     |          |               | 0 | PROP
+38   | println            |      |         |      |     | built-in |               | 0 | CALL
+38   | timeout            |      |         |      |     |          |               | 0 | STR 
+42   | fanIn              |      | private | main |     |          | <-chan string | 1 | FUNC
+42   | ch1                |      |         |      |     |          | <-chan string | 1 | ARG 
+42   | ch2                |      |         |      |     |          | <-chan string | 1 | ARG 
+43   | out                |      | private | main |     |          |               | 1 | VAR 
+43   | make               |      |         |      |     | built-in |               | 0 | CALL
+44   | func               |      |         | main |     | go       |               | 0 | CALL
+44   | <lambda>           |      |         | main |     |          |               | 1 | LAM 
+47   | msg                |      |         | main |     |          |               | 0 | VAR 
+47   | ch1                |      | private | main |     | receive  |               | 0 | VAR 
+48   | out                |      | private | main |     | send     |               | 0 | VAR 
+48   | msg                |      |         | main |     |          |               | 0 | VAR 
+49   | msg                |      |         | main |     |          |               | 0 | VAR 
+49   | ch2                |      | private | main |     | receive  |               | 0 | VAR 
+50   | out                |      | private | main |     | send     |               | 0 | VAR 
+50   | msg                |      |         | main |     |          |               | 0 | VAR 
+54   | out                |      |         | main |     |          |               | 0 | VAR 
+57   | nonBlockingReceive |      | private | main |     |          |               | 1 | FUNC
+57   | ch                 |      |         |      |     |          | <-chan int    | 1 | ARG 
+59   | val                |      |         | main |     |          |               | 0 | VAR 
+59   | ch                 |      | private | main |     | receive  |               | 0 | VAR 
+60   | println            |      |         |      |     | built-in |               | 0 | CALL
+60   | val                |      |         | main |     | println  |               | 0 | ARG 
+62   | println            |      |         |      |     | built-in |               | 0 | CALL
+62   | channel            |      |         |      |     |          |               | 0 | STR 
+62   | empty              |      |         |      |     |          |               | 0 | STR 

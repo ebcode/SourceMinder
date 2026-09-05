@@ -1,0 +1,95 @@
+LINE | SYM                 | PAR                 | SCOPE | NS | MOD   | CLUE  | TYPE | D | CTX  
+./tools/sources/python/async-await.py:
+1    | async-await         |                     |       |    |       |       |      | 0 | FILE 
+1    | Python              |                     |       |    |       |       |      | 0 | STR  
+1    | async/await         |                     |       |    |       |       |      | 0 | STR  
+1    | syntax.             |                     |       |    |       |       |      | 0 | STR  
+3    | asyncio             |                     |       |    |       |       |      | 0 | IMP  
+6    | fetch_data          |                     |       |    | async |       |      | 1 | FUNC 
+6    | url                 | fetch_data          |       |    |       |       |      | 0 | ARG  
+7    | Basic               |                     |       |    |       |       |      | 0 | STR  
+7    | function.           |                     |       |    |       |       |      | 0 | STR  
+8    | sleep               | asyncio             |       |    | await |       |      | 0 | CALL 
+8    | asyncio             |                     |       |    |       |       |      | 0 | VAR  
+9    | f"Data from {url}"  |                     |       |    |       |       |      | 0 | STR  
+9    | Data                |                     |       |    |       |       |      | 0 | STR  
+9    | url                 |                     |       |    |       |       |      | 0 | VAR  
+12   | fetch_multiple      |                     |       |    | async |       |      | 1 | FUNC 
+13   | function            |                     |       |    |       |       |      | 0 | STR  
+13   | calling             |                     |       |    |       |       |      | 0 | STR  
+13   | multiple            |                     |       |    |       |       |      | 0 | STR  
+13   | awaits.             |                     |       |    |       |       |      | 0 | STR  
+14   | result1             |                     |       |    |       |       |      | 1 | VAR  
+14   | fetch_data          |                     |       |    | await |       |      | 0 | CALL 
+14   | url1                |                     |       |    |       |       |      | 0 | STR  
+15   | result2             |                     |       |    |       |       |      | 1 | VAR  
+15   | fetch_data          |                     |       |    | await |       |      | 0 | CALL 
+15   | url2                |                     |       |    |       |       |      | 0 | STR  
+16   | result1             |                     |       |    |       |       |      | 0 | VAR  
+16   | result2             |                     |       |    |       |       |      | 0 | VAR  
+19   | concurrent_fetch    |                     |       |    | async |       |      | 1 | FUNC 
+20   | Concurrent          |                     |       |    |       |       |      | 0 | STR  
+20   | operations.         |                     |       |    |       |       |      | 0 | STR  
+21   | tasks               |                     |       |    |       |       |      | 1 | VAR  
+22   | fetch_data          |                     |       |    |       |       |      | 0 | CALL 
+22   | url1                |                     |       |    |       |       |      | 0 | STR  
+23   | fetch_data          |                     |       |    |       |       |      | 0 | CALL 
+23   | url2                |                     |       |    |       |       |      | 0 | STR  
+24   | fetch_data          |                     |       |    |       |       |      | 0 | CALL 
+24   | url3                |                     |       |    |       |       |      | 0 | STR  
+26   | results             |                     |       |    |       |       |      | 1 | VAR  
+26   | gather              | asyncio             |       |    | await |       |      | 0 | CALL 
+26   | asyncio             |                     |       |    |       |       |      | 0 | VAR  
+26   | tasks               |                     |       |    |       |       |      | 0 | VAR  
+27   | results             |                     |       |    |       |       |      | 0 | VAR  
+30   | async_generator     |                     |       |    | async |       |      | 1 | FUNC 
+31   | generator           |                     |       |    |       |       |      | 0 | STR  
+31   | function.           |                     |       |    |       |       |      | 0 | STR  
+32   | ii                  |                     |       |    |       |       |      | 0 | VAR  
+32   | range               |                     |       |    |       |       |      | 0 | CALL 
+33   | sleep               | asyncio             |       |    | await |       |      | 0 | CALL 
+33   | asyncio             |                     |       |    |       |       |      | 0 | VAR  
+34   | ii                  |                     |       |    |       | yield |      | 0 | VAR  
+37   | consume_async_gen   |                     |       |    | async |       |      | 1 | FUNC 
+38   | Consuming           |                     |       |    |       |       |      | 0 | STR  
+38   | generator.          |                     |       |    |       |       |      | 0 | STR  
+39   | value               |                     |       |    |       |       |      | 0 | VAR  
+39   | async_generator     |                     |       |    |       |       |      | 0 | CALL 
+40   | print               |                     |       |    |       |       |      | 0 | CALL 
+40   | value               |                     |       |    |       | print |      | 0 | ARG  
+43   | AsyncContextManager |                     |       |    |       |       |      | 1 | CLASS
+44   | context             |                     |       |    |       |       |      | 0 | STR  
+44   | manager.            |                     |       |    |       |       |      | 0 | STR  
+46   | __aenter__          | AsyncContextManager |       |    | async |       |      | 1 | FUNC 
+46   | self                | __aenter__          |       |    |       |       |      | 0 | ARG  
+47   | sleep               | asyncio             |       |    | await |       |      | 0 | CALL 
+47   | asyncio             |                     |       |    |       |       |      | 0 | VAR  
+48   | self                |                     |       |    |       |       |      | 0 | VAR  
+50   | __aexit__           | AsyncContextManager |       |    | async |       |      | 1 | FUNC 
+50   | self                | __aexit__           |       |    |       |       |      | 0 | ARG  
+50   | exc_type            | __aexit__           |       |    |       |       |      | 0 | ARG  
+50   | exc_val             | __aexit__           |       |    |       |       |      | 0 | ARG  
+50   | exc_tb              | __aexit__           |       |    |       |       |      | 0 | ARG  
+51   | sleep               | asyncio             |       |    | await |       |      | 0 | CALL 
+51   | asyncio             |                     |       |    |       |       |      | 0 | VAR  
+54   | use_async_context   |                     |       |    | async |       |      | 1 | FUNC 
+55   | Using               |                     |       |    |       |       |      | 0 | STR  
+55   | context             |                     |       |    |       |       |      | 0 | STR  
+55   | manager.            |                     |       |    |       |       |      | 0 | STR  
+56   | AsyncContextManager |                     |       |    |       |       |      | 0 | CALL 
+57   | fetch_data          |                     |       |    | await |       |      | 0 | CALL 
+57   | example             |                     |       |    |       |       |      | 0 | STR  
+60   | async_comprehension |                     |       |    | async |       |      | 1 | FUNC 
+61   | comprehension.      |                     |       |    |       |       |      | 0 | STR  
+62   | results             |                     |       |    |       |       |      | 1 | VAR  
+62   | xx                  |                     |       |    |       |       |      | 0 | VAR  
+62   | xx                  |                     |       |    |       |       |      | 0 | VAR  
+62   | async_generator     |                     |       |    |       |       |      | 0 | CALL 
+63   | results             |                     |       |    |       |       |      | 0 | VAR  
+66   | main                |                     |       |    | async |       |      | 1 | FUNC 
+67   | Main                |                     |       |    |       |       |      | 0 | STR  
+67   | function.           |                     |       |    |       |       |      | 0 | STR  
+68   | result              |                     |       |    |       |       |      | 1 | VAR  
+68   | fetch_data          |                     |       |    | await |       |      | 0 | CALL 
+68   | main                |                     |       |    |       |       |      | 0 | STR  
+69   | result              |                     |       |    |       |       |      | 0 | VAR  

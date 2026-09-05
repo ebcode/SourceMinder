@@ -1,0 +1,29 @@
+LINE | SYM          | PAR | SCOPE  | NS   | MOD | CLUE | TYPE         | D | CTX  
+./tools/sources/go/structs.go:
+1    | structs      |     |        |      |     |      |              | 0 | FILE 
+1    | main         |     |        |      |     |      |              | 0 | NS   
+3    | User         |     |        |      |     |      |              | 0 | COM  
+3    | represents   |     |        |      |     |      |              | 0 | COM  
+3    | basic        |     |        |      |     |      |              | 0 | COM  
+3    | various      |     |        |      |     |      |              | 0 | COM  
+3    | field        |     |        |      |     |      |              | 0 | COM  
+3    | types        |     |        |      |     |      |              | 0 | COM  
+4    | User         |     | public | main |     |      |              | 1 | CLASS
+5    | ID           |     | public | main |     |      | int          | 1 | PROP 
+6    | Name         |     | public | main |     |      | string       | 1 | PROP 
+7    | Email        |     | public | main |     |      | string       | 1 | PROP 
+8    | Age          |     | public | main |     |      | int          | 1 | PROP 
+9    | IsActive     |     | public | main |     |      | bool         | 1 | PROP 
+12   | Point        |     |        |      |     |      |              | 0 | COM  
+12   | represents   |     |        |      |     |      |              | 0 | COM  
+12   | coordinate   |     |        |      |     |      |              | 0 | COM  
+13   | Point        |     | public | main |     |      |              | 1 | CLASS
+18   | Config       |     |        |      |     |      |              | 0 | COM  
+18   | nested       |     |        |      |     |      |              | 0 | COM  
+19   | Config       |     | public | main |     |      |              | 1 | CLASS
+20   | Server       |     | public | main |     |      | ServerConfig | 1 | PROP 
+21   | Database     |     | public | main |     |      | string       | 1 | PROP 
+22   | Port         |     | public | main |     |      | int          | 1 | PROP 
+25   | ServerConfig |     | public | main |     |      |              | 1 | CLASS
+26   | Host         |     | public | main |     |      | string       | 1 | PROP 
+27   | Timeout      |     | public | main |     |      | int          | 1 | PROP 

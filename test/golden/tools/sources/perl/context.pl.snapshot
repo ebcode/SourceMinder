@@ -1,0 +1,132 @@
+LINE | SYM                | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/context.pl:
+1    | context            |     |       |    |     |      |        | 0 | FILE
+2    | strict             |     |       |    |     |      |        | 0 | IMP 
+3    | warnings           |     |       |    |     |      |        | 0 | IMP 
+5    | wantarray:         |     |       |    |     |      |        | 0 | COM 
+5    | list               |     |       |    |     |      |        | 0 | COM 
+5    | vs                 |     |       |    |     |      |        | 0 | COM 
+5    | vs                 |     |       |    |     |      |        | 0 | COM 
+5    | void               |     |       |    |     |      |        | 0 | COM 
+5    | context            |     |       |    |     |      |        | 0 | COM 
+6    | context_aware      |     |       |    |     |      |        | 1 | FUNC
+7    | wantarray          |     |       |    |     |      |        | 0 | CALL
+9    | defined            |     |       |    |     |      |        | 0 | CALL
+9    | wantarray          |     |       |    |     |      |        | 0 | CALL
+12   | void               |     |       |    |     |      |        | 0 | COM 
+12   | context            |     |       |    |     |      |        | 0 | COM 
+12   | side               |     |       |    |     |      |        | 0 | COM 
+12   | effects            |     |       |    |     |      |        | 0 | COM 
+16   | list               |     |       |    | my  |      | array  | 1 | VAR 
+16   | context_aware      |     |       |    |     |      |        | 0 | CALL
+16   | list               |     |       |    |     |      |        | 0 | COM 
+16   | context            |     |       |    |     |      |        | 0 | COM 
+17   | scalar             |     |       |    | my  |      | scalar | 1 | VAR 
+17   | context_aware      |     |       |    |     |      |        | 0 | CALL
+17   | context            |     |       |    |     |      |        | 0 | COM 
+18   | context_aware      |     |       |    |     |      |        | 0 | CALL
+18   | void               |     |       |    |     |      |        | 0 | COM 
+18   | context            |     |       |    |     |      |        | 0 | COM 
+20   | Array              |     |       |    |     |      |        | 0 | COM 
+20   | context            |     |       |    |     |      |        | 0 | COM 
+20   | yields             |     |       |    |     |      |        | 0 | COM 
+20   | count              |     |       |    |     |      |        | 0 | COM 
+21   | items              |     |       |    | my  |      | array  | 1 | VAR 
+22   | count              |     |       |    | my  |      | scalar | 1 | VAR 
+22   | items              |     |       |    |     |      | array  | 0 | VAR 
+23   | last               |     |       |    | my  |      | scalar | 1 | VAR 
+23   | items              |     |       |    |     |      | array  | 0 | VAR 
+25   | Hash               |     |       |    |     |      |        | 0 | COM 
+25   | context            |     |       |    |     |      |        | 0 | COM 
+25   | bucket             |     |       |    |     |      |        | 0 | COM 
+25   | usage              |     |       |    |     |      |        | 0 | COM 
+27   | hinfo              |     |       |    | my  |      | scalar | 1 | VAR 
+29   | Forcing            |     |       |    |     |      |        | 0 | COM 
+29   | context            |     |       |    |     |      |        | 0 | COM 
+30   | num_items          |     |       |    | my  |      | scalar | 1 | VAR 
+30   | scalar             |     |       |    |     |      |        | 0 | CALL
+30   | items              |     |       |    |     |      | array  | 0 | VAR 
+31   | str                |     |       |    | my  |      | scalar | 1 | VAR 
+31   | scalar             |     |       |    |     |      |        | 0 | CALL
+31   | reverse            |     |       |    |     |      |        | 0 | CALL
+31   | hello              |     |       |    |     |      |        | 0 | STR 
+33   | localtime          |     |       |    |     |      |        | 0 | COM 
+33   | context            |     |       |    |     |      |        | 0 | COM 
+33   | sensitivity        |     |       |    |     |      |        | 0 | COM 
+34   | time_parts         |     |       |    | my  |      | array  | 1 | VAR 
+34   | localtime          |     |       |    |     |      |        | 0 | CALL
+34   | time               |     |       |    |     |      |        | 0 | CALL
+35   | time_str           |     |       |    | my  |      | scalar | 1 | VAR 
+35   | localtime          |     |       |    |     |      |        | 0 | CALL
+35   | time               |     |       |    |     |      |        | 0 | CALL
+37   | String             |     |       |    |     |      |        | 0 | COM 
+37   | vs                 |     |       |    |     |      |        | 0 | COM 
+37   | numeric            |     |       |    |     |      |        | 0 | COM 
+37   | context            |     |       |    |     |      |        | 0 | COM 
+38   | val                |     |       |    | my  |      | scalar | 1 | VAR 
+39   | num                |     |       |    | my  |      | scalar | 1 | VAR 
+39   | val                |     |       |    |     |      | scalar | 0 | VAR 
+40   | str2               |     |       |    | my  |      | scalar | 1 | VAR 
+40   | val                |     |       |    |     |      | scalar | 0 | VAR 
+42   | Boolean            |     |       |    |     |      |        | 0 | COM 
+42   | context            |     |       |    |     |      |        | 0 | COM 
+43   | empty              |     |       |    | my  |      | array  | 1 | VAR 
+44   | empty              |     |       |    |     |      | array  | 0 | VAR 
+44   | array              |     |       |    |     |      |        | 0 | COM 
+44   | bool               |     |       |    |     |      |        | 0 | COM 
+44   | context            |     |       |    |     |      |        | 0 | COM 
+45   | hash               |     |       |    |     |      |        | 0 | COM 
+45   | bool               |     |       |    |     |      |        | 0 | COM 
+45   | context            |     |       |    |     |      |        | 0 | COM 
+47   | short-circuit      |     |       |    |     |      |        | 0 | COM 
+47   | boolean            |     |       |    |     |      |        | 0 | COM 
+47   | context            |     |       |    |     |      |        | 0 | COM 
+48   | defined-or         |     |       |    |     |      |        | 0 | COM 
+50   | Context            |     |       |    |     |      |        | 0 | COM 
+50   | propagation        |     |       |    |     |      |        | 0 | COM 
+50   | calls              |     |       |    |     |      |        | 0 | COM 
+51   | wrap_context_aware |     |       |    |     |      |        | 1 | FUNC
+52   | context_aware      |     |       |    |     |      |        | 0 | CALL
+52   | propagates         |     |       |    |     |      |        | 0 | COM 
+52   | callers            |     |       |    |     |      |        | 0 | COM 
+52   | context            |     |       |    |     |      |        | 0 | COM 
+55   | r1                 |     |       |    | my  |      | array  | 1 | VAR 
+55   | wrap_context_aware |     |       |    |     |      |        | 0 | CALL
+56   | r2                 |     |       |    | my  |      | scalar | 1 | VAR 
+56   | wrap_context_aware |     |       |    |     |      |        | 0 | CALL
+58   | grep/map           |     |       |    |     |      |        | 0 | COM 
+58   | impose             |     |       |    |     |      |        | 0 | COM 
+58   | list               |     |       |    |     |      |        | 0 | COM 
+58   | context            |     |       |    |     |      |        | 0 | COM 
+58   | block              |     |       |    |     |      |        | 0 | COM 
+59   | nums               |     |       |    | my  |      | array  | 1 | VAR 
+60   | odds               |     |       |    | my  |      | array  | 1 | VAR 
+60   | nums               |     |       |    |     |      | array  | 0 | VAR 
+61   | doubled            |     |       |    | my  |      | array  | 1 | VAR 
+61   | nums               |     |       |    |     |      | array  | 0 | VAR 
+63   | Subroutine         |     |       |    |     |      |        | 0 | COM 
+63   | returns            |     |       |    |     |      |        | 0 | COM 
+63   | differently        |     |       |    |     |      |        | 0 | COM 
+63   | context            |     |       |    |     |      |        | 0 | COM 
+64   | fetch_config       |     |       |    |     |      |        | 1 | FUNC
+65   | cfg                |     |       |    | my  |      | hash   | 1 | VAR 
+65   | host               |     |       |    |     |      |        | 0 | PROP
+65   | localhost          |     |       |    |     |      |        | 0 | STR 
+65   | port               |     |       |    |     |      |        | 0 | PROP
+66   | wantarray          |     |       |    |     |      |        | 0 | CALL
+66   | cfg                |     |       |    |     |      | hash   | 0 | VAR 
+66   | cfg                |     |       |    |     |      | hash   | 0 | VAR 
+69   | flat_cfg           |     |       |    | my  |      | hash   | 1 | VAR 
+69   | fetch_config       |     |       |    |     |      |        | 0 | CALL
+70   | cfg_ref            |     |       |    | my  |      | scalar | 1 | VAR 
+70   | fetch_config       |     |       |    |     |      |        | 0 | CALL
+72   | String             |     |       |    |     |      |        | 0 | COM 
+72   | repetition         |     |       |    |     |      |        | 0 | COM 
+72   | vs                 |     |       |    |     |      |        | 0 | COM 
+72   | list               |     |       |    |     |      |        | 0 | COM 
+72   | repetition         |     |       |    |     |      |        | 0 | COM 
+72   | context            |     |       |    |     |      |        | 0 | COM 
+73   | str_rep            |     |       |    | my  |      | scalar | 1 | VAR 
+73   | ab                 |     |       |    |     |      |        | 0 | STR 
+73   | ababab             |     |       |    |     |      |        | 0 | COM 
+74   | list_rep           |     |       |    | my  |      | array  | 1 | VAR 

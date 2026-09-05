@@ -1,0 +1,278 @@
+LINE | SYM                        | PAR           | SCOPE | NS | MOD | CLUE         | TYPE | D | CTX  
+./tools/sources/python/keywords.py:
+1    | keywords                   |               |       |    |     |              |      | 0 | FILE 
+1    | Every                      |               |       |    |     |              |      | 0 | STR  
+1    | word                       |               |       |    |     |              |      | 0 | STR  
+1    | python/config/keywords.txt |               |       |    |     |              |      | 0 | STR  
+1    | used                       |               |       |    |     |              |      | 0 | STR  
+1    | naming                     |               |       |    |     |              |      | 0 | STR  
+1    | position.                  |               |       |    |     |              |      | 0 | STR  
+1    | Python                     |               |       |    |     |              |      | 0 | STR  
+1    | reserves                   |               |       |    |     |              |      | 0 | STR  
+1    | almost                     |               |       |    |     |              |      | 0 | STR  
+1    | self                       |               |       |    |     |              |      | 0 | STR  
+1    | cls                        |               |       |    |     |              |      | 0 | STR  
+1    | appear                     |               |       |    |     |              |      | 0 | STR  
+1    | bare                       |               |       |    |     |              |      | 0 | STR  
+1    | --                         |               |       |    |     |              |      | 0 | STR  
+1    | neither                    |               |       |    |     |              |      | 0 | STR  
+1    | actually                   |               |       |    |     |              |      | 0 | STR  
+1    | Python                     |               |       |    |     |              |      | 0 | STR  
+1    | keyword                    |               |       |    |     |              |      | 0 | STR  
+1    | naming                     |               |       |    |     |              |      | 0 | STR  
+1    | conventions                |               |       |    |     |              |      | 0 | STR  
+1    | keyword                    |               |       |    |     |              |      | 0 | STR  
+1    | list                       |               |       |    |     |              |      | 0 | STR  
+1    | probably                   |               |       |    |     |              |      | 0 | STR  
+1    | contain.                   |               |       |    |     |              |      | 0 | STR  
+1    | Everything                 |               |       |    |     |              |      | 0 | STR  
+1    | appears                    |               |       |    |     |              |      | 0 | STR  
+1    | case                       |               |       |    |     |              |      | 0 | STR  
+1    | variant.                   |               |       |    |     |              |      | 0 | STR  
+1    | ordinary                   |               |       |    |     |              |      | 0 | STR  
+1    | identifiers                |               |       |    |     |              |      | 0 | STR  
+1    | Python                     |               |       |    |     |              |      | 0 | STR  
+1    | symbol                     |               |       |    |     |              |      | 0 | STR  
+1    | filter                     |               |       |    |     |              |      | 0 | STR  
+1    | lowercases                 |               |       |    |     |              |      | 0 | STR  
+1    | comparing                  |               |       |    |     |              |      | 0 | STR  
+1    | collide                    |               |       |    |     |              |      | 0 | STR  
+1    | keyword                    |               |       |    |     |              |      | 0 | STR  
+1    | list                       |               |       |    |     |              |      | 0 | STR  
+1    | exactly                    |               |       |    |     |              |      | 0 | STR  
+1    | bare                       |               |       |    |     |              |      | 0 | STR  
+1    | words                      |               |       |    |     |              |      | 0 | STR  
+1    | would.                     |               |       |    |     |              |      | 0 | STR  
+1    | identifiers                |               |       |    |     |              |      | 0 | STR  
+1    | two                        |               |       |    |     |              |      | 0 | STR  
+1    | characters                 |               |       |    |     |              |      | 0 | STR  
+1    | longer                     |               |       |    |     |              |      | 0 | STR  
+1    | nothing                    |               |       |    |     |              |      | 0 | STR  
+1    | dropped                    |               |       |    |     |              |      | 0 | STR  
+1    | minimum                    |               |       |    |     |              |      | 0 | STR  
+1    | length                     |               |       |    |     |              |      | 0 | STR  
+1    | rather                     |               |       |    |     |              |      | 0 | STR  
+1    | keyword-ness.              |               |       |    |     |              |      | 0 | STR  
+15   | two                        |               |       |    |     |              |      | 0 | COM  
+15   | list                       |               |       |    |     |              |      | 0 | COM  
+15   | entries                    |               |       |    |     |              |      | 0 | COM  
+15   | legal                      |               |       |    |     |              |      | 0 | COM  
+15   | Python                     |               |       |    |     |              |      | 0 | COM  
+15   | identifiers.               |               |       |    |     |              |      | 0 | COM  
+16   | self                       |               |       |    |     |              |      | 1 | VAR  
+16   | self                       |               |       |    |     |              |      | 0 | STR  
+17   | cls                        |               |       |    |     |              |      | 1 | VAR  
+17   | cls                        |               |       |    |     |              |      | 0 | STR  
+19   | Capitalized                |               |       |    |     |              |      | 0 | COM  
+19   | variants                   |               |       |    |     |              |      | 0 | COM  
+19   | module-level               |               |       |    |     |              |      | 0 | COM  
+19   | names.                     |               |       |    |     |              |      | 0 | COM  
+20   | And                        |               |       |    |     |              |      | 1 | VAR  
+21   | As                         |               |       |    |     |              |      | 1 | VAR  
+22   | Assert                     |               |       |    |     |              |      | 1 | VAR  
+23   | Async                      |               |       |    |     |              |      | 1 | VAR  
+24   | Await                      |               |       |    |     |              |      | 1 | VAR  
+25   | Break                      |               |       |    |     |              |      | 1 | VAR  
+26   | Class                      |               |       |    |     |              |      | 1 | VAR  
+27   | Continue                   |               |       |    |     |              |      | 1 | VAR  
+28   | Def                        |               |       |    |     |              |      | 1 | VAR  
+29   | Del                        |               |       |    |     |              |      | 1 | VAR  
+30   | Elif                       |               |       |    |     |              |      | 1 | VAR  
+31   | Else                       |               |       |    |     |              |      | 1 | VAR  
+32   | Except                     |               |       |    |     |              |      | 1 | VAR  
+33   | Finally                    |               |       |    |     |              |      | 1 | VAR  
+34   | For                        |               |       |    |     |              |      | 1 | VAR  
+35   | From                       |               |       |    |     |              |      | 1 | VAR  
+36   | Global                     |               |       |    |     |              |      | 1 | VAR  
+37   | If                         |               |       |    |     |              |      | 1 | VAR  
+38   | Import                     |               |       |    |     |              |      | 1 | VAR  
+39   | In                         |               |       |    |     |              |      | 1 | VAR  
+40   | Is                         |               |       |    |     |              |      | 1 | VAR  
+41   | Lambda                     |               |       |    |     |              |      | 1 | VAR  
+42   | Nonlocal                   |               |       |    |     |              |      | 1 | VAR  
+43   | Not                        |               |       |    |     |              |      | 1 | VAR  
+44   | Or                         |               |       |    |     |              |      | 1 | VAR  
+45   | Pass                       |               |       |    |     |              |      | 1 | VAR  
+46   | Raise                      |               |       |    |     |              |      | 1 | VAR  
+47   | Return                     |               |       |    |     |              |      | 1 | VAR  
+48   | Try                        |               |       |    |     |              |      | 1 | VAR  
+49   | While                      |               |       |    |     |              |      | 1 | VAR  
+50   | With                       |               |       |    |     |              |      | 1 | VAR  
+51   | Yield                      |               |       |    |     |              |      | 1 | VAR  
+52   | Self                       |               |       |    |     |              |      | 1 | VAR  
+53   | Cls                        |               |       |    |     |              |      | 1 | VAR  
+55   | Upper-case                 |               |       |    |     |              |      | 0 | COM  
+55   | variants                   |               |       |    |     |              |      | 0 | COM  
+55   | module-level               |               |       |    |     |              |      | 0 | COM  
+55   | constants.                 |               |       |    |     |              |      | 0 | COM  
+56   | FALSE                      |               |       |    |     |              |      | 1 | VAR  
+56   | False                      |               |       |    |     |              |      | 0 | STR  
+57   | NONE                       |               |       |    |     |              |      | 1 | VAR  
+57   | None                       |               |       |    |     |              |      | 0 | STR  
+58   | TRUE                       |               |       |    |     |              |      | 1 | VAR  
+58   | True                       |               |       |    |     |              |      | 0 | STR  
+59   | AND                        |               |       |    |     |              |      | 1 | VAR  
+60   | AS                         |               |       |    |     |              |      | 1 | VAR  
+61   | ASSERT                     |               |       |    |     |              |      | 1 | VAR  
+62   | ASYNC                      |               |       |    |     |              |      | 1 | VAR  
+63   | AWAIT                      |               |       |    |     |              |      | 1 | VAR  
+64   | BREAK                      |               |       |    |     |              |      | 1 | VAR  
+65   | CLASS                      |               |       |    |     |              |      | 1 | VAR  
+66   | CONTINUE                   |               |       |    |     |              |      | 1 | VAR  
+67   | DEF                        |               |       |    |     |              |      | 1 | VAR  
+68   | DEL                        |               |       |    |     |              |      | 1 | VAR  
+69   | ELIF                       |               |       |    |     |              |      | 1 | VAR  
+70   | ELSE                       |               |       |    |     |              |      | 1 | VAR  
+71   | EXCEPT                     |               |       |    |     |              |      | 1 | VAR  
+72   | FINALLY                    |               |       |    |     |              |      | 1 | VAR  
+73   | FOR                        |               |       |    |     |              |      | 1 | VAR  
+74   | FROM                       |               |       |    |     |              |      | 1 | VAR  
+75   | GLOBAL                     |               |       |    |     |              |      | 1 | VAR  
+76   | IF                         |               |       |    |     |              |      | 1 | VAR  
+77   | IMPORT                     |               |       |    |     |              |      | 1 | VAR  
+78   | IN                         |               |       |    |     |              |      | 1 | VAR  
+79   | IS                         |               |       |    |     |              |      | 1 | VAR  
+80   | LAMBDA                     |               |       |    |     |              |      | 1 | VAR  
+81   | NONLOCAL                   |               |       |    |     |              |      | 1 | VAR  
+82   | NOT                        |               |       |    |     |              |      | 1 | VAR  
+83   | OR                         |               |       |    |     |              |      | 1 | VAR  
+84   | PASS                       |               |       |    |     |              |      | 1 | VAR  
+85   | RAISE                      |               |       |    |     |              |      | 1 | VAR  
+86   | RETURN                     |               |       |    |     |              |      | 1 | VAR  
+87   | TRY                        |               |       |    |     |              |      | 1 | VAR  
+88   | WHILE                      |               |       |    |     |              |      | 1 | VAR  
+89   | WITH                       |               |       |    |     |              |      | 1 | VAR  
+90   | YIELD                      |               |       |    |     |              |      | 1 | VAR  
+91   | SELF                       |               |       |    |     |              |      | 1 | VAR  
+91   | self                       |               |       |    |     |              |      | 0 | STR  
+92   | CLS                        |               |       |    |     |              |      | 1 | VAR  
+92   | cls                        |               |       |    |     |              |      | 0 | STR  
+94   | Capitalized                |               |       |    |     |              |      | 0 | COM  
+94   | variants                   |               |       |    |     |              |      | 0 | COM  
+94   | function                   |               |       |    |     |              |      | 0 | COM  
+94   | names.                     |               |       |    |     |              |      | 0 | COM  
+95   | And                        |               |       |    |     |              |      | 1 | FUNC 
+98   | As                         |               |       |    |     |              |      | 1 | FUNC 
+101  | Assert                     |               |       |    |     |              |      | 1 | FUNC 
+104  | Async                      |               |       |    |     |              |      | 1 | FUNC 
+107  | Await                      |               |       |    |     |              |      | 1 | FUNC 
+110  | Break                      |               |       |    |     |              |      | 1 | FUNC 
+113  | Class                      |               |       |    |     |              |      | 1 | FUNC 
+116  | Continue                   |               |       |    |     |              |      | 1 | FUNC 
+119  | Def                        |               |       |    |     |              |      | 1 | FUNC 
+122  | Del                        |               |       |    |     |              |      | 1 | FUNC 
+125  | Elif                       |               |       |    |     |              |      | 1 | FUNC 
+128  | Else                       |               |       |    |     |              |      | 1 | FUNC 
+131  | Except                     |               |       |    |     |              |      | 1 | FUNC 
+134  | Finally                    |               |       |    |     |              |      | 1 | FUNC 
+137  | For                        |               |       |    |     |              |      | 1 | FUNC 
+140  | From                       |               |       |    |     |              |      | 1 | FUNC 
+143  | Global                     |               |       |    |     |              |      | 1 | FUNC 
+146  | If                         |               |       |    |     |              |      | 1 | FUNC 
+149  | Import                     |               |       |    |     |              |      | 1 | FUNC 
+152  | In                         |               |       |    |     |              |      | 1 | FUNC 
+155  | Is                         |               |       |    |     |              |      | 1 | FUNC 
+158  | Lambda                     |               |       |    |     |              |      | 1 | FUNC 
+161  | Nonlocal                   |               |       |    |     |              |      | 1 | FUNC 
+164  | Not                        |               |       |    |     |              |      | 1 | FUNC 
+167  | Or                         |               |       |    |     |              |      | 1 | FUNC 
+170  | Pass                       |               |       |    |     |              |      | 1 | FUNC 
+173  | Raise                      |               |       |    |     |              |      | 1 | FUNC 
+176  | Return                     |               |       |    |     |              |      | 1 | FUNC 
+179  | Try                        |               |       |    |     |              |      | 1 | FUNC 
+182  | While                      |               |       |    |     |              |      | 1 | FUNC 
+185  | With                       |               |       |    |     |              |      | 1 | FUNC 
+188  | Yield                      |               |       |    |     |              |      | 1 | FUNC 
+191  | Self                       |               |       |    |     |              |      | 1 | FUNC 
+192  | self                       |               |       |    |     |              |      | 0 | STR  
+194  | Cls                        |               |       |    |     |              |      | 1 | FUNC 
+195  | cls                        |               |       |    |     |              |      | 0 | STR  
+197  | Capitalized                |               |       |    |     |              |      | 0 | COM  
+197  | variants                   |               |       |    |     |              |      | 0 | COM  
+197  | names.                     |               |       |    |     |              |      | 0 | COM  
+198  | AndHolder                  |               |       |    |     |              |      | 1 | CLASS
+201  | AsHolder                   |               |       |    |     |              |      | 1 | CLASS
+204  | AssertHolder               |               |       |    |     |              |      | 1 | CLASS
+207  | AsyncHolder                |               |       |    |     |              |      | 1 | CLASS
+210  | AwaitHolder                |               |       |    |     |              |      | 1 | CLASS
+213  | BreakHolder                |               |       |    |     |              |      | 1 | CLASS
+216  | ClassHolder                |               |       |    |     |              |      | 1 | CLASS
+219  | ContinueHolder             |               |       |    |     |              |      | 1 | CLASS
+222  | DefHolder                  |               |       |    |     |              |      | 1 | CLASS
+225  | DelHolder                  |               |       |    |     |              |      | 1 | CLASS
+228  | ElifHolder                 |               |       |    |     |              |      | 1 | CLASS
+231  | ElseHolder                 |               |       |    |     |              |      | 1 | CLASS
+234  | ExceptHolder               |               |       |    |     |              |      | 1 | CLASS
+237  | FinallyHolder              |               |       |    |     |              |      | 1 | CLASS
+240  | ForHolder                  |               |       |    |     |              |      | 1 | CLASS
+243  | FromHolder                 |               |       |    |     |              |      | 1 | CLASS
+246  | GlobalHolder               |               |       |    |     |              |      | 1 | CLASS
+249  | IfHolder                   |               |       |    |     |              |      | 1 | CLASS
+252  | ImportHolder               |               |       |    |     |              |      | 1 | CLASS
+255  | InHolder                   |               |       |    |     |              |      | 1 | CLASS
+258  | IsHolder                   |               |       |    |     |              |      | 1 | CLASS
+261  | LambdaHolder               |               |       |    |     |              |      | 1 | CLASS
+264  | NonlocalHolder             |               |       |    |     |              |      | 1 | CLASS
+267  | NotHolder                  |               |       |    |     |              |      | 1 | CLASS
+270  | OrHolder                   |               |       |    |     |              |      | 1 | CLASS
+273  | PassHolder                 |               |       |    |     |              |      | 1 | CLASS
+276  | RaiseHolder                |               |       |    |     |              |      | 1 | CLASS
+279  | ReturnHolder               |               |       |    |     |              |      | 1 | CLASS
+282  | TryHolder                  |               |       |    |     |              |      | 1 | CLASS
+285  | WhileHolder                |               |       |    |     |              |      | 1 | CLASS
+288  | WithHolder                 |               |       |    |     |              |      | 1 | CLASS
+291  | YieldHolder                |               |       |    |     |              |      | 1 | CLASS
+294  | SelfHolder                 |               |       |    |     |              |      | 1 | CLASS
+297  | ClsHolder                  |               |       |    |     |              |      | 1 | CLASS
+301  | KeywordHolder              |               |       |    |     |              |      | 1 | CLASS
+302  | self                       |               |       |    |     |              |      | 0 | STR  
+302  | cls                        |               |       |    |     |              |      | 0 | STR  
+302  | real                       |               |       |    |     |              |      | 0 | STR  
+302  | parameter                  |               |       |    |     |              |      | 0 | STR  
+302  | positions                  |               |       |    |     |              |      | 0 | STR  
+302  | plus                       |               |       |    |     |              |      | 0 | STR  
+302  | keyword                    |               |       |    |     |              |      | 0 | STR  
+302  | attributes.                |               |       |    |     |              |      | 0 | STR  
+304  | __init__                   | KeywordHolder |       |    |     |              |      | 1 | FUNC 
+304  | self                       | __init__      |       |    |     |              |      | 0 | ARG  
+305  | And                        | self          |       |    |     |              |      | 1 | PROP 
+306  | As                         | self          |       |    |     |              |      | 1 | PROP 
+307  | Assert                     | self          |       |    |     |              |      | 1 | PROP 
+308  | Async                      | self          |       |    |     |              |      | 1 | PROP 
+309  | Await                      | self          |       |    |     |              |      | 1 | PROP 
+310  | Break                      | self          |       |    |     |              |      | 1 | PROP 
+311  | Class                      | self          |       |    |     |              |      | 1 | PROP 
+312  | Continue                   | self          |       |    |     |              |      | 1 | PROP 
+313  | Def                        | self          |       |    |     |              |      | 1 | PROP 
+314  | Del                        | self          |       |    |     |              |      | 1 | PROP 
+315  | Elif                       | self          |       |    |     |              |      | 1 | PROP 
+316  | Else                       | self          |       |    |     |              |      | 1 | PROP 
+317  | Except                     | self          |       |    |     |              |      | 1 | PROP 
+318  | Finally                    | self          |       |    |     |              |      | 1 | PROP 
+319  | For                        | self          |       |    |     |              |      | 1 | PROP 
+320  | From                       | self          |       |    |     |              |      | 1 | PROP 
+321  | Global                     | self          |       |    |     |              |      | 1 | PROP 
+322  | If                         | self          |       |    |     |              |      | 1 | PROP 
+323  | Import                     | self          |       |    |     |              |      | 1 | PROP 
+324  | In                         | self          |       |    |     |              |      | 1 | PROP 
+325  | Is                         | self          |       |    |     |              |      | 1 | PROP 
+326  | Lambda                     | self          |       |    |     |              |      | 1 | PROP 
+327  | Nonlocal                   | self          |       |    |     |              |      | 1 | PROP 
+328  | Not                        | self          |       |    |     |              |      | 1 | PROP 
+329  | Or                         | self          |       |    |     |              |      | 1 | PROP 
+330  | Pass                       | self          |       |    |     |              |      | 1 | PROP 
+331  | Raise                      | self          |       |    |     |              |      | 1 | PROP 
+332  | Return                     | self          |       |    |     |              |      | 1 | PROP 
+333  | Try                        | self          |       |    |     |              |      | 1 | PROP 
+334  | While                      | self          |       |    |     |              |      | 1 | PROP 
+335  | With                       | self          |       |    |     |              |      | 1 | PROP 
+336  | Yield                      | self          |       |    |     |              |      | 1 | PROP 
+337  | Self                       | self          |       |    |     |              |      | 1 | PROP 
+338  | Cls                        | self          |       |    |     |              |      | 1 | PROP 
+341  | build                      | KeywordHolder |       |    |     | @classmethod |      | 1 | FUNC 
+341  | cls                        | build         |       |    |     |              |      | 0 | ARG  
+342  | cls                        |               |       |    |     |              |      | 0 | CALL 
+344  | show                       | KeywordHolder |       |    |     |              |      | 1 | FUNC 
+344  | self                       | show          |       |    |     |              |      | 0 | ARG  
+345  | If                         | self          |       |    |     |              |      | 0 | PROP 
+345  | self                       |               |       |    |     |              |      | 0 | VAR  

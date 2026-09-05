@@ -1,0 +1,127 @@
+LINE | SYM                  | PAR  | SCOPE  | NS | MOD | CLUE    | TYPE | D | CTX  
+./tools/sources/php/strings.php:
+1    | strings              |      |        |    |     |         |      | 0 | FILE 
+3    | Single-quoted        |      |        |    |     |         |      | 0 | COM  
+3    | strings              |      |        |    |     |         |      | 0 | COM  
+3    | interpolation        |      |        |    |     |         |      | 0 | COM  
+4    | $single              |      |        |    |     |         |      | 0 | VAR  
+4    | hello                |      |        |    |     |         |      | 0 | STR  
+4    | world                |      |        |    |     |         |      | 0 | STR  
+4    | single               |      |        |    |     |         |      | 0 | STR  
+5    | $singleMulti         |      |        |    |     |         |      | 0 | VAR  
+5    | foo                  |      |        |    |     |         |      | 0 | STR  
+5    | bar                  |      |        |    |     |         |      | 0 | STR  
+5    | baz                  |      |        |    |     |         |      | 0 | STR  
+7    | Double-quoted        |      |        |    |     |         |      | 0 | COM  
+7    | strings              |      |        |    |     |         |      | 0 | COM  
+7    | variables            |      |        |    |     |         |      | 0 | COM  
+8    | $double              |      |        |    |     |         |      | 0 | VAR  
+8    | hello                |      |        |    |     |         |      | 0 | STR  
+8    | world                |      |        |    |     |         |      | 0 | STR  
+8    | double               |      |        |    |     |         |      | 0 | STR  
+9    | $doubleMulti         |      |        |    |     |         |      | 0 | VAR  
+9    | apple                |      |        |    |     |         |      | 0 | STR  
+9    | orange               |      |        |    |     |         |      | 0 | STR  
+9    | banana               |      |        |    |     |         |      | 0 | STR  
+11   | Double-quoted        |      |        |    |     |         |      | 0 | COM  
+11   | simple               |      |        |    |     |         |      | 0 | COM  
+11   | variable             |      |        |    |     |         |      | 0 | COM  
+11   | interpolation        |      |        |    |     |         |      | 0 | COM  
+12   | $name                |      |        |    |     |         |      | 0 | VAR  
+12   | John                 |      |        |    |     |         |      | 0 | STR  
+13   | $greeting            |      |        |    |     |         |      | 0 | VAR  
+13   | Hello                |      |        |    |     |         |      | 0 | STR  
+13   | welcome              |      |        |    |     |         |      | 0 | STR  
+15   | Double-quoted        |      |        |    |     |         |      | 0 | COM  
+15   | complex              |      |        |    |     |         |      | 0 | COM  
+15   | interpolation        |      |        |    |     |         |      | 0 | COM  
+16   | User                 |      |        |    |     |         |      | 1 | CLASS
+17   | $username            | User | public |    |     |         |      | 1 | PROP 
+19   | $user                |      |        |    |     |         |      | 0 | VAR  
+20   | $message             |      |        |    |     |         |      | 0 | VAR  
+20   | User                 |      |        |    |     |         |      | 0 | STR  
+20   | active               |      |        |    |     |         |      | 0 | STR  
+22   | Heredoc              |      |        |    |     |         |      | 0 | COM  
+22   | syntax               |      |        |    |     |         |      | 0 | COM  
+22   | interpolation        |      |        |    |     |         |      | 0 | COM  
+22   | enabled              |      |        |    |     |         |      | 0 | COM  
+23   | $heredoc             |      |        |    |     |         |      | 0 | VAR  
+23   | heredoc              |      |        |    |     | heredoc |      | 0 | STR  
+23   | content              |      |        |    |     | heredoc |      | 0 | STR  
+23   | Multiple             |      |        |    |     | heredoc |      | 0 | STR  
+23   | lines                |      |        |    |     | heredoc |      | 0 | STR  
+23   | available            |      |        |    |     | heredoc |      | 0 | STR  
+23   | Has                  |      |        |    |     | heredoc |      | 0 | STR  
+23   | words                |      |        |    |     | heredoc |      | 0 | STR  
+23   | like                 |      |        |    |     | heredoc |      | 0 | STR  
+23   | database             |      |        |    |     | heredoc |      | 0 | STR  
+23   | connection           |      |        |    |     | heredoc |      | 0 | STR  
+29   | Heredoc              |      |        |    |     |         |      | 0 | COM  
+29   | variable             |      |        |    |     |         |      | 0 | COM  
+29   | interpolation        |      |        |    |     |         |      | 0 | COM  
+30   | $city                |      |        |    |     |         |      | 0 | VAR  
+30   | Boston               |      |        |    |     |         |      | 0 | STR  
+31   | $heredocInterpolated |      |        |    |     |         |      | 0 | VAR  
+31   | Welcome              |      |        |    |     | heredoc |      | 0 | STR  
+31   | Enjoy                |      |        |    |     | heredoc |      | 0 | STR  
+31   | stay                 |      |        |    |     | heredoc |      | 0 | STR  
+36   | Nowdoc               |      |        |    |     |         |      | 0 | COM  
+36   | syntax               |      |        |    |     |         |      | 0 | COM  
+36   | interpolation        |      |        |    |     |         |      | 0 | COM  
+36   | like                 |      |        |    |     |         |      | 0 | COM  
+36   | single-quoted        |      |        |    |     |         |      | 0 | COM  
+37   | $nowdoc              |      |        |    |     |         |      | 0 | VAR  
+37   | nowdoc               |      |        |    |     | nowdoc  |      | 0 | STR  
+37   | content              |      |        |    |     | nowdoc  |      | 0 | STR  
+37   | interpolation        |      |        |    |     | nowdoc  |      | 0 | STR  
+37   | Keywords             |      |        |    |     | nowdoc  |      | 0 | STR  
+37   | like                 |      |        |    |     | nowdoc  |      | 0 | STR  
+37   | password             |      |        |    |     | nowdoc  |      | 0 | STR  
+37   | authentication       |      |        |    |     | nowdoc  |      | 0 | STR  
+43   | String               |      |        |    |     |         |      | 0 | COM  
+43   | concatenation        |      |        |    |     |         |      | 0 | COM  
+44   | $concat              |      |        |    |     |         |      | 0 | VAR  
+44   | first                |      |        |    |     |         |      | 0 | STR  
+44   | part                 |      |        |    |     |         |      | 0 | STR  
+44   | second               |      |        |    |     |         |      | 0 | STR  
+44   | part                 |      |        |    |     |         |      | 0 | STR  
+46   | strings              |      |        |    |     |         |      | 0 | COM  
+47   | $empty1              |      |        |    |     |         |      | 0 | VAR  
+48   | $empty2              |      |        |    |     |         |      | 0 | VAR  
+50   | Strings              |      |        |    |     |         |      | 0 | COM  
+50   | calls                |      |        |    |     |         |      | 0 | COM  
+51   | output               |      |        |    |     |         |      | 0 | STR  
+51   | message              |      |        |    |     |         |      | 0 | STR  
+52   | another              |      |        |    |     |         |      | 0 | STR  
+52   | message              |      |        |    |     |         |      | 0 | STR  
+52   | text                 |      |        |    |     |         |      | 0 | STR  
+54   | Strings              |      |        |    |     |         |      | 0 | COM  
+55   | $array               |      |        |    |     |         |      | 0 | VAR  
+56   | first                |      |        |    |     |         |      | 0 | STR  
+56   | element              |      |        |    |     |         |      | 0 | STR  
+56   | value                |      |        |    |     |         |      | 0 | STR  
+57   | second               |      |        |    |     |         |      | 0 | STR  
+57   | element              |      |        |    |     |         |      | 0 | STR  
+57   | text                 |      |        |    |     |         |      | 0 | STR  
+58   | error                |      |        |    |     |         |      | 0 | STR  
+58   | message              |      |        |    |     |         |      | 0 | STR  
+58   | failed               |      |        |    |     |         |      | 0 | STR  
+61   | Multi-line           |      |        |    |     |         |      | 0 | COM  
+61   | double-quoted        |      |        |    |     |         |      | 0 | COM  
+62   | $multiline           |      |        |    |     |         |      | 0 | VAR  
+62   | line                 |      |        |    |     |         |      | 0 | STR  
+62   | one                  |      |        |    |     |         |      | 0 | STR  
+62   | line                 |      |        |    |     |         |      | 0 | STR  
+62   | two                  |      |        |    |     |         |      | 0 | STR  
+62   | content              |      |        |    |     |         |      | 0 | STR  
+66   | Escape               |      |        |    |     |         |      | 0 | COM  
+66   | sequences            |      |        |    |     |         |      | 0 | COM  
+67   | $escaped             |      |        |    |     |         |      | 0 | VAR  
+67   | quote                |      |        |    |     |         |      | 0 | STR  
+67   | newline              |      |        |    |     |         |      | 0 | STR  
+67   | tab                  |      |        |    |     |         |      | 0 | STR  
+69   | String               |      |        |    |     |         |      | 0 | COM  
+69   | numbers              |      |        |    |     |         |      | 0 | COM  
+70   | $withNumbers         |      |        |    |     |         |      | 0 | VAR  
+70   | Order                |      |        |    |     |         |      | 0 | STR  
+70   | number               |      |        |    |     |         |      | 0 | STR  

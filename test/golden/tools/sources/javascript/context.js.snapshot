@@ -1,0 +1,32 @@
+LINE | SYM            | PAR         | SCOPE | NS | MOD   | CLUE | TYPE | D | CTX  
+./tools/sources/javascript/context.js:
+1    | context        |             |       |    |       |      |      | 0 | FILE 
+1    | Context        |             |       |    |       |      |      | 0 | COM  
+1    | types          |             |       |    |       |      |      | 0 | COM  
+1    | test           |             |       |    |       |      |      | 0 | COM  
+1    | classes        |             |       |    |       |      |      | 0 | COM  
+1    | functions      |             |       |    |       |      |      | 0 | COM  
+1    | variables      |             |       |    |       |      |      | 0 | COM  
+1    | properties     |             |       |    |       |      |      | 0 | COM  
+2    | UserManager    |             |       |    |       |      |      | 1 | CLASS
+3    | constructor    | UserManager |       |    |       |      |      | 1 | FUNC 
+3    | database       |             |       |    |       |      |      | 1 | ARG  
+4    | database       | this        |       |    |       |      |      | 1 | PROP 
+4    | database       |             |       |    |       |      |      | 0 | VAR  
+5    | cache          | this        |       |    |       |      |      | 1 | PROP 
+5    | Map            |             |       |    |       |      |      | 0 | CALL 
+8    | getUser        | UserManager |       |    | async |      |      | 1 | FUNC 
+8    | userId         |             |       |    |       |      |      | 1 | ARG  
+9    | query          | database    |       |    |       |      |      | 0 | CALL 
+9    | database       | this        |       |    |       |      |      | 0 | PROP 
+9    | SELECT         |             |       |    |       |      |      | 0 | STR  
+9    | users          |             |       |    |       |      |      | 0 | STR  
+9    | id             |             |       |    |       |      |      | 0 | STR  
+12   | clearCache     | UserManager |       |    |       |      |      | 1 | FUNC 
+13   | clear          | cache       |       |    |       |      |      | 0 | CALL 
+13   | cache          | this        |       |    |       |      |      | 0 | PROP 
+17   | globalConfig   |             |       |    |       |      |      | 1 | VAR  
+22   | processRequest |             |       |    |       |      |      | 1 | FUNC 
+22   | request        |             |       |    |       |      |      | 1 | ARG  
+22   | options        |             |       |    |       |      |      | 1 | ARG  
+27   | exports        | module      |       |    |       |      |      | 1 | PROP 

@@ -1,0 +1,22 @@
+LINE | SYM                  | PAR     | SCOPE     | NS         | MOD | CLUE          | TYPE | D | CTX  
+./tools/sources/php/visibility_modifiers.php:
+1    | visibility_modifiers |         |           |            |     |               |      | 0 | FILE 
+3    | App\Models           |         |           |            |     |               |      | 1 | NS   
+5    | demonstrating        |         |           | App\Models |     |               |      | 0 | COM  
+5    | visibility           |         |           | App\Models |     |               |      | 0 | COM  
+5    | modifiers            |         |           | App\Models |     |               |      | 0 | COM  
+8    | Account              |         |           | App\Models |     |               |      | 1 | CLASS
+9    | $username            | Account | public    | App\Models |     |               |      | 1 | PROP 
+10   | $email               | Account | protected | App\Models |     |               |      | 1 | PROP 
+11   | $passwordHash        | Account | private   | App\Models |     |               |      | 1 | PROP 
+13   | getUsername          | Account | public    | App\Models |     |               |      | 1 | FUNC 
+14   | $this                |         |           | App\Models |     |               |      | 0 | VAR  
+14   | username             | $this   |           | App\Models |     |               |      | 0 | PROP 
+17   | validateEmail        | Account | protected | App\Models |     |               |      | 1 | FUNC 
+18   | filter_var           |         |           | App\Models |     |               |      | 0 | CALL 
+18   | $email               |         |           | App\Models |     | filter_var    |      | 0 | ARG  
+18   | $email               |         |           | App\Models |     |               |      | 0 | VAR  
+21   | hashPassword         | Account | private   | App\Models |     |               |      | 1 | FUNC 
+22   | password_hash        |         |           | App\Models |     |               |      | 0 | CALL 
+22   | $password            |         |           | App\Models |     | password_hash |      | 0 | ARG  
+22   | $password            |         |           | App\Models |     |               |      | 0 | VAR  

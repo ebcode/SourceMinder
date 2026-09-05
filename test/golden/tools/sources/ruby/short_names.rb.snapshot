@@ -1,0 +1,45 @@
+LINE | SYM              | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/ruby/short_names.rb:
+1    | short_names      |     |       |    |     |      |      | 0 | FILE
+1    | Single-character |     |       |    |     |      |      | 0 | COM 
+1    | names            |     |       |    |     |      |      | 0 | COM 
+1    | without          |     |       |    |     |      |      | 0 | COM 
+1    | sigils           |     |       |    |     |      |      | 0 | COM 
+1    | N2/N3            |     |       |    |     |      |      | 0 | COM 
+1    | probes.          |     |       |    |     |      |      | 0 | COM 
+3    | Helpers          | T   |       | T  |     |      |      | 1 | NS  
+11   | args             | f   |       |    |     |      |      | 0 | ARG 
+12   | args             |     |       |    |     |      |      | 0 | VAR 
+16   | @x               | C   |       |    |     |      |      | 0 | PROP
+16   | 1-char           |     |       |    |     |      |      | 0 | COM 
+16   | ivar:            |     |       |    |     |      |      | 0 | COM 
+16   | @x               |     |       |    |     |      |      | 0 | COM 
+16   | chars            |     |       |    |     |      |      | 0 | COM 
+16   | written          |     |       |    |     |      |      | 0 | COM 
+17   | @@c              | C   |       |    |     |      |      | 0 | PROP
+17   | 1-char           |     |       |    |     |      |      | 0 | COM 
+17   | cvar:            |     |       |    |     |      |      | 0 | COM 
+17   | @@c              |     |       |    |     |      |      | 0 | COM 
+17   | chars            |     |       |    |     |      |      | 0 | COM 
+17   | written          |     |       |    |     |      |      | 0 | COM 
+18   | $g               | C   |       |    |     |      |      | 1 | VAR 
+18   | 1-char           |     |       |    |     |      |      | 0 | COM 
+18   | global:          |     |       |    |     |      |      | 0 | COM 
+18   | $g               |     |       |    |     |      |      | 0 | COM 
+18   | chars            |     |       |    |     |      |      | 0 | COM 
+18   | written          |     |       |    |     |      |      | 0 | COM 
+19   | bare             |     |       |    |     |      |      | 0 | COM 
+19   | 1-char           |     |       |    |     |      |      | 0 | COM 
+19   | local            |     |       |    |     |      |      | 0 | COM 
+19   | expected         |     |       |    |     |      |      | 0 | COM 
+19   | filtered         |     |       |    |     |      |      | 0 | COM 
+20   | let              | T   |       |    |     |      |      | 0 | CALL
+20   | Integer          |     |       |    |     |      |      | 0 | VAR 
+21   | Helpers          | T   |       | T  |     |      |      | 0 | VAR 
+22   | $g               |     |       |    |     |      |      | 0 | VAR 
+22   | @x               | C   |       |    |     |      |      | 0 | PROP
+26   | $o               |     |       |    |     |      |      | 0 | VAR 
+26   | bare             |     |       |    |     |      |      | 0 | COM 
+26   | global           |     |       |    |     |      |      | 0 | COM 
+26   | read             |     |       |    |     |      |      | 0 | COM 
+30   | new              | C   |       |    |     |      |      | 0 | CALL

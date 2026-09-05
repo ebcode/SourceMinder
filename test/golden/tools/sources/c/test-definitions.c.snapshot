@@ -1,0 +1,77 @@
+LINE | SYM              | PAR | SCOPE | NS | MOD    | CLUE    | TYPE  | D | CTX 
+./tools/sources/c/test-definitions.c:
+1    | test-definitions |     |       |    |        |         |       | 0 | FILE
+1    | Test             |     |       |    |        |         |       | 0 | COM 
+1    | file             |     |       |    |        |         |       | 0 | COM 
+1    | definition       |     |       |    |        |         |       | 0 | COM 
+1    | vs               |     |       |    |        |         |       | 0 | COM 
+1    | usage            |     |       |    |        |         |       | 0 | COM 
+1    | detection        |     |       |    |        |         |       | 0 | COM 
+3    | Type             |     |       |    |        |         |       | 0 | COM 
+3    | definition       |     |       |    |        |         |       | 0 | COM 
+4    | Point            |     |       |    |        |         |       | 1 | TYPE
+5    | int              |     |       |    |        |         |       | 0 | TYPE
+6    | int              |     |       |    |        |         |       | 0 | TYPE
+9    | Function         |     |       |    |        |         |       | 0 | COM 
+9    | definition       |     |       |    |        |         |       | 0 | COM 
+10   | init_point       |     |       |    |        |         | void  | 1 | FUNC
+10   | Point            |     |       |    |        |         |       | 0 | TYPE
+11   | Field            |     |       |    |        |         |       | 0 | COM 
+11   | usage            |     |       |    |        |         |       | 0 | COM 
+12   | Field            |     |       |    |        |         |       | 0 | COM 
+12   | usage            |     |       |    |        |         |       | 0 | COM 
+15   | Variable         |     |       |    |        |         |       | 0 | COM 
+15   | definition       |     |       |    |        |         |       | 0 | COM 
+15   | global           |     |       |    |        |         |       | 0 | COM 
+16   | counter          |     |       |    | static |         | int   | 1 | VAR 
+18   | Function         |     |       |    |        |         |       | 0 | COM 
+18   | definition       |     |       |    |        |         |       | 0 | COM 
+18   | type             |     |       |    |        |         |       | 0 | COM 
+18   | usage            |     |       |    |        |         |       | 0 | COM 
+18   | parameter        |     |       |    |        |         |       | 0 | COM 
+19   | get_x            |     |       |    |        |         | int   | 1 | FUNC
+19   | Point            |     |       |    |        |         |       | 0 | TYPE
+19   | Type             |     |       |    |        |         |       | 0 | COM 
+19   | usage:           |     |       |    |        |         |       | 0 | COM 
+19   | Point            |     |       |    |        |         |       | 0 | COM 
+20   | Variable         |     |       |    |        |         |       | 0 | COM 
+20   | usage:           |     |       |    |        |         |       | 0 | COM 
+20   | field            |     |       |    |        |         |       | 0 | COM 
+20   | usage:           |     |       |    |        |         |       | 0 | COM 
+23   | Main             |     |       |    |        |         |       | 0 | COM 
+23   | function         |     |       |    |        |         |       | 0 | COM 
+23   | definitions      |     |       |    |        |         |       | 0 | COM 
+23   | usages           |     |       |    |        |         |       | 0 | COM 
+24   | main             |     |       |    |        |         | int   | 1 | FUNC
+25   | p1               |     |       |    |        |         | Point | 1 | VAR 
+25   | Variable         |     |       |    |        |         |       | 0 | COM 
+25   | definition       |     |       |    |        |         |       | 0 | COM 
+25   | type             |     |       |    |        |         |       | 0 | COM 
+25   | usage            |     |       |    |        |         |       | 0 | COM 
+26   | p2               |     |       |    |        |         | Point | 1 | VAR 
+26   | Variable         |     |       |    |        |         |       | 0 | COM 
+26   | definition       |     |       |    |        |         |       | 0 | COM 
+26   | type             |     |       |    |        |         |       | 0 | COM 
+26   | usage            |     |       |    |        |         |       | 0 | COM 
+28   | init_point       |     |       |    |        |         |       | 0 | CALL
+28   | p1               |     |       |    |        | address |       | 0 | VAR 
+28   | Function         |     |       |    |        |         |       | 0 | COM 
+28   | call             |     |       |    |        |         |       | 0 | COM 
+28   | usage            |     |       |    |        |         |       | 0 | COM 
+28   | variable         |     |       |    |        |         |       | 0 | COM 
+28   | usage            |     |       |    |        |         |       | 0 | COM 
+29   | result           |     |       |    |        |         | int   | 1 | VAR 
+29   | get_x            |     |       |    |        |         |       | 0 | CALL
+29   | p1               |     |       |    |        | get_x   |       | 0 | ARG 
+29   | Function         |     |       |    |        |         |       | 0 | COM 
+29   | call             |     |       |    |        |         |       | 0 | COM 
+29   | usage            |     |       |    |        |         |       | 0 | COM 
+29   | variable         |     |       |    |        |         |       | 0 | COM 
+29   | definitions      |     |       |    |        |         |       | 0 | COM 
+29   | usages           |     |       |    |        |         |       | 0 | COM 
+31   | counter          |     |       |    |        |         |       | 0 | VAR 
+31   | Variable         |     |       |    |        |         |       | 0 | COM 
+31   | usage            |     |       |    |        |         |       | 0 | COM 
+33   | result           |     |       |    |        |         |       | 0 | VAR 
+33   | Variable         |     |       |    |        |         |       | 0 | COM 
+33   | usage            |     |       |    |        |         |       | 0 | COM 

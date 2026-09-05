@@ -1,0 +1,45 @@
+LINE | SYM               | PAR             | SCOPE   | NS          | MOD    | CLUE | TYPE                                 | D | CTX 
+./tools/sources/rust/async_expressions.rs:
+1    | async_expressions |                 |         |             |        |      |                                      | 0 | FILE
+1    | async/await       |                 |         |             |        |      |                                      | 0 | COM 
+1    | operator          |                 |         |             |        |      |                                      | 0 | COM 
+1    | references        |                 |         |             |        |      |                                      | 0 | COM 
+1    | casts             |                 |         |             |        |      |                                      | 0 | COM 
+1    | blocks            |                 |         |             |        |      |                                      | 0 | COM 
+3    | Future            |                 |         | std::future |        |      |                                      | 0 | IMP 
+5    | fetch_data        |                 | pub     |             | async  |      | Result<String, std::io::Error>       | 1 | FUNC
+5    | url               |                 |         |             |        |      | &str                                 | 0 | ARG 
+6    | body              |                 |         |             |        |      |                                      | 1 | VAR 
+6    | download          |                 |         |             | await  |      |                                      | 0 | CALL
+7    | parsed            |                 |         |             |        |      |                                      | 1 | VAR 
+7    | parse_body        |                 |         |             | await  |      |                                      | 0 | CALL
+8    | Ok                |                 |         |             |        |      |                                      | 0 | CALL
+11   | download          |                 | private |             | async  |      | Result<Vec<u8>, std::io::Error>      | 1 | FUNC
+11   | url               |                 |         |             |        |      | &str                                 | 0 | ARG 
+13   | Ok                |                 |         |             |        |      |                                      | 0 | CALL
+13   | new               |                 |         | Vec         |        |      |                                      | 0 | CALL
+16   | parse_body        |                 | private |             | async  |      | Result<String, std::io::Error>       | 1 | FUNC
+16   | bytes             |                 |         |             |        |      | &[u8]                                | 0 | ARG 
+17   | Ok                |                 |         |             |        |      |                                      | 0 | CALL
+17   | to_string         | from_utf8_lossy |         |             |        |      |                                      | 0 | CALL
+17   | from_utf8_lossy   |                 |         | String      |        |      |                                      | 0 | CALL
+20   | make_future       |                 | pub     |             |        |      | impl Future<Output = u32>            | 1 | FUNC
+28   | cast_and_ref      |                 | pub     |             |        |      |                                      | 1 | FUNC
+32   | mr                |                 |         |             |        |      | &mut u32                             | 1 | VAR 
+32   | clone             | m               |         |             |        |      |                                      | 0 | CALL
+37   | try_chain         |                 | pub     |             |        |      | Result<i32, std::num::ParseIntError> | 1 | FUNC
+37   | text              |                 |         |             |        |      | &str                                 | 0 | ARG 
+38   | parsed            |                 |         |             |        |      |                                      | 1 | VAR 
+38   | parse             | trim            |         |             |        |      |                                      | 0 | CALL
+38   | trim              | text            |         |             |        |      |                                      | 0 | CALL
+39   | doubled           |                 |         |             |        |      |                                      | 1 | VAR 
+39   | ok_or_else        |                 |         |             |        |      |                                      | 0 | CALL
+39   | checked_mul       | parsed          |         |             |        |      |                                      | 0 | CALL
+39   | <closure>         |                 |         |             |        |      |                                      | 1 | LAM 
+40   | unwrap_err        | parse           |         |             |        |      |                                      | 0 | CALL
+40   | parse             |                 |         |             |        |      |                                      | 0 | CALL
+40   | overflow          |                 |         |             |        |      |                                      | 0 | STR 
+42   | Ok                |                 |         |             |        |      |                                      | 0 | CALL
+45   | do_unsafe         |                 | pub     |             | unsafe |      |                                      | 1 | FUNC
+45   | ptr               |                 |         |             |        |      | *mut u8                              | 0 | ARG 
+48   | val               |                 |         |             |        |      |                                      | 1 | VAR 

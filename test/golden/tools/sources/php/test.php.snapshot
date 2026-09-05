@@ -1,0 +1,233 @@
+LINE | SYM                 | PAR                 | SCOPE     | NS         | MOD    | CLUE            | TYPE | D | CTX  
+./tools/sources/php/test.php:
+1    | test                |                     |           |            |        |                 |      | 0 | FILE 
+3    | PHPDoc              |                     |           |            |        |                 |      | 0 | COM  
+3    | comment             |                     |           |            |        |                 |      | 0 | COM  
+3    | tests               |                     |           |            |        |                 |      | 0 | COM  
+3    | documentation       |                     |           |            |        |                 |      | 0 | COM  
+3    | comments            |                     |           |            |        |                 |      | 0 | COM  
+7    | App\Models          |                     |           |            |        |                 |      | 1 | NS   
+13   | User                |                     |           | App\Models |        |                 |      | 0 | COM  
+13   | repository          |                     |           | App\Models |        |                 |      | 0 | COM  
+13   | Handles             |                     |           | App\Models |        |                 |      | 0 | COM  
+13   | user                |                     |           | App\Models |        |                 |      | 0 | COM  
+13   | data                |                     |           | App\Models |        |                 |      | 0 | COM  
+13   | operations          |                     |           | App\Models |        |                 |      | 0 | COM  
+17   | UserRepository      |                     |           | App\Models |        |                 |      | 1 | CLASS
+18   | Properties          |                     |           | App\Models |        |                 |      | 0 | COM  
+18   | different           |                     |           | App\Models |        |                 |      | 0 | COM  
+18   | visibility          |                     |           | App\Models |        |                 |      | 0 | COM  
+19   | $tableName          | UserRepository      | public    | App\Models |        |                 |      | 1 | PROP 
+20   | $cacheTimeout       | UserRepository      | protected | App\Models |        |                 |      | 1 | PROP 
+21   | $config             | UserRepository      | private   | App\Models |        |                 |      | 1 | PROP 
+22   | $instanceCount      | UserRepository      | public    | App\Models | static |                 |      | 1 | PROP 
+24   | DEFAULT_LIMIT       | UserRepository      | private   | App\Models | const  |                 |      | 1 | VAR  
+25   | STATUS_ACTIVE       | UserRepository      | public    | App\Models | const  |                 |      | 1 | VAR  
+27   | Constructor         |                     |           | App\Models |        |                 |      | 0 | COM  
+27   | method              |                     |           | App\Models |        |                 |      | 0 | COM  
+30   | __construct         | UserRepository      | public    | App\Models |        |                 |      | 1 | FUNC 
+31   | $config             |                     |           | App\Models |        |                 |      | 0 | VAR  
+31   | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+31   | config              | $this               |           | App\Models |        |                 |      | 0 | PROP 
+32   | $instanceCount      | self                |           | App\Models | static |                 |      | 0 | PROP 
+35   | Get                 |                     |           | App\Models |        |                 |      | 0 | COM  
+35   | user                |                     |           | App\Models |        |                 |      | 0 | COM  
+35   | ID                  |                     |           | App\Models |        |                 |      | 0 | COM  
+38   | getUserById         | UserRepository      | public    | App\Models |        |                 |      | 1 | FUNC 
+39   | $query              |                     |           | App\Models |        |                 |      | 0 | VAR  
+39   | SELECT              |                     |           | App\Models |        |                 |      | 0 | STR  
+39   | users               |                     |           | App\Models |        |                 |      | 0 | STR  
+39   | id                  |                     |           | App\Models |        |                 |      | 0 | STR  
+40   | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+40   | fetchOne            | $this               |           | App\Models |        |                 |      | 0 | CALL 
+40   | $query              |                     |           | App\Models |        | fetchOne        |      | 0 | ARG  
+43   | helper              |                     |           | App\Models |        |                 |      | 0 | COM  
+43   | method              |                     |           | App\Models |        |                 |      | 0 | COM  
+46   | fetchOne            | UserRepository      | private   | App\Models |        |                 |      | 1 | FUNC 
+47   | $statement          |                     |           | App\Models |        |                 |      | 0 | VAR  
+47   | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+47   | prepare             | $this               |           | App\Models |        |                 |      | 0 | CALL 
+47   | $sql                |                     |           | App\Models |        | prepare         |      | 0 | ARG  
+48   | $statement          |                     |           | App\Models |        |                 |      | 0 | VAR  
+48   | execute             | $statement          |           | App\Models |        |                 |      | 0 | CALL 
+48   | $params             |                     |           | App\Models |        | execute         |      | 0 | ARG  
+49   | $statement          |                     |           | App\Models |        |                 |      | 0 | VAR  
+49   | fetch               | $statement          |           | App\Models |        |                 |      | 0 | CALL 
+52   | method              |                     |           | App\Models |        |                 |      | 0 | COM  
+52   | subclasses          |                     |           | App\Models |        |                 |      | 0 | COM  
+55   | getCacheKey         | UserRepository      | protected | App\Models |        |                 |      | 1 | FUNC 
+56   | sprintf             |                     |           | App\Models |        |                 |      | 0 | CALL 
+56   | %s:%d               |                     |           | App\Models |        |                 |      | 0 | STR  
+56   | $prefix             |                     |           | App\Models |        | sprintf         |      | 0 | ARG  
+56   | $prefix             |                     |           | App\Models |        |                 |      | 0 | VAR  
+56   | $id                 |                     |           | App\Models |        | sprintf         |      | 0 | ARG  
+56   | $id                 |                     |           | App\Models |        |                 |      | 0 | VAR  
+59   | factory             |                     |           | App\Models |        |                 |      | 0 | COM  
+59   | method              |                     |           | App\Models |        |                 |      | 0 | COM  
+62   | create              | UserRepository      | public    | App\Models | static |                 |      | 1 | FUNC 
+66   | Magic               |                     |           | App\Models |        |                 |      | 0 | COM  
+66   | method              |                     |           | App\Models |        |                 |      | 0 | COM  
+66   | examples            |                     |           | App\Models |        |                 |      | 0 | COM  
+69   | __toString          | UserRepository      | public    | App\Models |        |                 |      | 1 | FUNC 
+70   | UserRepository[     |                     |           | App\Models |        |                 |      | 0 | STR  
+73   | __get               | UserRepository      | public    | App\Models |        |                 |      | 1 | FUNC 
+74   | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+74   | $name               |                     |           | App\Models |        |                 |      | 0 | VAR  
+78   | definition          |                     |           | App\Models |        |                 |      | 0 | COM  
+81   | RepositoryInterface |                     |           | App\Models |        |                 |      | 1 | IFACE
+82   | find                | RepositoryInterface | public    | App\Models |        |                 |      | 1 | FUNC 
+83   | save                | RepositoryInterface | public    | App\Models |        |                 |      | 1 | FUNC 
+84   | delete              | RepositoryInterface | public    | App\Models |        |                 |      | 1 | FUNC 
+87   | definition          |                     |           | App\Models |        |                 |      | 0 | COM  
+90   | Cacheable           |                     |           | App\Models |        |                 |      | 1 | TRAIT
+91   | $cache              | Cacheable           | protected | App\Models |        |                 |      | 1 | PROP 
+93   | getFromCache        | Cacheable           | public    | App\Models |        |                 |      | 1 | FUNC 
+94   | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+94   | $key                |                     |           | App\Models |        |                 |      | 0 | VAR  
+97   | putInCache          | Cacheable           | public    | App\Models |        |                 |      | 1 | FUNC 
+98   | $value              |                     |           | App\Models |        |                 |      | 0 | VAR  
+98   | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+98   | $key                |                     |           | App\Models |        |                 |      | 0 | VAR  
+102  | User                |                     |           | App\Models |        |                 |      | 0 | COM  
+102  | model               |                     |           | App\Models |        |                 |      | 0 | COM  
+102  | using               |                     |           | App\Models |        |                 |      | 0 | COM  
+105  | User                |                     |           | App\Models |        |                 |      | 1 | CLASS
+105  | UserInterface       |                     |           | App\Models |        | implements      |      | 0 | TYPE 
+106  | Timestampable       |                     |           | App\Models |        | use             |      | 0 | TYPE 
+106  | Cacheable           |                     |           | App\Models |        | use             |      | 0 | TYPE 
+108  | $id                 | User                | public    | App\Models |        |                 |      | 1 | PROP 
+109  | $name               | User                | public    | App\Models |        |                 |      | 1 | PROP 
+110  | $email              | User                | public    | App\Models |        |                 |      | 1 | PROP 
+111  | $passwordHash       | User                | private   | App\Models |        |                 |      | 1 | PROP 
+113  | __construct         | User                | public    | App\Models |        |                 |      | 1 | FUNC 
+118  | $id                 |                     |           | App\Models |        |                 |      | 0 | VAR  
+118  | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+118  | id                  | $this               |           | App\Models |        |                 |      | 0 | PROP 
+119  | $name               |                     |           | App\Models |        |                 |      | 0 | VAR  
+119  | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+119  | name                | $this               |           | App\Models |        |                 |      | 0 | PROP 
+120  | $email              |                     |           | App\Models |        |                 |      | 0 | VAR  
+120  | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+120  | email               | $this               |           | App\Models |        |                 |      | 0 | PROP 
+123  | authenticate        | User                | public    | App\Models |        |                 |      | 1 | FUNC 
+124  | password_verify     |                     |           | App\Models |        |                 |      | 0 | CALL 
+124  | $password           |                     |           | App\Models |        | password_verify |      | 0 | ARG  
+124  | $password           |                     |           | App\Models |        |                 |      | 0 | VAR  
+124  | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+127  | getDisplayName      | User                | public    | App\Models |        |                 |      | 1 | FUNC 
+128  | $this               |                     |           | App\Models |        |                 |      | 0 | VAR  
+128  | name                | $this               |           | App\Models |        |                 |      | 0 | PROP 
+132  | Standalone          |                     |           | App\Models |        |                 |      | 0 | COM  
+135  | calculateTotal      |                     |           | App\Models |        |                 |      | 1 | FUNC 
+136  | $subtotal           |                     |           | App\Models |        |                 |      | 0 | VAR  
+138  | $item               |                     |           | App\Models |        |                 |      | 0 | VAR  
+138  | $item               |                     |           | App\Models |        |                 |      | 0 | VAR  
+140  | $tax                |                     |           | App\Models |        |                 |      | 0 | VAR  
+140  | $subtotal           |                     |           | App\Models |        |                 |      | 0 | VAR  
+140  | $taxRate            |                     |           | App\Models |        |                 |      | 0 | VAR  
+141  | $subtotal           |                     |           | App\Models |        |                 |      | 0 | VAR  
+141  | $tax                |                     |           | App\Models |        |                 |      | 0 | VAR  
+144  | various             |                     |           | App\Models |        |                 |      | 0 | COM  
+144  | parameter           |                     |           | App\Models |        |                 |      | 0 | COM  
+144  | types               |                     |           | App\Models |        |                 |      | 0 | COM  
+147  | processData         |                     |           | App\Models |        |                 |      | 1 | FUNC 
+153  | String              |                     |           | App\Models |        |                 |      | 0 | COM  
+153  | literal             |                     |           | App\Models |        |                 |      | 0 | COM  
+153  | testing             |                     |           | App\Models |        |                 |      | 0 | COM  
+154  | $message            |                     |           | App\Models |        |                 |      | 0 | VAR  
+154  | Processing          |                     |           | App\Models |        |                 |      | 0 | STR  
+154  | data                |                     |           | App\Models |        |                 |      | 0 | STR  
+154  | limit               |                     |           | App\Models |        |                 |      | 0 | STR  
+156  | Variable            |                     |           | App\Models |        |                 |      | 0 | COM  
+156  | assignments         |                     |           | App\Models |        |                 |      | 0 | COM  
+157  | $counter            |                     |           | App\Models |        |                 |      | 0 | VAR  
+158  | $results            |                     |           | App\Models |        |                 |      | 0 | VAR  
+160  | Control             |                     |           | App\Models |        |                 |      | 0 | COM  
+160  | structures          |                     |           | App\Models |        |                 |      | 0 | COM  
+161  | $counter            |                     |           | App\Models |        |                 |      | 0 | VAR  
+161  | $limit              |                     |           | App\Models |        |                 |      | 0 | VAR  
+162  | $input              |                     |           | App\Models |        |                 |      | 0 | VAR  
+162  | $output             |                     |           | App\Models |        |                 |      | 0 | VAR  
+165  | Loop                |                     |           | App\Models |        |                 |      | 0 | COM  
+166  | $counter            |                     |           | App\Models |        |                 |      | 0 | VAR  
+166  | $limit              |                     |           | App\Models |        |                 |      | 0 | VAR  
+167  | $counter            |                     |           | App\Models |        |                 |      | 0 | VAR  
+167  | $results            |                     |           | App\Models |        |                 |      | 0 | VAR  
+171  | loop                |                     |           | App\Models |        |                 |      | 0 | COM  
+173  | Item                |                     |           | App\Models |        |                 |      | 0 | STR  
+176  | Method              |                     |           | App\Models |        |                 |      | 0 | COM  
+176  | call                |                     |           | App\Models |        |                 |      | 0 | COM  
+177  | $repository         |                     |           | App\Models |        |                 |      | 0 | VAR  
+177  | create              | UserRepository      |           | App\Models | static |                 |      | 0 | CALL 
+178  | $user               |                     |           | App\Models |        |                 |      | 0 | VAR  
+178  | $repository         |                     |           | App\Models |        |                 |      | 0 | VAR  
+178  | getUserById         | $repository         |           | App\Models |        |                 |      | 0 | CALL 
+180  | Property            |                     |           | App\Models |        |                 |      | 0 | COM  
+180  | access              |                     |           | App\Models |        |                 |      | 0 | COM  
+181  | $user               |                     |           | App\Models |        |                 |      | 0 | VAR  
+182  | $userName           |                     |           | App\Models |        |                 |      | 0 | VAR  
+182  | $user               |                     |           | App\Models |        |                 |      | 0 | VAR  
+182  | name                | $user               |           | App\Models |        |                 |      | 0 | PROP 
+183  | $userEmail          |                     |           | App\Models |        |                 |      | 0 | VAR  
+183  | $user               |                     |           | App\Models |        |                 |      | 0 | VAR  
+183  | email               | $user               |           | App\Models |        |                 |      | 0 | PROP 
+186  | Callback            |                     |           | App\Models |        |                 |      | 0 | COM  
+186  | invocation          |                     |           | App\Models |        |                 |      | 0 | COM  
+187  | $callback           |                     |           | App\Models |        |                 |      | 0 | VAR  
+188  | $callback           |                     |           | App\Models |        |                 |      | 0 | CALL 
+188  | $results            |                     |           | App\Models |        | $callback       |      | 0 | ARG  
+188  | $results            |                     |           | App\Models |        |                 |      | 0 | VAR  
+194  | Arrow               |                     |           | App\Models |        |                 |      | 0 | COM  
+194  | PHP                 |                     |           | App\Models |        |                 |      | 0 | COM  
+194  | 7.4+                |                     |           | App\Models |        |                 |      | 0 | COM  
+197  | $multiply           |                     |           | App\Models |        |                 |      | 0 | VAR  
+197  | <lambda>            |                     |           | App\Models |        | arrow           |      | 1 | LAM  
+197  | $a                  |                     |           | App\Models |        |                 |      | 0 | ARG  
+197  | $b                  |                     |           | App\Models |        |                 |      | 0 | ARG  
+197  | $a                  |                     |           | App\Models |        |                 |      | 0 | VAR  
+197  | $b                  |                     |           | App\Models |        |                 |      | 0 | VAR  
+199  | Anonymous           |                     |           | App\Models |        |                 |      | 0 | COM  
+202  | $filter             |                     |           | App\Models |        |                 |      | 0 | VAR  
+202  | <lambda>            |                     |           | App\Models |        |                 |      | 1 | LAM  
+202  | $items              |                     |           | App\Models |        |                 |      | 0 | ARG  
+202  | $predicate          |                     |           | App\Models |        |                 |      | 0 | ARG  
+203  | $filtered           |                     |           | App\Models |        |                 |      | 0 | VAR  
+205  | $predicate          |                     |           | App\Models |        |                 |      | 0 | CALL 
+205  | $item               |                     |           | App\Models |        | $predicate      |      | 0 | ARG  
+205  | $item               |                     |           | App\Models |        |                 |      | 0 | VAR  
+206  | $item               |                     |           | App\Models |        |                 |      | 0 | VAR  
+206  | $filtered           |                     |           | App\Models |        |                 |      | 0 | VAR  
+212  | expression          |                     |           | App\Models |        |                 |      | 0 | COM  
+212  | PHP                 |                     |           | App\Models |        |                 |      | 0 | COM  
+212  | 8.0+                |                     |           | App\Models |        |                 |      | 0 | COM  
+213  | getStatusMessage    |                     |           | App\Models |        |                 |      | 1 | FUNC 
+215  | active              |                     |           | App\Models |        |                 |      | 0 | STR  
+215  | User                |                     |           | App\Models |        |                 |      | 0 | STR  
+215  | active              |                     |           | App\Models |        |                 |      | 0 | STR  
+216  | inactive            |                     |           | App\Models |        |                 |      | 0 | STR  
+216  | User                |                     |           | App\Models |        |                 |      | 0 | STR  
+216  | inactive            |                     |           | App\Models |        |                 |      | 0 | STR  
+217  | pending             |                     |           | App\Models |        |                 |      | 0 | STR  
+217  | User                |                     |           | App\Models |        |                 |      | 0 | STR  
+217  | pending             |                     |           | App\Models |        |                 |      | 0 | STR  
+217  | approval            |                     |           | App\Models |        |                 |      | 0 | STR  
+218  | Unknown             |                     |           | App\Models |        |                 |      | 0 | STR  
+218  | status              |                     |           | App\Models |        |                 |      | 0 | STR  
+222  | Enum                |                     |           | App\Models |        |                 |      | 0 | COM  
+222  | PHP                 |                     |           | App\Models |        |                 |      | 0 | COM  
+222  | 8.1+                |                     |           | App\Models |        |                 |      | 0 | COM  
+225  | Status              |                     |           | App\Models |        |                 |      | 1 | ENUM 
+226  | Active              | Status              |           | App\Models |        |                 |      | 1 | CASE 
+227  | Inactive            | Status              |           | App\Models |        |                 |      | 1 | CASE 
+228  | Pending             | Status              |           | App\Models |        |                 |      | 1 | CASE 
+231  | constants           |                     |           | App\Models |        |                 |      | 0 | COM  
+232  | define              |                     |           | App\Models |        |                 |      | 0 | CALL 
+232  | APP_VERSION         |                     |           | App\Models |        |                 |      | 0 | STR  
+232  | 1.0.0               |                     |           | App\Models |        |                 |      | 0 | STR  
+233  | define              |                     |           | App\Models |        |                 |      | 0 | CALL 
+233  | DEBUG_MODE          |                     |           | App\Models |        |                 |      | 0 | STR  
+235  | variables           |                     |           | App\Models |        |                 |      | 0 | COM  
+236  | $globalConfig       |                     |           | App\Models |        |                 |      | 0 | VAR  
+236  | debug               |                     |           | App\Models |        |                 |      | 0 | STR  
+237  | $apiKey             |                     |           | App\Models |        |                 |      | 0 | VAR  
+237  | test-api-key-12345  |                     |           | App\Models |        |                 |      | 0 | STR  

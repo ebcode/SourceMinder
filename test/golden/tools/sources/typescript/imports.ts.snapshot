@@ -1,0 +1,59 @@
+LINE | SYM                       | PAR     | SCOPE | NS | MOD | CLUE                      | TYPE | D | CTX 
+./tools/sources/typescript/imports.ts:
+1    | imports                   |         |       |    |     |                           |      | 0 | FILE
+1    | forms.                    |         |       |    |     |                           |      | 0 | COM 
+1    | Each                      |         |       |    |     |                           |      | 0 | COM 
+1    | produce                   |         |       |    |     |                           |      | 0 | COM 
+1    | IMP                       |         |       |    |     |                           |      | 0 | COM 
+1    | row                       |         |       |    |     |                           |      | 0 | COM 
+1    | whose                     |         |       |    |     |                           |      | 0 | COM 
+1    | clue                      |         |       |    |     |                           |      | 0 | COM 
+1    | path.                     |         |       |    |     |                           |      | 0 | COM 
+4    | Selection                 |         |       |    |     | ../selection/Selection.js |      | 0 | IMP 
+4    | ../selection/Selection.js |         |       |    |     |                           |      | 0 | STR 
+6    | Named                     |         |       |    |     |                           |      | 0 | COM 
+7    | TextContainer             |         |       |    |     | ../tools/TextContainer.js |      | 0 | IMP 
+7    | ../tools/TextContainer.js |         |       |    |     |                           |      | 0 | STR 
+9    | Several                   |         |       |    |     |                           |      | 0 | COM 
+9    | names                     |         |       |    |     |                           |      | 0 | COM 
+9    | one                       |         |       |    |     |                           |      | 0 | COM 
+10   | ObjectManager             |         |       |    |     | ../tools/managers.js      |      | 0 | IMP 
+10   | ShapeFactory              |         |       |    |     | ../tools/managers.js      |      | 0 | IMP 
+10   | DebugManager              |         |       |    |     | ../tools/managers.js      |      | 0 | IMP 
+10   | ../tools/managers.js      |         |       |    |     |                           |      | 0 | STR 
+12   | Renamed                   |         |       |    |     |                           |      | 0 | COM 
+13   | Position                  |         |       |    |     | ../text/TextStructures.js |      | 0 | IMP 
+13   | ../text/TextStructures.js |         |       |    |     |                           |      | 0 | STR 
+15   | plus                      |         |       |    |     |                           |      | 0 | COM 
+15   | named                     |         |       |    |     |                           |      | 0 | COM 
+15   | together                  |         |       |    |     |                           |      | 0 | COM 
+16   | Rectangle                 |         |       |    |     | ../shapes/index.js        |      | 0 | IMP 
+16   | Circle                    |         |       |    |     | ../shapes/index.js        |      | 0 | IMP 
+16   | ../shapes/index.js        |         |       |    |     |                           |      | 0 | STR 
+19   | ../shapes/geometry.js     |         |       |    |     |                           |      | 0 | STR 
+21   | Bare                      |         |       |    |     |                           |      | 0 | COM 
+21   | name                      |         |       |    |     |                           |      | 0 | COM 
+21   | relative                  |         |       |    |     |                           |      | 0 | COM 
+21   | path                      |         |       |    |     |                           |      | 0 | COM 
+22   | readFile                  |         |       |    |     | node:fs/promises          |      | 0 | IMP 
+22   | node:fs/promises          |         |       |    |     |                           |      | 0 | STR 
+24   | Side-effect               |         |       |    |     |                           |      | 0 | COM 
+24   | bindings                  |         |       |    |     |                           |      | 0 | COM 
+25   | ../styles/editor.css      |         |       |    |     |                           |      | 0 | STR 
+27   | Type-only                 |         |       |    |     |                           |      | 0 | COM 
+28   | CommandData               |         |       |    |     | ../commands/types.js      |      | 0 | IMP 
+28   | ../commands/types.js      |         |       |    |     |                           |      | 0 | STR 
+30   | use                       |         |       |    |     |                           |      | 0 | EXP 
+30   | use                       |         |       |    |     |                           | void | 1 | FUNC
+31   | log                       | console |       |    |     |                           |      | 0 | CALL
+31   | Selection                 |         |       |    |     | log                       |      | 0 | ARG 
+31   | TextContainer             |         |       |    |     | log                       |      | 0 | ARG 
+31   | ObjectManager             |         |       |    |     | log                       |      | 0 | ARG 
+31   | ShapeFactory              |         |       |    |     | log                       |      | 0 | ARG 
+31   | DebugManager              |         |       |    |     | log                       |      | 0 | ARG 
+32   | log                       | console |       |    |     |                           |      | 0 | CALL
+32   | Position                  |         |       |    |     | log                       |      | 0 | ARG 
+32   | Rectangle                 |         |       |    |     | log                       |      | 0 | ARG 
+32   | Circle                    |         |       |    |     | log                       |      | 0 | ARG 
+32   | geometry                  |         |       |    |     | log                       |      | 0 | ARG 
+32   | readFile                  |         |       |    |     | log                       |      | 0 | ARG 

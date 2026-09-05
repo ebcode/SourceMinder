@@ -1,0 +1,20 @@
+LINE | SYM            | PAR           | SCOPE | NS | MOD | CLUE   | TYPE         | D | CTX 
+./tools/sources/c/test-strcmp-if.c:
+1    | test-strcmp-if |               |       |    |     |        |              | 0 | FILE
+1    | <string.h>     |               |       |    |     |        |              | 0 | IMP 
+3    | test_function  |               |       |    |     |        | void         | 1 | FUNC
+3    | input          | test_function |       |    |     |        | const char * | 1 | ARG 
+4    | Test           |               |       |    |     |        |              | 0 | COM 
+4    | strcmp         |               |       |    |     |        |              | 0 | COM 
+4    | condition      |               |       |    |     |        |              | 0 | COM 
+5    | strcmp         |               |       |    |     |        |              | 0 | CALL
+5    | input          |               |       |    |     | strcmp |              | 0 | ARG 
+5    | hello          |               |       |    |     |        |              | 0 | STR 
+6    | something      |               |       |    |     |        |              | 0 | COM 
+7    | strcmp         |               |       |    |     |        |              | 0 | CALL
+7    | input          |               |       |    |     | strcmp |              | 0 | ARG 
+7    | world          |               |       |    |     |        |              | 0 | STR 
+8    | strcmp         |               |       |    |     |        |              | 0 | CALL
+8    | input          |               |       |    |     | strcmp |              | 0 | ARG 
+8    | foo            |               |       |    |     |        |              | 0 | STR 
+9    | something      |               |       |    |     |        |              | 0 | COM 

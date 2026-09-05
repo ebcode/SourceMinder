@@ -1,0 +1,10 @@
+LINE | SYM             | PAR | SCOPE | NS | MOD    | CLUE | TYPE | D | CTX 
+./tools/sources/c/test-modifiers.c:
+1    | test-modifiers  |     |       |    |        |      |      | 0 | FILE
+1    | Test            |     |       |    |        |      |      | 0 | COM 
+1    | function        |     |       |    |        |      |      | 0 | COM 
+1    | modifiers       |     |       |    |        |      |      | 0 | COM 
+3    | helper_function |     |       |    | static |      | void | 1 | FUNC
+5    | public_function |     |       |    |        |      | void | 1 | FUNC
+7    | static_helper   |     |       |    | static |      | int  | 1 | FUNC
+11   | inline_function |     |       |    | inline |      | void | 1 | FUNC

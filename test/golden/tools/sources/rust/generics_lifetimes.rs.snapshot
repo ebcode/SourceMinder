@@ -1,0 +1,64 @@
+LINE | SYM                | PAR              | SCOPE   | NS        | MOD | CLUE    | TYPE                   | D | CTX  
+./tools/sources/rust/generics_lifetimes.rs:
+1    | generics_lifetimes |                  |         |           |     |         |                        | 0 | FILE 
+1    | Generic            |                  |         |           |     |         |                        | 0 | COM  
+1    | types              |                  |         |           |     |         |                        | 0 | COM  
+1    | lifetimes          |                  |         |           |     |         |                        | 0 | COM  
+1    | clauses            |                  |         |           |     |         |                        | 0 | COM  
+1    | bounds             |                  |         |           |     |         |                        | 0 | COM  
+3    | Debug              |                  |         | std::fmt  |     |         |                        | 0 | IMP  
+3    | Display            |                  |         | std::fmt  |     |         |                        | 0 | IMP  
+5    | Wrapper            |                  | pub     |           |     |         |                        | 1 | CLASS
+5    | Clone              |                  |         |           |     |         |                        | 0 | TRAIT
+6    | value              | Wrapper          | private |           |     |         | &'a T                  | 1 | PROP 
+7    | name               | Wrapper          | private |           |     |         | String                 | 1 | PROP 
+10   | Wrapper            |                  |         |           |     | impl    |                        | 1 | CLASS
+10   | Clone              |                  |         |           |     |         |                        | 0 | TRAIT
+10   | Display            |                  |         |           |     |         |                        | 0 | TRAIT
+11   | new                | Wrapper          | pub     |           |     |         | Self                   | 1 | FUNC 
+11   | value              |                  |         |           |     |         | &'a T                  | 0 | ARG  
+11   | name               |                  |         |           |     |         | String                 | 0 | ARG  
+12   | Wrapper            |                  |         |           |     |         |                        | 0 | CLASS
+12   | value              | Wrapper          |         |           |     |         |                        | 0 | PROP 
+12   | name               | Wrapper          |         |           |     |         |                        | 0 | PROP 
+15   | render             | Wrapper          | pub     |           |     |         | String                 | 1 | FUNC 
+16   | format             |                  |         |           |     |         | macro                  | 0 | CALL 
+16   | name               | self             |         |           |     | format  |                        | 0 | PROP 
+16   | value              | self             |         |           |     | format  |                        | 0 | PROP 
+20   | Repository         |                  | pub     |           |     |         |                        | 1 | TRAIT
+22   | Eq                 |                  |         |           |     |         |                        | 0 | TRAIT
+22   | Hash               |                  |         | std::hash |     |         |                        | 0 | TRAIT
+23   | Clone              |                  |         |           |     |         |                        | 0 | TRAIT
+25   | insert             | Repository       | private |           |     |         |                        | 1 | FUNC 
+25   | key                |                  |         |           |     |         | K                      | 0 | ARG  
+25   | value              |                  |         |           |     |         | V                      | 0 | ARG  
+26   | get                | Repository       | private |           |     |         | Option<&V>             | 1 | FUNC 
+26   | key                |                  |         |           |     |         | &K                     | 0 | ARG  
+29   | print_pair         |                  | pub     |           |     |         |                        | 1 | FUNC 
+29   | left               |                  |         |           |     |         | T                      | 0 | ARG  
+29   | right              |                  |         |           |     |         | U                      | 0 | ARG  
+31   | Display            |                  |         |           |     |         |                        | 0 | TRAIT
+32   | Debug              |                  |         |           |     |         |                        | 0 | TRAIT
+34   | println            |                  |         |           |     |         | macro                  | 0 | CALL 
+34   | left               |                  |         |           |     | println |                        | 0 | ARG  
+34   | right              |                  |         |           |     | println |                        | 0 | ARG  
+37   | longest            |                  | pub     |           |     |         | &'a str                | 1 | FUNC 
+38   | len                | x                |         |           |     |         |                        | 0 | CALL 
+38   | len                | y                |         |           |     |         |                        | 0 | CALL 
+41   | first_word         |                  | pub     |           |     |         | &'s str                | 1 | FUNC 
+41   | text               |                  |         |           |     |         | &'s str                | 0 | ARG  
+42   | unwrap_or          | next             |         |           |     |         |                        | 0 | CALL 
+42   | next               | split_whitespace |         |           |     |         |                        | 0 | CALL 
+42   | split_whitespace   | text             |         |           |     |         |                        | 0 | CALL 
+45   | Higher-ranked      |                  |         |           |     |         |                        | 0 | COM  
+45   | bounds             |                  |         |           |     |         |                        | 0 | COM  
+46   | apply_fn           |                  | pub     |           |     |         |                        | 1 | FUNC 
+46   | callback           |                  |         |           |     |         | F                      | 0 | ARG  
+50   | callback           |                  |         |           |     |         |                        | 0 | CALL 
+50   | hello              |                  |         |           |     |         |                        | 0 | STR  
+53   | Generic            |                  |         |           |     |         |                        | 0 | COM  
+53   | associated         |                  |         |           |     |         |                        | 0 | COM  
+53   | via                |                  |         |           |     |         |                        | 0 | COM  
+54   | Stream             |                  | pub     |           |     |         |                        | 1 | TRAIT
+55   | Item               | Stream           | private |           |     |         |                        | 1 | TYPE 
+56   | next               | Stream           | private |           |     |         | Option<Self::Item<'a>> | 1 | FUNC 

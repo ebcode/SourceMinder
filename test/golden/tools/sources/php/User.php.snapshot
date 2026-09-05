@@ -1,0 +1,15 @@
+LINE | SYM         | PAR   | SCOPE   | NS         | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/User.php:
+1    | User        |       |         |            |     |      |      | 0 | FILE 
+3    | App\Models  |       |         |            |     |      |      | 1 | NS   
+5    | User        |       |         | App\Models |     |      |      | 1 | CLASS
+6    | $name       | User  | public  | App\Models |     |      |      | 1 | PROP 
+7    | $password   | User  | private | App\Models |     |      |      | 1 | PROP 
+9    | __construct | User  | public  | App\Models |     |      |      | 1 | FUNC 
+10   | $name       |       |         | App\Models |     |      |      | 0 | VAR  
+10   | $this       |       |         | App\Models |     |      |      | 0 | VAR  
+10   | name        | $this |         | App\Models |     |      |      | 0 | PROP 
+13   | save        | User  | public  | App\Models |     |      |      | 1 | FUNC 
+14   | Save        |       |         | App\Models |     |      |      | 0 | COM  
+14   | user        |       |         | App\Models |     |      |      | 0 | COM  
+14   | database    |       |         | App\Models |     |      |      | 0 | COM  

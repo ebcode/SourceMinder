@@ -1,0 +1,82 @@
+LINE | SYM         | PAR   | SCOPE | NS     | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/oop-classic.pl:
+1    | oop-classic |       |       |        |     |      |        | 0 | FILE
+2    | Animal      |       |       |        |     |      |        | 1 | NS  
+4    | strict      |       |       |        |     |      |        | 0 | IMP 
+5    | warnings    |       |       |        |     |      |        | 0 | IMP 
+7    | new         |       |       | Animal |     |      |        | 1 | FUNC
+8    | class       |       |       |        | my  |      | scalar | 1 | ARG 
+8    | args        |       |       |        | my  |      | hash   | 1 | ARG 
+9    | self        |       |       |        | my  |      | scalar | 1 | VAR 
+10   | name        |       |       |        |     |      |        | 0 | PROP
+10   | args        |       |       |        |     |      | hash   | 0 | VAR 
+10   | name        | args  |       |        |     |      |        | 0 | PROP
+11   | sound       |       |       |        |     |      |        | 0 | PROP
+11   | args        |       |       |        |     |      | hash   | 0 | VAR 
+11   | sound       | args  |       |        |     |      |        | 0 | PROP
+11   | generic     |       |       |        |     |      |        | 0 | STR 
+11   | noise       |       |       |        |     |      |        | 0 | STR 
+13   | bless       |       |       |        |     |      |        | 0 | CALL
+13   | self        |       |       |        |     |      | scalar | 0 | VAR 
+13   | class       |       |       |        |     |      | scalar | 0 | VAR 
+16   | name        |       |       | Animal |     |      |        | 1 | FUNC
+17   | self        |       |       |        | my  |      | scalar | 1 | ARG 
+18   | self        |       |       |        |     |      | hash   | 0 | VAR 
+18   | name        | self  |       |        |     |      |        | 0 | PROP
+21   | sound       |       |       | Animal |     |      |        | 1 | FUNC
+22   | self        |       |       |        | my  |      | scalar | 1 | ARG 
+23   | self        |       |       |        |     |      | hash   | 0 | VAR 
+23   | sound       | self  |       |        |     |      |        | 0 | PROP
+26   | speak       |       |       | Animal |     |      |        | 1 | FUNC
+27   | self        |       |       |        | my  |      | scalar | 1 | ARG 
+28   | printf      |       |       |        |     |      |        | 0 | CALL
+28   | %s          |       |       |        |     |      |        | 0 | STR 
+28   | says        |       |       |        |     |      |        | 0 | STR 
+28   | %sn         |       |       |        |     |      |        | 0 | STR 
+28   | name        | self  |       |        |     |      |        | 0 | CALL
+28   | self        |       |       |        |     |      | scalar | 0 | VAR 
+28   | sound       | self  |       |        |     |      |        | 0 | CALL
+28   | self        |       |       |        |     |      | scalar | 0 | VAR 
+31   | describe    |       |       | Animal |     |      |        | 1 | FUNC
+32   | self        |       |       |        | my  |      | scalar | 1 | ARG 
+33   | sprintf     |       |       |        |     |      |        | 0 | CALL
+33   | %s          |       |       |        |     |      |        | 0 | STR 
+33   | self        |       |       |        |     |      | hash   | 0 | VAR 
+33   | name        | self  |       |        |     |      |        | 0 | PROP
+36   | Dog         |       |       |        |     |      |        | 1 | NS  
+37   | parent      |       |       |        |     |      |        | 0 | IMP 
+39   | new         |       |       | Dog    |     |      |        | 1 | FUNC
+40   | class       |       |       |        | my  |      | scalar | 1 | ARG 
+40   | args        |       |       |        | my  |      | hash   | 1 | ARG 
+41   | args        |       |       |        |     |      | hash   | 0 | VAR 
+41   | sound       | args  |       |        |     |      |        | 0 | PROP
+41   | woof        |       |       |        |     |      |        | 0 | STR 
+42   | self        |       |       |        | my  |      | scalar | 1 | VAR 
+42   | SUPER::new  | class |       |        |     |      |        | 0 | CALL
+42   | class       |       |       |        |     |      | scalar | 0 | VAR 
+42   | args        |       |       |        |     |      | hash   | 0 | VAR 
+43   | self        |       |       |        |     |      | hash   | 0 | VAR 
+43   | tricks      | self  |       |        |     |      |        | 0 | PROP
+44   | self        |       |       |        |     |      | scalar | 0 | VAR 
+47   | learn_trick |       |       | Dog    |     |      |        | 1 | FUNC
+48   | self        |       |       |        | my  |      | scalar | 1 | ARG 
+48   | trick       |       |       |        | my  |      | scalar | 1 | ARG 
+49   | push        |       |       |        |     |      |        | 0 | CALL
+49   | self        |       |       |        |     |      | scalar | 0 | VAR 
+49   | trick       |       |       |        |     |      | scalar | 0 | VAR 
+52   | show_tricks |       |       | Dog    |     |      |        | 1 | FUNC
+53   | self        |       |       |        | my  |      | scalar | 1 | ARG 
+54   | self        |       |       |        |     |      | scalar | 0 | VAR 
+57   | main        |       |       |        |     |      |        | 1 | NS  
+59   | dog         |       |       |        | my  |      | scalar | 1 | VAR 
+59   | new         | Dog   |       |        |     |      |        | 0 | CALL
+59   | name        |       |       |        |     |      |        | 0 | PROP
+59   | Rex         |       |       |        |     |      |        | 0 | STR 
+60   | learn_trick | dog   |       |        |     |      |        | 0 | CALL
+60   | dog         |       |       |        |     |      | scalar | 0 | VAR 
+60   | sit         |       |       |        |     |      |        | 0 | STR 
+61   | learn_trick | dog   |       |        |     |      |        | 0 | CALL
+61   | dog         |       |       |        |     |      | scalar | 0 | VAR 
+61   | shake       |       |       |        |     |      |        | 0 | STR 
+62   | speak       | dog   |       |        |     |      |        | 0 | CALL
+62   | dog         |       |       |        |     |      | scalar | 0 | VAR 

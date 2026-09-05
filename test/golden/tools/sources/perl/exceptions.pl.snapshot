@@ -1,0 +1,163 @@
+LINE | SYM              | PAR              | SCOPE | NS               | MOD | CLUE | TYPE       | D | CTX 
+./tools/sources/perl/exceptions.pl:
+1    | exceptions       |                  |       |                  |     |      |            | 0 | FILE
+2    | strict           |                  |       |                  |     |      |            | 0 | IMP 
+3    | warnings         |                  |       |                  |     |      |            | 0 | IMP 
+5    | ---              |                  |       |                  |     |      |            | 0 | COM 
+5    | Basic            |                  |       |                  |     |      |            | 0 | COM 
+5    | eval/die         |                  |       |                  |     |      |            | 0 | COM 
+5    | ---              |                  |       |                  |     |      |            | 0 | COM 
+7    | divide           |                  |       |                  |     |      |            | 1 | FUNC
+9    | die              |                  |       |                  |     |      |            | 0 | CALL
+9    | Division         |                  |       |                  |     |      |            | 0 | STR 
+9    | zeron            |                  |       |                  |     |      |            | 0 | STR 
+14   | result           |                  |       |                  | my  |      | scalar     | 1 | VAR 
+14   | divide           |                  |       |                  |     |      |            | 0 | CALL
+17   | warn             |                  |       |                  |     |      |            | 0 | CALL
+17   | Caught:          |                  |       |                  |     |      |            | 0 | STR 
+17   | $@               |                  |       |                  |     |      |            | 0 | STR 
+20   | ---              |                  |       |                  |     |      |            | 0 | COM 
+20   | reference        |                  |       |                  |     |      |            | 0 | COM 
+20   | object           |                  |       |                  |     |      |            | 0 | COM 
+20   | exception        |                  |       |                  |     |      |            | 0 | COM 
+20   | ---              |                  |       |                  |     |      |            | 0 | COM 
+22   | read_file        |                  |       |                  |     |      |            | 1 | FUNC
+23   | path             |                  |       |                  | my  |      | scalar     | 1 | ARG 
+24   | open             |                  |       |                  |     |      |            | 0 | CALL
+24   | fh               |                  |       |                  | my  |      | filehandle | 1 | VAR 
+24   | path             |                  |       |                  |     |      | scalar     | 0 | VAR 
+24   | die              |                  |       |                  |     |      |            | 0 | CALL
+24   | code             |                  |       |                  |     |      |            | 0 | PROP
+24   | message          |                  |       |                  |     |      |            | 0 | PROP
+24   | File             |                  |       |                  |     |      |            | 0 | STR 
+24   | found:           |                  |       |                  |     |      |            | 0 | STR 
+24   | $path            |                  |       |                  |     |      |            | 0 | STR 
+24   | path             |                  |       |                  |     |      | scalar     | 0 | VAR 
+25   | fh               |                  |       |                  |     |      | filehandle | 0 | VAR 
+29   | read_file        |                  |       |                  |     |      |            | 0 | CALL
+29   | /no/such/file    |                  |       |                  |     |      |            | 0 | STR 
+31   | ref              |                  |       |                  |     |      |            | 0 | CALL
+31   | HASH             |                  |       |                  |     |      |            | 0 | STR 
+32   | err              |                  |       |                  | my  |      | scalar     | 1 | VAR 
+33   | warn             |                  |       |                  |     |      |            | 0 | CALL
+33   | Error            |                  |       |                  |     |      |            | 0 | STR 
+33   | $err->code:      |                  |       |                  |     |      |            | 0 | STR 
+33   | $err->messagen   |                  |       |                  |     |      |            | 0 | STR 
+33   | err              |                  |       |                  |     |      | hash       | 0 | VAR 
+33   | code             | err              |       |                  |     |      |            | 0 | PROP
+33   | err              |                  |       |                  |     |      | hash       | 0 | VAR 
+33   | message          | err              |       |                  |     |      |            | 0 | PROP
+36   | ---              |                  |       |                  |     |      |            | 0 | COM 
+36   | Exception        |                  |       |                  |     |      |            | 0 | COM 
+36   | class            |                  |       |                  |     |      |            | 0 | COM 
+36   | classic          |                  |       |                  |     |      |            | 0 | COM 
+36   | OOP              |                  |       |                  |     |      |            | 0 | COM 
+36   | style            |                  |       |                  |     |      |            | 0 | COM 
+36   | ---              |                  |       |                  |     |      |            | 0 | COM 
+38   | Exception        |                  |       |                  |     |      |            | 1 | NS  
+40   | new              |                  |       | Exception        |     |      |            | 1 | FUNC
+41   | class            |                  |       |                  | my  |      | scalar     | 1 | ARG 
+41   | args             |                  |       |                  | my  |      | hash       | 1 | ARG 
+42   | bless            |                  |       |                  |     |      |            | 0 | CALL
+43   | message          |                  |       |                  |     |      |            | 0 | PROP
+43   | args             |                  |       |                  |     |      | hash       | 0 | VAR 
+43   | message          | args             |       |                  |     |      |            | 0 | PROP
+43   | Unknown          |                  |       |                  |     |      |            | 0 | STR 
+43   | error            |                  |       |                  |     |      |            | 0 | STR 
+44   | code             |                  |       |                  |     |      |            | 0 | PROP
+44   | args             |                  |       |                  |     |      | hash       | 0 | VAR 
+44   | code             | args             |       |                  |     |      |            | 0 | PROP
+45   | class            |                  |       |                  |     |      | scalar     | 0 | VAR 
+48   | message          |                  |       | Exception        |     |      |            | 1 | FUNC
+48   | message          |                  |       |                  |     |      |            | 0 | PROP
+49   | code             |                  |       | Exception        |     |      |            | 1 | FUNC
+49   | code             |                  |       |                  |     |      |            | 0 | PROP
+50   | throw            |                  |       | Exception        |     |      |            | 1 | FUNC
+51   | class            |                  |       |                  | my  |      | scalar     | 1 | ARG 
+51   | args             |                  |       |                  | my  |      | hash       | 1 | ARG 
+52   | die              |                  |       |                  |     |      |            | 0 | CALL
+52   | new              | class            |       |                  |     |      |            | 0 | CALL
+52   | class            |                  |       |                  |     |      | scalar     | 0 | VAR 
+52   | args             |                  |       |                  |     |      | hash       | 0 | VAR 
+55   | IOException      |                  |       |                  |     |      |            | 1 | NS  
+56   | parent           |                  |       |                  |     |      |            | 0 | IMP 
+58   | new              |                  |       | IOException      |     |      |            | 1 | FUNC
+59   | class            |                  |       |                  | my  |      | scalar     | 1 | ARG 
+59   | args             |                  |       |                  | my  |      | hash       | 1 | ARG 
+60   | args             |                  |       |                  |     |      | hash       | 0 | VAR 
+60   | code             | args             |       |                  |     |      |            | 0 | PROP
+61   | SUPER::new       | class            |       |                  |     |      |            | 0 | CALL
+61   | class            |                  |       |                  |     |      | scalar     | 0 | VAR 
+61   | args             |                  |       |                  |     |      | hash       | 0 | VAR 
+64   | NetworkException |                  |       |                  |     |      |            | 1 | NS  
+65   | parent           |                  |       |                  |     |      |            | 0 | IMP 
+67   | new              |                  |       | NetworkException |     |      |            | 1 | FUNC
+68   | class            |                  |       |                  | my  |      | scalar     | 1 | ARG 
+68   | args             |                  |       |                  | my  |      | hash       | 1 | ARG 
+69   | args             |                  |       |                  |     |      | hash       | 0 | VAR 
+69   | code             | args             |       |                  |     |      |            | 0 | PROP
+70   | SUPER::new       | class            |       |                  |     |      |            | 0 | CALL
+70   | class            |                  |       |                  |     |      | scalar     | 0 | VAR 
+70   | args             |                  |       |                  |     |      | hash       | 0 | VAR 
+73   | main             |                  |       |                  |     |      |            | 1 | NS  
+75   | ---              |                  |       |                  |     |      |            | 0 | COM 
+75   | Catching         |                  |       |                  |     |      |            | 0 | COM 
+75   | typed            |                  |       |                  |     |      |            | 0 | COM 
+75   | exceptions       |                  |       |                  |     |      |            | 0 | COM 
+75   | ---              |                  |       |                  |     |      |            | 0 | COM 
+78   | throw            | IOException      |       |                  |     |      |            | 0 | CALL
+78   | message          |                  |       |                  |     |      |            | 0 | PROP
+78   | Disk             |                  |       |                  |     |      |            | 0 | STR 
+78   | full             |                  |       |                  |     |      |            | 0 | STR 
+78   | code             |                  |       |                  |     |      |            | 0 | PROP
+81   | ref              |                  |       |                  |     |      |            | 0 | CALL
+81   | isa              | e                |       |                  |     |      |            | 0 | CALL
+81   | IOException      |                  |       |                  |     |      |            | 0 | STR 
+82   | warn             |                  |       |                  |     |      |            | 0 | CALL
+82   | IO               |                  |       |                  |     |      |            | 0 | STR 
+82   | error            |                  |       |                  |     |      |            | 0 | STR 
+82   | code             | e                |       |                  |     |      |            | 0 | CALL
+82   | message          | e                |       |                  |     |      |            | 0 | CALL
+83   | ref              |                  |       |                  |     |      |            | 0 | CALL
+83   | isa              | e                |       |                  |     |      |            | 0 | CALL
+83   | Exception        |                  |       |                  |     |      |            | 0 | STR 
+84   | warn             |                  |       |                  |     |      |            | 0 | CALL
+84   | General          |                  |       |                  |     |      |            | 0 | STR 
+84   | error:           |                  |       |                  |     |      |            | 0 | STR 
+84   | message          | e                |       |                  |     |      |            | 0 | CALL
+86   | die              |                  |       |                  |     |      |            | 0 | CALL
+86   | rethrow          |                  |       |                  |     |      |            | 0 | COM 
+86   | unknown          |                  |       |                  |     |      |            | 0 | COM 
+90   | ---              |                  |       |                  |     |      |            | 0 | COM 
+90   | Nested           |                  |       |                  |     |      |            | 0 | COM 
+90   | eval             |                  |       |                  |     |      |            | 0 | COM 
+90   | ---              |                  |       |                  |     |      |            | 0 | COM 
+92   | safe_connect     |                  |       | main             |     |      |            | 1 | FUNC
+93   | host             |                  |       |                  | my  |      | scalar     | 1 | ARG 
+93   | port             |                  |       |                  | my  |      | scalar     | 1 | ARG 
+94   | result           |                  |       |                  | my  |      | scalar     | 1 | VAR 
+95   | throw            | NetworkException |       |                  |     |      |            | 0 | CALL
+95   | message          |                  |       |                  |     |      |            | 0 | PROP
+95   | Cannot           |                  |       |                  |     |      |            | 0 | STR 
+95   | connect          |                  |       |                  |     |      |            | 0 | STR 
+95   | $host:$port      |                  |       |                  |     |      |            | 0 | STR 
+95   | host             |                  |       |                  |     |      | scalar     | 0 | VAR 
+95   | port             |                  |       |                  |     |      | scalar     | 0 | VAR 
+97   | result           |                  |       |                  |     |      | scalar     | 0 | VAR 
+100  | ---              |                  |       |                  |     |      |            | 0 | COM 
+100  | $@               |                  |       |                  |     |      |            | 0 | COM 
+100  | preserve         |                  |       |                  |     |      |            | 0 | COM 
+100  | error            |                  |       |                  |     |      |            | 0 | COM 
+100  | across           |                  |       |                  |     |      |            | 0 | COM 
+100  | nested           |                  |       |                  |     |      |            | 0 | COM 
+100  | calls            |                  |       |                  |     |      |            | 0 | COM 
+100  | ---              |                  |       |                  |     |      |            | 0 | COM 
+102  | wrap_eval        |                  |       | main             |     |      |            | 1 | FUNC
+103  | code             |                  |       |                  | my  |      | scalar     | 1 | ARG 
+104  | code             |                  |       |                  |     |      |            | 0 | CALL
+105  | err              |                  |       |                  | my  |      | scalar     | 1 | VAR 
+106  | err              |                  |       |                  |     |      | scalar     | 0 | VAR 
+106  | failed:          |                  |       |                  |     |      |            | 0 | STR 
+106  | $err             |                  |       |                  |     |      |            | 0 | STR 
+106  | err              |                  |       |                  |     |      | scalar     | 0 | VAR 
+106  | ok               |                  |       |                  |     |      |            | 0 | STR 

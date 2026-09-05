@@ -1,0 +1,71 @@
+LINE | SYM              | PAR          | SCOPE | NS | MOD    | CLUE | TYPE          | D | CTX 
+./tools/sources/c/test-phase2.c:
+1    | test-phase2      |              |       |    |        |      |               | 0 | FILE
+1    | Test             |              |       |    |        |      |               | 0 | COM 
+1    | file             |              |       |    |        |      |               | 0 | COM 
+1    | Phase            |              |       |    |        |      |               | 0 | COM 
+1    | indexer          |              |       |    |        |      |               | 0 | COM 
+2    | <stdio.h>        |              |       |    |        |      |               | 0 | IMP 
+3    | <stdlib.h>       |              |       |    |        |      |               | 0 | IMP 
+5    | Global           |              |       |    |        |      |               | 0 | COM 
+5    | variables        |              |       |    |        |      |               | 0 | COM 
+6    | global_count     |              |       |    |        |      | int           | 1 | VAR 
+7    | static_buffer    |              |       |    | static |      | char*         | 1 | VAR 
+9    | definition       |              |       |    |        |      |               | 0 | COM 
+10   | Point            |              |       |    |        |      |               | 1 | TYPE
+11   | int              |              |       |    |        |      |               | 0 | TYPE
+12   | int              |              |       |    |        |      |               | 0 | TYPE
+15   | anonymous        |              |       |    |        |      |               | 0 | COM 
+16   | Person           |              |       |    |        |      |               | 1 | TYPE
+17   | char             |              |       |    |        |      |               | 0 | TYPE
+17   | name             |              |       |    |        |      | char*         | 1 | PROP
+18   | int              |              |       |    |        |      |               | 0 | TYPE
+18   | age              |              |       |    |        |      | int           | 1 | PROP
+19   | location         |              |       |    |        |      | struct Point* | 1 | PROP
+22   | definition       |              |       |    |        |      |               | 0 | COM 
+23   | Color            |              |       |    |        |      |               | 1 | ENUM
+24   | RED              |              |       |    |        |      |               | 1 | CASE
+25   | GREEN            |              |       |    |        |      |               | 1 | CASE
+26   | BLUE             |              |       |    |        |      |               | 1 | CASE
+27   | YELLOW           |              |       |    |        |      |               | 1 | CASE
+30   | Function         |              |       |    |        |      |               | 0 | COM 
+30   | simple           |              |       |    |        |      |               | 0 | COM 
+30   | parameters       |              |       |    |        |      |               | 0 | COM 
+31   | add              |              |       |    |        |      | int           | 1 | FUNC
+35   | Function         |              |       |    |        |      |               | 0 | COM 
+35   | pointer          |              |       |    |        |      |               | 0 | COM 
+35   | parameters       |              |       |    |        |      |               | 0 | COM 
+36   | process_data     |              |       |    |        |      | void          | 1 | FUNC
+36   | str              | process_data |       |    |        |      | char *        | 1 | ARG 
+36   | ptr              | process_data |       |    |        |      | int *         | 1 | ARG 
+36   | Person           |              |       |    |        |      |               | 0 | TYPE
+36   | person           | process_data |       |    |        |      | Person *      | 1 | ARG 
+37   | printf           |              |       |    |        |      |               | 0 | CALL
+37   | Processing       |              |       |    |        |      |               | 0 | STR 
+37   | data             |              |       |    |        |      |               | 0 | STR 
+40   | Function         |              |       |    |        |      |               | 0 | COM 
+40   | multiple         |              |       |    |        |      |               | 0 | COM 
+40   | variables        |              |       |    |        |      |               | 0 | COM 
+41   | complex_function |              |       |    |        |      | void          | 1 | FUNC
+43   | message          |              |       |    |        |      | char*         | 1 | VAR 
+43   | hello            |              |       |    |        |      |               | 0 | STR 
+43   | world            |              |       |    |        |      |               | 0 | STR 
+44   | user             |              |       |    |        |      | Person        | 1 | VAR 
+45   | age              | user         |       |    |        |      |               | 0 | PROP
+45   | user             |              |       |    |        |      |               | 0 | VAR 
+48   | definition       |              |       |    |        |      |               | 0 | COM 
+49   | Data             |              |       |    |        |      |               | 1 | TYPE
+50   | int              |              |       |    |        |      |               | 0 | TYPE
+50   | integer          |              |       |    |        |      | int           | 1 | PROP
+51   | float            |              |       |    |        |      |               | 0 | TYPE
+51   | decimal          |              |       |    |        |      | float         | 1 | PROP
+52   | char             |              |       |    |        |      |               | 0 | TYPE
+52   | byte             |              |       |    |        |      | char          | 1 | PROP
+55   | Another          |              |       |    |        |      |               | 0 | COM 
+55   | pointer          |              |       |    |        |      |               | 0 | COM 
+55   | fields           |              |       |    |        |      |               | 0 | COM 
+56   | Node             |              |       |    |        |      |               | 1 | TYPE
+57   | int              |              |       |    |        |      |               | 0 | TYPE
+57   | value            |              |       |    |        |      | int           | 1 | PROP
+58   | next             |              |       |    |        |      | struct Node*  | 1 | PROP
+59   | prev             |              |       |    |        |      | struct Node*  | 1 | PROP

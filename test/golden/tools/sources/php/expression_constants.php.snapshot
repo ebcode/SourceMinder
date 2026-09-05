@@ -1,0 +1,75 @@
+LINE | SYM                  | PAR           | SCOPE  | NS       | MOD    | CLUE | TYPE | D | CTX  
+./tools/sources/php/expression_constants.php:
+1    | expression_constants |               |        |          |        |      |      | 0 | FILE 
+3    | App\Test             |               |        |          |        |      |      | 1 | NS   
+5    | Factory              |               |        | App\Test |        |      |      | 1 | CLASS
+6    | CONFIG               | Factory       | public | App\Test | const  |      |      | 1 | VAR  
+8    | getClass             | Factory       | public | App\Test | static |      |      | 1 | FUNC 
+9    | class                | self          |        | App\Test | const  |      |      | 0 | VAR  
+12   | getInstance          | Factory       | public | App\Test | static |      |      | 1 | FUNC 
+17   | ConfigManager        |               |        | App\Test |        |      |      | 1 | CLASS
+18   | $factory             | ConfigManager | public | App\Test |        |      |      | 1 | PROP 
+20   | __construct          | ConfigManager | public | App\Test |        |      |      | 1 | FUNC 
+21   | $this                |               |        | App\Test |        |      |      | 0 | VAR  
+21   | factory              | $this         |        | App\Test |        |      |      | 0 | PROP 
+25   | Test                 |               |        | App\Test |        |      |      | 0 | COM  
+25   | 1:                   |               |        | App\Test |        |      |      | 0 | COM  
+25   | call                 |               |        | App\Test |        |      |      | 0 | COM  
+25   | result               |               |        | App\Test |        |      |      | 0 | COM  
+25   | scope                |               |        | App\Test |        |      |      | 0 | COM  
+26   | getClass             |               |        | App\Test |        |      |      | 1 | FUNC 
+27   | class                | Factory       |        | App\Test | const  |      |      | 0 | VAR  
+30   | $config1             |               |        | App\Test |        |      |      | 0 | VAR  
+30   | CONFIG               | getClass      |        | App\Test | const  |      |      | 0 | VAR  
+32   | Test                 |               |        | App\Test |        |      |      | 0 | COM  
+32   | 2:                   |               |        | App\Test |        |      |      | 0 | COM  
+32   | Method               |               |        | App\Test |        |      |      | 0 | COM  
+32   | call                 |               |        | App\Test |        |      |      | 0 | COM  
+32   | object               |               |        | App\Test |        |      |      | 0 | COM  
+32   | scope                |               |        | App\Test |        |      |      | 0 | COM  
+33   | $manager             |               |        | App\Test |        |      |      | 0 | VAR  
+34   | $config2             |               |        | App\Test |        |      |      | 0 | VAR  
+34   | CONFIG               | getInstance   |        | App\Test | const  |      |      | 0 | VAR  
+36   | Test                 |               |        | App\Test |        |      |      | 0 | COM  
+36   | 3:                   |               |        | App\Test |        |      |      | 0 | COM  
+36   | method               |               |        | App\Test |        |      |      | 0 | COM  
+36   | call                 |               |        | App\Test |        |      |      | 0 | COM  
+36   | result               |               |        | App\Test |        |      |      | 0 | COM  
+36   | scope                |               |        | App\Test |        |      |      | 0 | COM  
+37   | $config3             |               |        | App\Test |        |      |      | 0 | VAR  
+37   | CONFIG               | getInstance   |        | App\Test | const  |      |      | 0 | VAR  
+39   | Test                 |               |        | App\Test |        |      |      | 0 | COM  
+39   | 4:                   |               |        | App\Test |        |      |      | 0 | COM  
+39   | Property             |               |        | App\Test |        |      |      | 0 | COM  
+39   | access               |               |        | App\Test |        |      |      | 0 | COM  
+39   | scope                |               |        | App\Test |        |      |      | 0 | COM  
+40   | $obj                 |               |        | App\Test |        |      |      | 0 | VAR  
+41   | $config4             |               |        | App\Test |        |      |      | 0 | VAR  
+41   | CONFIG               | factory       |        | App\Test | const  |      |      | 0 | VAR  
+43   | Test                 |               |        | App\Test |        |      |      | 0 | COM  
+43   | 5:                   |               |        | App\Test |        |      |      | 0 | COM  
+43   | Parenthesized        |               |        | App\Test |        |      |      | 0 | COM  
+43   | expression           |               |        | App\Test |        |      |      | 0 | COM  
+43   | scope                |               |        | App\Test |        |      |      | 0 | COM  
+44   | $className           |               |        | App\Test |        |      |      | 0 | VAR  
+44   | class                | Factory       |        | App\Test | const  |      |      | 0 | VAR  
+45   | $config5             |               |        | App\Test |        |      |      | 0 | VAR  
+45   | CONFIG               | $className    |        | App\Test | const  |      |      | 0 | VAR  
+47   | Test                 |               |        | App\Test |        |      |      | 0 | COM  
+47   | 6:                   |               |        | App\Test |        |      |      | 0 | COM  
+47   | Chained              |               |        | App\Test |        |      |      | 0 | COM  
+47   | method               |               |        | App\Test |        |      |      | 0 | COM  
+47   | calls                |               |        | App\Test |        |      |      | 0 | COM  
+48   | $config6             |               |        | App\Test |        |      |      | 0 | VAR  
+48   | CONFIG               | getInstance   |        | App\Test | const  |      |      | 0 | VAR  
+50   | Test                 |               |        | App\Test |        |      |      | 0 | COM  
+50   | 7:                   |               |        | App\Test |        |      |      | 0 | COM  
+50   | Variable             |               |        | App\Test |        |      |      | 0 | COM  
+50   | scope                |               |        | App\Test |        |      |      | 0 | COM  
+50   | already              |               |        | App\Test |        |      |      | 0 | COM  
+50   | supported            |               |        | App\Test |        |      |      | 0 | COM  
+50   | included             |               |        | App\Test |        |      |      | 0 | COM  
+50   | completeness         |               |        | App\Test |        |      |      | 0 | COM  
+51   | $factoryClass        |               |        | App\Test |        |      |      | 0 | VAR  
+51   | class                | Factory       |        | App\Test | const  |      |      | 0 | VAR  
+52   | $config7             |               |        | App\Test |        |      |      | 0 | VAR  

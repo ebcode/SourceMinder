@@ -1,0 +1,33 @@
+LINE | SYM               | PAR | SCOPE | NS         | MOD | CLUE  | TYPE | D | CTX 
+./tools/sources/php/functions.php:
+1    | functions         |     |       |            |     |       |      | 0 | FILE
+3    | App\Models        |     |       |            |     |       |      | 1 | NS  
+5    | Regular           |     |       | App\Models |     |       |      | 0 | COM 
+8    | calculateDiscount |     |       | App\Models |     |       |      | 1 | FUNC
+9    | $price            |     |       | App\Models |     |       |      | 0 | VAR 
+9    | $percentage       |     |       | App\Models |     |       |      | 0 | VAR 
+12   | optional          |     |       | App\Models |     |       |      | 0 | COM 
+12   | parameters        |     |       | App\Models |     |       |      | 0 | COM 
+15   | formatName        |     |       | App\Models |     |       |      | 1 | FUNC
+19   | Arrow             |     |       | App\Models |     |       |      | 0 | COM 
+19   | PHP               |     |       | App\Models |     |       |      | 0 | COM 
+19   | 7.4+              |     |       | App\Models |     |       |      | 0 | COM 
+22   | $square           |     |       | App\Models |     |       |      | 0 | VAR 
+22   | <lambda>          |     |       | App\Models |     | arrow |      | 1 | LAM 
+22   | $n                |     |       | App\Models |     |       |      | 0 | ARG 
+22   | $n                |     |       | App\Models |     |       |      | 0 | VAR 
+22   | $n                |     |       | App\Models |     |       |      | 0 | VAR 
+24   | Anonymous         |     |       | App\Models |     |       |      | 0 | COM 
+24   | closure           |     |       | App\Models |     |       |      | 0 | COM 
+27   | $greet            |     |       | App\Models |     |       |      | 0 | VAR 
+27   | <lambda>          |     |       | App\Models |     |       |      | 1 | LAM 
+27   | $name             |     |       | App\Models |     |       |      | 0 | ARG 
+28   | Hello             |     |       | App\Models |     |       |      | 0 | STR 
+31   | Closure           |     |       | App\Models |     |       |      | 0 | COM 
+31   | clause            |     |       | App\Models |     |       |      | 0 | COM 
+34   | $multiplier       |     |       | App\Models |     |       |      | 0 | VAR 
+35   | $multiply         |     |       | App\Models |     |       |      | 0 | VAR 
+35   | <lambda>          |     |       | App\Models |     |       |      | 1 | LAM 
+35   | $value            |     |       | App\Models |     |       |      | 0 | ARG 
+36   | $value            |     |       | App\Models |     |       |      | 0 | VAR 
+36   | $multiplier       |     |       | App\Models |     |       |      | 0 | VAR 

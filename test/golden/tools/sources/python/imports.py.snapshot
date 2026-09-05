@@ -1,0 +1,110 @@
+LINE | SYM              | PAR      | SCOPE | NS | MOD | CLUE        | TYPE        | D | CTX  
+./tools/sources/python/imports.py:
+1    | imports          |          |       |    |     |             |             | 0 | FILE 
+1    | Python           |          |       |    |     |             |             | 0 | STR  
+1    | patterns.        |          |       |    |     |             |             | 0 | STR  
+3    | Standard         |          |       |    |     |             |             | 0 | COM  
+3    | library          |          |       |    |     |             |             | 0 | COM  
+3    | imports          |          |       |    |     |             |             | 0 | COM  
+4    | os               |          |       |    |     |             |             | 0 | IMP  
+5    | sys              |          |       |    |     |             |             | 0 | IMP  
+6    | json             |          |       |    |     |             |             | 0 | IMP  
+8    | alias            |          |       |    |     |             |             | 0 | COM  
+9    | np               |          |       |    |     | numpy       |             | 0 | IMP  
+10   | pd               |          |       |    |     | pandas      |             | 0 | IMP  
+12   | specific         |          |       |    |     |             |             | 0 | COM  
+12   | items            |          |       |    |     |             |             | 0 | COM  
+13   | datetime         |          |       |    |     |             |             | 0 | IMP  
+13   | datetime         |          |       |    |     |             |             | 0 | IMP  
+13   | timedelta        |          |       |    |     |             |             | 0 | IMP  
+14   | pathlib          |          |       |    |     |             |             | 0 | IMP  
+14   | Path             |          |       |    |     |             |             | 0 | IMP  
+16   | recommended      |          |       |    |     |             |             | 0 | COM  
+17   | math             |          |       |    |     |             |             | 0 | IMP  
+19   | rename           |          |       |    |     |             |             | 0 | COM  
+20   | collections      |          |       |    |     |             |             | 0 | IMP  
+20   | dd               |          |       |    |     | defaultdict |             | 0 | IMP  
+22   | Multiple         |          |       |    |     |             |             | 0 | COM  
+22   | imports          |          |       |    |     |             |             | 0 | COM  
+22   | one              |          |       |    |     |             |             | 0 | COM  
+22   | line             |          |       |    |     |             |             | 0 | COM  
+23   | typing           |          |       |    |     |             |             | 0 | IMP  
+23   | List             |          |       |    |     |             |             | 0 | IMP  
+23   | Dict             |          |       |    |     |             |             | 0 | IMP  
+23   | Optional         |          |       |    |     |             |             | 0 | IMP  
+23   | Union            |          |       |    |     |             |             | 0 | IMP  
+25   | Relative         |          |       |    |     |             |             | 0 | COM  
+25   | imports          |          |       |    |     |             |             | 0 | COM  
+25   | package          |          |       |    |     |             |             | 0 | COM  
+25   | structure        |          |       |    |     |             |             | 0 | COM  
+26   | sibling_module   |          |       |    |     |             |             | 0 | COM  
+27   | parent_module    |          |       |    |     |             |             | 0 | COM  
+28   | ..sibling        |          |       |    |     |             |             | 0 | COM  
+28   | cousin_module    |          |       |    |     |             |             | 0 | COM  
+30   | Conditional      |          |       |    |     |             |             | 0 | COM  
+30   | imports          |          |       |    |     |             |             | 0 | COM  
+32   | optional_package |          |       |    |     |             |             | 0 | IMP  
+33   | ImportError      |          |       |    |     |             | ImportError | 0 | EXC  
+34   | optional_package |          |       |    |     |             |             | 1 | VAR  
+37   | use_imports      |          |       |    |     |             |             | 1 | FUNC 
+38   | Using            |          |       |    |     |             |             | 0 | STR  
+38   | imported         |          |       |    |     |             |             | 0 | STR  
+38   | modules.         |          |       |    |     |             |             | 0 | STR  
+39   | Use              |          |       |    |     |             |             | 0 | COM  
+39   | os               |          |       |    |     |             |             | 0 | COM  
+39   | module           |          |       |    |     |             |             | 0 | COM  
+40   | current_dir      |          |       |    |     |             |             | 1 | VAR  
+40   | getcwd           | os       |       |    |     |             |             | 0 | CALL 
+40   | os               |          |       |    |     |             |             | 0 | VAR  
+42   | Use              |          |       |    |     |             |             | 0 | COM  
+42   | aliased          |          |       |    |     |             |             | 0 | COM  
+43   | array            |          |       |    |     |             |             | 1 | VAR  
+43   | array            | np       |       |    |     |             |             | 0 | CALL 
+43   | np               |          |       |    |     |             |             | 0 | VAR  
+45   | Use              |          |       |    |     |             |             | 0 | COM  
+45   | specific         |          |       |    |     |             |             | 0 | COM  
+46   | now              |          |       |    |     |             |             | 1 | VAR  
+46   | now              | datetime |       |    |     |             |             | 0 | CALL 
+46   | datetime         |          |       |    |     |             |             | 0 | VAR  
+47   | delta            |          |       |    |     |             |             | 1 | VAR  
+47   | timedelta        |          |       |    |     |             |             | 0 | CALL 
+47   | days             |          |       |    |     |             |             | 0 | VAR  
+49   | Use              |          |       |    |     |             |             | 0 | COM  
+49   | renamed          |          |       |    |     |             |             | 0 | COM  
+50   | counter          |          |       |    |     |             |             | 1 | VAR  
+50   | dd               |          |       |    |     |             |             | 0 | CALL 
+50   | int              |          |       |    |     | dd          |             | 0 | ARG  
+52   | current_dir      |          |       |    |     |             |             | 0 | VAR  
+52   | array            |          |       |    |     |             |             | 0 | VAR  
+52   | now              |          |       |    |     |             |             | 0 | VAR  
+52   | delta            |          |       |    |     |             |             | 0 | VAR  
+52   | counter          |          |       |    |     |             |             | 0 | VAR  
+55   | different        |          |       |    |     |             |             | 0 | COM  
+55   | scopes           |          |       |    |     |             |             | 0 | COM  
+56   | MyClass          |          |       |    |     |             |             | 1 | CLASS
+57   | inside           |          |       |    |     |             |             | 0 | STR  
+59   | method           | MyClass  |       |    |     |             |             | 1 | FUNC 
+59   | self             | method   |       |    |     |             |             | 0 | ARG  
+60   | re               |          |       |    |     |             |             | 0 | IMP  
+61   | pattern          |          |       |    |     |             |             | 1 | VAR  
+61   | compile          | re       |       |    |     |             |             | 0 | CALL 
+61   | re               |          |       |    |     |             |             | 0 | VAR  
+61   | r'\d+'           |          |       |    |     |             |             | 0 | STR  
+61   | d+               |          |       |    |     |             |             | 0 | STR  
+62   | pattern          |          |       |    |     |             |             | 0 | VAR  
+65   | my_function      |          |       |    |     |             |             | 1 | FUNC 
+66   | inside           |          |       |    |     |             |             | 0 | STR  
+66   | function.        |          |       |    |     |             |             | 0 | STR  
+67   | itertools        |          |       |    |     |             |             | 0 | IMP  
+67   | chain            |          |       |    |     |             |             | 0 | IMP  
+68   | result           |          |       |    |     |             |             | 1 | VAR  
+68   | list             |          |       |    |     |             |             | 0 | CALL 
+68   | chain            |          |       |    |     |             |             | 0 | CALL 
+69   | result           |          |       |    |     |             |             | 0 | VAR  
+72   | __all__          |          |       |    |     |             |             | 0 | COM  
+72   | controlling      |          |       |    |     |             |             | 0 | COM  
+72   | exports          |          |       |    |     |             |             | 0 | COM  
+73   | __all__          |          |       |    |     |             |             | 1 | VAR  
+73   | use_imports      |          |       |    |     |             |             | 0 | STR  
+73   | MyClass          |          |       |    |     |             |             | 0 | STR  
+73   | my_function      |          |       |    |     |             |             | 0 | STR  

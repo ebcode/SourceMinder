@@ -1,0 +1,79 @@
+LINE | SYM           | PAR   | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/references.pl:
+1    | references    |       |       |    |     |      |        | 0 | FILE
+2    | strict        |       |       |    |     |      |        | 0 | IMP 
+3    | warnings      |       |       |    |     |      |        | 0 | IMP 
+5    | references    |       |       |    |     |      |        | 0 | COM 
+6    | value         |       |       |    | my  |      | scalar | 1 | VAR 
+7    | ref           |       |       |    | my  |      | scalar | 1 | VAR 
+7    | value         |       |       |    |     |      | scalar | 0 | VAR 
+8    | deref         |       |       |    | my  |      | scalar | 1 | VAR 
+8    | ref           |       |       |    |     |      | scalar | 0 | VAR 
+10   | Array         |       |       |    |     |      |        | 0 | COM 
+10   | references    |       |       |    |     |      |        | 0 | COM 
+11   | data          |       |       |    | my  |      | array  | 1 | VAR 
+12   | aref          |       |       |    | my  |      | scalar | 1 | VAR 
+12   | data          |       |       |    |     |      | array  | 0 | VAR 
+13   | aref2         |       |       |    | my  |      | scalar | 1 | VAR 
+15   | Hash          |       |       |    |     |      |        | 0 | COM 
+15   | references    |       |       |    |     |      |        | 0 | COM 
+16   | opts          |       |       |    | my  |      | hash   | 1 | VAR 
+16   | key           |       |       |    |     |      |        | 0 | PROP
+16   | val           |       |       |    |     |      |        | 0 | STR 
+17   | href          |       |       |    | my  |      | scalar | 1 | VAR 
+17   | opts          |       |       |    |     |      | hash   | 0 | VAR 
+18   | href2         |       |       |    | my  |      | scalar | 1 | VAR 
+18   | host          |       |       |    |     |      |        | 0 | PROP
+18   | localhost     |       |       |    |     |      |        | 0 | STR 
+18   | port          |       |       |    |     |      |        | 0 | PROP
+20   | Code          |       |       |    |     |      |        | 0 | COM 
+20   | references    |       |       |    |     |      |        | 0 | COM 
+20   | coderefs      |       |       |    |     |      |        | 0 | COM 
+21   | greet         |       |       |    | my  |      | scalar | 1 | FUNC
+21   | <lambda>      |       |       |    |     |      |        | 1 | LAM 
+21   | Hello         |       |       |    |     |      |        | 0 | STR 
+21   | $_[0]!        |       |       |    |     |      |        | 0 | STR 
+22   | add           |       |       |    | my  |      | scalar | 1 | FUNC
+22   | <lambda>      |       |       |    |     |      |        | 1 | LAM 
+23   | result        |       |       |    | my  |      | scalar | 1 | VAR 
+23   | greet         |       |       |    |     |      |        | 0 | CALL
+23   | World         |       |       |    |     |      |        | 0 | STR 
+25   | Named         |       |       |    |     |      |        | 0 | COM 
+25   | coderef       |       |       |    |     |      |        | 0 | COM 
+25   | stored        |       |       |    |     |      |        | 0 | COM 
+25   | hash          |       |       |    |     |      |        | 0 | COM 
+25   | dispatch      |       |       |    |     |      |        | 0 | COM 
+25   | table         |       |       |    |     |      |        | 0 | COM 
+26   | dispatch      |       |       |    | my  |      | hash   | 1 | VAR 
+27   | add           |       |       |    |     |      |        | 0 | PROP
+27   | <lambda>      |       |       |    |     |      |        | 1 | LAM 
+28   | subtract      |       |       |    |     |      |        | 0 | PROP
+28   | <lambda>      |       |       |    |     |      |        | 1 | LAM 
+29   | multiply      |       |       |    |     |      |        | 0 | PROP
+29   | <lambda>      |       |       |    |     |      |        | 1 | LAM 
+32   | Passing       |       |       |    |     |      |        | 0 | COM 
+32   | coderefs      |       |       |    |     |      |        | 0 | COM 
+32   | callbacks     |       |       |    |     |      |        | 0 | COM 
+33   | apply_to_list |       |       |    |     |      |        | 1 | FUNC
+34   | func          |       |       |    | my  |      | scalar | 1 | ARG 
+34   | list          |       |       |    | my  |      | array  | 1 | ARG 
+35   | func          |       |       |    |     |      |        | 0 | CALL
+35   | list          |       |       |    |     |      | array  | 0 | VAR 
+38   | doubled       |       |       |    | my  |      | array  | 1 | VAR 
+38   | apply_to_list |       |       |    |     |      |        | 0 | CALL
+38   | <lambda>      |       |       |    |     |      |        | 1 | LAM 
+40   | Weak          |       |       |    |     |      |        | 0 | COM 
+40   | references    |       |       |    |     |      |        | 0 | COM 
+41   | Scalar::Util  |       |       |    |     |      |        | 0 | IMP 
+41   | weaken        |       |       |    |     |      |        | 0 | IMP 
+42   | parent        |       |       |    | my  |      | scalar | 1 | VAR 
+42   | name          |       |       |    |     |      |        | 0 | PROP
+42   | parent        |       |       |    |     |      |        | 0 | STR 
+43   | child         |       |       |    | my  |      | scalar | 1 | VAR 
+43   | name          |       |       |    |     |      |        | 0 | PROP
+43   | child         |       |       |    |     |      |        | 0 | STR 
+43   | parent        |       |       |    |     |      |        | 0 | PROP
+43   | parent        |       |       |    |     |      | scalar | 0 | VAR 
+44   | weaken        |       |       |    |     |      |        | 0 | CALL
+44   | child         |       |       |    |     |      | hash   | 0 | VAR 
+44   | parent        | child |       |    |     |      |        | 0 | PROP

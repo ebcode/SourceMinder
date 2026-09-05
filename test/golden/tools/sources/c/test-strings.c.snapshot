@@ -1,0 +1,18 @@
+LINE | SYM                        | PAR | SCOPE | NS | MOD | CLUE   | TYPE  | D | CTX 
+./tools/sources/c/test-strings.c:
+1    | test-strings               |     |       |    |     |        |       | 0 | FILE
+1    | <stdio.h>                  |     |       |    |     |        |       | 0 | IMP 
+3    | main                       |     |       |    |     |        | int   | 1 | FUNC
+4    | Test                       |     |       |    |     |        |       | 0 | COM 
+4    | path                       |     |       |    |     |        |       | 0 | COM 
+4    | strings                    |     |       |    |     |        |       | 0 | COM 
+5    | path1                      |     |       |    |     |        | char* | 1 | VAR 
+5    | shared/file_walker.h       |     |       |    |     |        |       | 0 | STR 
+6    | path2                      |     |       |    |     |        | char* | 1 | VAR 
+6    | shared/database.h          |     |       |    |     |        |       | 0 | STR 
+7    | url                        |     |       |    |     |        | char* | 1 | VAR 
+7    | https://example.com/api/v1 |     |       |    |     |        |       | 0 | STR 
+9    | printf                     |     |       |    |     |        |       | 0 | CALL
+9    | Including:                 |     |       |    |     |        |       | 0 | STR 
+9    | %s                         |     |       |    |     |        |       | 0 | STR 
+9    | path1                      |     |       |    |     | printf |       | 0 | ARG 

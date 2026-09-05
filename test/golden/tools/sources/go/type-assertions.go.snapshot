@@ -1,0 +1,54 @@
+LINE | SYM             | PAR | SCOPE   | NS   | MOD | CLUE    | TYPE      | D | CTX 
+./tools/sources/go/type-assertions.go:
+1    | type-assertions |     |         |      |     |         |           | 0 | FILE
+1    | main            |     |         |      |     |         |           | 0 | NS  
+3    | fmt             |     |         | main |     |         |           | 0 | IMP 
+5    | typeAssertions  |     | private | main |     |         |           | 1 | FUNC
+6    | hello           |     |         |      |     |         |           | 0 | STR 
+8    | assertion       |     |         |      |     |         |           | 0 | COM 
+10   | Println         | fmt |         |      |     |         |           | 0 | CALL
+12   | assertion       |     |         |      |     |         |           | 0 | COM 
+12   | ok              |     |         |      |     |         |           | 0 | COM 
+12   | check           |     |         |      |     |         |           | 0 | COM 
+13   | str             |     | private | main |     |         |           | 1 | VAR 
+13   | ok              |     | private | main |     |         |           | 1 | VAR 
+14   | ok              |     |         | main |     |         |           | 0 | VAR 
+15   | Println         | fmt |         |      |     |         |           | 0 | CALL
+15   | str             |     |         | main |     | Println |           | 0 | ARG 
+18   | assertion       |     |         |      |     |         |           | 0 | COM 
+18   | would           |     |         |      |     |         |           | 0 | COM 
+18   | panic           |     |         |      |     |         |           | 0 | COM 
+18   | checked         |     |         |      |     |         |           | 0 | COM 
+19   | :=              |     |         |      |     |         |           | 0 | COM 
+19   | i.int           |     |         |      |     |         |           | 0 | COM 
+19   | //              |     |         |      |     |         |           | 0 | COM 
+19   | would           |     |         |      |     |         |           | 0 | COM 
+19   | panic           |     |         |      |     |         |           | 0 | COM 
+21   | Safe            |     |         |      |     |         |           | 0 | COM 
+21   | assertion       |     |         |      |     |         |           | 0 | COM 
+22   | num             |     | private | main |     |         |           | 1 | VAR 
+22   | ok              |     | private | main |     |         |           | 1 | VAR 
+23   | ok              |     |         | main |     |         |           | 0 | VAR 
+24   | Println         | fmt |         |      |     |         |           | 0 | CALL
+24   | int             |     |         |      |     |         |           | 0 | STR 
+26   | num             |     |         | main |     |         |           | 0 | VAR 
+29   | typeSwitch      |     | private | main |     |         |           | 1 | FUNC
+33   | Println         | fmt |         |      |     |         |           | 0 | CALL
+33   | Integer:        |     |         |      |     |         |           | 0 | STR 
+35   | Println         | fmt |         |      |     |         |           | 0 | CALL
+35   | String:         |     |         |      |     |         |           | 0 | STR 
+37   | Println         | fmt |         |      |     |         |           | 0 | CALL
+37   | Boolean:        |     |         |      |     |         |           | 0 | STR 
+39   | Println         | fmt |         |      |     |         |           | 0 | CALL
+39   | Int             |     |         |      |     |         |           | 0 | STR 
+39   | slice:          |     |         |      |     |         |           | 0 | STR 
+41   | Println         | fmt |         |      |     |         |           | 0 | CALL
+41   | Unknown         |     |         |      |     |         |           | 0 | STR 
+45   | processValue    |     | private | main |     |         | string    | 1 | FUNC
+45   | val             |     |         |      |     |         | interface | 1 | ARG 
+46   | val             |     |         | main |     |         |           | 0 | VAR 
+50   | Sprintf         | fmt |         |      |     |         |           | 0 | CALL
+50   | %d              |     |         |      |     |         |           | 0 | STR 
+52   | Sprintf         | fmt |         |      |     |         |           | 0 | CALL
+52   | %.2f            |     |         |      |     |         |           | 0 | STR 
+54   | unknown         |     |         |      |     |         |           | 0 | STR 

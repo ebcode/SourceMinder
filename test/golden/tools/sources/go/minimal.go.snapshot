@@ -1,0 +1,9 @@
+LINE | SYM     | PAR | SCOPE   | NS   | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/go/minimal.go:
+1    | minimal |     |         |      |     |      |      | 0 | FILE
+1    | main    |     |         |      |     |      |      | 0 | NS  
+3    | fmt     |     |         | main |     |      |      | 0 | IMP 
+5    | main    |     | private | main |     |      |      | 1 | FUNC
+6    | Println | fmt |         |      |     |      |      | 0 | CALL
+6    | Hello   |     |         |      |     |      |      | 0 | STR 
+6    | World!  |     |         |      |     |      |      | 0 | STR 

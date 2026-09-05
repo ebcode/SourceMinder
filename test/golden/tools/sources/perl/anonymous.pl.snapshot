@@ -1,0 +1,60 @@
+LINE | SYM           | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/anonymous.pl:
+1    | anonymous     |     |       |    |     |      |        | 0 | FILE
+2    | strict        |     |       |    |     |      |        | 0 | IMP 
+3    | warnings      |     |       |    |     |      |        | 0 | IMP 
+5    | Anonymous     |     |       |    |     |      |        | 0 | COM 
+5    | subroutines   |     |       |    |     |      |        | 0 | COM 
+6    | double        |     |       |    | my  |      | scalar | 1 | FUNC
+6    | <lambda>      |     |       |    |     |      |        | 1 | LAM 
+7    | square        |     |       |    | my  |      | scalar | 1 | FUNC
+7    | <lambda>      |     |       |    |     |      |        | 1 | LAM 
+8    | identity      |     |       |    | my  |      | scalar | 1 | FUNC
+8    | <lambda>      |     |       |    |     |      |        | 1 | LAM 
+10   | Immediately   |     |       |    |     |      |        | 0 | COM 
+10   | invoked       |     |       |    |     |      |        | 0 | COM 
+11   | result        |     |       |    | my  |      | scalar | 1 | VAR 
+11   | <lambda>      |     |       |    |     |      |        | 1 | LAM 
+13   | Closure       |     |       |    |     |      |        | 0 | COM 
+13   | capturing     |     |       |    |     |      |        | 0 | COM 
+13   | outer         |     |       |    |     |      |        | 0 | COM 
+13   | variable      |     |       |    |     |      |        | 0 | COM 
+14   | make_counter  |     |       |    |     |      |        | 1 | FUNC
+15   | count         |     |       |    | my  |      | scalar | 1 | VAR 
+16   | <lambda>      |     |       |    |     |      |        | 1 | LAM 
+16   | count         |     |       |    |     |      | scalar | 0 | VAR 
+19   | counter       |     |       |    | my  |      | scalar | 1 | VAR 
+19   | make_counter  |     |       |    |     |      |        | 0 | CALL
+20   | counter       |     |       |    |     |      |        | 0 | CALL
+21   | counter       |     |       |    |     |      |        | 0 | CALL
+23   | Closure       |     |       |    |     |      |        | 0 | COM 
+23   | capturing     |     |       |    |     |      |        | 0 | COM 
+23   | multiple      |     |       |    |     |      |        | 0 | COM 
+23   | vars          |     |       |    |     |      |        | 0 | COM 
+24   | make_adder    |     |       |    |     |      |        | 1 | FUNC
+26   | <lambda>      |     |       |    |     |      |        | 1 | LAM 
+29   | add5          |     |       |    | my  |      | scalar | 1 | VAR 
+29   | make_adder    |     |       |    |     |      |        | 0 | CALL
+30   | add10         |     |       |    | my  |      | scalar | 1 | VAR 
+30   | make_adder    |     |       |    |     |      |        | 0 | CALL
+32   | Callbacks     |     |       |    |     |      |        | 0 | COM 
+33   | process_each  |     |       |    |     |      |        | 1 | FUNC
+34   | list_ref      |     |       |    | my  |      | scalar | 1 | ARG 
+34   | callback      |     |       |    | my  |      | scalar | 1 | ARG 
+35   | results       |     |       |    | my  |      | array  | 1 | VAR 
+36   | item          |     |       |    |     |      | scalar | 0 | VAR 
+36   | list_ref      |     |       |    |     |      | scalar | 0 | VAR 
+37   | push          |     |       |    |     |      |        | 0 | CALL
+37   | results       |     |       |    |     |      | array  | 0 | VAR 
+37   | callback      |     |       |    |     |      |        | 0 | CALL
+37   | item          |     |       |    |     |      | scalar | 0 | VAR 
+39   | results       |     |       |    |     |      | array  | 0 | VAR 
+42   | evens         |     |       |    | my  |      | array  | 1 | VAR 
+43   | mapped        |     |       |    | my  |      | array  | 1 | VAR 
+43   | process_each  |     |       |    |     |      |        | 0 | CALL
+43   | evens         |     |       |    |     |      | array  | 0 | VAR 
+43   | <lambda>      |     |       |    |     |      |        | 1 | LAM 
+45   | Method        |     |       |    |     |      |        | 0 | COM 
+45   | coderef       |     |       |    |     |      |        | 0 | COM 
+46   | method_ref    |     |       |    | my  |      | scalar | 1 | VAR 
+46   | Animal::speak |     |       |    |     |      |        | 0 | CALL

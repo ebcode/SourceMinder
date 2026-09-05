@@ -1,0 +1,597 @@
+LINE | SYM                      | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/keywords.pl:
+1    | keywords                 |     |       |    |     |      |        | 0 | FILE
+3    | Every                    |     |       |    |     |      |        | 0 | COM 
+3    | word                     |     |       |    |     |      |        | 0 | COM 
+3    | perl/config/keywords.txt |     |       |    |     |      |        | 0 | COM 
+3    | used                     |     |       |    |     |      |        | 0 | COM 
+3    | naming                   |     |       |    |     |      |        | 0 | COM 
+3    | position.                |     |       |    |     |      |        | 0 | COM 
+5    | Perl                     |     |       |    |     |      |        | 0 | COM 
+5    | accepts                  |     |       |    |     |      |        | 0 | COM 
+5    | array                    |     |       |    |     |      |        | 0 | COM 
+5    | hash                     |     |       |    |     |      |        | 0 | COM 
+5    | hash-key                 |     |       |    |     |      |        | 0 | COM 
+6    | names                    |     |       |    |     |      |        | 0 | COM 
+6    | verified                 |     |       |    |     |      |        | 0 | COM 
+6    | perl                     |     |       |    |     |      |        | 0 | COM 
+6    | -c.                      |     |       |    |     |      |        | 0 | COM 
+6    | Sigils                   |     |       |    |     |      |        | 0 | COM 
+6    | mean                     |     |       |    |     |      |        | 0 | COM 
+6    | $if                      |     |       |    |     |      |        | 0 | COM 
+6    | @for                     |     |       |    |     |      |        | 0 | COM 
+6    | never                    |     |       |    |     |      |        | 0 | COM 
+6    | collide                  |     |       |    |     |      |        | 0 | COM 
+7    | keyword                  |     |       |    |     |      |        | 0 | COM 
+7    | list                     |     |       |    |     |      |        | 0 | COM 
+7    | bare                     |     |       |    |     |      |        | 0 | COM 
+7    | names                    |     |       |    |     |      |        | 0 | COM 
+7    | hash                     |     |       |    |     |      |        | 0 | COM 
+7    | keys                     |     |       |    |     |      |        | 0 | COM 
+9    | Many                     |     |       |    |     |      |        | 0 | COM 
+9    | entries                  |     |       |    |     |      |        | 0 | COM 
+9    | list                     |     |       |    |     |      |        | 0 | COM 
+9    | builtin                  |     |       |    |     |      |        | 0 | COM 
+9    | functions                |     |       |    |     |      |        | 0 | COM 
+9    | keywords                 |     |       |    |     |      |        | 0 | COM 
+9    | --                       |     |       |    |     |      |        | 0 | COM 
+10   | calls                    |     |       |    |     |      |        | 0 | COM 
+10   | bottom                   |     |       |    |     |      |        | 0 | COM 
+10   | exercise                 |     |       |    |     |      |        | 0 | COM 
+12   | identifiers              |     |       |    |     |      |        | 0 | COM 
+12   | two                      |     |       |    |     |      |        | 0 | COM 
+12   | characters               |     |       |    |     |      |        | 0 | COM 
+12   | longer                   |     |       |    |     |      |        | 0 | COM 
+12   | nothing                  |     |       |    |     |      |        | 0 | COM 
+12   | dropped                  |     |       |    |     |      |        | 0 | COM 
+13   | minimum                  |     |       |    |     |      |        | 0 | COM 
+13   | rather                   |     |       |    |     |      |        | 0 | COM 
+13   | keyword-ness.            |     |       |    |     |      |        | 0 | COM 
+15   | strict                   |     |       |    |     |      |        | 0 | IMP 
+16   | warnings                 |     |       |    |     |      |        | 0 | IMP 
+18   | Keywords                 |     |       |    |     |      |        | 0 | COM 
+18   | scalars.                 |     |       |    |     |      |        | 0 | COM 
+19   | if                       |     |       |    | my  |      | scalar | 1 | VAR 
+20   | elsif                    |     |       |    | my  |      | scalar | 1 | VAR 
+21   | else                     |     |       |    | my  |      | scalar | 1 | VAR 
+22   | unless                   |     |       |    | my  |      | scalar | 1 | VAR 
+23   | while                    |     |       |    | my  |      | scalar | 1 | VAR 
+24   | until                    |     |       |    | my  |      | scalar | 1 | VAR 
+25   | for                      |     |       |    | my  |      | scalar | 1 | VAR 
+26   | foreach                  |     |       |    | my  |      | scalar | 1 | VAR 
+27   | do                       |     |       |    | my  |      | scalar | 1 | VAR 
+28   | given                    |     |       |    | my  |      | scalar | 1 | VAR 
+29   | when                     |     |       |    | my  |      | scalar | 1 | VAR 
+30   | default                  |     |       |    | my  |      | scalar | 1 | VAR 
+31   | use                      |     |       |    | my  |      | scalar | 1 | VAR 
+32   | no                       |     |       |    | my  |      | scalar | 1 | VAR 
+33   | require                  |     |       |    | my  |      | scalar | 1 | VAR 
+34   | package                  |     |       |    | my  |      | scalar | 1 | VAR 
+35   | sub                      |     |       |    | my  |      | scalar | 1 | VAR 
+36   | my                       |     |       |    | my  |      | scalar | 1 | VAR 
+37   | our                      |     |       |    | my  |      | scalar | 1 | VAR 
+38   | local                    |     |       |    | my  |      | scalar | 1 | VAR 
+39   | return                   |     |       |    | my  |      | scalar | 1 | VAR 
+40   | last                     |     |       |    | my  |      | scalar | 1 | VAR 
+41   | next                     |     |       |    | my  |      | scalar | 1 | VAR 
+42   | redo                     |     |       |    | my  |      | scalar | 1 | VAR 
+43   | goto                     |     |       |    | my  |      | scalar | 1 | VAR 
+44   | and                      |     |       |    | my  |      | scalar | 1 | VAR 
+45   | or                       |     |       |    | my  |      | scalar | 1 | VAR 
+46   | not                      |     |       |    | my  |      | scalar | 1 | VAR 
+47   | eq                       |     |       |    | my  |      | scalar | 1 | VAR 
+48   | ne                       |     |       |    | my  |      | scalar | 1 | VAR 
+49   | lt                       |     |       |    | my  |      | scalar | 1 | VAR 
+50   | gt                       |     |       |    | my  |      | scalar | 1 | VAR 
+51   | le                       |     |       |    | my  |      | scalar | 1 | VAR 
+52   | ge                       |     |       |    | my  |      | scalar | 1 | VAR 
+53   | cmp                      |     |       |    | my  |      | scalar | 1 | VAR 
+54   | print                    |     |       |    | my  |      | scalar | 1 | VAR 
+55   | say                      |     |       |    | my  |      | scalar | 1 | VAR 
+56   | die                      |     |       |    | my  |      | scalar | 1 | VAR 
+57   | warn                     |     |       |    | my  |      | scalar | 1 | VAR 
+58   | undef                    |     |       |    | my  |      | scalar | 1 | VAR 
+59   | defined                  |     |       |    | my  |      | scalar | 1 | VAR 
+60   | scalar                   |     |       |    | my  |      | scalar | 1 | VAR 
+61   | push                     |     |       |    | my  |      | scalar | 1 | VAR 
+62   | pop                      |     |       |    | my  |      | scalar | 1 | VAR 
+63   | shift                    |     |       |    | my  |      | scalar | 1 | VAR 
+64   | unshift                  |     |       |    | my  |      | scalar | 1 | VAR 
+65   | splice                   |     |       |    | my  |      | scalar | 1 | VAR 
+66   | reverse                  |     |       |    | my  |      | scalar | 1 | VAR 
+67   | sort                     |     |       |    | my  |      | scalar | 1 | VAR 
+68   | map                      |     |       |    | my  |      | scalar | 1 | VAR 
+69   | grep                     |     |       |    | my  |      | scalar | 1 | VAR 
+70   | join                     |     |       |    | my  |      | scalar | 1 | VAR 
+71   | split                    |     |       |    | my  |      | scalar | 1 | VAR 
+72   | chomp                    |     |       |    | my  |      | scalar | 1 | VAR 
+73   | chop                     |     |       |    | my  |      | scalar | 1 | VAR 
+74   | length                   |     |       |    | my  |      | scalar | 1 | VAR 
+75   | substr                   |     |       |    | my  |      | scalar | 1 | VAR 
+76   | sprintf                  |     |       |    | my  |      | scalar | 1 | VAR 
+77   | printf                   |     |       |    | my  |      | scalar | 1 | VAR 
+78   | open                     |     |       |    | my  |      | scalar | 1 | VAR 
+79   | close                    |     |       |    | my  |      | scalar | 1 | VAR 
+80   | read                     |     |       |    | my  |      | scalar | 1 | VAR 
+81   | write                    |     |       |    | my  |      | scalar | 1 | VAR 
+82   | binmode                  |     |       |    | my  |      | scalar | 1 | VAR 
+83   | true                     |     |       |    | my  |      | scalar | 1 | VAR 
+84   | false                    |     |       |    | my  |      | scalar | 1 | VAR 
+86   | Keywords                 |     |       |    |     |      |        | 0 | COM 
+86   | arrays.                  |     |       |    |     |      |        | 0 | COM 
+87   | if                       |     |       |    | my  |      | array  | 1 | VAR 
+88   | elsif                    |     |       |    | my  |      | array  | 1 | VAR 
+89   | else                     |     |       |    | my  |      | array  | 1 | VAR 
+90   | unless                   |     |       |    | my  |      | array  | 1 | VAR 
+91   | while                    |     |       |    | my  |      | array  | 1 | VAR 
+92   | until                    |     |       |    | my  |      | array  | 1 | VAR 
+93   | for                      |     |       |    | my  |      | array  | 1 | VAR 
+94   | foreach                  |     |       |    | my  |      | array  | 1 | VAR 
+95   | do                       |     |       |    | my  |      | array  | 1 | VAR 
+96   | given                    |     |       |    | my  |      | array  | 1 | VAR 
+97   | when                     |     |       |    | my  |      | array  | 1 | VAR 
+98   | default                  |     |       |    | my  |      | array  | 1 | VAR 
+99   | use                      |     |       |    | my  |      | array  | 1 | VAR 
+100  | no                       |     |       |    | my  |      | array  | 1 | VAR 
+101  | require                  |     |       |    | my  |      | array  | 1 | VAR 
+102  | package                  |     |       |    | my  |      | array  | 1 | VAR 
+103  | sub                      |     |       |    | my  |      | array  | 1 | VAR 
+104  | my                       |     |       |    | my  |      | array  | 1 | VAR 
+105  | our                      |     |       |    | my  |      | array  | 1 | VAR 
+106  | local                    |     |       |    | my  |      | array  | 1 | VAR 
+107  | return                   |     |       |    | my  |      | array  | 1 | VAR 
+108  | last                     |     |       |    | my  |      | array  | 1 | VAR 
+109  | next                     |     |       |    | my  |      | array  | 1 | VAR 
+110  | redo                     |     |       |    | my  |      | array  | 1 | VAR 
+111  | goto                     |     |       |    | my  |      | array  | 1 | VAR 
+112  | and                      |     |       |    | my  |      | array  | 1 | VAR 
+113  | or                       |     |       |    | my  |      | array  | 1 | VAR 
+114  | not                      |     |       |    | my  |      | array  | 1 | VAR 
+115  | eq                       |     |       |    | my  |      | array  | 1 | VAR 
+116  | ne                       |     |       |    | my  |      | array  | 1 | VAR 
+117  | lt                       |     |       |    | my  |      | array  | 1 | VAR 
+118  | gt                       |     |       |    | my  |      | array  | 1 | VAR 
+119  | le                       |     |       |    | my  |      | array  | 1 | VAR 
+120  | ge                       |     |       |    | my  |      | array  | 1 | VAR 
+121  | cmp                      |     |       |    | my  |      | array  | 1 | VAR 
+122  | print                    |     |       |    | my  |      | array  | 1 | VAR 
+123  | say                      |     |       |    | my  |      | array  | 1 | VAR 
+124  | die                      |     |       |    | my  |      | array  | 1 | VAR 
+125  | warn                     |     |       |    | my  |      | array  | 1 | VAR 
+126  | undef                    |     |       |    | my  |      | array  | 1 | VAR 
+127  | defined                  |     |       |    | my  |      | array  | 1 | VAR 
+128  | scalar                   |     |       |    | my  |      | array  | 1 | VAR 
+129  | push                     |     |       |    | my  |      | array  | 1 | VAR 
+130  | pop                      |     |       |    | my  |      | array  | 1 | VAR 
+131  | shift                    |     |       |    | my  |      | array  | 1 | VAR 
+132  | unshift                  |     |       |    | my  |      | array  | 1 | VAR 
+133  | splice                   |     |       |    | my  |      | array  | 1 | VAR 
+134  | reverse                  |     |       |    | my  |      | array  | 1 | VAR 
+135  | sort                     |     |       |    | my  |      | array  | 1 | VAR 
+136  | map                      |     |       |    | my  |      | array  | 1 | VAR 
+137  | grep                     |     |       |    | my  |      | array  | 1 | VAR 
+138  | join                     |     |       |    | my  |      | array  | 1 | VAR 
+139  | split                    |     |       |    | my  |      | array  | 1 | VAR 
+140  | chomp                    |     |       |    | my  |      | array  | 1 | VAR 
+141  | chop                     |     |       |    | my  |      | array  | 1 | VAR 
+142  | length                   |     |       |    | my  |      | array  | 1 | VAR 
+143  | substr                   |     |       |    | my  |      | array  | 1 | VAR 
+144  | sprintf                  |     |       |    | my  |      | array  | 1 | VAR 
+145  | printf                   |     |       |    | my  |      | array  | 1 | VAR 
+146  | open                     |     |       |    | my  |      | array  | 1 | VAR 
+147  | close                    |     |       |    | my  |      | array  | 1 | VAR 
+148  | read                     |     |       |    | my  |      | array  | 1 | VAR 
+149  | write                    |     |       |    | my  |      | array  | 1 | VAR 
+150  | binmode                  |     |       |    | my  |      | array  | 1 | VAR 
+151  | true                     |     |       |    | my  |      | array  | 1 | VAR 
+152  | false                    |     |       |    | my  |      | array  | 1 | VAR 
+154  | Keywords                 |     |       |    |     |      |        | 0 | COM 
+154  | hashes.                  |     |       |    |     |      |        | 0 | COM 
+155  | if                       |     |       |    | my  |      | hash   | 1 | VAR 
+155  | aa                       |     |       |    |     |      |        | 0 | PROP
+156  | elsif                    |     |       |    | my  |      | hash   | 1 | VAR 
+156  | aa                       |     |       |    |     |      |        | 0 | PROP
+157  | else                     |     |       |    | my  |      | hash   | 1 | VAR 
+157  | aa                       |     |       |    |     |      |        | 0 | PROP
+158  | unless                   |     |       |    | my  |      | hash   | 1 | VAR 
+158  | aa                       |     |       |    |     |      |        | 0 | PROP
+159  | while                    |     |       |    | my  |      | hash   | 1 | VAR 
+159  | aa                       |     |       |    |     |      |        | 0 | PROP
+160  | until                    |     |       |    | my  |      | hash   | 1 | VAR 
+160  | aa                       |     |       |    |     |      |        | 0 | PROP
+161  | for                      |     |       |    | my  |      | hash   | 1 | VAR 
+161  | aa                       |     |       |    |     |      |        | 0 | PROP
+162  | foreach                  |     |       |    | my  |      | hash   | 1 | VAR 
+162  | aa                       |     |       |    |     |      |        | 0 | PROP
+163  | do                       |     |       |    | my  |      | hash   | 1 | VAR 
+163  | aa                       |     |       |    |     |      |        | 0 | PROP
+164  | given                    |     |       |    | my  |      | hash   | 1 | VAR 
+164  | aa                       |     |       |    |     |      |        | 0 | PROP
+165  | when                     |     |       |    | my  |      | hash   | 1 | VAR 
+165  | aa                       |     |       |    |     |      |        | 0 | PROP
+166  | default                  |     |       |    | my  |      | hash   | 1 | VAR 
+166  | aa                       |     |       |    |     |      |        | 0 | PROP
+167  | use                      |     |       |    | my  |      | hash   | 1 | VAR 
+167  | aa                       |     |       |    |     |      |        | 0 | PROP
+168  | no                       |     |       |    | my  |      | hash   | 1 | VAR 
+168  | aa                       |     |       |    |     |      |        | 0 | PROP
+169  | require                  |     |       |    | my  |      | hash   | 1 | VAR 
+169  | aa                       |     |       |    |     |      |        | 0 | PROP
+170  | package                  |     |       |    | my  |      | hash   | 1 | VAR 
+170  | aa                       |     |       |    |     |      |        | 0 | PROP
+171  | sub                      |     |       |    | my  |      | hash   | 1 | VAR 
+171  | aa                       |     |       |    |     |      |        | 0 | PROP
+172  | my                       |     |       |    | my  |      | hash   | 1 | VAR 
+172  | aa                       |     |       |    |     |      |        | 0 | PROP
+173  | our                      |     |       |    | my  |      | hash   | 1 | VAR 
+173  | aa                       |     |       |    |     |      |        | 0 | PROP
+174  | local                    |     |       |    | my  |      | hash   | 1 | VAR 
+174  | aa                       |     |       |    |     |      |        | 0 | PROP
+175  | return                   |     |       |    | my  |      | hash   | 1 | VAR 
+175  | aa                       |     |       |    |     |      |        | 0 | PROP
+176  | last                     |     |       |    | my  |      | hash   | 1 | VAR 
+176  | aa                       |     |       |    |     |      |        | 0 | PROP
+177  | next                     |     |       |    | my  |      | hash   | 1 | VAR 
+177  | aa                       |     |       |    |     |      |        | 0 | PROP
+178  | redo                     |     |       |    | my  |      | hash   | 1 | VAR 
+178  | aa                       |     |       |    |     |      |        | 0 | PROP
+179  | goto                     |     |       |    | my  |      | hash   | 1 | VAR 
+179  | aa                       |     |       |    |     |      |        | 0 | PROP
+180  | and                      |     |       |    | my  |      | hash   | 1 | VAR 
+180  | aa                       |     |       |    |     |      |        | 0 | PROP
+181  | or                       |     |       |    | my  |      | hash   | 1 | VAR 
+181  | aa                       |     |       |    |     |      |        | 0 | PROP
+182  | not                      |     |       |    | my  |      | hash   | 1 | VAR 
+182  | aa                       |     |       |    |     |      |        | 0 | PROP
+183  | eq                       |     |       |    | my  |      | hash   | 1 | VAR 
+183  | aa                       |     |       |    |     |      |        | 0 | PROP
+184  | ne                       |     |       |    | my  |      | hash   | 1 | VAR 
+184  | aa                       |     |       |    |     |      |        | 0 | PROP
+185  | lt                       |     |       |    | my  |      | hash   | 1 | VAR 
+185  | aa                       |     |       |    |     |      |        | 0 | PROP
+186  | gt                       |     |       |    | my  |      | hash   | 1 | VAR 
+186  | aa                       |     |       |    |     |      |        | 0 | PROP
+187  | le                       |     |       |    | my  |      | hash   | 1 | VAR 
+187  | aa                       |     |       |    |     |      |        | 0 | PROP
+188  | ge                       |     |       |    | my  |      | hash   | 1 | VAR 
+188  | aa                       |     |       |    |     |      |        | 0 | PROP
+189  | cmp                      |     |       |    | my  |      | hash   | 1 | VAR 
+189  | aa                       |     |       |    |     |      |        | 0 | PROP
+190  | print                    |     |       |    | my  |      | hash   | 1 | VAR 
+190  | aa                       |     |       |    |     |      |        | 0 | PROP
+191  | say                      |     |       |    | my  |      | hash   | 1 | VAR 
+191  | aa                       |     |       |    |     |      |        | 0 | PROP
+192  | die                      |     |       |    | my  |      | hash   | 1 | VAR 
+192  | aa                       |     |       |    |     |      |        | 0 | PROP
+193  | warn                     |     |       |    | my  |      | hash   | 1 | VAR 
+193  | aa                       |     |       |    |     |      |        | 0 | PROP
+194  | undef                    |     |       |    | my  |      | hash   | 1 | VAR 
+194  | aa                       |     |       |    |     |      |        | 0 | PROP
+195  | defined                  |     |       |    | my  |      | hash   | 1 | VAR 
+195  | aa                       |     |       |    |     |      |        | 0 | PROP
+196  | scalar                   |     |       |    | my  |      | hash   | 1 | VAR 
+196  | aa                       |     |       |    |     |      |        | 0 | PROP
+197  | push                     |     |       |    | my  |      | hash   | 1 | VAR 
+197  | aa                       |     |       |    |     |      |        | 0 | PROP
+198  | pop                      |     |       |    | my  |      | hash   | 1 | VAR 
+198  | aa                       |     |       |    |     |      |        | 0 | PROP
+199  | shift                    |     |       |    | my  |      | hash   | 1 | VAR 
+199  | aa                       |     |       |    |     |      |        | 0 | PROP
+200  | unshift                  |     |       |    | my  |      | hash   | 1 | VAR 
+200  | aa                       |     |       |    |     |      |        | 0 | PROP
+201  | splice                   |     |       |    | my  |      | hash   | 1 | VAR 
+201  | aa                       |     |       |    |     |      |        | 0 | PROP
+202  | reverse                  |     |       |    | my  |      | hash   | 1 | VAR 
+202  | aa                       |     |       |    |     |      |        | 0 | PROP
+203  | sort                     |     |       |    | my  |      | hash   | 1 | VAR 
+203  | aa                       |     |       |    |     |      |        | 0 | PROP
+204  | map                      |     |       |    | my  |      | hash   | 1 | VAR 
+204  | aa                       |     |       |    |     |      |        | 0 | PROP
+205  | grep                     |     |       |    | my  |      | hash   | 1 | VAR 
+205  | aa                       |     |       |    |     |      |        | 0 | PROP
+206  | join                     |     |       |    | my  |      | hash   | 1 | VAR 
+206  | aa                       |     |       |    |     |      |        | 0 | PROP
+207  | split                    |     |       |    | my  |      | hash   | 1 | VAR 
+207  | aa                       |     |       |    |     |      |        | 0 | PROP
+208  | chomp                    |     |       |    | my  |      | hash   | 1 | VAR 
+208  | aa                       |     |       |    |     |      |        | 0 | PROP
+209  | chop                     |     |       |    | my  |      | hash   | 1 | VAR 
+209  | aa                       |     |       |    |     |      |        | 0 | PROP
+210  | length                   |     |       |    | my  |      | hash   | 1 | VAR 
+210  | aa                       |     |       |    |     |      |        | 0 | PROP
+211  | substr                   |     |       |    | my  |      | hash   | 1 | VAR 
+211  | aa                       |     |       |    |     |      |        | 0 | PROP
+212  | sprintf                  |     |       |    | my  |      | hash   | 1 | VAR 
+212  | aa                       |     |       |    |     |      |        | 0 | PROP
+213  | printf                   |     |       |    | my  |      | hash   | 1 | VAR 
+213  | aa                       |     |       |    |     |      |        | 0 | PROP
+214  | open                     |     |       |    | my  |      | hash   | 1 | VAR 
+214  | aa                       |     |       |    |     |      |        | 0 | PROP
+215  | close                    |     |       |    | my  |      | hash   | 1 | VAR 
+215  | aa                       |     |       |    |     |      |        | 0 | PROP
+216  | read                     |     |       |    | my  |      | hash   | 1 | VAR 
+216  | aa                       |     |       |    |     |      |        | 0 | PROP
+217  | write                    |     |       |    | my  |      | hash   | 1 | VAR 
+217  | aa                       |     |       |    |     |      |        | 0 | PROP
+218  | binmode                  |     |       |    | my  |      | hash   | 1 | VAR 
+218  | aa                       |     |       |    |     |      |        | 0 | PROP
+219  | true                     |     |       |    | my  |      | hash   | 1 | VAR 
+219  | aa                       |     |       |    |     |      |        | 0 | PROP
+220  | false                    |     |       |    | my  |      | hash   | 1 | VAR 
+220  | aa                       |     |       |    |     |      |        | 0 | PROP
+222  | Case                     |     |       |    |     |      |        | 0 | COM 
+222  | variants:                |     |       |    |     |      |        | 0 | COM 
+222  | filter                   |     |       |    |     |      |        | 0 | COM 
+222  | lowercases               |     |       |    |     |      |        | 0 | COM 
+222  | comparing                |     |       |    |     |      |        | 0 | COM 
+222  | $If                      |     |       |    |     |      |        | 0 | COM 
+222  | folds                    |     |       |    |     |      |        | 0 | COM 
+222  | onto                     |     |       |    |     |      |        | 0 | COM 
+223  | If                       |     |       |    | my  |      | scalar | 1 | VAR 
+224  | Elsif                    |     |       |    | my  |      | scalar | 1 | VAR 
+225  | Else                     |     |       |    | my  |      | scalar | 1 | VAR 
+226  | Unless                   |     |       |    | my  |      | scalar | 1 | VAR 
+227  | While                    |     |       |    | my  |      | scalar | 1 | VAR 
+228  | Until                    |     |       |    | my  |      | scalar | 1 | VAR 
+229  | For                      |     |       |    | my  |      | scalar | 1 | VAR 
+230  | Foreach                  |     |       |    | my  |      | scalar | 1 | VAR 
+231  | Do                       |     |       |    | my  |      | scalar | 1 | VAR 
+232  | Given                    |     |       |    | my  |      | scalar | 1 | VAR 
+233  | When                     |     |       |    | my  |      | scalar | 1 | VAR 
+234  | Default                  |     |       |    | my  |      | scalar | 1 | VAR 
+235  | Use                      |     |       |    | my  |      | scalar | 1 | VAR 
+236  | No                       |     |       |    | my  |      | scalar | 1 | VAR 
+237  | Require                  |     |       |    | my  |      | scalar | 1 | VAR 
+238  | Package                  |     |       |    | my  |      | scalar | 1 | VAR 
+239  | Sub                      |     |       |    | my  |      | scalar | 1 | VAR 
+240  | My                       |     |       |    | my  |      | scalar | 1 | VAR 
+241  | Our                      |     |       |    | my  |      | scalar | 1 | VAR 
+242  | Local                    |     |       |    | my  |      | scalar | 1 | VAR 
+243  | Return                   |     |       |    | my  |      | scalar | 1 | VAR 
+244  | Last                     |     |       |    | my  |      | scalar | 1 | VAR 
+245  | Next                     |     |       |    | my  |      | scalar | 1 | VAR 
+246  | Redo                     |     |       |    | my  |      | scalar | 1 | VAR 
+247  | Goto                     |     |       |    | my  |      | scalar | 1 | VAR 
+248  | And                      |     |       |    | my  |      | scalar | 1 | VAR 
+249  | Or                       |     |       |    | my  |      | scalar | 1 | VAR 
+250  | Not                      |     |       |    | my  |      | scalar | 1 | VAR 
+251  | Eq                       |     |       |    | my  |      | scalar | 1 | VAR 
+252  | Ne                       |     |       |    | my  |      | scalar | 1 | VAR 
+253  | Lt                       |     |       |    | my  |      | scalar | 1 | VAR 
+254  | Gt                       |     |       |    | my  |      | scalar | 1 | VAR 
+255  | Le                       |     |       |    | my  |      | scalar | 1 | VAR 
+256  | Ge                       |     |       |    | my  |      | scalar | 1 | VAR 
+257  | Cmp                      |     |       |    | my  |      | scalar | 1 | VAR 
+258  | Print                    |     |       |    | my  |      | scalar | 1 | VAR 
+259  | Say                      |     |       |    | my  |      | scalar | 1 | VAR 
+260  | Die                      |     |       |    | my  |      | scalar | 1 | VAR 
+261  | Warn                     |     |       |    | my  |      | scalar | 1 | VAR 
+262  | Undef                    |     |       |    | my  |      | scalar | 1 | VAR 
+263  | Defined                  |     |       |    | my  |      | scalar | 1 | VAR 
+264  | Scalar                   |     |       |    | my  |      | scalar | 1 | VAR 
+265  | Push                     |     |       |    | my  |      | scalar | 1 | VAR 
+266  | Pop                      |     |       |    | my  |      | scalar | 1 | VAR 
+267  | Shift                    |     |       |    | my  |      | scalar | 1 | VAR 
+268  | Unshift                  |     |       |    | my  |      | scalar | 1 | VAR 
+269  | Splice                   |     |       |    | my  |      | scalar | 1 | VAR 
+270  | Reverse                  |     |       |    | my  |      | scalar | 1 | VAR 
+271  | Sort                     |     |       |    | my  |      | scalar | 1 | VAR 
+272  | Map                      |     |       |    | my  |      | scalar | 1 | VAR 
+273  | Grep                     |     |       |    | my  |      | scalar | 1 | VAR 
+274  | Join                     |     |       |    | my  |      | scalar | 1 | VAR 
+275  | Split                    |     |       |    | my  |      | scalar | 1 | VAR 
+276  | Chomp                    |     |       |    | my  |      | scalar | 1 | VAR 
+277  | Chop                     |     |       |    | my  |      | scalar | 1 | VAR 
+278  | Length                   |     |       |    | my  |      | scalar | 1 | VAR 
+279  | Substr                   |     |       |    | my  |      | scalar | 1 | VAR 
+280  | Sprintf                  |     |       |    | my  |      | scalar | 1 | VAR 
+281  | Printf                   |     |       |    | my  |      | scalar | 1 | VAR 
+282  | Open                     |     |       |    | my  |      | scalar | 1 | VAR 
+283  | Close                    |     |       |    | my  |      | scalar | 1 | VAR 
+284  | Read                     |     |       |    | my  |      | scalar | 1 | VAR 
+285  | Write                    |     |       |    | my  |      | scalar | 1 | VAR 
+286  | Binmode                  |     |       |    | my  |      | scalar | 1 | VAR 
+287  | True                     |     |       |    | my  |      | scalar | 1 | VAR 
+288  | False                    |     |       |    | my  |      | scalar | 1 | VAR 
+290  | Keywords                 |     |       |    |     |      |        | 0 | COM 
+290  | hash                     |     |       |    |     |      |        | 0 | COM 
+290  | keys                     |     |       |    |     |      |        | 0 | COM 
+290  | bare                     |     |       |    |     |      |        | 0 | COM 
+290  | sigil                    |     |       |    |     |      |        | 0 | COM 
+290  | protect                  |     |       |    |     |      |        | 0 | COM 
+291  | settings                 |     |       |    | my  |      | hash   | 1 | VAR 
+292  | if                       |     |       |    |     |      |        | 0 | PROP
+293  | elsif                    |     |       |    |     |      |        | 0 | PROP
+294  | else                     |     |       |    |     |      |        | 0 | PROP
+295  | unless                   |     |       |    |     |      |        | 0 | PROP
+296  | while                    |     |       |    |     |      |        | 0 | PROP
+297  | until                    |     |       |    |     |      |        | 0 | PROP
+298  | for                      |     |       |    |     |      |        | 0 | PROP
+299  | foreach                  |     |       |    |     |      |        | 0 | PROP
+300  | do                       |     |       |    |     |      |        | 0 | PROP
+301  | given                    |     |       |    |     |      |        | 0 | PROP
+302  | when                     |     |       |    |     |      |        | 0 | PROP
+303  | default                  |     |       |    |     |      |        | 0 | PROP
+304  | use                      |     |       |    |     |      |        | 0 | PROP
+305  | no                       |     |       |    |     |      |        | 0 | PROP
+306  | require                  |     |       |    |     |      |        | 0 | PROP
+307  | package                  |     |       |    |     |      |        | 0 | PROP
+308  | sub                      |     |       |    |     |      |        | 0 | PROP
+309  | my                       |     |       |    |     |      |        | 0 | PROP
+310  | our                      |     |       |    |     |      |        | 0 | PROP
+311  | local                    |     |       |    |     |      |        | 0 | PROP
+312  | return                   |     |       |    |     |      |        | 0 | PROP
+313  | last                     |     |       |    |     |      |        | 0 | PROP
+314  | next                     |     |       |    |     |      |        | 0 | PROP
+315  | redo                     |     |       |    |     |      |        | 0 | PROP
+316  | goto                     |     |       |    |     |      |        | 0 | PROP
+317  | and                      |     |       |    |     |      |        | 0 | PROP
+318  | or                       |     |       |    |     |      |        | 0 | PROP
+319  | not                      |     |       |    |     |      |        | 0 | PROP
+320  | eq                       |     |       |    |     |      |        | 0 | PROP
+321  | ne                       |     |       |    |     |      |        | 0 | PROP
+322  | lt                       |     |       |    |     |      |        | 0 | PROP
+323  | gt                       |     |       |    |     |      |        | 0 | PROP
+324  | le                       |     |       |    |     |      |        | 0 | PROP
+325  | ge                       |     |       |    |     |      |        | 0 | PROP
+326  | cmp                      |     |       |    |     |      |        | 0 | PROP
+327  | print                    |     |       |    |     |      |        | 0 | PROP
+328  | say                      |     |       |    |     |      |        | 0 | PROP
+329  | die                      |     |       |    |     |      |        | 0 | PROP
+330  | warn                     |     |       |    |     |      |        | 0 | PROP
+331  | undef                    |     |       |    |     |      |        | 0 | PROP
+332  | defined                  |     |       |    |     |      |        | 0 | PROP
+333  | scalar                   |     |       |    |     |      |        | 0 | PROP
+334  | push                     |     |       |    |     |      |        | 0 | PROP
+335  | pop                      |     |       |    |     |      |        | 0 | PROP
+336  | shift                    |     |       |    |     |      |        | 0 | PROP
+337  | unshift                  |     |       |    |     |      |        | 0 | PROP
+338  | splice                   |     |       |    |     |      |        | 0 | PROP
+339  | reverse                  |     |       |    |     |      |        | 0 | PROP
+340  | sort                     |     |       |    |     |      |        | 0 | PROP
+341  | map                      |     |       |    |     |      |        | 0 | PROP
+342  | grep                     |     |       |    |     |      |        | 0 | PROP
+343  | join                     |     |       |    |     |      |        | 0 | PROP
+344  | split                    |     |       |    |     |      |        | 0 | PROP
+345  | chomp                    |     |       |    |     |      |        | 0 | PROP
+346  | chop                     |     |       |    |     |      |        | 0 | PROP
+347  | length                   |     |       |    |     |      |        | 0 | PROP
+348  | substr                   |     |       |    |     |      |        | 0 | PROP
+349  | sprintf                  |     |       |    |     |      |        | 0 | PROP
+350  | printf                   |     |       |    |     |      |        | 0 | PROP
+351  | open                     |     |       |    |     |      |        | 0 | PROP
+352  | close                    |     |       |    |     |      |        | 0 | PROP
+353  | read                     |     |       |    |     |      |        | 0 | PROP
+354  | write                    |     |       |    |     |      |        | 0 | PROP
+355  | binmode                  |     |       |    |     |      |        | 0 | PROP
+356  | true                     |     |       |    |     |      |        | 0 | PROP
+357  | false                    |     |       |    |     |      |        | 0 | PROP
+360  | Keywords                 |     |       |    |     |      |        | 0 | COM 
+360  | names                    |     |       |    |     |      |        | 0 | COM 
+360  | bare                     |     |       |    |     |      |        | 0 | COM 
+360  | sigil                    |     |       |    |     |      |        | 0 | COM 
+360  | protect                  |     |       |    |     |      |        | 0 | COM 
+361  | if                       |     |       |    |     |      |        | 1 | FUNC
+362  | elsif                    |     |       |    |     |      |        | 1 | FUNC
+363  | else                     |     |       |    |     |      |        | 1 | FUNC
+364  | unless                   |     |       |    |     |      |        | 1 | FUNC
+365  | while                    |     |       |    |     |      |        | 1 | FUNC
+366  | until                    |     |       |    |     |      |        | 1 | FUNC
+367  | for                      |     |       |    |     |      |        | 1 | FUNC
+368  | foreach                  |     |       |    |     |      |        | 1 | FUNC
+369  | do                       |     |       |    |     |      |        | 1 | FUNC
+370  | given                    |     |       |    |     |      |        | 1 | FUNC
+371  | when                     |     |       |    |     |      |        | 1 | FUNC
+372  | default                  |     |       |    |     |      |        | 1 | FUNC
+373  | use                      |     |       |    |     |      |        | 1 | FUNC
+374  | no                       |     |       |    |     |      |        | 1 | FUNC
+375  | require                  |     |       |    |     |      |        | 1 | FUNC
+376  | package                  |     |       |    |     |      |        | 1 | FUNC
+377  | sub                      |     |       |    |     |      |        | 1 | FUNC
+378  | my                       |     |       |    |     |      |        | 1 | FUNC
+379  | our                      |     |       |    |     |      |        | 1 | FUNC
+380  | local                    |     |       |    |     |      |        | 1 | FUNC
+381  | return                   |     |       |    |     |      |        | 1 | FUNC
+382  | last                     |     |       |    |     |      |        | 1 | FUNC
+383  | next                     |     |       |    |     |      |        | 1 | FUNC
+384  | redo                     |     |       |    |     |      |        | 1 | FUNC
+385  | goto                     |     |       |    |     |      |        | 1 | FUNC
+386  | and                      |     |       |    |     |      |        | 1 | FUNC
+387  | or                       |     |       |    |     |      |        | 1 | FUNC
+388  | not                      |     |       |    |     |      |        | 1 | FUNC
+389  | eq                       |     |       |    |     |      |        | 1 | FUNC
+390  | ne                       |     |       |    |     |      |        | 1 | FUNC
+391  | lt                       |     |       |    |     |      |        | 1 | FUNC
+392  | gt                       |     |       |    |     |      |        | 1 | FUNC
+393  | le                       |     |       |    |     |      |        | 1 | FUNC
+394  | ge                       |     |       |    |     |      |        | 1 | FUNC
+395  | cmp                      |     |       |    |     |      |        | 1 | FUNC
+396  | print                    |     |       |    |     |      |        | 1 | FUNC
+397  | say                      |     |       |    |     |      |        | 1 | FUNC
+398  | die                      |     |       |    |     |      |        | 1 | FUNC
+399  | warn                     |     |       |    |     |      |        | 1 | FUNC
+400  | undef                    |     |       |    |     |      |        | 1 | FUNC
+401  | defined                  |     |       |    |     |      |        | 1 | FUNC
+402  | scalar                   |     |       |    |     |      |        | 1 | FUNC
+403  | push                     |     |       |    |     |      |        | 1 | FUNC
+404  | pop                      |     |       |    |     |      |        | 1 | FUNC
+405  | shift                    |     |       |    |     |      |        | 1 | FUNC
+406  | unshift                  |     |       |    |     |      |        | 1 | FUNC
+407  | splice                   |     |       |    |     |      |        | 1 | FUNC
+408  | reverse                  |     |       |    |     |      |        | 1 | FUNC
+409  | sort                     |     |       |    |     |      |        | 1 | FUNC
+410  | map                      |     |       |    |     |      |        | 1 | FUNC
+411  | grep                     |     |       |    |     |      |        | 1 | FUNC
+412  | join                     |     |       |    |     |      |        | 1 | FUNC
+413  | split                    |     |       |    |     |      |        | 1 | FUNC
+414  | chomp                    |     |       |    |     |      |        | 1 | FUNC
+415  | chop                     |     |       |    |     |      |        | 1 | FUNC
+416  | length                   |     |       |    |     |      |        | 1 | FUNC
+417  | substr                   |     |       |    |     |      |        | 1 | FUNC
+418  | sprintf                  |     |       |    |     |      |        | 1 | FUNC
+419  | printf                   |     |       |    |     |      |        | 1 | FUNC
+420  | open                     |     |       |    |     |      |        | 1 | FUNC
+421  | close                    |     |       |    |     |      |        | 1 | FUNC
+422  | read                     |     |       |    |     |      |        | 1 | FUNC
+423  | write                    |     |       |    |     |      |        | 1 | FUNC
+424  | binmode                  |     |       |    |     |      |        | 1 | FUNC
+425  | true                     |     |       |    |     |      |        | 1 | FUNC
+426  | false                    |     |       |    |     |      |        | 1 | FUNC
+428  | Builtin                  |     |       |    |     |      |        | 0 | COM 
+428  | functions                |     |       |    |     |      |        | 0 | COM 
+428  | keyword                  |     |       |    |     |      |        | 0 | COM 
+428  | list                     |     |       |    |     |      |        | 0 | COM 
+428  | called                   |     |       |    |     |      |        | 0 | COM 
+428  | normally.                |     |       |    |     |      |        | 0 | COM 
+429  | stack                    |     |       |    | my  |      | array  | 1 | VAR 
+430  | push                     |     |       |    |     |      |        | 0 | CALL
+430  | stack                    |     |       |    |     |      | array  | 0 | VAR 
+431  | top                      |     |       |    | my  |      | scalar | 1 | VAR 
+431  | pop                      |     |       |    |     |      |        | 0 | CALL
+431  | stack                    |     |       |    |     |      | array  | 0 | VAR 
+432  | head                     |     |       |    | my  |      | scalar | 1 | VAR 
+432  | shift                    |     |       |    |     |      |        | 0 | CALL
+432  | stack                    |     |       |    |     |      | array  | 0 | VAR 
+433  | unshift                  |     |       |    |     |      |        | 0 | CALL
+433  | stack                    |     |       |    |     |      | array  | 0 | VAR 
+434  | sorted                   |     |       |    | my  |      | array  | 1 | VAR 
+434  | stack                    |     |       |    |     |      | array  | 0 | VAR 
+435  | doubled                  |     |       |    | my  |      | array  | 1 | VAR 
+435  | stack                    |     |       |    |     |      | array  | 0 | VAR 
+436  | kept                     |     |       |    | my  |      | array  | 1 | VAR 
+436  | stack                    |     |       |    |     |      | array  | 0 | VAR 
+437  | joined                   |     |       |    | my  |      | scalar | 1 | VAR 
+437  | join                     |     |       |    |     |      |        | 0 | CALL
+437  | stack                    |     |       |    |     |      | array  | 0 | VAR 
+438  | parts                    |     |       |    | my  |      | array  | 1 | VAR 
+438  | split                    |     |       |    |     |      |        | 0 | CALL
+438  | joined                   |     |       |    |     |      | scalar | 0 | VAR 
+439  | size                     |     |       |    | my  |      | scalar | 1 | VAR 
+439  | length                   |     |       |    |     |      |        | 0 | CALL
+439  | joined                   |     |       |    |     |      | scalar | 0 | VAR 
+440  | piece                    |     |       |    | my  |      | scalar | 1 | VAR 
+440  | substr                   |     |       |    |     |      |        | 0 | CALL
+440  | joined                   |     |       |    |     |      | scalar | 0 | VAR 
+441  | text                     |     |       |    | my  |      | scalar | 1 | VAR 
+441  | sprintf                  |     |       |    |     |      |        | 0 | CALL
+441  | %s                       |     |       |    |     |      |        | 0 | STR 
+441  | joined                   |     |       |    |     |      | scalar | 0 | VAR 
+442  | print                    |     |       |    |     |      |        | 0 | CALL
+442  | $text                    |     |       |    |     |      |        | 0 | STR 
+442  | $top                     |     |       |    |     |      |        | 0 | STR 
+442  | $head                    |     |       |    |     |      |        | 0 | STR 
+442  | $size                    |     |       |    |     |      |        | 0 | STR 
+442  | $piece                   |     |       |    |     |      |        | 0 | STR 
+442  | @sorted                  |     |       |    |     |      |        | 0 | STR 
+442  | @doubled                 |     |       |    |     |      |        | 0 | STR 
+442  | @kept                    |     |       |    |     |      |        | 0 | STR 
+442  | @partsn                  |     |       |    |     |      |        | 0 | STR 
+442  | text                     |     |       |    |     |      | scalar | 0 | VAR 
+442  | top                      |     |       |    |     |      | scalar | 0 | VAR 
+442  | head                     |     |       |    |     |      | scalar | 0 | VAR 
+442  | size                     |     |       |    |     |      | scalar | 0 | VAR 
+442  | piece                    |     |       |    |     |      | scalar | 0 | VAR 
+442  | sorted                   |     |       |    |     |      | array  | 0 | VAR 
+442  | doubled                  |     |       |    |     |      | array  | 0 | VAR 
+442  | kept                     |     |       |    |     |      | array  | 0 | VAR 
+442  | parts                    |     |       |    |     |      | array  | 0 | VAR 

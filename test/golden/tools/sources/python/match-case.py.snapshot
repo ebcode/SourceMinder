@@ -1,0 +1,186 @@
+LINE | SYM                                  | PAR              | SCOPE | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/python/match-case.py:
+1    | match-case                           |                  |       |    |     |      |      | 0 | FILE 
+1    | Python                               |                  |       |    |     |      |      | 0 | STR  
+1    | 3.10+                                |                  |       |    |     |      |      | 0 | STR  
+1    | match-case                           |                  |       |    |     |      |      | 0 | STR  
+1    | pattern                              |                  |       |    |     |      |      | 0 | STR  
+1    | matching.                            |                  |       |    |     |      |      | 0 | STR  
+4    | match_literal                        |                  |       |    |     |      |      | 1 | FUNC 
+4    | value                                | match_literal    |       |    |     |      |      | 0 | ARG  
+5    | Basic                                |                  |       |    |     |      |      | 0 | STR  
+5    | literal                              |                  |       |    |     |      |      | 0 | STR  
+5    | matching.                            |                  |       |    |     |      |      | 0 | STR  
+8    | zero                                 |                  |       |    |     |      |      | 0 | STR  
+10   | one                                  |                  |       |    |     |      |      | 0 | STR  
+12   | two                                  |                  |       |    |     |      |      | 0 | STR  
+17   | match_multiple                       |                  |       |    |     |      |      | 1 | FUNC 
+17   | value                                | match_multiple   |       |    |     |      |      | 0 | ARG  
+18   | Matching                             |                  |       |    |     |      |      | 0 | STR  
+18   | multiple                             |                  |       |    |     |      |      | 0 | STR  
+18   | values.                              |                  |       |    |     |      |      | 0 | STR  
+21   | small                                |                  |       |    |     |      |      | 0 | STR  
+23   | medium                               |                  |       |    |     |      |      | 0 | STR  
+25   | large                                |                  |       |    |     |      |      | 0 | STR  
+28   | match_types                          |                  |       |    |     |      |      | 1 | FUNC 
+28   | obj                                  | match_types      |       |    |     |      |      | 0 | ARG  
+29   | Type-based                           |                  |       |    |     |      |      | 0 | STR  
+29   | matching.                            |                  |       |    |     |      |      | 0 | STR  
+31   | int                                  |                  |       |    |     |      |      | 0 | VAR  
+32   | integer                              |                  |       |    |     |      |      | 0 | STR  
+33   | str                                  |                  |       |    |     |      |      | 0 | VAR  
+34   | string                               |                  |       |    |     |      |      | 0 | STR  
+35   | list                                 |                  |       |    |     |      |      | 0 | VAR  
+36   | list                                 |                  |       |    |     |      |      | 0 | STR  
+38   | unknown                              |                  |       |    |     |      |      | 0 | STR  
+41   | match_sequence                       |                  |       |    |     |      |      | 1 | FUNC 
+41   | point                                | match_sequence   |       |    |     |      |      | 0 | ARG  
+42   | Sequence                             |                  |       |    |     |      |      | 0 | STR  
+42   | pattern                              |                  |       |    |     |      |      | 0 | STR  
+42   | matching.                            |                  |       |    |     |      |      | 0 | STR  
+45   | origin                               |                  |       |    |     |      |      | 0 | STR  
+46   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+47   | f"on y-axis at {yy}"                 |                  |       |    |     |      |      | 0 | STR  
+47   | y-axis                               |                  |       |    |     |      |      | 0 | STR  
+47   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+48   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+49   | f"on x-axis at {xx}"                 |                  |       |    |     |      |      | 0 | STR  
+49   | x-axis                               |                  |       |    |     |      |      | 0 | STR  
+49   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+50   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+50   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+51   | f"point at ({xx}, {yy})"             |                  |       |    |     |      |      | 0 | STR  
+51   | point                                |                  |       |    |     |      |      | 0 | STR  
+51   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+51   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+53   | point                                |                  |       |    |     |      |      | 0 | STR  
+56   | match_with_guard                     |                  |       |    |     |      |      | 1 | FUNC 
+56   | point                                | match_with_guard |       |    |     |      |      | 0 | ARG  
+57   | Pattern                              |                  |       |    |     |      |      | 0 | STR  
+57   | matching                             |                  |       |    |     |      |      | 0 | STR  
+57   | guard                                |                  |       |    |     |      |      | 0 | STR  
+57   | conditions.                          |                  |       |    |     |      |      | 0 | STR  
+59   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+59   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+60   | diagonal                             |                  |       |    |     |      |      | 0 | STR  
+61   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+61   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+62   | diagonal                             |                  |       |    |     |      |      | 0 | STR  
+63   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+63   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+64   | diagonal                             |                  |       |    |     |      |      | 0 | STR  
+67   | match_dict                           |                  |       |    |     |      |      | 1 | FUNC 
+67   | obj                                  | match_dict       |       |    |     |      |      | 0 | ARG  
+68   | Dictionary                           |                  |       |    |     |      |      | 0 | STR  
+68   | pattern                              |                  |       |    |     |      |      | 0 | STR  
+68   | matching.                            |                  |       |    |     |      |      | 0 | STR  
+70   | name                                 |                  |       |    |     |      |      | 0 | VAR  
+70   | type                                 |                  |       |    |     |      |      | 0 | STR  
+70   | user                                 |                  |       |    |     |      |      | 0 | STR  
+70   | name                                 |                  |       |    |     |      |      | 0 | STR  
+71   | f"User: {name}"                      |                  |       |    |     |      |      | 0 | STR  
+71   | User:                                |                  |       |    |     |      |      | 0 | STR  
+71   | name                                 |                  |       |    |     |      |      | 0 | VAR  
+72   | name                                 |                  |       |    |     |      |      | 0 | VAR  
+72   | level                                |                  |       |    |     |      |      | 0 | VAR  
+72   | type                                 |                  |       |    |     |      |      | 0 | STR  
+72   | admin                                |                  |       |    |     |      |      | 0 | STR  
+72   | name                                 |                  |       |    |     |      |      | 0 | STR  
+72   | level                                |                  |       |    |     |      |      | 0 | STR  
+73   | f"Admin: {name} (level {level})"     |                  |       |    |     |      |      | 0 | STR  
+73   | Admin:                               |                  |       |    |     |      |      | 0 | STR  
+73   | level                                |                  |       |    |     |      |      | 0 | STR  
+73   | name                                 |                  |       |    |     |      |      | 0 | VAR  
+73   | level                                |                  |       |    |     |      |      | 0 | VAR  
+75   | unknown                              |                  |       |    |     |      |      | 0 | STR  
+78   | match_class                          |                  |       |    |     |      |      | 1 | FUNC 
+78   | obj                                  | match_class      |       |    |     |      |      | 0 | ARG  
+79   | pattern                              |                  |       |    |     |      |      | 0 | STR  
+79   | matching.                            |                  |       |    |     |      |      | 0 | STR  
+81   | Point                                |                  |       |    |     |      |      | 0 | VAR  
+81   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+81   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+82   | origin                               |                  |       |    |     |      |      | 0 | STR  
+83   | Point                                |                  |       |    |     |      |      | 0 | VAR  
+83   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+83   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+83   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+84   | f"y-axis: {yy}"                      |                  |       |    |     |      |      | 0 | STR  
+84   | y-axis:                              |                  |       |    |     |      |      | 0 | STR  
+84   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+85   | Point                                |                  |       |    |     |      |      | 0 | VAR  
+85   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+85   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+85   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+86   | f"x-axis: {xx}"                      |                  |       |    |     |      |      | 0 | STR  
+86   | x-axis:                              |                  |       |    |     |      |      | 0 | STR  
+86   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+87   | Point                                |                  |       |    |     |      |      | 0 | VAR  
+88   | f"point: ({xx}, {yy})"               |                  |       |    |     |      |      | 0 | STR  
+88   | point:                               |                  |       |    |     |      |      | 0 | STR  
+88   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+88   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+91   | Point                                |                  |       |    |     |      |      | 1 | CLASS
+92   | __init__                             | Point            |       |    |     |      |      | 1 | FUNC 
+92   | self                                 | __init__         |       |    |     |      |      | 0 | ARG  
+92   | xx                                   | __init__         |       |    |     |      |      | 0 | ARG  
+92   | yy                                   | __init__         |       |    |     |      |      | 0 | ARG  
+93   | xx                                   | self             |       |    |     |      |      | 1 | PROP 
+93   | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+94   | yy                                   | self             |       |    |     |      |      | 1 | PROP 
+94   | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+97   | match_nested                         |                  |       |    |     |      |      | 1 | FUNC 
+97   | data                                 | match_nested     |       |    |     |      |      | 0 | ARG  
+98   | Nested                               |                  |       |    |     |      |      | 0 | STR  
+98   | pattern                              |                  |       |    |     |      |      | 0 | STR  
+98   | matching.                            |                  |       |    |     |      |      | 0 | STR  
+100  | name                                 |                  |       |    |     |      |      | 0 | VAR  
+100  | age                                  |                  |       |    |     |      |      | 0 | VAR  
+100  | user                                 |                  |       |    |     |      |      | 0 | STR  
+100  | name                                 |                  |       |    |     |      |      | 0 | STR  
+100  | age                                  |                  |       |    |     |      |      | 0 | STR  
+101  | f"{name} is {age}"                   |                  |       |    |     |      |      | 0 | STR  
+101  | name                                 |                  |       |    |     |      |      | 0 | VAR  
+101  | age                                  |                  |       |    |     |      |      | 0 | VAR  
+102  | first                                |                  |       |    |     |      |      | 0 | VAR  
+102  | rest                                 |                  |       |    |     |      |      | 0 | VAR  
+102  | users                                |                  |       |    |     |      |      | 0 | STR  
+103  | f"First: {first}, Rest: {rest}"      |                  |       |    |     |      |      | 0 | STR  
+103  | First:                               |                  |       |    |     |      |      | 0 | STR  
+103  | Rest:                                |                  |       |    |     |      |      | 0 | STR  
+103  | first                                |                  |       |    |     |      |      | 0 | VAR  
+103  | rest                                 |                  |       |    |     |      |      | 0 | VAR  
+105  | match                                |                  |       |    |     |      |      | 0 | STR  
+108  | match_as_pattern                     |                  |       |    |     |      |      | 1 | FUNC 
+108  | value                                | match_as_pattern |       |    |     |      |      | 0 | ARG  
+109  | Using                                |                  |       |    |     |      |      | 0 | STR  
+109  | capture                              |                  |       |    |     |      |      | 0 | STR  
+109  | patterns.                            |                  |       |    |     |      |      | 0 | STR  
+111  | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+111  | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+111  | point                                |                  |       |    |     |      |      | 0 | VAR  
+112  | f"Point {point} with x={xx}, y={yy}" |                  |       |    |     |      |      | 0 | STR  
+112  | Point                                |                  |       |    |     |      |      | 0 | STR  
+112  | x=                                   |                  |       |    |     |      |      | 0 | STR  
+112  | y=                                   |                  |       |    |     |      |      | 0 | STR  
+112  | point                                |                  |       |    |     |      |      | 0 | VAR  
+112  | xx                                   |                  |       |    |     |      |      | 0 | VAR  
+112  | yy                                   |                  |       |    |     |      |      | 0 | VAR  
+114  | match                                |                  |       |    |     |      |      | 0 | STR  
+117  | match_wildcard                       |                  |       |    |     |      |      | 1 | FUNC 
+117  | values                               | match_wildcard   |       |    |     |      |      | 0 | ARG  
+118  | Wildcard                             |                  |       |    |     |      |      | 0 | STR  
+118  | patterns.                            |                  |       |    |     |      |      | 0 | STR  
+120  | first                                |                  |       |    |     |      |      | 0 | VAR  
+120  | middle                               |                  |       |    |     |      |      | 0 | VAR  
+120  | last                                 |                  |       |    |     |      |      | 0 | VAR  
+121  | f"First: {first}, Last: {last}"      |                  |       |    |     |      |      | 0 | STR  
+121  | First:                               |                  |       |    |     |      |      | 0 | STR  
+121  | Last:                                |                  |       |    |     |      |      | 0 | STR  
+121  | first                                |                  |       |    |     |      |      | 0 | VAR  
+121  | last                                 |                  |       |    |     |      |      | 0 | VAR  
+122  | single                               |                  |       |    |     |      |      | 0 | VAR  
+123  | f"Single: {single}"                  |                  |       |    |     |      |      | 0 | STR  
+123  | Single:                              |                  |       |    |     |      |      | 0 | STR  
+123  | single                               |                  |       |    |     |      |      | 0 | VAR  
+125  | empty                                |                  |       |    |     |      |      | 0 | STR  

@@ -1,0 +1,46 @@
+LINE | SYM           | PAR           | SCOPE     | NS         | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/traits.php:
+1    | traits        |               |           |            |     |      |      | 0 | FILE 
+3    | App\Models    |               |           |            |     |      |      | 1 | NS   
+5    | timestamping  |               |           | App\Models |     |      |      | 0 | COM  
+8    | Timestampable |               |           | App\Models |     |      |      | 1 | TRAIT
+9    | $createdAt    | Timestampable | protected | App\Models |     |      |      | 1 | PROP 
+10   | $updatedAt    | Timestampable | protected | App\Models |     |      |      | 1 | PROP 
+12   | setTimestamps | Timestampable | public    | App\Models |     |      |      | 1 | FUNC 
+13   | $this         |               |           | App\Models |     |      |      | 0 | VAR  
+13   | createdAt     | $this         |           | App\Models |     |      |      | 0 | PROP 
+13   | date          |               |           | App\Models |     |      |      | 0 | CALL 
+13   | Y-m-d         |               |           | App\Models |     |      |      | 0 | STR  
+13   | H:i:s         |               |           | App\Models |     |      |      | 0 | STR  
+14   | $this         |               |           | App\Models |     |      |      | 0 | VAR  
+14   | updatedAt     | $this         |           | App\Models |     |      |      | 0 | PROP 
+14   | date          |               |           | App\Models |     |      |      | 0 | CALL 
+14   | Y-m-d         |               |           | App\Models |     |      |      | 0 | STR  
+14   | H:i:s         |               |           | App\Models |     |      |      | 0 | STR  
+18   | soft          |               |           | App\Models |     |      |      | 0 | COM  
+18   | deletes       |               |           | App\Models |     |      |      | 0 | COM  
+21   | SoftDeletes   |               |           | App\Models |     |      |      | 1 | TRAIT
+22   | $deletedAt    | SoftDeletes   | protected | App\Models |     |      |      | 1 | PROP 
+24   | softDelete    | SoftDeletes   | public    | App\Models |     |      |      | 1 | FUNC 
+25   | $this         |               |           | App\Models |     |      |      | 0 | VAR  
+25   | deletedAt     | $this         |           | App\Models |     |      |      | 0 | PROP 
+25   | date          |               |           | App\Models |     |      |      | 0 | CALL 
+25   | Y-m-d         |               |           | App\Models |     |      |      | 0 | STR  
+25   | H:i:s         |               |           | App\Models |     |      |      | 0 | STR  
+29   | using         |               |           | App\Models |     |      |      | 0 | COM  
+29   | multiple      |               |           | App\Models |     |      |      | 0 | COM  
+29   | traits        |               |           | App\Models |     |      |      | 0 | COM  
+32   | Post          |               |           | App\Models |     |      |      | 1 | CLASS
+33   | Timestampable |               |           | App\Models |     | use  |      | 0 | TYPE 
+33   | SoftDeletes   |               |           | App\Models |     | use  |      | 0 | TYPE 
+35   | $title        | Post          | public    | App\Models |     |      |      | 1 | PROP 
+36   | $content      | Post          | public    | App\Models |     |      |      | 1 | PROP 
+39   | Object        |               |           | App\Models |     |      |      | 0 | COM  
+39   | instantiation |               |           | App\Models |     |      |      | 0 | COM  
+39   | method        |               |           | App\Models |     |      |      | 0 | COM  
+39   | calls         |               |           | App\Models |     |      |      | 0 | COM  
+40   | $post         |               |           | App\Models |     |      |      | 0 | VAR  
+41   | $post         |               |           | App\Models |     |      |      | 0 | VAR  
+41   | setTimestamps | $post         |           | App\Models |     |      |      | 0 | CALL 
+42   | $post         |               |           | App\Models |     |      |      | 0 | VAR  
+42   | softDelete    | $post         |           | App\Models |     |      |      | 0 | CALL 

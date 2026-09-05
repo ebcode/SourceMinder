@@ -1,0 +1,65 @@
+LINE | SYM                    | PAR           | SCOPE     | NS | MOD               | CLUE | TYPE    | D | CTX  
+./tools/sources/typescript/modifiers.ts:
+1    | modifiers              |               |           |    |                   |      |         | 0 | FILE 
+1    | Test                   |               |           |    |                   |      |         | 0 | COM  
+1    | file                   |               |           |    |                   |      |         | 0 | COM  
+1    | TypeScript             |               |           |    |                   |      |         | 0 | COM  
+1    | modifier               |               |           |    |                   |      |         | 0 | COM  
+1    | detection              |               |           |    |                   |      |         | 0 | COM  
+2    | Tests:                 |               |           |    |                   |      |         | 0 | COM  
+2    | modifiers              |               |           |    |                   |      |         | 0 | COM  
+4    | methods                |               |           |    |                   |      |         | 0 | COM  
+5    | AbstractBase           |               |           |    | abstract          |      |         | 1 | CLASS
+7    | abstractProperty       | AbstractBase  |           |    | readonly abstract |      | string  | 1 | PROP 
+9    | regularMethod          | AbstractBase  |           |    |                   |      |         | 1 | FUNC 
+14   | Regular                |               |           |    |                   |      |         | 0 | COM  
+14   | various                |               |           |    |                   |      |         | 0 | COM  
+14   | modifiers              |               |           |    |                   |      |         | 0 | COM  
+15   | TestClass              |               |           |    |                   |      |         | 1 | CLASS
+16   | members                |               |           |    |                   |      |         | 0 | COM  
+17   | staticProperty         | TestClass     |           |    | static            |      |         | 1 | PROP 
+18   | staticReadonlyProperty | TestClass     |           |    | static readonly   |      |         | 1 | PROP 
+20   | Instance               |               |           |    |                   |      |         | 0 | COM  
+20   | members                |               |           |    |                   |      |         | 0 | COM  
+21   | regularProperty        | TestClass     | public    |    |                   |      | string  | 1 | PROP 
+22   | privateProperty        | TestClass     | private   |    |                   |      | number  | 1 | PROP 
+23   | readonlyProperty       | TestClass     |           |    | readonly          |      | boolean | 1 | PROP 
+25   | constructor            | TestClass     |           |    |                   |      |         | 1 | FUNC 
+26   | regularProperty        | this          |           |    |                   |      |         | 1 | PROP 
+27   | privateProperty        | this          |           |    |                   |      |         | 1 | PROP 
+28   | readonlyProperty       | this          |           |    |                   |      |         | 1 | PROP 
+31   | methods                |               |           |    |                   |      |         | 0 | COM  
+32   | staticMethod           | TestClass     |           |    | static            |      |         | 1 | FUNC 
+36   | staticAsyncMethod      | TestClass     |           |    | static async      |      |         | 1 | FUNC 
+37   | resolve                | Promise       |           |    |                   |      |         | 0 | CALL 
+40   | Instance               |               |           |    |                   |      |         | 0 | COM  
+40   | methods                |               |           |    |                   |      |         | 0 | COM  
+41   | regularMethod          | TestClass     |           |    |                   |      |         | 1 | FUNC 
+45   | asyncMethod            | TestClass     |           |    | async             |      |         | 1 | FUNC 
+46   | resolve                | Promise       |           |    |                   |      |         | 0 | CALL 
+49   | privateMethod          | TestClass     | private   |    |                   |      |         | 1 | FUNC 
+53   | protectedMethod        | TestClass     | protected |    |                   |      |         | 1 | FUNC 
+57   | publicAsyncMethod      | TestClass     | public    |    | async             |      |         | 1 | FUNC 
+58   | resolve                | Promise       |           |    |                   |      |         | 0 | CALL 
+62   | functions              |               |           |    |                   |      |         | 0 | COM  
+63   | asyncFunction          |               |           |    | async             |      |         | 1 | FUNC 
+64   | resolve                | Promise       |           |    |                   |      |         | 0 | CALL 
+67   | regularFunction        |               |           |    |                   |      |         | 1 | FUNC 
+72   | TestInterface          |               |           |    |                   |      |         | 1 | IFACE
+73   | readonlyProp           | TestInterface |           |    | readonly          |      | string  | 1 | PROP 
+74   | regularProp            | TestInterface |           |    |                   |      | number  | 1 | PROP 
+77   | alias                  |               |           |    |                   |      |         | 0 | COM  
+78   | TestType               |               |           |    |                   |      |         | 1 | TYPE 
+79   | readonlyField          |               |           |    | readonly          |      | string  | 1 | PROP 
+80   | mutableField           |               |           |    |                   |      | number  | 1 | PROP 
+84   | exportedAsyncFunction  |               |           |    |                   |      |         | 0 | EXP  
+84   | exportedAsyncFunction  |               |           |    | async             |      |         | 1 | FUNC 
+85   | resolve                | Promise       |           |    |                   |      |         | 0 | CALL 
+85   | exported               |               |           |    |                   |      |         | 0 | STR  
+88   | ExportedClass          |               |           |    |                   |      |         | 0 | EXP  
+88   | ExportedClass          |               |           |    |                   |      |         | 1 | CLASS
+89   | exportedStaticReadonly | ExportedClass |           |    | static readonly   |      |         | 1 | PROP 
+91   | exportedAsyncMethod    | ExportedClass |           |    | async             |      |         | 1 | FUNC 
+92   | resolve                | Promise       |           |    |                   |      |         | 0 | CALL 
+92   | exported               |               |           |    |                   |      |         | 0 | STR  
+92   | method                 |               |           |    |                   |      |         | 0 | STR  

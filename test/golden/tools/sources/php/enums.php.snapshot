@@ -1,0 +1,33 @@
+LINE | SYM        | PAR        | SCOPE  | NS         | MOD   | CLUE | TYPE | D | CTX 
+./tools/sources/php/enums.php:
+1    | enums      |            |        |            |       |      |      | 0 | FILE
+3    | App\Models |            |        |            |       |      |      | 1 | NS  
+5    | Backed     |            |        | App\Models |       |      |      | 0 | COM 
+5    | enum       |            |        | App\Models |       |      |      | 0 | COM 
+5    | string     |            |        | App\Models |       |      |      | 0 | COM 
+5    | values     |            |        | App\Models |       |      |      | 0 | COM 
+8    | UserStatus |            |        | App\Models |       |      |      | 1 | ENUM
+9    | Active     | UserStatus |        | App\Models |       |      |      | 1 | CASE
+10   | Inactive   | UserStatus |        | App\Models |       |      |      | 1 | CASE
+11   | Suspended  | UserStatus |        | App\Models |       |      |      | 1 | CASE
+12   | Pending    | UserStatus |        | App\Models |       |      |      | 1 | CASE
+15   | Pure       |            |        | App\Models |       |      |      | 0 | COM 
+15   | enum       |            |        | App\Models |       |      |      | 0 | COM 
+15   | without    |            |        | App\Models |       |      |      | 0 | COM 
+15   | backing    |            |        | App\Models |       |      |      | 0 | COM 
+15   | values     |            |        | App\Models |       |      |      | 0 | COM 
+18   | Priority   |            |        | App\Models |       |      |      | 1 | ENUM
+19   | Low        | Priority   |        | App\Models |       |      |      | 1 | CASE
+20   | Medium     | Priority   |        | App\Models |       |      |      | 1 | CASE
+21   | High       | Priority   |        | App\Models |       |      |      | 1 | CASE
+22   | Critical   | Priority   |        | App\Models |       |      |      | 1 | CASE
+25   | Enum       |            |        | App\Models |       |      |      | 0 | COM 
+25   | methods    |            |        | App\Models |       |      |      | 0 | COM 
+28   | Color      |            |        | App\Models |       |      |      | 1 | ENUM
+29   | Red        | Color      |        | App\Models |       |      |      | 1 | CASE
+30   | Green      | Color      |        | App\Models |       |      |      | 1 | CASE
+31   | Blue       | Color      |        | App\Models |       |      |      | 1 | CASE
+33   | getHex     | Color      | public | App\Models |       |      |      | 1 | FUNC
+35   | Red        | Color      |        | App\Models | const |      |      | 0 | VAR 
+36   | Green      | Color      |        | App\Models | const |      |      | 0 | VAR 
+37   | Blue       | Color      |        | App\Models | const |      |      | 0 | VAR 

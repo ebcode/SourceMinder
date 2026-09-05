@@ -1,0 +1,46 @@
+LINE | SYM            | PAR           | SCOPE | NS     | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/ruby/constants.rb:
+1    | constants      |               |       |        |     |      |      | 0 | FILE 
+1    | Constants      |               |       |        |     |      |      | 0 | COM  
+1    | instance/class |               |       |        |     |      |      | 0 | COM  
+1    | variables      |               |       |        |     |      |      | 0 | COM  
+1    | globals.       |               |       |        |     |      |      | 0 | COM  
+2    | PI             |               |       |        |     |      |      | 1 | VAR  
+3    | MAX_RETRIES    |               |       |        |     |      |      | 1 | VAR  
+4    | COLORS         |               |       |        |     |      |      | 1 | VAR  
+4    | freeze         |               |       |        |     |      |      | 0 | CALL 
+6    | $global_config |               |       |        |     |      |      | 1 | VAR  
+6    | debug          | global_config |       |        |     |      |      | 0 | PROP 
+6    | global         |               |       |        |     |      |      | 0 | COM  
+6    | variable       |               |       |        |     |      |      | 0 | COM  
+8    | Config         |               |       |        |     |      |      | 1 | NS   
+9    | VERSION        | Config        |       | Config |     |      |      | 1 | VAR  
+9    | 1.0.0          |               |       |        |     |      |      | 0 | STR  
+10   | DEFAULTS       | Config        |       | Config |     |      |      | 1 | VAR  
+10   | freeze         |               |       |        |     |      |      | 0 | CALL 
+11   | timeout        | DEFAULTS      |       |        |     |      |      | 0 | PROP 
+12   | retries        | DEFAULTS      |       |        |     |      |      | 0 | PROP 
+12   | MAX_RETRIES    |               |       |        |     |      |      | 0 | VAR  
+16   | Circle         |               |       |        |     |      |      | 1 | CLASS
+17   | TAU            | Circle        |       |        |     |      |      | 1 | VAR  
+17   | PI             |               |       |        |     |      |      | 0 | VAR  
+18   | BIGGEST        | Circle        |       |        |     |      |      | 1 | VAR  
+18   | INFINITY       | Float         |       | Float  |     |      |      | 0 | VAR  
+18   | Float          |               |       |        |     |      |      | 0 | NS   
+20   | initialize     | Circle        |       |        |     |      |      | 1 | FUNC 
+20   | radius         | initialize    |       |        |     |      |      | 0 | ARG  
+21   | @radius        | Circle        |       |        |     |      |      | 0 | PROP 
+21   | radius         |               |       |        |     |      |      | 0 | VAR  
+22   | @area          | Circle        |       |        |     |      |      | 0 | PROP 
+23   | @@instances    | Circle        |       |        |     |      |      | 0 | PROP 
+24   | @@instances    | Circle        |       |        |     |      |      | 0 | PROP 
+27   | area           | Circle        |       |        |     |      |      | 1 | FUNC 
+28   | @area          | Circle        |       |        |     |      |      | 0 | PROP 
+28   | PI             |               |       |        |     |      |      | 0 | VAR  
+28   | @radius        | Circle        |       |        |     |      |      | 0 | PROP 
+28   | @radius        | Circle        |       |        |     |      |      | 0 | PROP 
+31   | circumference  | Circle        |       |        |     |      |      | 1 | FUNC 
+32   | sqrt           | Math          |       |        |     |      |      | 0 | CALL 
+32   | Math           |               |       |        |     |      |      | 0 | VAR  
+32   | @area          | Circle        |       |        |     |      |      | 0 | PROP 
+32   | TAU            |               |       |        |     |      |      | 0 | VAR  

@@ -1,0 +1,472 @@
+LINE | SYM                            | PAR          | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX  
+./tools/sources/typescript/keywords.ts:
+1    | keywords                       |              |       |    |     |      |        | 0 | FILE 
+1    | Every                          |              |       |    |     |      |        | 0 | COM  
+1    | word                           |              |       |    |     |      |        | 0 | COM  
+1    | typescript/config/keywords.txt |              |       |    |     |      |        | 0 | COM  
+1    | used                           |              |       |    |     |      |        | 0 | COM  
+1    | naming                         |              |       |    |     |      |        | 0 | COM  
+1    | position.                      |              |       |    |     |      |        | 0 | COM  
+1    | TypeScript                     |              |       |    |     |      |        | 0 | COM  
+1    | reserves                       |              |       |    |     |      |        | 0 | COM  
+1    | strict                         |              |       |    |     |      |        | 0 | COM  
+1    | mode                           |              |       |    |     |      |        | 0 | COM  
+1    | modules                        |              |       |    |     |      |        | 0 | COM  
+1    | always                         |              |       |    |     |      |        | 0 | COM  
+1    | strict                         |              |       |    |     |      |        | 0 | COM  
+1    | every                          |              |       |    |     |      |        | 0 | COM  
+1    | one                            |              |       |    |     |      |        | 0 | COM  
+1    | legal                          |              |       |    |     |      |        | 0 | COM  
+1    | object                         |              |       |    |     |      |        | 0 | COM  
+1    | property                       |              |       |    |     |      |        | 0 | COM  
+1    | member                         |              |       |    |     |      |        | 0 | COM  
+1    | method                         |              |       |    |     |      |        | 0 | COM  
+1    | name                           |              |       |    |     |      |        | 0 | COM  
+1    | capitalized                    |              |       |    |     |      |        | 0 | COM  
+1    | identifier.                    |              |       |    |     |      |        | 0 | COM  
+1    | Several                        |              |       |    |     |      |        | 0 | COM  
+1    | entries                        |              |       |    |     |      |        | 0 | COM  
+1    | list                           |              |       |    |     |      |        | 0 | COM  
+1    | contextual                     |              |       |    |     |      |        | 0 | COM  
+1    | keywords                       |              |       |    |     |      |        | 0 | COM  
+1    | reserved                       |              |       |    |     |      |        | 0 | COM  
+1    | --                             |              |       |    |     |      |        | 0 | COM  
+1    | variants                       |              |       |    |     |      |        | 0 | COM  
+1    | matter                         |              |       |    |     |      |        | 0 | COM  
+1    | symbol                         |              |       |    |     |      |        | 0 | COM  
+1    | filter                         |              |       |    |     |      |        | 0 | COM  
+1    | lowercases                     |              |       |    |     |      |        | 0 | COM  
+1    | comparing                      |              |       |    |     |      |        | 0 | COM  
+1    | collides                       |              |       |    |     |      |        | 0 | COM  
+1    | identifiers                    |              |       |    |     |      |        | 0 | COM  
+1    | two                            |              |       |    |     |      |        | 0 | COM  
+1    | characters                     |              |       |    |     |      |        | 0 | COM  
+1    | longer                         |              |       |    |     |      |        | 0 | COM  
+1    | nothing                        |              |       |    |     |      |        | 0 | COM  
+1    | dropped                        |              |       |    |     |      |        | 0 | COM  
+1    | minimum                        |              |       |    |     |      |        | 0 | COM  
+1    | length                         |              |       |    |     |      |        | 0 | COM  
+1    | rather                         |              |       |    |     |      |        | 0 | COM  
+1    | keyword-ness.                  |              |       |    |     |      |        | 0 | COM  
+17   | Keywords                       |              |       |    |     |      |        | 0 | COM  
+17   | legal                          |              |       |    |     |      |        | 0 | COM  
+17   | bindings                       |              |       |    |     |      |        | 0 | COM  
+17   | strict                         |              |       |    |     |      |        | 0 | COM  
+17   | mode                           |              |       |    |     |      |        | 0 | COM  
+17   | block-scoped                   |              |       |    |     |      |        | 0 | COM  
+18   | collide                        |              |       |    |     |      |        | 0 | COM  
+18   | declarations                   |              |       |    |     |      |        | 0 | COM  
+20   | abstract                       |              |       |    |     |      |        | 1 | VAR  
+21   | accessor                       |              |       |    |     |      |        | 1 | VAR  
+22   | as                             |              |       |    |     |      |        | 1 | VAR  
+23   | asserts                        |              |       |    |     |      |        | 1 | VAR  
+24   | assert                         |              |       |    |     |      |        | 1 | VAR  
+25   | constructor                    |              |       |    |     |      |        | 1 | VAR  
+26   | declare                        |              |       |    |     |      |        | 1 | VAR  
+27   | defer                          |              |       |    |     |      |        | 1 | VAR  
+28   | from                           |              |       |    |     |      |        | 1 | VAR  
+29   | get                            |              |       |    |     |      |        | 1 | VAR  
+30   | infer                          |              |       |    |     |      |        | 1 | VAR  
+31   | intrinsic                      |              |       |    |     |      |        | 1 | VAR  
+32   | is                             |              |       |    |     |      |        | 1 | VAR  
+33   | keyof                          |              |       |    |     |      |        | 1 | VAR  
+34   | module                         |              |       |    |     |      |        | 1 | VAR  
+35   | namespace                      |              |       |    |     |      |        | 1 | VAR  
+36   | override                       |              |       |    |     |      |        | 1 | VAR  
+37   | out                            |              |       |    |     |      |        | 1 | VAR  
+38   | readonly                       |              |       |    |     |      |        | 1 | VAR  
+39   | require                        |              |       |    |     |      |        | 1 | VAR  
+40   | global                         |              |       |    |     |      |        | 1 | VAR  
+41   | satisfies                      |              |       |    |     |      |        | 1 | VAR  
+42   | set                            |              |       |    |     |      |        | 1 | VAR  
+43   | type                           |              |       |    |     |      |        | 1 | VAR  
+44   | unique                         |              |       |    |     |      |        | 1 | VAR  
+45   | using                          |              |       |    |     |      |        | 1 | VAR  
+46   | async                          |              |       |    |     |      |        | 1 | VAR  
+47   | of                             |              |       |    |     |      |        | 1 | VAR  
+50   | Capitalized                    |              |       |    |     |      |        | 0 | COM  
+50   | variants                       |              |       |    |     |      |        | 0 | COM  
+50   | bindings.                      |              |       |    |     |      |        | 0 | COM  
+52   | Abstract                       |              |       |    |     |      |        | 1 | VAR  
+53   | Accessor                       |              |       |    |     |      |        | 1 | VAR  
+54   | As                             |              |       |    |     |      |        | 1 | VAR  
+55   | Asserts                        |              |       |    |     |      |        | 1 | VAR  
+56   | Assert                         |              |       |    |     |      |        | 1 | VAR  
+57   | Break                          |              |       |    |     |      |        | 1 | VAR  
+58   | Case                           |              |       |    |     |      |        | 1 | VAR  
+59   | Catch                          |              |       |    |     |      |        | 1 | VAR  
+60   | Class                          |              |       |    |     |      |        | 1 | VAR  
+61   | Continue                       |              |       |    |     |      |        | 1 | VAR  
+62   | Const                          |              |       |    |     |      |        | 1 | VAR  
+63   | Constructor                    |              |       |    |     |      |        | 1 | VAR  
+64   | Debugger                       |              |       |    |     |      |        | 1 | VAR  
+65   | Declare                        |              |       |    |     |      |        | 1 | VAR  
+66   | Default                        |              |       |    |     |      |        | 1 | VAR  
+67   | Defer                          |              |       |    |     |      |        | 1 | VAR  
+68   | Delete                         |              |       |    |     |      |        | 1 | VAR  
+69   | Do                             |              |       |    |     |      |        | 1 | VAR  
+70   | Else                           |              |       |    |     |      |        | 1 | VAR  
+71   | Enum                           |              |       |    |     |      |        | 1 | VAR  
+72   | Export                         |              |       |    |     |      |        | 1 | VAR  
+73   | Extends                        |              |       |    |     |      |        | 1 | VAR  
+74   | False                          |              |       |    |     |      |        | 1 | VAR  
+75   | Finally                        |              |       |    |     |      |        | 1 | VAR  
+76   | For                            |              |       |    |     |      |        | 1 | VAR  
+77   | From                           |              |       |    |     |      |        | 1 | VAR  
+78   | Function                       |              |       |    |     |      |        | 1 | VAR  
+79   | Get                            |              |       |    |     |      |        | 1 | VAR  
+80   | If                             |              |       |    |     |      |        | 1 | VAR  
+81   | Implements                     |              |       |    |     |      |        | 1 | VAR  
+82   | Import                         |              |       |    |     |      |        | 1 | VAR  
+83   | In                             |              |       |    |     |      |        | 1 | VAR  
+84   | Infer                          |              |       |    |     |      |        | 1 | VAR  
+85   | Instanceof                     |              |       |    |     |      |        | 1 | VAR  
+86   | Interface                      |              |       |    |     |      |        | 1 | VAR  
+87   | Intrinsic                      |              |       |    |     |      |        | 1 | VAR  
+88   | Is                             |              |       |    |     |      |        | 1 | VAR  
+89   | Keyof                          |              |       |    |     |      |        | 1 | VAR  
+90   | Let                            |              |       |    |     |      |        | 1 | VAR  
+91   | Module                         |              |       |    |     |      |        | 1 | VAR  
+92   | Namespace                      |              |       |    |     |      |        | 1 | VAR  
+93   | New                            |              |       |    |     |      |        | 1 | VAR  
+94   | Null                           |              |       |    |     |      |        | 1 | VAR  
+95   | Package                        |              |       |    |     |      |        | 1 | VAR  
+96   | Private                        |              |       |    |     |      |        | 1 | VAR  
+97   | Protected                      |              |       |    |     |      |        | 1 | VAR  
+98   | Public                         |              |       |    |     |      |        | 1 | VAR  
+99   | Override                       |              |       |    |     |      |        | 1 | VAR  
+100  | Out                            |              |       |    |     |      |        | 1 | VAR  
+101  | Readonly                       |              |       |    |     |      |        | 1 | VAR  
+102  | Require                        |              |       |    |     |      |        | 1 | VAR  
+103  | Global                         |              |       |    |     |      |        | 1 | VAR  
+104  | Return                         |              |       |    |     |      |        | 1 | VAR  
+105  | Satisfies                      |              |       |    |     |      |        | 1 | VAR  
+106  | Set                            |              |       |    |     |      |        | 1 | VAR  
+107  | Static                         |              |       |    |     |      |        | 1 | VAR  
+108  | Super                          |              |       |    |     |      |        | 1 | VAR  
+109  | Switch                         |              |       |    |     |      |        | 1 | VAR  
+110  | This                           |              |       |    |     |      |        | 1 | VAR  
+111  | Throw                          |              |       |    |     |      |        | 1 | VAR  
+112  | True                           |              |       |    |     |      |        | 1 | VAR  
+113  | Try                            |              |       |    |     |      |        | 1 | VAR  
+114  | Type                           |              |       |    |     |      |        | 1 | VAR  
+115  | Typeof                         |              |       |    |     |      |        | 1 | VAR  
+116  | Unique                         |              |       |    |     |      |        | 1 | VAR  
+117  | Using                          |              |       |    |     |      |        | 1 | VAR  
+118  | Var                            |              |       |    |     |      |        | 1 | VAR  
+119  | While                          |              |       |    |     |      |        | 1 | VAR  
+120  | With                           |              |       |    |     |      |        | 1 | VAR  
+121  | Yield                          |              |       |    |     |      |        | 1 | VAR  
+122  | Async                          |              |       |    |     |      |        | 1 | VAR  
+123  | Await                          |              |       |    |     |      |        | 1 | VAR  
+124  | Of                             |              |       |    |     |      |        | 1 | VAR  
+127  | Keywords                       |              |       |    |     |      |        | 0 | COM  
+127  | names.                         |              |       |    |     |      |        | 0 | COM  
+128  | abstract                       |              |       |    |     |      |        | 0 | EXP  
+128  | abstract                       |              |       |    |     |      | number | 1 | FUNC 
+129  | accessor                       |              |       |    |     |      |        | 0 | EXP  
+129  | accessor                       |              |       |    |     |      | number | 1 | FUNC 
+130  | as                             |              |       |    |     |      |        | 0 | EXP  
+130  | as                             |              |       |    |     |      | number | 1 | FUNC 
+131  | asserts                        |              |       |    |     |      |        | 0 | EXP  
+131  | asserts                        |              |       |    |     |      | number | 1 | FUNC 
+132  | assert                         |              |       |    |     |      |        | 0 | EXP  
+132  | assert                         |              |       |    |     |      | number | 1 | FUNC 
+133  | constructor                    |              |       |    |     |      |        | 0 | EXP  
+133  | constructor                    |              |       |    |     |      | number | 1 | FUNC 
+134  | declare                        |              |       |    |     |      |        | 0 | EXP  
+134  | declare                        |              |       |    |     |      | number | 1 | FUNC 
+135  | defer                          |              |       |    |     |      |        | 0 | EXP  
+135  | defer                          |              |       |    |     |      | number | 1 | FUNC 
+136  | from                           |              |       |    |     |      |        | 0 | EXP  
+136  | from                           |              |       |    |     |      | number | 1 | FUNC 
+137  | get                            |              |       |    |     |      |        | 0 | EXP  
+137  | get                            |              |       |    |     |      | number | 1 | FUNC 
+138  | infer                          |              |       |    |     |      |        | 0 | EXP  
+138  | infer                          |              |       |    |     |      | number | 1 | FUNC 
+139  | intrinsic                      |              |       |    |     |      |        | 0 | EXP  
+139  | intrinsic                      |              |       |    |     |      | number | 1 | FUNC 
+140  | is                             |              |       |    |     |      |        | 0 | EXP  
+140  | is                             |              |       |    |     |      | number | 1 | FUNC 
+141  | keyof                          |              |       |    |     |      |        | 0 | EXP  
+141  | keyof                          |              |       |    |     |      | number | 1 | FUNC 
+142  | module                         |              |       |    |     |      |        | 0 | EXP  
+142  | module                         |              |       |    |     |      | number | 1 | FUNC 
+143  | namespace                      |              |       |    |     |      |        | 0 | EXP  
+143  | namespace                      |              |       |    |     |      | number | 1 | FUNC 
+144  | override                       |              |       |    |     |      |        | 0 | EXP  
+144  | override                       |              |       |    |     |      | number | 1 | FUNC 
+145  | out                            |              |       |    |     |      |        | 0 | EXP  
+145  | out                            |              |       |    |     |      | number | 1 | FUNC 
+146  | readonly                       |              |       |    |     |      |        | 0 | EXP  
+146  | readonly                       |              |       |    |     |      | number | 1 | FUNC 
+147  | require                        |              |       |    |     |      |        | 0 | EXP  
+147  | require                        |              |       |    |     |      | number | 1 | FUNC 
+148  | global                         |              |       |    |     |      |        | 0 | EXP  
+148  | global                         |              |       |    |     |      | number | 1 | FUNC 
+149  | satisfies                      |              |       |    |     |      |        | 0 | EXP  
+149  | satisfies                      |              |       |    |     |      | number | 1 | FUNC 
+150  | set                            |              |       |    |     |      |        | 0 | EXP  
+150  | set                            |              |       |    |     |      | number | 1 | FUNC 
+151  | type                           |              |       |    |     |      |        | 0 | EXP  
+151  | type                           |              |       |    |     |      | number | 1 | FUNC 
+152  | unique                         |              |       |    |     |      |        | 0 | EXP  
+152  | unique                         |              |       |    |     |      | number | 1 | FUNC 
+153  | using                          |              |       |    |     |      |        | 0 | EXP  
+153  | using                          |              |       |    |     |      | number | 1 | FUNC 
+154  | async                          |              |       |    |     |      |        | 0 | EXP  
+154  | async                          |              |       |    |     |      | number | 1 | FUNC 
+155  | of                             |              |       |    |     |      |        | 0 | EXP  
+155  | of                             |              |       |    |     |      | number | 1 | FUNC 
+157  | Capitalized                    |              |       |    |     |      |        | 0 | COM  
+157  | variants                       |              |       |    |     |      |        | 0 | COM  
+157  | names.                         |              |       |    |     |      |        | 0 | COM  
+158  | AbstractHolder                 |              |       |    |     |      |        | 0 | EXP  
+158  | AbstractHolder                 |              |       |    |     |      |        | 1 | CLASS
+159  | AccessorHolder                 |              |       |    |     |      |        | 0 | EXP  
+159  | AccessorHolder                 |              |       |    |     |      |        | 1 | CLASS
+160  | AsHolder                       |              |       |    |     |      |        | 0 | EXP  
+160  | AsHolder                       |              |       |    |     |      |        | 1 | CLASS
+161  | AssertsHolder                  |              |       |    |     |      |        | 0 | EXP  
+161  | AssertsHolder                  |              |       |    |     |      |        | 1 | CLASS
+162  | AssertHolder                   |              |       |    |     |      |        | 0 | EXP  
+162  | AssertHolder                   |              |       |    |     |      |        | 1 | CLASS
+163  | BreakHolder                    |              |       |    |     |      |        | 0 | EXP  
+163  | BreakHolder                    |              |       |    |     |      |        | 1 | CLASS
+164  | CaseHolder                     |              |       |    |     |      |        | 0 | EXP  
+164  | CaseHolder                     |              |       |    |     |      |        | 1 | CLASS
+165  | CatchHolder                    |              |       |    |     |      |        | 0 | EXP  
+165  | CatchHolder                    |              |       |    |     |      |        | 1 | CLASS
+166  | ClassHolder                    |              |       |    |     |      |        | 0 | EXP  
+166  | ClassHolder                    |              |       |    |     |      |        | 1 | CLASS
+167  | ContinueHolder                 |              |       |    |     |      |        | 0 | EXP  
+167  | ContinueHolder                 |              |       |    |     |      |        | 1 | CLASS
+168  | ConstHolder                    |              |       |    |     |      |        | 0 | EXP  
+168  | ConstHolder                    |              |       |    |     |      |        | 1 | CLASS
+169  | ConstructorHolder              |              |       |    |     |      |        | 0 | EXP  
+169  | ConstructorHolder              |              |       |    |     |      |        | 1 | CLASS
+170  | DebuggerHolder                 |              |       |    |     |      |        | 0 | EXP  
+170  | DebuggerHolder                 |              |       |    |     |      |        | 1 | CLASS
+171  | DeclareHolder                  |              |       |    |     |      |        | 0 | EXP  
+171  | DeclareHolder                  |              |       |    |     |      |        | 1 | CLASS
+172  | DefaultHolder                  |              |       |    |     |      |        | 0 | EXP  
+172  | DefaultHolder                  |              |       |    |     |      |        | 1 | CLASS
+173  | DeferHolder                    |              |       |    |     |      |        | 0 | EXP  
+173  | DeferHolder                    |              |       |    |     |      |        | 1 | CLASS
+174  | DeleteHolder                   |              |       |    |     |      |        | 0 | EXP  
+174  | DeleteHolder                   |              |       |    |     |      |        | 1 | CLASS
+175  | DoHolder                       |              |       |    |     |      |        | 0 | EXP  
+175  | DoHolder                       |              |       |    |     |      |        | 1 | CLASS
+176  | ElseHolder                     |              |       |    |     |      |        | 0 | EXP  
+176  | ElseHolder                     |              |       |    |     |      |        | 1 | CLASS
+177  | EnumHolder                     |              |       |    |     |      |        | 0 | EXP  
+177  | EnumHolder                     |              |       |    |     |      |        | 1 | CLASS
+178  | ExportHolder                   |              |       |    |     |      |        | 0 | EXP  
+178  | ExportHolder                   |              |       |    |     |      |        | 1 | CLASS
+179  | ExtendsHolder                  |              |       |    |     |      |        | 0 | EXP  
+179  | ExtendsHolder                  |              |       |    |     |      |        | 1 | CLASS
+180  | FalseHolder                    |              |       |    |     |      |        | 0 | EXP  
+180  | FalseHolder                    |              |       |    |     |      |        | 1 | CLASS
+181  | FinallyHolder                  |              |       |    |     |      |        | 0 | EXP  
+181  | FinallyHolder                  |              |       |    |     |      |        | 1 | CLASS
+182  | ForHolder                      |              |       |    |     |      |        | 0 | EXP  
+182  | ForHolder                      |              |       |    |     |      |        | 1 | CLASS
+183  | FromHolder                     |              |       |    |     |      |        | 0 | EXP  
+183  | FromHolder                     |              |       |    |     |      |        | 1 | CLASS
+184  | FunctionHolder                 |              |       |    |     |      |        | 0 | EXP  
+184  | FunctionHolder                 |              |       |    |     |      |        | 1 | CLASS
+185  | GetHolder                      |              |       |    |     |      |        | 0 | EXP  
+185  | GetHolder                      |              |       |    |     |      |        | 1 | CLASS
+186  | IfHolder                       |              |       |    |     |      |        | 0 | EXP  
+186  | IfHolder                       |              |       |    |     |      |        | 1 | CLASS
+187  | ImplementsHolder               |              |       |    |     |      |        | 0 | EXP  
+187  | ImplementsHolder               |              |       |    |     |      |        | 1 | CLASS
+188  | ImportHolder                   |              |       |    |     |      |        | 0 | EXP  
+188  | ImportHolder                   |              |       |    |     |      |        | 1 | CLASS
+189  | InHolder                       |              |       |    |     |      |        | 0 | EXP  
+189  | InHolder                       |              |       |    |     |      |        | 1 | CLASS
+190  | InferHolder                    |              |       |    |     |      |        | 0 | EXP  
+190  | InferHolder                    |              |       |    |     |      |        | 1 | CLASS
+191  | InstanceofHolder               |              |       |    |     |      |        | 0 | EXP  
+191  | InstanceofHolder               |              |       |    |     |      |        | 1 | CLASS
+192  | InterfaceHolder                |              |       |    |     |      |        | 0 | EXP  
+192  | InterfaceHolder                |              |       |    |     |      |        | 1 | CLASS
+193  | IntrinsicHolder                |              |       |    |     |      |        | 0 | EXP  
+193  | IntrinsicHolder                |              |       |    |     |      |        | 1 | CLASS
+194  | IsHolder                       |              |       |    |     |      |        | 0 | EXP  
+194  | IsHolder                       |              |       |    |     |      |        | 1 | CLASS
+195  | KeyofHolder                    |              |       |    |     |      |        | 0 | EXP  
+195  | KeyofHolder                    |              |       |    |     |      |        | 1 | CLASS
+196  | LetHolder                      |              |       |    |     |      |        | 0 | EXP  
+196  | LetHolder                      |              |       |    |     |      |        | 1 | CLASS
+197  | ModuleHolder                   |              |       |    |     |      |        | 0 | EXP  
+197  | ModuleHolder                   |              |       |    |     |      |        | 1 | CLASS
+198  | NamespaceHolder                |              |       |    |     |      |        | 0 | EXP  
+198  | NamespaceHolder                |              |       |    |     |      |        | 1 | CLASS
+199  | NewHolder                      |              |       |    |     |      |        | 0 | EXP  
+199  | NewHolder                      |              |       |    |     |      |        | 1 | CLASS
+200  | NullHolder                     |              |       |    |     |      |        | 0 | EXP  
+200  | NullHolder                     |              |       |    |     |      |        | 1 | CLASS
+201  | PackageHolder                  |              |       |    |     |      |        | 0 | EXP  
+201  | PackageHolder                  |              |       |    |     |      |        | 1 | CLASS
+202  | PrivateHolder                  |              |       |    |     |      |        | 0 | EXP  
+202  | PrivateHolder                  |              |       |    |     |      |        | 1 | CLASS
+203  | ProtectedHolder                |              |       |    |     |      |        | 0 | EXP  
+203  | ProtectedHolder                |              |       |    |     |      |        | 1 | CLASS
+204  | PublicHolder                   |              |       |    |     |      |        | 0 | EXP  
+204  | PublicHolder                   |              |       |    |     |      |        | 1 | CLASS
+205  | OverrideHolder                 |              |       |    |     |      |        | 0 | EXP  
+205  | OverrideHolder                 |              |       |    |     |      |        | 1 | CLASS
+206  | OutHolder                      |              |       |    |     |      |        | 0 | EXP  
+206  | OutHolder                      |              |       |    |     |      |        | 1 | CLASS
+207  | ReadonlyHolder                 |              |       |    |     |      |        | 0 | EXP  
+207  | ReadonlyHolder                 |              |       |    |     |      |        | 1 | CLASS
+208  | RequireHolder                  |              |       |    |     |      |        | 0 | EXP  
+208  | RequireHolder                  |              |       |    |     |      |        | 1 | CLASS
+209  | GlobalHolder                   |              |       |    |     |      |        | 0 | EXP  
+209  | GlobalHolder                   |              |       |    |     |      |        | 1 | CLASS
+210  | ReturnHolder                   |              |       |    |     |      |        | 0 | EXP  
+210  | ReturnHolder                   |              |       |    |     |      |        | 1 | CLASS
+211  | SatisfiesHolder                |              |       |    |     |      |        | 0 | EXP  
+211  | SatisfiesHolder                |              |       |    |     |      |        | 1 | CLASS
+212  | SetHolder                      |              |       |    |     |      |        | 0 | EXP  
+212  | SetHolder                      |              |       |    |     |      |        | 1 | CLASS
+213  | StaticHolder                   |              |       |    |     |      |        | 0 | EXP  
+213  | StaticHolder                   |              |       |    |     |      |        | 1 | CLASS
+214  | SuperHolder                    |              |       |    |     |      |        | 0 | EXP  
+214  | SuperHolder                    |              |       |    |     |      |        | 1 | CLASS
+215  | SwitchHolder                   |              |       |    |     |      |        | 0 | EXP  
+215  | SwitchHolder                   |              |       |    |     |      |        | 1 | CLASS
+216  | ThisHolder                     |              |       |    |     |      |        | 0 | EXP  
+216  | ThisHolder                     |              |       |    |     |      |        | 1 | CLASS
+217  | ThrowHolder                    |              |       |    |     |      |        | 0 | EXP  
+217  | ThrowHolder                    |              |       |    |     |      |        | 1 | CLASS
+218  | TrueHolder                     |              |       |    |     |      |        | 0 | EXP  
+218  | TrueHolder                     |              |       |    |     |      |        | 1 | CLASS
+219  | TryHolder                      |              |       |    |     |      |        | 0 | EXP  
+219  | TryHolder                      |              |       |    |     |      |        | 1 | CLASS
+220  | TypeHolder                     |              |       |    |     |      |        | 0 | EXP  
+220  | TypeHolder                     |              |       |    |     |      |        | 1 | CLASS
+221  | TypeofHolder                   |              |       |    |     |      |        | 0 | EXP  
+221  | TypeofHolder                   |              |       |    |     |      |        | 1 | CLASS
+222  | UniqueHolder                   |              |       |    |     |      |        | 0 | EXP  
+222  | UniqueHolder                   |              |       |    |     |      |        | 1 | CLASS
+223  | UsingHolder                    |              |       |    |     |      |        | 0 | EXP  
+223  | UsingHolder                    |              |       |    |     |      |        | 1 | CLASS
+224  | VarHolder                      |              |       |    |     |      |        | 0 | EXP  
+224  | VarHolder                      |              |       |    |     |      |        | 1 | CLASS
+225  | WhileHolder                    |              |       |    |     |      |        | 0 | EXP  
+225  | WhileHolder                    |              |       |    |     |      |        | 1 | CLASS
+226  | WithHolder                     |              |       |    |     |      |        | 0 | EXP  
+226  | WithHolder                     |              |       |    |     |      |        | 1 | CLASS
+227  | YieldHolder                    |              |       |    |     |      |        | 0 | EXP  
+227  | YieldHolder                    |              |       |    |     |      |        | 1 | CLASS
+228  | AsyncHolder                    |              |       |    |     |      |        | 0 | EXP  
+228  | AsyncHolder                    |              |       |    |     |      |        | 1 | CLASS
+229  | AwaitHolder                    |              |       |    |     |      |        | 0 | EXP  
+229  | AwaitHolder                    |              |       |    |     |      |        | 1 | CLASS
+230  | OfHolder                       |              |       |    |     |      |        | 0 | EXP  
+230  | OfHolder                       |              |       |    |     |      |        | 1 | CLASS
+232  | Every                          |              |       |    |     |      |        | 0 | COM  
+232  | keyword                        |              |       |    |     |      |        | 0 | COM  
+232  | object                         |              |       |    |     |      |        | 0 | COM  
+232  | property                       |              |       |    |     |      |        | 0 | COM  
+232  | name.                          |              |       |    |     |      |        | 0 | COM  
+233  | settings                       |              |       |    |     |      |        | 0 | EXP  
+233  | settings                       |              |       |    |     |      |        | 1 | VAR  
+309  | Every                          |              |       |    |     |      |        | 0 | COM  
+309  | keyword                        |              |       |    |     |      |        | 0 | COM  
+309  | member.                        |              |       |    |     |      |        | 0 | COM  
+310  | KeywordShape                   |              |       |    |     |      |        | 0 | EXP  
+310  | KeywordShape                   |              |       |    |     |      |        | 1 | IFACE
+311  | number                         | KeywordShape |       |    |     |      |        | 1 | PROP 
+312  | accessor                       | KeywordShape |       |    |     |      | number | 1 | PROP 
+313  | as                             | KeywordShape |       |    |     |      | number | 1 | PROP 
+314  | asserts                        | KeywordShape |       |    |     |      | number | 1 | PROP 
+315  | assert                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+316  | break                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+317  | case                           | KeywordShape |       |    |     |      | number | 1 | PROP 
+318  | catch                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+319  | class                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+320  | continue                       | KeywordShape |       |    |     |      | number | 1 | PROP 
+321  | const                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+322  | constructor                    | KeywordShape |       |    |     |      | number | 1 | PROP 
+323  | debugger                       | KeywordShape |       |    |     |      | number | 1 | PROP 
+324  | declare                        | KeywordShape |       |    |     |      | number | 1 | PROP 
+325  | default                        | KeywordShape |       |    |     |      | number | 1 | PROP 
+326  | defer                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+327  | delete                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+328  | do                             | KeywordShape |       |    |     |      | number | 1 | PROP 
+329  | else                           | KeywordShape |       |    |     |      | number | 1 | PROP 
+330  | enum                           | KeywordShape |       |    |     |      | number | 1 | PROP 
+331  | export                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+332  | extends                        | KeywordShape |       |    |     |      | number | 1 | PROP 
+333  | false                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+334  | finally                        | KeywordShape |       |    |     |      | number | 1 | PROP 
+335  | for                            | KeywordShape |       |    |     |      | number | 1 | PROP 
+336  | from                           | KeywordShape |       |    |     |      | number | 1 | PROP 
+337  | function                       | KeywordShape |       |    |     |      | number | 1 | PROP 
+338  | get                            | KeywordShape |       |    |     |      | number | 1 | PROP 
+339  | if                             | KeywordShape |       |    |     |      | number | 1 | PROP 
+340  | implements                     | KeywordShape |       |    |     |      | number | 1 | PROP 
+341  | import                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+342  | in                             | KeywordShape |       |    |     |      | number | 1 | PROP 
+343  | infer                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+344  | instanceof                     | KeywordShape |       |    |     |      | number | 1 | PROP 
+345  | interface                      | KeywordShape |       |    |     |      | number | 1 | PROP 
+346  | intrinsic                      | KeywordShape |       |    |     |      | number | 1 | PROP 
+347  | is                             | KeywordShape |       |    |     |      | number | 1 | PROP 
+348  | keyof                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+349  | let                            | KeywordShape |       |    |     |      | number | 1 | PROP 
+350  | module                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+351  | namespace                      | KeywordShape |       |    |     |      | number | 1 | PROP 
+352  | new                            | KeywordShape |       |    |     |      | number | 1 | PROP 
+353  | null                           | KeywordShape |       |    |     |      | number | 1 | PROP 
+354  | package                        | KeywordShape |       |    |     |      | number | 1 | PROP 
+355  | private                        | KeywordShape |       |    |     |      | number | 1 | PROP 
+356  | protected                      | KeywordShape |       |    |     |      | number | 1 | PROP 
+357  | public                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+358  | override                       | KeywordShape |       |    |     |      | number | 1 | PROP 
+359  | out                            | KeywordShape |       |    |     |      | number | 1 | PROP 
+360  | readonly                       | KeywordShape |       |    |     |      | number | 1 | PROP 
+361  | require                        | KeywordShape |       |    |     |      | number | 1 | PROP 
+362  | global                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+363  | return                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+364  | satisfies                      | KeywordShape |       |    |     |      | number | 1 | PROP 
+365  | set                            | KeywordShape |       |    |     |      | number | 1 | PROP 
+366  | static                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+367  | super                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+368  | switch                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+369  | this                           | KeywordShape |       |    |     |      | number | 1 | PROP 
+370  | throw                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+371  | true                           | KeywordShape |       |    |     |      | number | 1 | PROP 
+372  | try                            | KeywordShape |       |    |     |      | number | 1 | PROP 
+373  | type                           | KeywordShape |       |    |     |      | number | 1 | PROP 
+374  | typeof                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+375  | unique                         | KeywordShape |       |    |     |      | number | 1 | PROP 
+376  | using                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+377  | var                            | KeywordShape |       |    |     |      | number | 1 | PROP 
+378  | while                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+379  | with                           | KeywordShape |       |    |     |      | number | 1 | PROP 
+380  | yield                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+381  | async                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+382  | await                          | KeywordShape |       |    |     |      | number | 1 | PROP 
+383  | of                             | KeywordShape |       |    |     |      | number | 1 | PROP 
+386  | Every                          |              |       |    |     |      |        | 0 | COM  
+386  | keyword                        |              |       |    |     |      |        | 0 | COM  
+386  | method                         |              |       |    |     |      |        | 0 | COM  
+386  | name                           |              |       |    |     |      |        | 0 | COM  
+386  | excluded:                      |              |       |    |     |      |        | 0 | COM  
+386  | must                           |              |       |    |     |      |        | 0 | COM  
+387  | instance                       |              |       |    |     |      |        | 0 | COM  
+388  | KeywordHolder                  |              |       |    |     |      |        | 0 | EXP  
+388  | KeywordHolder                  |              |       |    |     |      |        | 1 | CLASS
+390  | accessor                       |              |       |    |     |      |        | 0 | CALL 
+391  | as                             |              |       |    |     |      |        | 0 | CALL 
+393  | assert                         |              |       |    |     |      |        | 0 | CALL 
+395  | case                           |              |       |    |     |      |        | 0 | CALL 
+401  | declare                        |              |       |    |     |      |        | 0 | CALL 
+402  | default                        |              |       |    |     |      |        | 0 | CALL 
+403  | defer                          |              |       |    |     |      |        | 0 | CALL 
+414  | <lambda>                       |              |       |    |     |      |        | 1 | LAM  
+460  | return                         |              |       |    |     |      |        | 0 | PROP 

@@ -1,0 +1,77 @@
+LINE | SYM                       | PAR       | SCOPE | NS | MOD | CLUE | TYPE  | D | CTX  
+./tools/sources/python/classes.py:
+1    | classes                   |           |       |    |     |      |       | 0 | FILE 
+1    | Python                    |           |       |    |     |      |       | 0 | STR  
+1    | declarations              |           |       |    |     |      |       | 0 | STR  
+1    | features.                 |           |       |    |     |      |       | 0 | STR  
+4    | User                      |           |       |    |     |      |       | 1 | CLASS
+5    | Basic                     |           |       |    |     |      |       | 0 | STR  
+5    | instance                  |           |       |    |     |      |       | 0 | STR  
+5    | variables.                |           |       |    |     |      |       | 0 | STR  
+7    | __init__                  | User      |       |    |     |      |       | 1 | FUNC 
+7    | self                      | __init__  |       |    |     |      |       | 0 | ARG  
+7    | name                      | __init__  |       |    |     |      | str   | 0 | ARG  
+7    | email                     | __init__  |       |    |     |      | str   | 0 | ARG  
+8    | name                      | self      |       |    |     |      |       | 1 | PROP 
+8    | name                      |           |       |    |     |      |       | 0 | VAR  
+9    | email                     | self      |       |    |     |      |       | 1 | PROP 
+9    | email                     |           |       |    |     |      |       | 0 | VAR  
+10   | active                    | self      |       |    |     |      |       | 1 | PROP 
+12   | greet                     | User      |       |    |     |      |       | 1 | FUNC 
+12   | self                      | greet     |       |    |     |      |       | 0 | ARG  
+13   | f"Hello, {self.name}"     |           |       |    |     |      |       | 0 | STR  
+13   | Hello                     |           |       |    |     |      |       | 0 | STR  
+13   | name                      | self      |       |    |     |      |       | 0 | PROP 
+13   | self                      |           |       |    |     |      |       | 0 | VAR  
+16   | Counter                   |           |       |    |     |      |       | 1 | CLASS
+17   | variables.                |           |       |    |     |      |       | 0 | STR  
+19   | total_count               |           |       |    |     |      |       | 1 | VAR  
+21   | __init__                  | Counter   |       |    |     |      |       | 1 | FUNC 
+21   | self                      | __init__  |       |    |     |      |       | 0 | ARG  
+22   | count                     | self      |       |    |     |      |       | 1 | PROP 
+23   | total_count               | Counter   |       |    |     |      |       | 1 | PROP 
+25   | increment                 | Counter   |       |    |     |      |       | 1 | FUNC 
+25   | self                      | increment |       |    |     |      |       | 0 | ARG  
+26   | count                     | self      |       |    |     |      |       | 1 | PROP 
+29   | Rectangle                 |           |       |    |     |      |       | 1 | CLASS
+30   | instance                  |           |       |    |     |      |       | 0 | STR  
+30   | methods.                  |           |       |    |     |      |       | 0 | STR  
+32   | __init__                  | Rectangle |       |    |     |      |       | 1 | FUNC 
+32   | self                      | __init__  |       |    |     |      |       | 0 | ARG  
+32   | width                     | __init__  |       |    |     |      | float | 0 | ARG  
+32   | height                    | __init__  |       |    |     |      | float | 0 | ARG  
+33   | width                     | self      |       |    |     |      |       | 1 | PROP 
+33   | width                     |           |       |    |     |      |       | 0 | VAR  
+34   | height                    | self      |       |    |     |      |       | 1 | PROP 
+34   | height                    |           |       |    |     |      |       | 0 | VAR  
+36   | area                      | Rectangle |       |    |     |      | float | 1 | FUNC 
+36   | self                      | area      |       |    |     |      |       | 0 | ARG  
+37   | width                     | self      |       |    |     |      |       | 0 | PROP 
+37   | self                      |           |       |    |     |      |       | 0 | VAR  
+37   | height                    | self      |       |    |     |      |       | 0 | PROP 
+37   | self                      |           |       |    |     |      |       | 0 | VAR  
+39   | perimeter                 | Rectangle |       |    |     |      | float | 1 | FUNC 
+39   | self                      | perimeter |       |    |     |      |       | 0 | ARG  
+40   | width                     | self      |       |    |     |      |       | 0 | PROP 
+40   | self                      |           |       |    |     |      |       | 0 | VAR  
+40   | height                    | self      |       |    |     |      |       | 0 | PROP 
+40   | self                      |           |       |    |     |      |       | 0 | VAR  
+43   | Animal                    |           |       |    |     |      |       | 1 | CLASS
+44   | Base                      |           |       |    |     |      |       | 0 | STR  
+44   | inheritance.              |           |       |    |     |      |       | 0 | STR  
+46   | __init__                  | Animal    |       |    |     |      |       | 1 | FUNC 
+46   | self                      | __init__  |       |    |     |      |       | 0 | ARG  
+46   | name                      | __init__  |       |    |     |      | str   | 0 | ARG  
+47   | name                      | self      |       |    |     |      |       | 1 | PROP 
+47   | name                      |           |       |    |     |      |       | 0 | VAR  
+49   | speak                     | Animal    |       |    |     |      |       | 1 | FUNC 
+49   | self                      | speak     |       |    |     |      |       | 0 | ARG  
+53   | Dog                       | Animal    |       |    |     |      |       | 1 | CLASS
+54   | Derived                   |           |       |    |     |      |       | 0 | STR  
+56   | speak                     | Dog       |       |    |     |      |       | 1 | FUNC 
+56   | self                      | speak     |       |    |     |      |       | 0 | ARG  
+57   | f"{self.name} says Woof!" |           |       |    |     |      |       | 0 | STR  
+57   | says                      |           |       |    |     |      |       | 0 | STR  
+57   | Woof!                     |           |       |    |     |      |       | 0 | STR  
+57   | name                      | self      |       |    |     |      |       | 0 | PROP 
+57   | self                      |           |       |    |     |      |       | 0 | VAR  

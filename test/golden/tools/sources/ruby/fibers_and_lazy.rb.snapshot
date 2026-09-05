@@ -1,0 +1,208 @@
+LINE | SYM                | PAR          | SCOPE | NS    | MOD | CLUE    | TYPE | D | CTX  
+./tools/sources/ruby/fibers_and_lazy.rb:
+1    | fibers_and_lazy    |              |       |       |     |         |      | 0 | FILE 
+1    | Fibers             |              |       |       |     |         |      | 0 | COM  
+1    | Enumerators        |              |       |       |     |         |      | 0 | COM  
+1    | lazy               |              |       |       |     |         |      | 0 | COM  
+1    | infinite           |              |       |       |     |         |      | 0 | COM  
+1    | streams:           |              |       |       |     |         |      | 0 | COM  
+1    | coroutines         |              |       |       |     |         |      | 0 | COM  
+1    | Ruby.              |              |       |       |     |         |      | 0 | COM  
+3    | infinite           |              |       |       |     |         |      | 0 | COM  
+3    | lazy               |              |       |       |     |         |      | 0 | COM  
+3    | stream             |              |       |       |     |         |      | 0 | COM  
+3    | primes             |              |       |       |     |         |      | 0 | COM  
+3    | via                |              |       |       |     |         |      | 0 | COM  
+3    | trial              |              |       |       |     |         |      | 0 | COM  
+3    | division.          |              |       |       |     |         |      | 0 | COM  
+4    | primes             |              |       |       |     |         |      | 1 | VAR  
+4    | lazy               | new          |       |       |     |         |      | 0 | CALL 
+4    | new                | Enumerator   |       |       |     |         |      | 0 | CALL 
+4    | Enumerator         |              |       |       |     |         |      | 0 | VAR  
+5    | candidate          |              |       |       |     |         |      | 1 | VAR  
+6    | seen               |              |       |       |     |         |      | 1 | VAR  
+7    | loop               |              |       |       |     |         |      | 0 | CALL 
+8    | candidate          |              |       |       |     |         |      | 0 | VAR  
+8    | any?               | seen         |       |       |     |         |      | 0 | CALL 
+8    | seen               |              |       |       |     |         |      | 0 | VAR  
+8    | zero?              |              |       |       |     |         |      | 0 | CALL 
+8    | candidate          |              |       |       |     |         |      | 0 | VAR  
+9    | seen               |              |       |       |     |         |      | 0 | VAR  
+9    | candidate          |              |       |       |     |         |      | 0 | VAR  
+9    | none?              | seen         |       |       |     |         |      | 0 | CALL 
+9    | seen               |              |       |       |     |         |      | 0 | VAR  
+9    | zero?              |              |       |       |     |         |      | 0 | CALL 
+9    | candidate          |              |       |       |     |         |      | 0 | VAR  
+10   | candidate          |              |       |       |     |         |      | 0 | VAR  
+14   | first_ten_primes   |              |       |       |     |         |      | 1 | VAR  
+14   | first              | primes       |       |       |     |         |      | 0 | CALL 
+14   | primes             |              |       |       |     |         |      | 0 | VAR  
+16   | Lazy               |              |       |       |     |         |      | 0 | COM  
+16   | pipelines          |              |       |       |     |         |      | 0 | COM  
+16   | compute            |              |       |       |     |         |      | 0 | COM  
+16   | pulled             |              |       |       |     |         |      | 0 | COM  
+17   | powers_of_two      |              |       |       |     |         |      | 1 | VAR  
+17   | first              | select       |       |       |     |         |      | 0 | CALL 
+17   | select             | map          |       |       |     |         |      | 0 | CALL 
+17   | map                | lazy         |       |       |     |         |      | 0 | CALL 
+17   | lazy               |              |       |       |     |         |      | 0 | CALL 
+17   | INFINITY           | Float        |       | Float |     |         |      | 0 | VAR  
+17   | Float              |              |       |       |     |         |      | 0 | NS   
+19   | include?           | to_s         |       |       |     |         |      | 0 | CALL 
+19   | to_s               | n            |       |       |     |         |      | 0 | CALL 
+22   | Fiber              |              |       |       |     |         |      | 0 | COM  
+22   | used               |              |       |       |     |         |      | 0 | COM  
+22   | explicit           |              |       |       |     |         |      | 0 | COM  
+22   | coroutine          |              |       |       |     |         |      | 0 | COM  
+22   | yields             |              |       |       |     |         |      | 0 | COM  
+22   | control            |              |       |       |     |         |      | 0 | COM  
+22   | back.              |              |       |       |     |         |      | 0 | COM  
+23   | counter            |              |       |       |     |         |      | 1 | VAR  
+23   | new                | Fiber        |       |       |     |         |      | 0 | CALL 
+23   | Fiber              |              |       |       |     |         |      | 0 | VAR  
+24   | total              |              |       |       |     |         |      | 1 | VAR  
+25   | loop               |              |       |       |     |         |      | 0 | CALL 
+26   | increment          |              |       |       |     |         |      | 1 | VAR  
+26   | yield              | Fiber        |       |       |     |         |      | 0 | CALL 
+26   | Fiber              |              |       |       |     |         |      | 0 | VAR  
+26   | total              |              |       |       |     |         |      | 0 | VAR  
+27   | total              |              |       |       |     |         |      | 0 | VAR  
+27   | increment          |              |       |       |     |         |      | 0 | VAR  
+31   | Producer/consumer: |              |       |       |     |         |      | 0 | COM  
+31   | two                |              |       |       |     |         |      | 0 | COM  
+31   | fibers             |              |       |       |     |         |      | 0 | COM  
+31   | passing            |              |       |       |     |         |      | 0 | COM  
+31   | values             |              |       |       |     |         |      | 0 | COM  
+31   | back               |              |       |       |     |         |      | 0 | COM  
+31   | forth.             |              |       |       |     |         |      | 0 | COM  
+32   | ping_pong          |              |       |       |     |         |      | 1 | FUNC 
+32   | rounds             | ping_pong    |       |       |     |         |      | 0 | ARG  
+33   | ping               | ping_pong    |       |       |     |         |      | 1 | VAR  
+33   | new                | Fiber        |       |       |     |         |      | 0 | CALL 
+33   | Fiber              |              |       |       |     |         |      | 0 | VAR  
+34   | times              | rounds       |       |       |     |         |      | 0 | CALL 
+34   | rounds             |              |       |       |     |         |      | 0 | VAR  
+35   | yield              | Fiber        |       |       |     |         |      | 0 | CALL 
+35   | Fiber              |              |       |       |     |         |      | 0 | VAR  
+35   | ping               |              |       |       |     |         |      | 0 | STR  
+37   | done               |              |       |       |     |         |      | 0 | STR  
+40   | results            | ping_pong    |       |       |     |         |      | 1 | VAR  
+41   | loop               |              |       |       |     |         |      | 0 | CALL 
+42   | value              | ping_pong    |       |       |     |         |      | 1 | VAR  
+42   | resume             | ping         |       |       |     |         |      | 0 | CALL 
+42   | ping               |              |       |       |     |         |      | 0 | VAR  
+43   | alive?             | ping         |       |       |     |         |      | 0 | CALL 
+43   | ping               |              |       |       |     |         |      | 0 | VAR  
+44   | results            |              |       |       |     |         |      | 0 | VAR  
+44   | value              |              |       |       |     |         |      | 0 | VAR  
+46   | results            |              |       |       |     |         |      | 0 | VAR  
+49   | External           |              |       |       |     |         |      | 0 | COM  
+49   | iterator:          |              |       |       |     |         |      | 0 | COM  
+49   | pull               |              |       |       |     |         |      | 0 | COM  
+49   | items              |              |       |       |     |         |      | 0 | COM  
+49   | one                |              |       |       |     |         |      | 0 | COM  
+49   | time               |              |       |       |     |         |      | 0 | COM  
+49   | .next              |              |       |       |     |         |      | 0 | COM  
+49   | .peek.             |              |       |       |     |         |      | 0 | COM  
+50   | merge_sorted       |              |       |       |     |         |      | 1 | FUNC 
+50   | left               | merge_sorted |       |       |     |         |      | 0 | ARG  
+50   | right              | merge_sorted |       |       |     |         |      | 0 | ARG  
+51   | each               | left         |       |       |     |         |      | 0 | CALL 
+51   | left               |              |       |       |     |         |      | 0 | VAR  
+52   | each               | right        |       |       |     |         |      | 0 | CALL 
+52   | right              |              |       |       |     |         |      | 0 | VAR  
+53   | merged             | merge_sorted |       |       |     |         |      | 1 | VAR  
+55   | loop               |              |       |       |     |         |      | 0 | CALL 
+57   | peek               | a            |       |       |     |         |      | 0 | CALL 
+57   | peek               | b            |       |       |     |         |      | 0 | CALL 
+58   | merged             |              |       |       |     |         |      | 0 | VAR  
+58   | next               | a            |       |       |     |         |      | 0 | CALL 
+60   | merged             |              |       |       |     |         |      | 0 | VAR  
+60   | next               | b            |       |       |     |         |      | 0 | CALL 
+62   | StopIteration      |              |       |       |     |         |      | 0 | VAR  
+67   | merged             |              |       |       |     |         |      | 0 | VAR  
+67   | to_a               | a            |       |       |     |         |      | 0 | CALL 
+67   | to_a               | b            |       |       |     |         |      | 0 | CALL 
+70   | Custom             |              |       |       |     |         |      | 0 | COM  
+70   | Enumerable         |              |       |       |     |         |      | 0 | COM  
+70   | via                |              |       |       |     |         |      | 0 | COM  
+70   | yielding           |              |       |       |     |         |      | 0 | COM  
+70   | each.              |              |       |       |     |         |      | 0 | COM  
+71   | Tree               |              |       |       |     |         |      | 1 | CLASS
+72   | Enumerable         |              |       |       |     | include |      | 0 | TYPE 
+72   | include            |              |       |       |     |         |      | 0 | CALL 
+74   | initialize         | Tree         |       |       |     |         |      | 1 | FUNC 
+74   | value              | initialize   |       |       |     |         |      | 0 | ARG  
+74   | children           | initialize   |       |       |     |         |      | 0 | ARG  
+75   | @value             | Tree         |       |       |     |         |      | 0 | PROP 
+75   | value              |              |       |       |     |         |      | 0 | VAR  
+76   | @children          | Tree         |       |       |     |         |      | 0 | PROP 
+76   | children           |              |       |       |     |         |      | 0 | VAR  
+79   | each               | Tree         |       |       |     |         |      | 1 | FUNC 
+79   | block              | each         |       |       |     |         |      | 0 | ARG  
+80   | @value             | Tree         |       |       |     |         |      | 0 | PROP 
+81   | each               | @children    |       |       |     |         |      | 0 | CALL 
+81   | @children          | Tree         |       |       |     |         |      | 0 | PROP 
+81   | child              | each         |       |       |     |         |      | 0 | ARG  
+81   | each               | child        |       |       |     |         |      | 0 | CALL 
+81   | child              |              |       |       |     |         |      | 0 | VAR  
+81   | block              |              |       |       |     |         |      | 0 | VAR  
+85   | Lazy               |              |       |       |     |         |      | 0 | COM  
+85   | generator          |              |       |       |     |         |      | 0 | COM  
+85   | memoizes           |              |       |       |     |         |      | 0 | COM  
+85   | goes               |              |       |       |     |         |      | 0 | COM  
+85   | Lisp-style         |              |       |       |     |         |      | 0 | COM  
+85   | stream.            |              |       |       |     |         |      | 0 | COM  
+86   | naturals           |              |       |       |     |         |      | 1 | FUNC 
+87   | new                | Enumerator   |       |       |     |         |      | 0 | CALL 
+87   | Enumerator         |              |       |       |     |         |      | 0 | VAR  
+89   | loop               |              |       |       |     |         |      | 0 | CALL 
+89   | yield              | y            |       |       |     |         |      | 0 | CALL 
+93   | ---                |              |       |       |     |         |      | 0 | COM  
+93   | Exercise:          |              |       |       |     |         |      | 0 | COM  
+93   | drive              |              |       |       |     |         |      | 0 | COM  
+93   | coroutines         |              |       |       |     |         |      | 0 | COM  
+93   | lazy               |              |       |       |     |         |      | 0 | COM  
+93   | definitions.       |              |       |       |     |         |      | 0 | COM  
+93   | ---                |              |       |       |     |         |      | 0 | COM  
+94   | tick               |              |       |       |     |         |      | 1 | VAR  
+94   | resume             | counter      |       |       |     |         |      | 0 | CALL 
+94   | counter            |              |       |       |     |         |      | 0 | VAR  
+94   | start              |              |       |       |     |         |      | 0 | COM  
+94   | fiber              |              |       |       |     |         |      | 0 | COM  
+95   | tock               |              |       |       |     |         |      | 1 | VAR  
+95   | resume             | counter      |       |       |     |         |      | 0 | CALL 
+95   | counter            |              |       |       |     |         |      | 0 | VAR  
+95   | feed               |              |       |       |     |         |      | 0 | COM  
+95   | value              |              |       |       |     |         |      | 0 | COM  
+95   | back               |              |       |       |     |         |      | 0 | COM  
+96   | volley             |              |       |       |     |         |      | 1 | VAR  
+96   | ping_pong          |              |       |       |     |         |      | 0 | CALL 
+97   | merged             |              |       |       |     |         |      | 1 | VAR  
+97   | merge_sorted       |              |       |       |     |         |      | 0 | CALL 
+98   | tree               |              |       |       |     |         |      | 1 | VAR  
+98   | new                | Tree         |       |       |     |         |      | 0 | CALL 
+98   | Tree               |              |       |       |     |         |      | 0 | VAR  
+98   | new                | Tree         |       |       |     |         |      | 0 | CALL 
+98   | Tree               |              |       |       |     |         |      | 0 | VAR  
+98   | new                | Tree         |       |       |     |         |      | 0 | CALL 
+98   | Tree               |              |       |       |     |         |      | 0 | VAR  
+98   | new                | Tree         |       |       |     |         |      | 0 | CALL 
+98   | Tree               |              |       |       |     |         |      | 0 | VAR  
+99   | preorder           |              |       |       |     |         |      | 1 | VAR  
+99   | to_a               | tree         |       |       |     |         |      | 0 | CALL 
+99   | tree               |              |       |       |     |         |      | 0 | VAR  
+99   | Enumerable#to_a    |              |       |       |     |         |      | 0 | COM  
+99   | via                |              |       |       |     |         |      | 0 | COM  
+99   | each               |              |       |       |     |         |      | 0 | COM  
+100  | counts             |              |       |       |     |         |      | 1 | VAR  
+100  | first              | naturals     |       |       |     |         |      | 0 | CALL 
+100  | naturals           |              |       |       |     |         |      | 0 | VAR  
+101  | first_ten_primes   |              |       |       |     |         |      | 0 | VAR  
+101  | powers_of_two      |              |       |       |     |         |      | 0 | VAR  
+101  | tick               |              |       |       |     |         |      | 0 | VAR  
+101  | tock               |              |       |       |     |         |      | 0 | VAR  
+101  | volley             |              |       |       |     |         |      | 0 | VAR  
+101  | merged             |              |       |       |     |         |      | 0 | VAR  
+101  | preorder           |              |       |       |     |         |      | 0 | VAR  
+101  | counts             |              |       |       |     |         |      | 0 | VAR  

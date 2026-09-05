@@ -1,0 +1,188 @@
+LINE | SYM                                                          | PAR            | SCOPE | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/python/f-strings.py:
+1    | f-strings                                                    |                |       |    |     |      |      | 0 | FILE 
+1    | Python                                                       |                |       |    |     |      |      | 0 | STR  
+1    | 3.6+                                                         |                |       |    |     |      |      | 0 | STR  
+1    | f-string                                                     |                |       |    |     |      |      | 0 | STR  
+1    | formatting.                                                  |                |       |    |     |      |      | 0 | STR  
+4    | name                                                         |                |       |    |     |      |      | 1 | VAR  
+4    | Alice                                                        |                |       |    |     |      |      | 0 | STR  
+5    | age                                                          |                |       |    |     |      |      | 1 | VAR  
+7    | Basic                                                        |                |       |    |     |      |      | 0 | COM  
+7    | f-string                                                     |                |       |    |     |      |      | 0 | COM  
+8    | greeting                                                     |                |       |    |     |      |      | 1 | VAR  
+8    | f"Hello, {name}!"                                            |                |       |    |     |      |      | 0 | STR  
+8    | Hello                                                        |                |       |    |     |      |      | 0 | STR  
+8    | name                                                         |                |       |    |     |      |      | 0 | VAR  
+10   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+10   | expressions                                                  |                |       |    |     |      |      | 0 | COM  
+11   | message                                                      |                |       |    |     |      |      | 1 | VAR  
+11   | f"{name} is {age} years old"                                 |                |       |    |     |      |      | 0 | STR  
+11   | years                                                        |                |       |    |     |      |      | 0 | STR  
+11   | old                                                          |                |       |    |     |      |      | 0 | STR  
+11   | name                                                         |                |       |    |     |      |      | 0 | VAR  
+11   | age                                                          |                |       |    |     |      |      | 0 | VAR  
+12   | calculation                                                  |                |       |    |     |      |      | 1 | VAR  
+12   | f"Next year {name} will be {age + 1}"                        |                |       |    |     |      |      | 0 | STR  
+12   | Next                                                         |                |       |    |     |      |      | 0 | STR  
+12   | year                                                         |                |       |    |     |      |      | 0 | STR  
+12   | name                                                         |                |       |    |     |      |      | 0 | VAR  
+12   | age                                                          |                |       |    |     |      |      | 0 | VAR  
+14   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+14   | method                                                       |                |       |    |     |      |      | 0 | COM  
+14   | calls                                                        |                |       |    |     |      |      | 0 | COM  
+15   | text                                                         |                |       |    |     |      |      | 1 | VAR  
+15   | python                                                       |                |       |    |     |      |      | 0 | STR  
+16   | uppercase                                                    |                |       |    |     |      |      | 1 | VAR  
+16   | f"Language: {text.upper()}"                                  |                |       |    |     |      |      | 0 | STR  
+16   | Language:                                                    |                |       |    |     |      |      | 0 | STR  
+16   | upper                                                        | text           |       |    |     |      |      | 0 | CALL 
+16   | text                                                         |                |       |    |     |      |      | 0 | VAR  
+18   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+18   | formatting                                                   |                |       |    |     |      |      | 0 | COM  
+19   | pi                                                           |                |       |    |     |      |      | 1 | VAR  
+20   | formatted_pi                                                 |                |       |    |     |      |      | 1 | VAR  
+20   | f"Pi is approximately {pi:.2f}"                              |                |       |    |     |      |      | 0 | STR  
+20   | Pi                                                           |                |       |    |     |      |      | 0 | STR  
+20   | approximately                                                |                |       |    |     |      |      | 0 | STR  
+20   | pi                                                           |                |       |    |     |      |      | 0 | VAR  
+22   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+22   | alignment                                                    |                |       |    |     |      |      | 0 | COM  
+23   | left_aligned                                                 |                |       |    |     |      |      | 1 | VAR  
+23   | f"{name:<10}"                                                |                |       |    |     |      |      | 0 | STR  
+23   | name                                                         |                |       |    |     |      |      | 0 | VAR  
+24   | right_aligned                                                |                |       |    |     |      |      | 1 | VAR  
+24   | f"{name:>10}"                                                |                |       |    |     |      |      | 0 | STR  
+24   | name                                                         |                |       |    |     |      |      | 0 | VAR  
+25   | centered                                                     |                |       |    |     |      |      | 1 | VAR  
+25   | f"{name:^10}"                                                |                |       |    |     |      |      | 0 | STR  
+25   | name                                                         |                |       |    |     |      |      | 0 | VAR  
+27   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+27   | number                                                       |                |       |    |     |      |      | 0 | COM  
+27   | formatting                                                   |                |       |    |     |      |      | 0 | COM  
+28   | number                                                       |                |       |    |     |      |      | 1 | VAR  
+29   | comma_separated                                              |                |       |    |     |      |      | 1 | VAR  
+29   | f"{number:,}"                                                |                |       |    |     |      |      | 0 | STR  
+29   | number                                                       |                |       |    |     |      |      | 0 | VAR  
+30   | hex_format                                                   |                |       |    |     |      |      | 1 | VAR  
+30   | f"{number:x}"                                                |                |       |    |     |      |      | 0 | STR  
+30   | number                                                       |                |       |    |     |      |      | 0 | VAR  
+31   | binary_format                                                |                |       |    |     |      |      | 1 | VAR  
+31   | f"{number:b}"                                                |                |       |    |     |      |      | 0 | STR  
+31   | number                                                       |                |       |    |     |      |      | 0 | VAR  
+33   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+33   | dict                                                         |                |       |    |     |      |      | 0 | COM  
+33   | access                                                       |                |       |    |     |      |      | 0 | COM  
+34   | user                                                         |                |       |    |     |      |      | 1 | VAR  
+34   | name                                                         |                |       |    |     |      |      | 0 | STR  
+34   | Bob                                                          |                |       |    |     |      |      | 0 | STR  
+34   | age                                                          |                |       |    |     |      |      | 0 | STR  
+35   | info                                                         |                |       |    |     |      |      | 1 | VAR  
+35   | f"User: {user['name']}, Age: {user['age']}"                  |                |       |    |     |      |      | 0 | STR  
+35   | User:                                                        |                |       |    |     |      |      | 0 | STR  
+35   | Age:                                                         |                |       |    |     |      |      | 0 | STR  
+35   | user                                                         |                |       |    |     |      |      | 0 | VAR  
+35   | name                                                         |                |       |    |     |      |      | 0 | STR  
+35   | user                                                         |                |       |    |     |      |      | 0 | VAR  
+35   | age                                                          |                |       |    |     |      |      | 0 | STR  
+37   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+37   | conditional                                                  |                |       |    |     |      |      | 0 | COM  
+38   | status                                                       |                |       |    |     |      |      | 1 | VAR  
+38   | active                                                       |                |       |    |     |      |      | 0 | STR  
+39   | display                                                      |                |       |    |     |      |      | 1 | VAR  
+39   | f"Status: {status.upper() if status else 'N/A'}"             |                |       |    |     |      |      | 0 | STR  
+39   | Status:                                                      |                |       |    |     |      |      | 0 | STR  
+39   | upper                                                        | status         |       |    |     |      |      | 0 | CALL 
+39   | status                                                       |                |       |    |     |      |      | 0 | VAR  
+39   | status                                                       |                |       |    |     |      |      | 0 | VAR  
+39   | N/A                                                          |                |       |    |     |      |      | 0 | STR  
+41   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+41   | list                                                         |                |       |    |     |      |      | 0 | COM  
+41   | comprehension                                                |                |       |    |     |      |      | 0 | COM  
+42   | numbers                                                      |                |       |    |     |      |      | 1 | VAR  
+43   | summary                                                      |                |       |    |     |      |      | 1 | VAR  
+43   | f"Numbers: {', '.join(str(n) for n in numbers)}"             |                |       |    |     |      |      | 0 | STR  
+43   | Numbers:                                                     |                |       |    |     |      |      | 0 | STR  
+43   | join                                                         |                |       |    |     |      |      | 0 | CALL 
+43   | str                                                          |                |       |    |     |      |      | 0 | CALL 
+43   | numbers                                                      |                |       |    |     |      |      | 0 | VAR  
+45   | Multi-line                                                   |                |       |    |     |      |      | 0 | COM  
+45   | f-string                                                     |                |       |    |     |      |      | 0 | COM  
+46   | multiline                                                    |                |       |    |     |      |      | 1 | VAR  
+46   | f"""
+Name: {name}
+Age: {age}
+Status: Active
+"""              |                |       |    |     |      |      | 0 | STR  
+46   | Name:                                                        |                |       |    |     |      |      | 0 | STR  
+46   | Age:                                                         |                |       |    |     |      |      | 0 | STR  
+46   | Status:                                                      |                |       |    |     |      |      | 0 | STR  
+46   | Active                                                       |                |       |    |     |      |      | 0 | STR  
+47   | name                                                         |                |       |    |     |      |      | 0 | VAR  
+48   | age                                                          |                |       |    |     |      |      | 0 | VAR  
+52   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+52   | debugging                                                    |                |       |    |     |      |      | 0 | COM  
+52   | Python                                                       |                |       |    |     |      |      | 0 | COM  
+52   | 3.8+                                                         |                |       |    |     |      |      | 0 | COM  
+53   | debug                                                        |                |       |    |     |      |      | 1 | VAR  
+53   | f"{name=} {age=}"                                            |                |       |    |     |      |      | 0 | STR  
+53   | name                                                         |                |       |    |     |      |      | 0 | VAR  
+53   | age                                                          |                |       |    |     |      |      | 0 | VAR  
+55   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+55   | nested                                                       |                |       |    |     |      |      | 0 | COM  
+55   | expressions                                                  |                |       |    |     |      |      | 0 | COM  
+56   | width                                                        |                |       |    |     |      |      | 1 | VAR  
+57   | height                                                       |                |       |    |     |      |      | 1 | VAR  
+58   | rectangle_info                                               |                |       |    |     |      |      | 1 | VAR  
+58   | f"Area: {width * height}, Perimeter: {2 * (width + height)}" |                |       |    |     |      |      | 0 | STR  
+58   | Area:                                                        |                |       |    |     |      |      | 0 | STR  
+58   | Perimeter:                                                   |                |       |    |     |      |      | 0 | STR  
+58   | width                                                        |                |       |    |     |      |      | 0 | VAR  
+58   | height                                                       |                |       |    |     |      |      | 0 | VAR  
+58   | width                                                        |                |       |    |     |      |      | 0 | VAR  
+58   | height                                                       |                |       |    |     |      |      | 0 | VAR  
+60   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+60   | datetime                                                     |                |       |    |     |      |      | 0 | COM  
+61   | datetime                                                     |                |       |    |     |      |      | 0 | IMP  
+61   | datetime                                                     |                |       |    |     |      |      | 0 | IMP  
+62   | now                                                          |                |       |    |     |      |      | 1 | VAR  
+62   | now                                                          | datetime       |       |    |     |      |      | 0 | CALL 
+62   | datetime                                                     |                |       |    |     |      |      | 0 | VAR  
+63   | timestamp                                                    |                |       |    |     |      |      | 1 | VAR  
+63   | f"Current time: {now:%Y-%m-%d %H:%M:%S}"                     |                |       |    |     |      |      | 0 | STR  
+63   | Current                                                      |                |       |    |     |      |      | 0 | STR  
+63   | time:                                                        |                |       |    |     |      |      | 0 | STR  
+63   | now                                                          |                |       |    |     |      |      | 0 | VAR  
+65   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+65   | function                                                     |                |       |    |     |      |      | 0 | COM  
+66   | create_message                                               |                |       |    |     |      |      | 1 | FUNC 
+66   | person                                                       | create_message |       |    |     |      |      | 0 | ARG  
+66   | score                                                        | create_message |       |    |     |      |      | 0 | ARG  
+67   | f"{person} scored {score} points"                            |                |       |    |     |      |      | 0 | STR  
+67   | scored                                                       |                |       |    |     |      |      | 0 | STR  
+67   | points                                                       |                |       |    |     |      |      | 0 | STR  
+67   | person                                                       |                |       |    |     |      |      | 0 | VAR  
+67   | score                                                        |                |       |    |     |      |      | 0 | VAR  
+70   | F-string                                                     |                |       |    |     |      |      | 0 | COM  
+70   | instance                                                     |                |       |    |     |      |      | 0 | COM  
+71   | Person                                                       |                |       |    |     |      |      | 1 | CLASS
+72   | __init__                                                     | Person         |       |    |     |      |      | 1 | FUNC 
+72   | self                                                         | __init__       |       |    |     |      |      | 0 | ARG  
+72   | name                                                         | __init__       |       |    |     |      |      | 0 | ARG  
+72   | age                                                          | __init__       |       |    |     |      |      | 0 | ARG  
+73   | name                                                         | self           |       |    |     |      |      | 1 | PROP 
+73   | name                                                         |                |       |    |     |      |      | 0 | VAR  
+74   | age                                                          | self           |       |    |     |      |      | 1 | PROP 
+74   | age                                                          |                |       |    |     |      |      | 0 | VAR  
+76   | __str__                                                      | Person         |       |    |     |      |      | 1 | FUNC 
+76   | self                                                         | __str__        |       |    |     |      |      | 0 | ARG  
+77   | f"Person(name={self.name}, age={self.age})"                  |                |       |    |     |      |      | 0 | STR  
+77   | Personname=                                                  |                |       |    |     |      |      | 0 | STR  
+77   | age=                                                         |                |       |    |     |      |      | 0 | STR  
+77   | name                                                         | self           |       |    |     |      |      | 0 | PROP 
+77   | self                                                         |                |       |    |     |      |      | 0 | VAR  
+77   | age                                                          | self           |       |    |     |      |      | 0 | PROP 
+77   | self                                                         |                |       |    |     |      |      | 0 | VAR  
+81   | person_str                                                   |                |       |    |     |      |      | 1 | VAR  
+81   | f"Details: {p}"                                              |                |       |    |     |      |      | 0 | STR  
+81   | Details:                                                     |                |       |    |     |      |      | 0 | STR  

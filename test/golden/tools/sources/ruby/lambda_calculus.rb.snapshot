@@ -1,0 +1,210 @@
+LINE | SYM                  | PAR         | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/ruby/lambda_calculus.rb:
+1    | lambda_calculus      |             |       |    |     |      |      | 0 | FILE
+1    | Lisp/lambda-calculus |             |       |    |     |      |      | 0 | COM 
+1    | heritage:            |             |       |    |     |      |      | 0 | COM 
+1    | everything           |             |       |    |     |      |      | 0 | COM 
+1    | function.            |             |       |    |     |      |      | 0 | COM 
+2    | Rubys                |             |       |    |     |      |      | 0 | COM 
+2    | blocks               |             |       |    |     |      |      | 0 | COM 
+2    | procs                |             |       |    |     |      |      | 0 | COM 
+2    | lambdas              |             |       |    |     |      |      | 0 | COM 
+2    | make                 |             |       |    |     |      |      | 0 | COM 
+2    | combinator           |             |       |    |     |      |      | 0 | COM 
+2    | programming          |             |       |    |     |      |      | 0 | COM 
+2    | natural.             |             |       |    |     |      |      | 0 | COM 
+4    | Y-combinator:        |             |       |    |     |      |      | 0 | COM 
+4    | recursion            |             |       |    |     |      |      | 0 | COM 
+4    | without              |             |       |    |     |      |      | 0 | COM 
+4    | naming               |             |       |    |     |      |      | 0 | COM 
+5    | call                 |             |       |    |     |      |      | 0 | CALL
+5    | call                 | x           |       |    |     |      |      | 0 | CALL
+5    | call                 | f           |       |    |     |      |      | 0 | CALL
+5    | call                 |             |       |    |     |      |      | 0 | CALL
+5    | call                 | x           |       |    |     |      |      | 0 | CALL
+7    | factorial            |             |       |    |     |      |      | 1 | VAR 
+7    | call                 | Y           |       |    |     |      |      | 0 | CALL
+7    | fact                 |             |       |    |     |      |      | 0 | ARG 
+8    | zero?                | n           |       |    |     |      |      | 0 | CALL
+8    | call                 | fact        |       |    |     |      |      | 0 | CALL
+8    | fact                 |             |       |    |     |      |      | 0 | VAR 
+11   | Church               |             |       |    |     |      |      | 0 | COM 
+11   | numerals:            |             |       |    |     |      |      | 0 | COM 
+11   | numbers              |             |       |    |     |      |      | 0 | COM 
+11   | encoded              |             |       |    |     |      |      | 0 | COM 
+11   | higher-order         |             |       |    |     |      |      | 0 | COM 
+11   | functions.           |             |       |    |     |      |      | 0 | COM 
+12   | ZERO                 |             |       |    |     |      |      | 1 | VAR 
+12   | _f                   |             |       |    |     |      |      | 0 | ARG 
+13   | SUCC                 |             |       |    |     |      |      | 1 | VAR 
+13   | call                 | f           |       |    |     |      |      | 0 | CALL
+13   | call                 |             |       |    |     |      |      | 0 | CALL
+13   | call                 | n           |       |    |     |      |      | 0 | CALL
+14   | ONE                  |             |       |    |     |      |      | 1 | VAR 
+14   | call                 | SUCC        |       |    |     |      |      | 0 | CALL
+14   | SUCC                 |             |       |    |     |      |      | 0 | VAR 
+14   | ZERO                 |             |       |    |     |      |      | 0 | VAR 
+15   | TWO                  |             |       |    |     |      |      | 1 | VAR 
+15   | call                 | SUCC        |       |    |     |      |      | 0 | CALL
+15   | SUCC                 |             |       |    |     |      |      | 0 | VAR 
+15   | ONE                  |             |       |    |     |      |      | 0 | VAR 
+17   | church_to_i          |             |       |    |     |      |      | 1 | FUNC
+17   | numeral              | church_to_i |       |    |     |      |      | 0 | ARG 
+18   | call                 |             |       |    |     |      |      | 0 | CALL
+18   | call                 | numeral     |       |    |     |      |      | 0 | CALL
+18   | numeral              |             |       |    |     |      |      | 0 | VAR 
+21   | Currying:            |             |       |    |     |      |      | 0 | COM 
+21   | turn                 |             |       |    |     |      |      | 0 | COM 
+21   | binary               |             |       |    |     |      |      | 0 | COM 
+21   | function             |             |       |    |     |      |      | 0 | COM 
+21   | chain                |             |       |    |     |      |      | 0 | COM 
+21   | unary                |             |       |    |     |      |      | 0 | COM 
+21   | ones.                |             |       |    |     |      |      | 0 | COM 
+22   | add                  |             |       |    |     |      |      | 1 | VAR 
+22   | curry                |             |       |    |     |      |      | 0 | CALL
+23   | increment            |             |       |    |     |      |      | 1 | VAR 
+23   | call                 | add         |       |    |     |      |      | 0 | CALL
+23   | add                  |             |       |    |     |      |      | 0 | VAR 
+24   | add_ten              |             |       |    |     |      |      | 1 | VAR 
+24   | call                 | add         |       |    |     |      |      | 0 | CALL
+24   | add                  |             |       |    |     |      |      | 0 | VAR 
+26   | Proc                 |             |       |    |     |      |      | 0 | COM 
+26   | composition          |             |       |    |     |      |      | 0 | COM 
+26   | >>                   |             |       |    |     |      |      | 0 | COM 
+26   | forward              |             |       |    |     |      |      | 0 | COM 
+26   | <<                   |             |       |    |     |      |      | 0 | COM 
+26   | reverse              |             |       |    |     |      |      | 0 | COM 
+26   | point-free           |             |       |    |     |      |      | 0 | COM 
+26   | style.               |             |       |    |     |      |      | 0 | COM 
+27   | sanitize             |             |       |    |     |      |      | 1 | VAR 
+27   | strip                | s           |       |    |     |      |      | 0 | CALL
+28   | downcase             |             |       |    |     |      |      | 1 | VAR 
+28   | to_proc              |             |       |    |     |      |      | 0 | CALL
+28   | downcase             |             |       |    |     |      |      | 0 | VAR 
+28   | symbol-to-proc:      |             |       |    |     |      |      | 0 | COM 
+28   | Lisp-y               |             |       |    |     |      |      | 0 | COM 
+28   | trick                |             |       |    |     |      |      | 0 | COM 
+29   | normalize            |             |       |    |     |      |      | 1 | VAR 
+29   | sanitize             |             |       |    |     |      |      | 0 | VAR 
+29   | downcase             |             |       |    |     |      |      | 0 | VAR 
+29   | gsub                 | s           |       |    |     |      |      | 0 | CALL
+31   | method               |             |       |    |     |      |      | 0 | COM 
+31   | reifies              |             |       |    |     |      |      | 0 | COM 
+31   | named                |             |       |    |     |      |      | 0 | COM 
+31   | method               |             |       |    |     |      |      | 0 | COM 
+31   | first-class          |             |       |    |     |      |      | 0 | COM 
+31   | Method               |             |       |    |     |      |      | 0 | COM 
+31   | object.              |             |       |    |     |      |      | 0 | COM 
+32   | shout                |             |       |    |     |      |      | 1 | FUNC
+32   | text                 | shout       |       |    |     |      |      | 0 | ARG 
+33   | upcase               | text        |       |    |     |      |      | 0 | CALL
+33   | text                 |             |       |    |     |      |      | 0 | VAR 
+36   | announce             |             |       |    |     |      |      | 1 | VAR 
+36   | to_proc              | method      |       |    |     |      |      | 0 | CALL
+36   | method               |             |       |    |     |      |      | 0 | CALL
+36   | shout                |             |       |    |     |      |      | 0 | VAR 
+38   | Cons                 |             |       |    |     |      |      | 0 | COM 
+38   | cells                |             |       |    |     |      |      | 0 | COM 
+38   | linked               |             |       |    |     |      |      | 0 | COM 
+38   | list                 |             |       |    |     |      |      | 0 | COM 
+38   | built                |             |       |    |     |      |      | 0 | COM 
+38   | closures             |             |       |    |     |      |      | 0 | COM 
+38   | pure                 |             |       |    |     |      |      | 0 | COM 
+38   | Lisp.                |             |       |    |     |      |      | 0 | COM 
+39   | cons                 |             |       |    |     |      |      | 1 | FUNC
+39   | head                 | cons        |       |    |     |      |      | 0 | ARG 
+39   | tail                 | cons        |       |    |     |      |      | 0 | ARG 
+40   | selector             | cons        |       |    |     |      |      | 0 | ARG 
+40   | call                 | selector    |       |    |     |      |      | 0 | CALL
+40   | selector             |             |       |    |     |      |      | 0 | VAR 
+40   | head                 |             |       |    |     |      |      | 0 | VAR 
+40   | tail                 |             |       |    |     |      |      | 0 | VAR 
+43   | car                  |             |       |    |     |      |      | 1 | FUNC
+43   | pair                 | car         |       |    |     |      |      | 0 | ARG 
+43   | call                 | pair        |       |    |     |      |      | 0 | CALL
+43   | pair                 |             |       |    |     |      |      | 0 | VAR 
+43   | _t                   | car         |       |    |     |      |      | 0 | ARG 
+44   | cdr                  |             |       |    |     |      |      | 1 | FUNC
+44   | pair                 | cdr         |       |    |     |      |      | 0 | ARG 
+44   | call                 | pair        |       |    |     |      |      | 0 | CALL
+44   | pair                 |             |       |    |     |      |      | 0 | VAR 
+44   | _h                   | cdr         |       |    |     |      |      | 0 | ARG 
+46   | from_array           |             |       |    |     |      |      | 1 | FUNC
+46   | items                | from_array  |       |    |     |      |      | 0 | ARG 
+47   | reduce               | reverse     |       |    |     |      |      | 0 | CALL
+47   | reverse              | items       |       |    |     |      |      | 0 | CALL
+47   | items                |             |       |    |     |      |      | 0 | VAR 
+47   | acc                  | from_array  |       |    |     |      |      | 0 | ARG 
+47   | item                 | from_array  |       |    |     |      |      | 0 | ARG 
+47   | cons                 |             |       |    |     |      |      | 0 | CALL
+47   | item                 |             |       |    |     |      |      | 0 | VAR 
+47   | acc                  |             |       |    |     |      |      | 0 | VAR 
+50   | fold/reduce          |             |       |    |     |      |      | 0 | COM 
+50   | symbol               |             |       |    |     |      |      | 0 | COM 
+50   | functional           |             |       |    |     |      |      | 0 | COM 
+50   | bread                |             |       |    |     |      |      | 0 | COM 
+50   | butter.              |             |       |    |     |      |      | 0 | COM 
+51   | sum_all              |             |       |    |     |      |      | 1 | FUNC
+51   | numbers              | sum_all     |       |    |     |      |      | 0 | ARG 
+52   | reduce               | numbers     |       |    |     |      |      | 0 | CALL
+52   | numbers              |             |       |    |     |      |      | 0 | VAR 
+55   | Lazy                 |             |       |    |     |      |      | 0 | COM 
+55   | self-referential     |             |       |    |     |      |      | 0 | COM 
+55   | Fibonacci            |             |       |    |     |      |      | 0 | COM 
+55   | via                  |             |       |    |     |      |      | 0 | COM 
+55   | Enumerator.          |             |       |    |     |      |      | 0 | COM 
+56   | fibs                 |             |       |    |     |      |      | 1 | VAR 
+56   | new                  | Enumerator  |       |    |     |      |      | 0 | CALL
+56   | Enumerator           |             |       |    |     |      |      | 0 | VAR 
+56   | yielder              |             |       |    |     |      |      | 0 | ARG 
+58   | loop                 |             |       |    |     |      |      | 0 | CALL
+59   | yielder              |             |       |    |     |      |      | 0 | VAR 
+64   | ---                  |             |       |    |     |      |      | 0 | COM 
+64   | Exercise:            |             |       |    |     |      |      | 0 | COM 
+64   | force                |             |       |    |     |      |      | 0 | COM 
+64   | every                |             |       |    |     |      |      | 0 | COM 
+64   | definition           |             |       |    |     |      |      | 0 | COM 
+64   | actually             |             |       |    |     |      |      | 0 | COM 
+64   | run.                 |             |       |    |     |      |      | 0 | COM 
+64   | ---                  |             |       |    |     |      |      | 0 | COM 
+65   | fact5                |             |       |    |     |      |      | 1 | VAR 
+65   | call                 | factorial   |       |    |     |      |      | 0 | CALL
+65   | factorial            |             |       |    |     |      |      | 0 | VAR 
+66   | two_as_int           |             |       |    |     |      |      | 1 | VAR 
+66   | church_to_i          |             |       |    |     |      |      | 0 | CALL
+66   | TWO                  |             |       |    |     |      |      | 0 | VAR 
+67   | stepped              |             |       |    |     |      |      | 1 | VAR 
+67   | call                 | increment   |       |    |     |      |      | 0 | CALL
+67   | increment            |             |       |    |     |      |      | 0 | VAR 
+67   | call                 | add_ten     |       |    |     |      |      | 0 | CALL
+67   | add_ten              |             |       |    |     |      |      | 0 | VAR 
+68   | slug                 |             |       |    |     |      |      | 1 | VAR 
+68   | call                 | normalize   |       |    |     |      |      | 0 | CALL
+68   | normalize            |             |       |    |     |      |      | 0 | VAR 
+68   | Hello                |             |       |    |     |      |      | 0 | STR 
+68   | World                |             |       |    |     |      |      | 0 | STR 
+69   | shouted              |             |       |    |     |      |      | 1 | VAR 
+69   | call                 | announce    |       |    |     |      |      | 0 | CALL
+69   | announce             |             |       |    |     |      |      | 0 | VAR 
+69   | ada                  |             |       |    |     |      |      | 0 | STR 
+70   | list                 |             |       |    |     |      |      | 1 | VAR 
+70   | from_array           |             |       |    |     |      |      | 0 | CALL
+71   | first_two            |             |       |    |     |      |      | 1 | VAR 
+71   | car                  |             |       |    |     |      |      | 0 | CALL
+71   | list                 |             |       |    |     |      |      | 0 | VAR 
+71   | car                  |             |       |    |     |      |      | 0 | CALL
+71   | cdr                  |             |       |    |     |      |      | 0 | CALL
+71   | list                 |             |       |    |     |      |      | 0 | VAR 
+72   | total                |             |       |    |     |      |      | 1 | VAR 
+72   | sum_all              |             |       |    |     |      |      | 0 | CALL
+73   | fib_five             |             |       |    |     |      |      | 1 | VAR 
+73   | first                | fibs        |       |    |     |      |      | 0 | CALL
+73   | fibs                 |             |       |    |     |      |      | 0 | VAR 
+74   | fact5                |             |       |    |     |      |      | 0 | VAR 
+74   | two_as_int           |             |       |    |     |      |      | 0 | VAR 
+74   | stepped              |             |       |    |     |      |      | 0 | VAR 
+74   | slug                 |             |       |    |     |      |      | 0 | VAR 
+74   | shouted              |             |       |    |     |      |      | 0 | VAR 
+74   | first_two            |             |       |    |     |      |      | 0 | VAR 
+74   | total                |             |       |    |     |      |      | 0 | VAR 
+74   | fib_five             |             |       |    |     |      |      | 0 | VAR 

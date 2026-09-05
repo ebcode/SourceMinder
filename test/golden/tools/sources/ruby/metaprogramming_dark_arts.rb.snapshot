@@ -1,0 +1,234 @@
+LINE | SYM                       | PAR                 | SCOPE | NS | MOD  | CLUE          | TYPE | D | CTX  
+./tools/sources/ruby/metaprogramming_dark_arts.rb:
+1    | metaprogramming_dark_arts |                     |       |    |      |               |      | 0 | FILE 
+1    | Metaprogramming           |                     |       |    |      |               |      | 0 | COM  
+1    | dark                      |                     |       |    |      |               |      | 0 | COM  
+1    | arts:                     |                     |       |    |      |               |      | 0 | COM  
+1    | classes                   |                     |       |    |      |               |      | 0 | COM  
+1    | methods                   |                     |       |    |      |               |      | 0 | COM  
+1    | conjured                  |                     |       |    |      |               |      | 0 | COM  
+1    | runtime.                  |                     |       |    |      |               |      | 0 | COM  
+2    | Almost                    |                     |       |    |      |               |      | 0 | COM  
+2    | none                      |                     |       |    |      |               |      | 0 | COM  
+2    | method                    |                     |       |    |      |               |      | 0 | COM  
+2    | names                     |                     |       |    |      |               |      | 0 | COM  
+2    | exist                     |                     |       |    |      |               |      | 0 | COM  
+2    | static                    |                     |       |    |      |               |      | 0 | COM  
+2    | source                    |                     |       |    |      |               |      | 0 | COM  
+2    | text.                     |                     |       |    |      |               |      | 0 | COM  
+4    | Build                     |                     |       |    |      |               |      | 0 | COM  
+4    | whole                     |                     |       |    |      |               |      | 0 | COM  
+4    | object                    |                     |       |    |      |               |      | 0 | COM  
+4    | keyword                   |                     |       |    |      |               |      | 0 | COM  
+4    | name                      |                     |       |    |      |               |      | 0 | COM  
+5    | Widget                    |                     |       |    |      | Class.new     |      | 1 | CLASS
+5    | new                       | Class               |       |    |      |               |      | 0 | CALL 
+5    | Class                     |                     |       |    |      |               |      | 0 | VAR  
+6    | label                     | Widget              |       |    |      | attr_accessor |      | 1 | PROP 
+8    | initialize                | Widget              |       |    |      |               |      | 1 | FUNC 
+8    | label                     | initialize          |       |    |      |               |      | 0 | ARG  
+9    | @label                    | Widget              |       |    |      |               |      | 0 | PROP 
+9    | label                     |                     |       |    |      |               |      | 0 | VAR  
+12   | render                    | Widget              |       |    |      |               |      | 1 | FUNC 
+12   | @label                    | Widget              |       |    |      |               |      | 0 | PROP 
+15   | Stamp                     |                     |       |    |      |               |      | 0 | COM  
+15   | constants                 |                     |       |    |      |               |      | 0 | COM  
+15   | namespace                 |                     |       |    |      |               |      | 0 | COM  
+15   | dynamically               |                     |       |    |      |               |      | 0 | COM  
+15   | Object.const_set          |                     |       |    |      |               |      | 0 | COM  
+15   | defines                   |                     |       |    |      |               |      | 0 | COM  
+16   | top-level                 |                     |       |    |      |               |      | 0 | COM  
+16   | constants                 |                     |       |    |      |               |      | 0 | COM  
+16   | bare                      |                     |       |    |      |               |      | 0 | COM  
+16   | const_set                 |                     |       |    |      |               |      | 0 | COM  
+16   | has                       |                     |       |    |      |               |      | 0 | COM  
+16   | receiver                  |                     |       |    |      |               |      | 0 | COM  
+17   | each_with_index           |                     |       |    |      |               |      | 0 | CALL 
+17   | name                      |                     |       |    |      |               |      | 0 | ARG  
+17   | code                      |                     |       |    |      |               |      | 0 | ARG  
+18   | const_set                 | Object              |       |    |      |               |      | 0 | CALL 
+18   | Object                    |                     |       |    |      |               |      | 0 | VAR  
+18   | name                      |                     |       |    |      |               |      | 0 | VAR  
+18   | new                       | Class               |       |    |      |               |      | 0 | CALL 
+18   | Class                     |                     |       |    |      |               |      | 0 | VAR  
+18   | Widget                    |                     |       |    |      |               |      | 0 | VAR  
+19   | color_code                |                     |       |    |      | define_method |      | 1 | FUNC 
+19   | code                      |                     |       |    |      |               |      | 0 | VAR  
+23   | configurable              |                     |       |    |      |               |      | 0 | COM  
+23   | model                     |                     |       |    |      |               |      | 0 | COM  
+23   | whose                     |                     |       |    |      |               |      | 0 | COM  
+23   | attributes                |                     |       |    |      |               |      | 0 | COM  
+23   | declared                  |                     |       |    |      |               |      | 0 | COM  
+23   | data.                     |                     |       |    |      |               |      | 0 | COM  
+24   | Model                     |                     |       |    |      |               |      | 1 | CLASS
+25   | SCHEMA                    | Model               |       |    |      |               |      | 1 | VAR  
+25   | id                        | SCHEMA              |       |    |      |               |      | 0 | PROP 
+25   | int                       |                     |       |    |      |               |      | 0 | VAR  
+25   | name                      | SCHEMA              |       |    |      |               |      | 0 | PROP 
+25   | string                    |                     |       |    |      |               |      | 0 | VAR  
+25   | active                    | SCHEMA              |       |    |      |               |      | 0 | PROP 
+25   | bool                      |                     |       |    |      |               |      | 0 | VAR  
+27   | each_key                  | SCHEMA              |       |    |      |               |      | 0 | CALL 
+27   | SCHEMA                    |                     |       |    |      |               |      | 0 | VAR  
+27   | attribute                 | Model               |       |    |      |               |      | 0 | ARG  
+29   | @attrs                    | Model               |       |    |      |               |      | 0 | PROP 
+29   | attribute                 |                     |       |    |      |               |      | 0 | VAR  
+30   | attribute                 | Model               |       |    |      | define_method |      | 0 | VAR  
+30   | val                       | Model               |       |    |      |               |      | 0 | ARG  
+30   | @attrs                    | Model               |       |    |      |               |      | 0 | PROP 
+30   | attribute                 |                     |       |    |      |               |      | 0 | VAR  
+30   | val                       |                     |       |    |      |               |      | 0 | VAR  
+31   | attribute                 | Model               |       |    |      | define_method |      | 0 | VAR  
+31   | nil?                      |                     |       |    |      |               |      | 0 | CALL 
+31   | @attrs                    | Model               |       |    |      |               |      | 0 | PROP 
+31   | attribute                 |                     |       |    |      |               |      | 0 | VAR  
+34   | initialize                | Model               |       |    |      |               |      | 1 | FUNC 
+34   | attrs                     | initialize          |       |    |      |               |      | 0 | ARG  
+35   | @attrs                    | Model               |       |    |      |               |      | 0 | PROP 
+35   | attrs                     |                     |       |    |      |               |      | 0 | VAR  
+39   | Ghost                     |                     |       |    |      |               |      | 0 | COM  
+39   | methods:                  |                     |       |    |      |               |      | 0 | COM  
+39   | respond                   |                     |       |    |      |               |      | 0 | COM  
+39   | calls                     |                     |       |    |      |               |      | 0 | COM  
+39   | never                     |                     |       |    |      |               |      | 0 | COM  
+39   | defined.                  |                     |       |    |      |               |      | 0 | COM  
+40   | ApiProxy                  |                     |       |    |      |               |      | 1 | CLASS
+41   | initialize                | ApiProxy            |       |    |      |               |      | 1 | FUNC 
+41   | base                      | initialize          |       |    |      |               |      | 0 | ARG  
+41   | @base                     | ApiProxy            |       |    |      |               |      | 0 | PROP 
+41   | base                      |                     |       |    |      |               |      | 0 | VAR  
+43   | method_missing            | ApiProxy            |       |    |      |               |      | 1 | FUNC 
+43   | name                      | method_missing      |       |    |      |               |      | 0 | ARG  
+43   | args                      | method_missing      |       |    |      |               |      | 0 | ARG  
+43   | opts                      | method_missing      |       |    |      |               |      | 0 | ARG  
+43   | block                     | method_missing      |       |    |      |               |      | 0 | ARG  
+44   | verb                      | method_missing      |       |    |      |               |      | 1 | VAR  
+44   | resource                  | method_missing      |       |    |      |               |      | 1 | VAR  
+44   | split                     | to_s                |       |    |      |               |      | 0 | CALL 
+44   | to_s                      | name                |       |    |      |               |      | 0 | CALL 
+44   | name                      |                     |       |    |      |               |      | 0 | VAR  
+45   | include?                  |                     |       |    |      |               |      | 0 | CALL 
+45   | verb                      |                     |       |    |      |               |      | 0 | VAR  
+47   | dispatch                  |                     |       |    |      |               |      | 0 | CALL 
+47   | verb                      |                     |       |    |      |               |      | 0 | VAR  
+47   | resource                  |                     |       |    |      |               |      | 0 | VAR  
+47   | args                      |                     |       |    |      |               |      | 0 | VAR  
+47   | opts                      |                     |       |    |      |               |      | 0 | VAR  
+50   | respond_to_missing?       | ApiProxy            |       |    |      |               |      | 1 | FUNC 
+50   | name                      | respond_to_missing? |       |    |      |               |      | 0 | ARG  
+50   | include_private           | respond_to_missing? |       |    |      |               |      | 0 | ARG  
+51   | start_with?               | to_s                |       |    |      |               |      | 0 | CALL 
+51   | to_s                      | name                |       |    |      |               |      | 0 | CALL 
+51   | name                      |                     |       |    |      |               |      | 0 | VAR  
+51   | get_                      |                     |       |    |      |               |      | 0 | STR  
+51   | post_                     |                     |       |    |      |               |      | 0 | STR  
+51   | delete_                   |                     |       |    |      |               |      | 0 | STR  
+54   | private                   |                     |       |    |      |               |      | 0 | VAR  
+56   | dispatch                  | ApiProxy            |       |    |      |               |      | 1 | FUNC 
+56   | verb                      | dispatch            |       |    |      |               |      | 0 | ARG  
+56   | resource                  | dispatch            |       |    |      |               |      | 0 | ARG  
+56   | args                      | dispatch            |       |    |      |               |      | 0 | ARG  
+56   | opts                      | dispatch            |       |    |      |               |      | 0 | ARG  
+57   | upcase                    | verb                |       |    |      |               |      | 0 | CALL 
+57   | verb                      |                     |       |    |      |               |      | 0 | VAR  
+57   | @base                     | ApiProxy            |       |    |      |               |      | 0 | PROP 
+57   | resource                  |                     |       |    |      |               |      | 0 | VAR  
+57   | inspect                   | args                |       |    |      |               |      | 0 | CALL 
+57   | args                      |                     |       |    |      |               |      | 0 | VAR  
+61   | instance_eval             |                     |       |    |      |               |      | 0 | COM  
+61   | class_eval                |                     |       |    |      |               |      | 0 | COM  
+61   | DSL:                      |                     |       |    |      |               |      | 0 | COM  
+61   | redefine                  |                     |       |    |      |               |      | 0 | COM  
+61   | inside                    |                     |       |    |      |               |      | 0 | COM  
+61   | block.                    |                     |       |    |      |               |      | 0 | COM  
+62   | Configuration             |                     |       |    |      |               |      | 1 | CLASS
+63   | build                     | Configuration       |       |    | self |               |      | 1 | FUNC 
+63   | block                     | build               |       |    |      |               |      | 0 | ARG  
+64   | config                    | build               |       |    |      |               |      | 1 | VAR  
+64   | new                       |                     |       |    |      |               |      | 0 | VAR  
+65   | instance_eval             | config              |       |    |      |               |      | 0 | CALL 
+65   | config                    |                     |       |    |      |               |      | 0 | VAR  
+65   | block                     |                     |       |    |      |               |      | 0 | VAR  
+65   | becomes                   |                     |       |    |      |               |      | 0 | COM  
+65   | instance                  |                     |       |    |      |               |      | 0 | COM  
+66   | config                    |                     |       |    |      |               |      | 0 | VAR  
+69   | set                       | Configuration       |       |    |      |               |      | 1 | FUNC 
+69   | key                       | set                 |       |    |      |               |      | 0 | ARG  
+69   | value                     | set                 |       |    |      |               |      | 0 | ARG  
+70   | @settings                 | Configuration       |       |    |      |               |      | 0 | PROP 
+70   | key                       |                     |       |    |      |               |      | 0 | VAR  
+70   | value                     |                     |       |    |      |               |      | 0 | VAR  
+74   | send                      |                     |       |    |      |               |      | 0 | COM  
+74   | public_send               |                     |       |    |      |               |      | 0 | COM  
+74   | reach                     |                     |       |    |      |               |      | 0 | COM  
+74   | methods                   |                     |       |    |      |               |      | 0 | COM  
+74   | chosen                    |                     |       |    |      |               |      | 0 | COM  
+74   | runtime                   |                     |       |    |      |               |      | 0 | COM  
+74   | string.                   |                     |       |    |      |               |      | 0 | COM  
+75   | invoke                    |                     |       |    |      |               |      | 1 | FUNC 
+75   | object                    | invoke              |       |    |      |               |      | 0 | ARG  
+75   | action                    | invoke              |       |    |      |               |      | 0 | ARG  
+75   | rest                      | invoke              |       |    |      |               |      | 0 | ARG  
+76   | public_send               | object              |       |    |      |               |      | 0 | CALL 
+76   | object                    |                     |       |    |      |               |      | 0 | VAR  
+76   | action                    |                     |       |    |      |               |      | 0 | VAR  
+76   | rest                      |                     |       |    |      |               |      | 0 | VAR  
+79   | Reopen                    |                     |       |    |      |               |      | 0 | COM  
+79   | core                      |                     |       |    |      |               |      | 0 | COM  
+79   | inject                    |                     |       |    |      |               |      | 0 | COM  
+79   | behavior                  |                     |       |    |      |               |      | 0 | COM  
+79   | monkey                    |                     |       |    |      |               |      | 0 | COM  
+79   | patching.                 |                     |       |    |      |               |      | 0 | COM  
+80   | String                    |                     |       |    |      |               |      | 1 | CLASS
+81   | shout                     | String              |       |    |      |               |      | 1 | FUNC 
+82   | upcase                    |                     |       |    |      |               |      | 0 | VAR  
+86   | ---                       |                     |       |    |      |               |      | 0 | COM  
+86   | Exercise:                 |                     |       |    |      |               |      | 0 | COM  
+86   | instantiate               |                     |       |    |      |               |      | 0 | COM  
+86   | call                      |                     |       |    |      |               |      | 0 | COM  
+86   | runtime-built             |                     |       |    |      |               |      | 0 | COM  
+86   | definitions.              |                     |       |    |      |               |      | 0 | COM  
+86   | ---                       |                     |       |    |      |               |      | 0 | COM  
+87   | widget                    |                     |       |    |      |               |      | 1 | VAR  
+87   | new                       | Widget              |       |    |      |               |      | 0 | CALL 
+87   | Widget                    |                     |       |    |      |               |      | 0 | VAR  
+87   | save                      |                     |       |    |      |               |      | 0 | STR  
+88   | swatch                    |                     |       |    |      |               |      | 1 | VAR  
+88   | new                       | Red                 |       |    |      |               |      | 0 | CALL 
+88   | Red                       |                     |       |    |      |               |      | 0 | VAR  
+88   | crimson                   |                     |       |    |      |               |      | 0 | STR  
+89   | model                     |                     |       |    |      |               |      | 1 | VAR  
+89   | new                       | Model               |       |    |      |               |      | 0 | CALL 
+89   | Model                     |                     |       |    |      |               |      | 0 | VAR  
+89   | id                        |                     |       |    |      |               |      | 0 | PROP 
+89   | name                      |                     |       |    |      |               |      | 0 | PROP 
+89   | Ada                       |                     |       |    |      |               |      | 0 | STR  
+89   | active                    |                     |       |    |      |               |      | 0 | PROP 
+90   | Grace                     |                     |       |    |      |               |      | 0 | STR  
+91   | proxy                     |                     |       |    |      |               |      | 1 | VAR  
+91   | new                       | ApiProxy            |       |    |      |               |      | 0 | CALL 
+91   | ApiProxy                  |                     |       |    |      |               |      | 0 | VAR  
+91   | https://api.test          |                     |       |    |      |               |      | 0 | STR  
+92   | config                    |                     |       |    |      |               |      | 1 | VAR  
+92   | build                     | Configuration       |       |    |      |               |      | 0 | CALL 
+92   | Configuration             |                     |       |    |      |               |      | 0 | VAR  
+92   | set                       |                     |       |    |      |               |      | 0 | CALL 
+92   | timeout                   |                     |       |    |      |               |      | 0 | VAR  
+93   | greeting                  |                     |       |    |      |               |      | 1 | VAR  
+93   | invoke                    |                     |       |    |      |               |      | 0 | CALL 
+93   | hello                     |                     |       |    |      |               |      | 0 | STR  
+93   | shout                     |                     |       |    |      |               |      | 0 | VAR  
+94   | puts                      |                     |       |    |      |               |      | 0 | CALL 
+94   | inspect                   |                     |       |    |      |               |      | 0 | CALL 
+94   | render                    | widget              |       |    |      |               |      | 0 | CALL 
+94   | widget                    |                     |       |    |      |               |      | 0 | VAR  
+94   | color_code                | swatch              |       |    |      |               |      | 0 | CALL 
+94   | swatch                    |                     |       |    |      |               |      | 0 | VAR  
+94   | name                      | model               |       |    |      |               |      | 0 | CALL 
+94   | model                     |                     |       |    |      |               |      | 0 | VAR  
+94   | active?                   | model               |       |    |      |               |      | 0 | CALL 
+94   | model                     |                     |       |    |      |               |      | 0 | VAR  
+95   | get_users                 | proxy               |       |    |      |               |      | 0 | CALL 
+95   | proxy                     |                     |       |    |      |               |      | 0 | VAR  
+95   | config                    |                     |       |    |      |               |      | 0 | VAR  
+95   | greeting                  |                     |       |    |      |               |      | 0 | VAR  

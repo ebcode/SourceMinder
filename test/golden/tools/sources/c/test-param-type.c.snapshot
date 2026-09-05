@@ -1,0 +1,8 @@
+LINE | SYM             | PAR   | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/c/test-param-type.c:
+1    | test-param-type |       |       |    |     |      |      | 0 | FILE
+1    | Point           |       |       |    |     |      |      | 1 | TYPE
+2    | int             |       |       |    |     |      |      | 0 | TYPE
+5    | func1           |       |       |    |     |      | void | 1 | FUNC
+5    | Point           |       |       |    |     |      |      | 0 | TYPE
+5    | value           | func1 |       |    |     |      | int  | 1 | ARG 

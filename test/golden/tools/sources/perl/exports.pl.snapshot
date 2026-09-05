@@ -1,0 +1,113 @@
+LINE | SYM           | PAR | SCOPE | NS      | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/exports.pl:
+1    | exports       |     |       |         |     |      |        | 0 | FILE
+2    | MyUtils       |     |       |         |     |      |        | 1 | NS  
+4    | strict        |     |       |         |     |      |        | 0 | IMP 
+5    | warnings      |     |       |         |     |      |        | 0 | IMP 
+6    | Exporter      |     |       |         |     |      |        | 0 | IMP 
+6    | import        |     |       |         |     |      |        | 0 | IMP 
+8    | exports       |     |       |         |     |      |        | 0 | COM 
+8    | imported      |     |       |         |     |      |        | 0 | COM 
+8    | automatically |     |       |         |     |      |        | 0 | COM 
+8    | MyUtils       |     |       |         |     |      |        | 0 | COM 
+9    | EXPORT        |     |       |         | our |      | array  | 1 | VAR 
+10   | trim          |     |       |         |     |      |        | 1 | EXP 
+11   | slugify       |     |       |         |     |      |        | 1 | EXP 
+12   | is_empty      |     |       |         |     |      |        | 1 | EXP 
+15   | Optional      |     |       |         |     |      |        | 0 | COM 
+15   | exports       |     |       |         |     |      |        | 0 | COM 
+15   | available     |     |       |         |     |      |        | 0 | COM 
+15   | via           |     |       |         |     |      |        | 0 | COM 
+15   | MyUtils       |     |       |         |     |      |        | 0 | COM 
+15   | qw...         |     |       |         |     |      |        | 0 | COM 
+16   | EXPORT_OK     |     |       |         | our |      | array  | 1 | VAR 
+17   | truncate_str  |     |       |         |     |      |        | 1 | EXP 
+18   | pad_left      |     |       |         |     |      |        | 1 | EXP 
+19   | pad_right     |     |       |         |     |      |        | 1 | EXP 
+20   | capitalize    |     |       |         |     |      |        | 1 | EXP 
+21   | count_words   |     |       |         |     |      |        | 1 | EXP 
+24   | Export        |     |       |         |     |      |        | 0 | COM 
+24   | tags          |     |       |         |     |      |        | 0 | COM 
+24   | groups        |     |       |         |     |      |        | 0 | COM 
+24   | optional      |     |       |         |     |      |        | 0 | COM 
+24   | exports       |     |       |         |     |      |        | 0 | COM 
+25   | EXPORT_TAGS   |     |       |         | our |      | hash   | 1 | VAR 
+26   | string        |     |       |         |     |      |        | 0 | PROP
+27   | padding       |     |       |         |     |      |        | 0 | PROP
+28   | all           |     |       |         |     |      |        | 0 | PROP
+28   | EXPORT        |     |       |         |     |      | array  | 0 | VAR 
+28   | EXPORT_OK     |     |       |         |     |      | array  | 0 | VAR 
+31   | ---           |     |       |         |     |      |        | 0 | COM 
+31   | Exported      |     |       |         |     |      |        | 0 | COM 
+31   | ---           |     |       |         |     |      |        | 0 | COM 
+33   | trim          |     |       | MyUtils |     |      |        | 1 | FUNC
+34   | str           |     |       |         | my  |      | scalar | 1 | ARG 
+35   | str           |     |       |         |     |      | scalar | 0 | VAR 
+36   | str           |     |       |         |     |      | scalar | 0 | VAR 
+39   | slugify       |     |       | MyUtils |     |      |        | 1 | FUNC
+40   | str           |     |       |         | my  |      | scalar | 1 | ARG 
+41   | str           |     |       |         |     |      | scalar | 0 | VAR 
+41   | lc            |     |       |         |     |      |        | 0 | CALL
+41   | str           |     |       |         |     |      | scalar | 0 | VAR 
+42   | str           |     |       |         |     |      | scalar | 0 | VAR 
+43   | str           |     |       |         |     |      | scalar | 0 | VAR 
+44   | str           |     |       |         |     |      | scalar | 0 | VAR 
+47   | is_empty      |     |       | MyUtils |     |      |        | 1 | FUNC
+48   | val           |     |       |         | my  |      | scalar | 1 | ARG 
+49   | defined       |     |       |         |     |      |        | 0 | CALL
+49   | val           |     |       |         |     |      | scalar | 0 | VAR 
+49   | val           |     |       |         |     |      | scalar | 0 | VAR 
+52   | ---           |     |       |         |     |      |        | 0 | COM 
+52   | Optionally    |     |       |         |     |      |        | 0 | COM 
+52   | exported      |     |       |         |     |      |        | 0 | COM 
+52   | ---           |     |       |         |     |      |        | 0 | COM 
+54   | truncate_str  |     |       | MyUtils |     |      |        | 1 | FUNC
+55   | str           |     |       |         | my  |      | scalar | 1 | ARG 
+55   | max           |     |       |         | my  |      | scalar | 1 | ARG 
+56   | length        |     |       |         |     |      |        | 0 | CALL
+56   | str           |     |       |         |     |      | scalar | 0 | VAR 
+56   | max           |     |       |         |     |      | scalar | 0 | VAR 
+56   | substr        |     |       |         |     |      |        | 0 | CALL
+56   | str           |     |       |         |     |      | scalar | 0 | VAR 
+56   | max           |     |       |         |     |      | scalar | 0 | VAR 
+56   | str           |     |       |         |     |      | scalar | 0 | VAR 
+59   | pad_left      |     |       | MyUtils |     |      |        | 1 | FUNC
+60   | str           |     |       |         | my  |      | scalar | 1 | ARG 
+60   | width         |     |       |         | my  |      | scalar | 1 | ARG 
+60   | char          |     |       |         | my  |      | scalar | 1 | ARG 
+61   | char          |     |       |         |     |      | scalar | 0 | VAR 
+62   | sprintf       |     |       |         |     |      |        | 0 | CALL
+62   | %s            |     |       |         |     |      |        | 0 | STR 
+62   | width         |     |       |         |     |      | scalar | 0 | VAR 
+62   | str           |     |       |         |     |      | scalar | 0 | VAR 
+65   | pad_right     |     |       | MyUtils |     |      |        | 1 | FUNC
+66   | str           |     |       |         | my  |      | scalar | 1 | ARG 
+66   | width         |     |       |         | my  |      | scalar | 1 | ARG 
+66   | char          |     |       |         | my  |      | scalar | 1 | ARG 
+67   | char          |     |       |         |     |      | scalar | 0 | VAR 
+68   | sprintf       |     |       |         |     |      |        | 0 | CALL
+68   | %-s           |     |       |         |     |      |        | 0 | STR 
+68   | width         |     |       |         |     |      | scalar | 0 | VAR 
+68   | str           |     |       |         |     |      | scalar | 0 | VAR 
+71   | capitalize    |     |       | MyUtils |     |      |        | 1 | FUNC
+72   | str           |     |       |         | my  |      | scalar | 1 | ARG 
+73   | ucfirst       |     |       |         |     |      |        | 0 | CALL
+73   | lc            |     |       |         |     |      |        | 0 | CALL
+73   | str           |     |       |         |     |      | scalar | 0 | VAR 
+76   | count_words   |     |       | MyUtils |     |      |        | 1 | FUNC
+77   | str           |     |       |         | my  |      | scalar | 1 | ARG 
+78   | words         |     |       |         | my  |      | array  | 1 | VAR 
+78   | split         |     |       |         |     |      |        | 0 | CALL
+78   | trim          |     |       |         |     |      |        | 0 | CALL
+78   | str           |     |       |         |     |      | scalar | 0 | VAR 
+79   | scalar        |     |       |         |     |      |        | 0 | CALL
+79   | words         |     |       |         |     |      | array  | 0 | VAR 
+82   | ---           |     |       |         |     |      |        | 0 | COM 
+82   | Internal      |     |       |         |     |      |        | 0 | COM 
+82   | exported      |     |       |         |     |      |        | 0 | COM 
+82   | ---           |     |       |         |     |      |        | 0 | COM 
+84   | _normalize    |     |       | MyUtils |     |      |        | 1 | FUNC
+85   | str           |     |       |         | my  |      | scalar | 1 | ARG 
+86   | trim          |     |       |         |     |      |        | 0 | CALL
+86   | lc            |     |       |         |     |      |        | 0 | CALL
+86   | str           |     |       |         |     |      | scalar | 0 | VAR 

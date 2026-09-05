@@ -1,0 +1,55 @@
+LINE | SYM               | PAR | SCOPE   | NS   | MOD | CLUE     | TYPE          | D | CTX 
+./tools/sources/go/channels.go:
+1    | channels          |     |         |      |     |          |               | 0 | FILE
+1    | main              |     |         |      |     |          |               | 0 | NS  
+3    | channelOperations |     | private | main |     |          |               | 1 | FUNC
+4    | Unbuffered        |     |         |      |     |          |               | 0 | COM 
+4    | channel           |     |         |      |     |          |               | 0 | COM 
+5    | messages          |     | private | main |     |          |               | 1 | VAR 
+5    | make              |     |         |      |     | built-in |               | 0 | CALL
+7    | Buffered          |     |         |      |     |          |               | 0 | COM 
+7    | channel           |     |         |      |     |          |               | 0 | COM 
+8    | buffered          |     | private | main |     |          |               | 1 | VAR 
+8    | make              |     |         |      |     | built-in |               | 0 | CALL
+10   | Send              |     |         |      |     |          |               | 0 | COM 
+10   | operation         |     |         |      |     |          |               | 0 | COM 
+11   | messages          |     | private | main |     | send     |               | 0 | VAR 
+11   | hello             |     |         |      |     |          |               | 0 | STR 
+13   | Receive           |     |         |      |     |          |               | 0 | COM 
+13   | operation         |     |         |      |     |          |               | 0 | COM 
+14   | msg               |     | private | main |     |          |               | 1 | VAR 
+14   | messages          |     | private | main |     | receive  |               | 0 | VAR 
+16   | Receive           |     |         |      |     |          |               | 0 | COM 
+16   | ok                |     |         |      |     |          |               | 0 | COM 
+16   | check             |     |         |      |     |          |               | 0 | COM 
+17   | value             |     | private | main |     |          |               | 1 | VAR 
+17   | ok                |     | private | main |     |          |               | 1 | VAR 
+17   | messages          |     | private | main |     | receive  |               | 0 | VAR 
+19   | Close             |     |         |      |     |          |               | 0 | COM 
+19   | channel           |     |         |      |     |          |               | 0 | COM 
+20   | close             |     |         |      |     | built-in |               | 0 | CALL
+20   | messages          |     |         | main |     | close    |               | 0 | ARG 
+22   | over              |     |         |      |     |          |               | 0 | COM 
+22   | channel           |     |         |      |     |          |               | 0 | COM 
+23   | item              |     | private | main |     | range    |               | 0 | VAR 
+24   | item              |     |         | main |     |          |               | 0 | VAR 
+28   | Channel           |     |         |      |     |          |               | 0 | COM 
+28   | function          |     |         |      |     |          |               | 0 | COM 
+28   | parameter         |     |         |      |     |          |               | 0 | COM 
+29   | sendData          |     | private | main |     |          |               | 1 | FUNC
+29   | ch                |     |         |      |     |          | chan<- int    | 1 | ARG 
+30   | ch                |     | private | main |     | send     |               | 0 | VAR 
+33   | Receive-only      |     |         |      |     |          |               | 0 | COM 
+33   | channel           |     |         |      |     |          |               | 0 | COM 
+33   | parameter         |     |         |      |     |          |               | 0 | COM 
+34   | receiveData       |     | private | main |     |          | string        | 1 | FUNC
+34   | ch                |     |         |      |     |          | <-chan string | 1 | ARG 
+35   | ch                |     | private | main |     | receive  |               | 0 | VAR 
+38   | Bidirectional     |     |         |      |     |          |               | 0 | COM 
+38   | channel           |     |         |      |     |          |               | 0 | COM 
+39   | processChannel    |     | private | main |     |          |               | 1 | FUNC
+39   | ch                |     |         |      |     |          | chan int      | 1 | ARG 
+40   | ch                |     | private | main |     | send     |               | 0 | VAR 
+41   | val               |     | private | main |     |          |               | 1 | VAR 
+41   | ch                |     | private | main |     | receive  |               | 0 | VAR 
+42   | val               |     |         | main |     |          |               | 0 | VAR 

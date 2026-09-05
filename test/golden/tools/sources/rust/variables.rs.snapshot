@@ -1,0 +1,41 @@
+LINE | SYM            | PAR   | SCOPE   | NS     | MOD | CLUE    | TYPE   | D | CTX  
+./tools/sources/rust/variables.rs:
+1    | variables      |       |         |        |     |         |        | 0 | FILE 
+1    | variables_demo |       | pub     |        |     |         |        | 1 | FUNC 
+2    | Simple         |       |         |        |     |         |        | 0 | COM  
+2    | bindings       |       |         |        |     |         |        | 0 | COM  
+5    | counter        |       |         |        | mut |         |        | 1 | VAR  
+7    | Tuple          |       |         |        |     |         |        | 0 | COM  
+7    | destructuring  |       |         |        |     |         |        | 0 | COM  
+10   | destructuring  |       |         |        |     |         |        | 0 | COM  
+11   | Point          |       |         |        |     |         |        | 0 | CLASS
+11   | px             |       |         |        |     |         |        | 1 | VAR  
+11   | py             |       |         |        |     |         |        | 1 | VAR  
+11   | Point          |       |         |        |     |         |        | 0 | CLASS
+13   | Type-annotated |       |         |        |     |         |        | 0 | COM  
+13   | explicit       |       |         |        |     |         |        | 0 | COM  
+13   | value          |       |         |        |     |         |        | 0 | COM  
+14   | name           |       |         |        |     |         | String | 1 | VAR  
+14   | from           |       |         | String |     |         |        | 0 | CALL 
+14   | alice          |       |         |        |     |         |        | 0 | STR  
+16   | inside         |       |         |        |     |         |        | 0 | COM  
+16   | function       |       |         |        |     |         |        | 0 | COM  
+17   | PI             |       | private |        |     |         | f64    | 1 | VAR  
+19   | Reference      |       |         |        |     |         |        | 0 | COM  
+19   | binding        |       |         |        |     |         |        | 0 | COM  
+21   | mut_ref        |       |         |        |     |         |        | 1 | VAR  
+24   | If-let         |       |         |        |     |         |        | 0 | COM  
+24   | pattern        |       |         |        |     |         |        | 0 | COM  
+25   | some_value     |       |         |        |     |         |        | 1 | VAR  
+25   | Some           |       |         |        |     |         |        | 0 | CALL 
+26   | Some           |       |         |        |     |         |        | 0 | CLASS
+27   | println        |       |         |        |     |         | macro  | 0 | CALL 
+30   | While-let      |       |         |        |     |         |        | 0 | COM  
+31   | stack          |       |         |        | mut |         |        | 1 | VAR  
+31   | vec            |       |         |        |     |         | macro  | 0 | CALL 
+32   | Some           |       |         |        |     |         |        | 0 | CLASS
+32   | top            |       |         |        |     |         |        | 1 | VAR  
+32   | pop            | stack |         |        |     |         |        | 0 | CALL 
+33   | println        |       |         |        |     |         | macro  | 0 | CALL 
+33   | top            |       |         |        |     | println |        | 0 | ARG  
+37   | Point          |       | private |        |     |         |        | 1 | CLASS

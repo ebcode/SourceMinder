@@ -1,0 +1,44 @@
+LINE | SYM            | PAR       | SCOPE   | NS       | MOD | CLUE        | TYPE                | D | CTX  
+./tools/sources/rust/traits.rs:
+1    | traits         |           |         |          |     |             |                     | 0 | FILE 
+1    | required       |           |         |          |     |             |                     | 0 | COM  
+1    | provided       |           |         |          |     |             |                     | 0 | COM  
+1    | methods        |           |         |          |     |             |                     | 0 | COM  
+2    | Animal         |           | pub     |          |     |             |                     | 1 | TRAIT
+3    | name           | Animal    | private |          |     |             | &str                | 1 | FUNC 
+4    | legs           | Animal    | private |          |     |             | u32                 | 1 | FUNC 
+6    | describe       | Animal    | private |          |     |             | String              | 1 | FUNC 
+7    | format         |           |         |          |     |             | macro               | 0 | CALL 
+7    | has            |           |         |          |     |             |                     | 0 | STR  
+7    | legs           |           |         |          |     |             |                     | 0 | STR  
+7    | name           | self      |         |          |     | format      |                     | 0 | CALL 
+7    | legs           | self      |         |          |     | format      |                     | 0 | CALL 
+11   | associated     |           |         |          |     |             |                     | 0 | COM  
+11   | constant       |           |         |          |     |             |                     | 0 | COM  
+12   | Container      |           | pub     |          |     |             |                     | 1 | TRAIT
+13   | Item           | Container | private |          |     |             |                     | 1 | TYPE 
+14   | CAPACITY       | Container | private |          |     |             | usize               | 1 | VAR  
+16   | put            | Container | private |          |     |             |                     | 1 | FUNC 
+16   | item           |           |         |          |     |             | Self::Item          | 0 | ARG  
+17   | get            | Container | private |          |     |             | Option<&Self::Item> | 1 | FUNC 
+20   | generic        |           |         |          |     |             |                     | 0 | COM  
+20   | param          |           |         |          |     |             |                     | 0 | COM  
+20   | supertrait     |           |         |          |     |             |                     | 0 | COM  
+21   | Drawable       |           | pub     |          |     |             |                     | 1 | TRAIT
+21   | Debug          |           |         | std::fmt |     |             |                     | 0 | TRAIT
+22   | draw           | Drawable  | private |          |     |             |                     | 1 | FUNC 
+22   | target         |           |         |          |     |             | &mut T              | 0 | ARG  
+25   | Implementation |           |         |          |     |             |                     | 0 | COM  
+26   | Dog            |           | pub     |          |     |             |                     | 1 | CLASS
+27   | name           | Dog       | private |          |     |             | String              | 1 | PROP 
+30   | Dog            |           |         |          |     | impl Animal |                     | 1 | CLASS
+31   | name           | Dog       | private |          |     |             | &str                | 1 | FUNC 
+32   | name           | self      |         |          |     |             |                     | 0 | PROP 
+34   | legs           | Dog       | private |          |     |             | u32                 | 1 | FUNC 
+39   | Blanket        |           |         |          |     |             |                     | 0 | COM  
+39   | implementation |           |         |          |     |             |                     | 0 | COM  
+40   | Animal         |           |         |          |     |             |                     | 0 | TRAIT
+41   | draw           | T         | private |          |     |             |                     | 1 | FUNC 
+41   | target         |           |         |          |     |             | &mut String         | 0 | ARG  
+42   | push_str       | target    |         |          |     |             |                     | 0 | CALL 
+42   | name           | self      |         |          |     |             |                     | 0 | CALL 

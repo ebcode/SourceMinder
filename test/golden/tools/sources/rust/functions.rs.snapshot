@@ -1,0 +1,35 @@
+LINE | SYM        | PAR | SCOPE   | NS | MOD        | CLUE   | TYPE                           | D | CTX  
+./tools/sources/rust/functions.rs:
+1    | functions  |     |         |    |            |        |                                | 0 | FILE 
+1    | Free       |     |         |    |            |        |                                | 0 | COM  
+1    | function   |     |         |    |            |        |                                | 0 | COM  
+1    | parameters |     |         |    |            |        |                                | 0 | COM  
+2    | add        |     | private |    |            |        | i32                            | 1 | FUNC 
+6    | Public     |     |         |    |            |        |                                | 0 | COM  
+6    | function   |     |         |    |            |        |                                | 0 | COM  
+7    | greet      |     | pub     |    |            |        | String                         | 1 | FUNC 
+7    | name       |     |         |    |            |        | &str                           | 0 | ARG  
+8    | format     |     |         |    |            |        | macro                          | 0 | CALL 
+8    | Hello      |     |         |    |            |        |                                | 0 | STR  
+8    | name       |     |         |    |            | format |                                | 0 | ARG  
+11   | Generic    |     |         |    |            |        |                                | 0 | COM  
+11   | function   |     |         |    |            |        |                                | 0 | COM  
+11   | clause     |     |         |    |            |        |                                | 0 | COM  
+12   | largest    |     | pub     |    |            |        | &T                             | 1 | FUNC 
+12   | list       |     |         |    |            |        | &[T]                           | 0 | ARG  
+14   | PartialOrd |     |         |    |            |        |                                | 0 | TRAIT
+16   | largest    |     |         |    | mut        |        |                                | 1 | VAR  
+17   | item       |     |         |    |            |        |                                | 1 | VAR  
+25   | function   |     |         |    |            |        |                                | 0 | COM  
+26   | fetch_user |     | pub     |    | async      |        | Result<String, std::io::Error> | 1 | FUNC 
+26   | id         |     |         |    |            |        | u64                            | 0 | ARG  
+27   | Ok         |     |         |    |            |        |                                | 0 | CALL 
+27   | format     |     |         |    |            |        | macro                          | 0 | CALL 
+27   | user_      |     |         |    |            |        |                                | 0 | STR  
+27   | id         |     |         |    |            | format |                                | 0 | ARG  
+30   | function   |     |         |    |            |        |                                | 0 | COM  
+31   | dangerous  |     | pub     |    | unsafe     |        |                                | 1 | FUNC 
+31   | ptr        |     |         |    |            |        | *mut i32                       | 0 | ARG  
+36   | square     |     | pub     |    | const      |        | u32                            | 1 | FUNC 
+41   | callback   |     | pub     |    | extern "C" |        | i32                            | 1 | FUNC 
+41   | value      |     |         |    |            |        | i32                            | 0 | ARG  

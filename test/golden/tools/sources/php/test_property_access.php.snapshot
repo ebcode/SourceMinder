@@ -1,0 +1,20 @@
+LINE | SYM                  | PAR       | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/php/test_property_access.php:
+1    | test_property_access |           |       |    |     |      |      | 0 | FILE
+3    | Test                 |           |       |    |     |      |      | 0 | COM 
+3    | property             |           |       |    |     |      |      | 0 | COM 
+3    | access               |           |       |    |     |      |      | 0 | COM 
+3    | assignment           |           |       |    |     |      |      | 0 | COM 
+4    | $wp_query            |           |       |    |     |      |      | 0 | VAR 
+4    | is_404               | $wp_query |       |    |     |      |      | 0 | PROP
+6    | Test                 |           |       |    |     |      |      | 0 | COM 
+6    | reading              |           |       |    |     |      |      | 0 | COM 
+6    | property             |           |       |    |     |      |      | 0 | COM 
+7    | $value               |           |       |    |     |      |      | 0 | VAR 
+7    | $wp_query            |           |       |    |     |      |      | 0 | VAR 
+7    | is_404               | $wp_query |       |    |     |      |      | 0 | PROP
+9    | Test                 |           |       |    |     |      |      | 0 | COM 
+9    | method               |           |       |    |     |      |      | 0 | COM 
+9    | call                 |           |       |    |     |      |      | 0 | COM 
+10   | $wp_query            |           |       |    |     |      |      | 0 | VAR 
+10   | get_posts            | $wp_query |       |    |     |      |      | 0 | CALL

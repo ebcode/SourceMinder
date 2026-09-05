@@ -1,0 +1,28 @@
+LINE | SYM           | PAR       | SCOPE | NS | MOD   | CLUE | TYPE | D | CTX 
+./tools/sources/javascript/dynamic.js:
+1    | dynamic       |           |       |    |       |      |      | 0 | FILE
+1    | Dynamic       |           |       |    |       |      |      | 0 | COM 
+1    | imports       |           |       |    |       |      |      | 0 | COM 
+1    | requires      |           |       |    |       |      |      | 0 | COM 
+2    | fs            |           |       |    |       | fs   |      | 0 | IMP 
+2    | fs            |           |       |    |       |      |      | 0 | STR 
+3    | path          |           |       |    |       | path |      | 0 | IMP 
+3    | path          |           |       |    |       |      |      | 0 | STR 
+5    | loadModule    |           |       |    |       |      |      | 1 | FUNC
+5    | moduleName    |           |       |    |       |      |      | 1 | ARG 
+6    | mod           |           |       |    |       |      |      | 0 | IMP 
+6    | ./            |           |       |    |       |      |      | 0 | STR 
+7    | mod           |           |       |    |       |      |      | 0 | VAR 
+10   | loadComponent |           |       |    | async |      |      | 1 | FUNC
+10   | componentName |           |       |    |       |      |      | 1 | ARG 
+11   | component     |           |       |    |       |      |      | 1 | VAR 
+11   | ./components/ |           |       |    |       |      |      | 0 | STR 
+11   | componentName |           |       |    |       |      |      | 0 | VAR 
+12   | default       | component |       |    |       |      |      | 0 | PROP
+15   | requireConfig |           |       |    |       |      |      | 1 | FUNC
+15   | env           |           |       |    |       |      |      | 1 | ARG 
+16   | require       |           |       |    |       |      |      | 0 | CALL
+16   | ./config/     |           |       |    |       |      |      | 0 | STR 
+16   | .json         |           |       |    |       |      |      | 0 | STR 
+16   | env           |           |       |    |       |      |      | 0 | VAR 
+19   | exports       | module    |       |    |       |      |      | 1 | PROP

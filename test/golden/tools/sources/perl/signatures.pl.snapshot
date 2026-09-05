@@ -1,0 +1,75 @@
+LINE | SYM         | PAR  | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/signatures.pl:
+1    | signatures  |      |       |    |     |      |        | 0 | FILE
+2    | strict      |      |       |    |     |      |        | 0 | IMP 
+3    | warnings    |      |       |    |     |      |        | 0 | IMP 
+4    | feature     |      |       |    |     |      |        | 0 | IMP 
+5    | warnings    |      |       |    |     |      |        | 0 | IMP 
+7    | Modern      |      |       |    |     |      |        | 0 | COM 
+7    | Perl        |      |       |    |     |      |        | 0 | COM 
+7    | signatures  |      |       |    |     |      |        | 0 | COM 
+7    | 5.20+       |      |       |    |     |      |        | 0 | COM 
+8    | greet       |      |       |    |     |      |        | 1 | FUNC
+8    | name        |      |       |    |     |      | scalar | 1 | ARG 
+9    | Hello       |      |       |    |     |      |        | 0 | STR 
+9    | $name!      |      |       |    |     |      |        | 0 | STR 
+9    | name        |      |       |    |     |      | scalar | 0 | VAR 
+12   | add         |      |       |    |     |      |        | 1 | FUNC
+16   | values      |      |       |    |     |      |        | 0 | COM 
+17   | connect     |      |       |    |     |      |        | 1 | FUNC
+17   | host        |      |       |    |     |      | scalar | 1 | ARG 
+17   | localhost   |      |       |    |     |      |        | 0 | STR 
+17   | port        |      |       |    |     |      | scalar | 1 | ARG 
+18   | $host:$port |      |       |    |     |      |        | 0 | STR 
+18   | host        |      |       |    |     |      | scalar | 0 | VAR 
+18   | port        |      |       |    |     |      | scalar | 0 | VAR 
+21   | Optional    |      |       |    |     |      |        | 0 | COM 
+21   | parameter   |      |       |    |     |      |        | 0 | COM 
+22   | log_message |      |       |    |     |      |        | 1 | FUNC
+22   | msg         |      |       |    |     |      | scalar | 1 | ARG 
+22   | level       |      |       |    |     |      | scalar | 1 | ARG 
+22   | info        |      |       |    |     |      |        | 0 | STR 
+23   | print       |      |       |    |     |      |        | 0 | CALL
+23   | [$level]    |      |       |    |     |      |        | 0 | STR 
+23   | $msgn       |      |       |    |     |      |        | 0 | STR 
+23   | level       |      |       |    |     |      | scalar | 0 | VAR 
+23   | msg         |      |       |    |     |      | scalar | 0 | VAR 
+26   | Slurpy      |      |       |    |     |      |        | 0 | COM 
+26   | parameter   |      |       |    |     |      |        | 0 | COM 
+27   | sum_all     |      |       |    |     |      |        | 1 | FUNC
+27   | first       |      |       |    |     |      | scalar | 1 | ARG 
+27   | rest        |      |       |    |     |      | array  | 1 | ARG 
+28   | total       |      |       |    | my  |      | scalar | 1 | VAR 
+28   | first       |      |       |    |     |      | scalar | 0 | VAR 
+29   | total       |      |       |    |     |      | scalar | 0 | VAR 
+29   | rest        |      |       |    |     |      | array  | 0 | VAR 
+30   | total       |      |       |    |     |      | scalar | 0 | VAR 
+33   | Named       |      |       |    |     |      |        | 0 | COM 
+33   | parameters  |      |       |    |     |      |        | 0 | COM 
+33   | via         |      |       |    |     |      |        | 0 | COM 
+33   | hash        |      |       |    |     |      |        | 0 | COM 
+33   | ref         |      |       |    |     |      |        | 0 | COM 
+34   | create_user |      |       |    |     |      |        | 1 | FUNC
+34   | args        |      |       |    |     |      | hash   | 1 | ARG 
+35   | name        |      |       |    | my  |      | scalar | 1 | VAR 
+35   | args        |      |       |    |     |      | hash   | 0 | VAR 
+35   | name        | args |       |    |     |      |        | 0 | PROP
+35   | die         |      |       |    |     |      |        | 0 | CALL
+35   | name        |      |       |    |     |      |        | 0 | STR 
+35   | required    |      |       |    |     |      |        | 0 | STR 
+36   | email       |      |       |    | my  |      | scalar | 1 | VAR 
+36   | args        |      |       |    |     |      | hash   | 0 | VAR 
+36   | email       | args |       |    |     |      |        | 0 | PROP
+36   | die         |      |       |    |     |      |        | 0 | CALL
+36   | email       |      |       |    |     |      |        | 0 | STR 
+36   | required    |      |       |    |     |      |        | 0 | STR 
+37   | role        |      |       |    | my  |      | scalar | 1 | VAR 
+37   | args        |      |       |    |     |      | hash   | 0 | VAR 
+37   | role        | args |       |    |     |      |        | 0 | PROP
+37   | user        |      |       |    |     |      |        | 0 | STR 
+38   | name        |      |       |    |     |      |        | 0 | PROP
+38   | name        |      |       |    |     |      | scalar | 0 | VAR 
+38   | email       |      |       |    |     |      |        | 0 | PROP
+38   | email       |      |       |    |     |      | scalar | 0 | VAR 
+38   | role        |      |       |    |     |      |        | 0 | PROP
+38   | role        |      |       |    |     |      | scalar | 0 | VAR 

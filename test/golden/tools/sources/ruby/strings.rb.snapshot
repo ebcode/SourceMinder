@@ -1,0 +1,46 @@
+LINE | SYM             | PAR          | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/ruby/strings.rb:
+1    | strings         |              |       |    |     |      |      | 0 | FILE
+1    | String          |              |       |    |     |      |      | 0 | COM 
+1    | literals        |              |       |    |     |      |      | 0 | COM 
+1    | interpolation   |              |       |    |     |      |      | 0 | COM 
+1    | symbols         |              |       |    |     |      |      | 0 | COM 
+1    | heredocs.       |              |       |    |     |      |      | 0 | COM 
+2    | name            |              |       |    |     |      |      | 1 | VAR 
+2    | world           |              |       |    |     |      |      | 0 | STR 
+3    | greeting        |              |       |    |     |      |      | 1 | VAR 
+3    | hello           |              |       |    |     |      |      | 0 | STR 
+3    | name            |              |       |    |     |      |      | 0 | VAR 
+4    | single          |              |       |    |     |      |      | 1 | VAR 
+4    | interpolation   |              |       |    |     |      |      | 0 | STR 
+5    | template        |              |       |    |     |      |      | 1 | VAR 
+5    | sum             |              |       |    |     |      |      | 0 | STR 
+7    | symbol_key      |              |       |    |     |      |      | 1 | VAR 
+7    | status          |              |       |    |     |      |      | 0 | VAR 
+8    | hash_literal    |              |       |    |     |      |      | 1 | VAR 
+8    | name            | hash_literal |       |    |     |      |      | 0 | PROP
+8    | Ada             |              |       |    |     |      |      | 0 | STR 
+8    | role            | hash_literal |       |    |     |      |      | 0 | PROP
+8    | admin           |              |       |    |     |      |      | 0 | VAR 
+10   | Percent-literal |              |       |    |     |      |      | 0 | COM 
+10   | strings         |              |       |    |     |      |      | 0 | COM 
+11   | words           |              |       |    |     |      |      | 1 | VAR 
+12   | symbols         |              |       |    |     |      |      | 1 | VAR 
+14   | Heredoc         |              |       |    |     |      |      | 0 | COM 
+14   | squiggly        |              |       |    |     |      |      | 0 | COM 
+14   | indented        |              |       |    |     |      |      | 0 | COM 
+15   | sql_query       |              |       |    |     |      |      | 1 | VAR 
+15   | SELECT          |              |       |    |     |      |      | 0 | STR 
+15   | id              |              |       |    |     |      |      | 0 | STR 
+15   | name            |              |       |    |     |      |      | 0 | STR 
+15   | users           |              |       |    |     |      |      | 0 | STR 
+15   | active          |              |       |    |     |      |      | 0 | STR 
+21   | Regular         |              |       |    |     |      |      | 0 | COM 
+21   | heredoc         |              |       |    |     |      |      | 0 | COM 
+22   | message         |              |       |    |     |      |      | 1 | VAR 
+22   | Multi-line      |              |       |    |     |      |      | 0 | STR 
+22   | message         |              |       |    |     |      |      | 0 | STR 
+22   | body            |              |       |    |     |      |      | 0 | STR 
+27   | Regexp          |              |       |    |     |      |      | 0 | COM 
+27   | literal         |              |       |    |     |      |      | 0 | COM 
+28   | pattern         |              |       |    |     |      |      | 1 | VAR 

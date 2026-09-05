@@ -1,0 +1,43 @@
+LINE | SYM              | PAR     | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/javascript/jsdoc.js:
+1    | jsdoc            |         |       |    |     |      |      | 0 | FILE
+1    | @typedef         |         |       |    |     |      |      | 0 | COM 
+1    | Object           |         |       |    |     |      |      | 0 | COM 
+1    | User             |         |       |    |     |      |      | 0 | COM 
+1    | @property        |         |       |    |     |      |      | 0 | COM 
+1    | string           |         |       |    |     |      |      | 0 | COM 
+1    | userId           |         |       |    |     |      |      | 0 | COM 
+1    | @property        |         |       |    |     |      |      | 0 | COM 
+1    | string           |         |       |    |     |      |      | 0 | COM 
+1    | email            |         |       |    |     |      |      | 0 | COM 
+7    | Fetches          |         |       |    |     |      |      | 0 | COM 
+7    | user             |         |       |    |     |      |      | 0 | COM 
+7    | ID               |         |       |    |     |      |      | 0 | COM 
+7    | @param           |         |       |    |     |      |      | 0 | COM 
+7    | string           |         |       |    |     |      |      | 0 | COM 
+7    | userId           |         |       |    |     |      |      | 0 | COM 
+7    | user             |         |       |    |     |      |      | 0 | COM 
+7    | identifier       |         |       |    |     |      |      | 0 | COM 
+7    | @param           |         |       |    |     |      |      | 0 | COM 
+7    | boolean          |         |       |    |     |      |      | 0 | COM 
+7    | includeDeleted   |         |       |    |     |      |      | 0 | COM 
+7    | Include          |         |       |    |     |      |      | 0 | COM 
+7    | deleted          |         |       |    |     |      |      | 0 | COM 
+7    | users            |         |       |    |     |      |      | 0 | COM 
+7    | @returns         |         |       |    |     |      |      | 0 | COM 
+7    | Promise<User>    |         |       |    |     |      |      | 0 | COM 
+13   | fetchUser        |         |       |    |     |      |      | 1 | FUNC
+13   | userId           |         |       |    |     |      |      | 1 | ARG 
+13   | includeDeleted   |         |       |    |     |      |      | 1 | ARG 
+14   | resolve          | Promise |       |    |     |      |      | 0 | CALL
+14   | userId           |         |       |    |     |      |      | 0 | PROP
+14   | email            |         |       |    |     |      |      | 0 | PROP
+17   | @param           |         |       |    |     |      |      | 0 | COM 
+17   | User[]           |         |       |    |     |      |      | 0 | COM 
+17   | users            |         |       |    |     |      |      | 0 | COM 
+17   | @returns         |         |       |    |     |      |      | 0 | COM 
+17   | number           |         |       |    |     |      |      | 0 | COM 
+21   | countActiveUsers |         |       |    |     |      |      | 1 | FUNC
+21   | users            |         |       |    |     |      |      | 1 | ARG 
+22   | length           | users   |       |    |     |      |      | 0 | PROP
+25   | exports          | module  |       |    |     |      |      | 1 | PROP

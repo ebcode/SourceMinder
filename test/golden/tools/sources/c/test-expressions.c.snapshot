@@ -1,0 +1,61 @@
+LINE | SYM              | PAR       | SCOPE | NS | MOD | CLUE | TYPE      | D | CTX 
+./tools/sources/c/test-expressions.c:
+1    | test-expressions |           |       |    |     |      |           | 0 | FILE
+1    | Test             |           |       |    |     |      |           | 0 | COM 
+1    | various          |           |       |    |     |      |           | 0 | COM 
+1    | expression       |           |       |    |     |      |           | 0 | COM 
+1    | patterns         |           |       |    |     |      |           | 0 | COM 
+2    | <stdio.h>        |           |       |    |     |      |           | 0 | IMP 
+4    | Point            |           |       |    |     |      |           | 1 | TYPE
+5    | int              |           |       |    |     |      |           | 0 | TYPE
+6    | int              |           |       |    |     |      |           | 0 | TYPE
+9    | Container        |           |       |    |     |      |           | 1 | TYPE
+10   | Point            |           |       |    |     |      |           | 0 | TYPE
+10   | location         |           |       |    |     |      | Point*    | 1 | PROP
+11   | int              |           |       |    |     |      |           | 0 | TYPE
+11   | count            |           |       |    |     |      | int       | 1 | PROP
+14   | add              |           |       |    |     |      | int       | 1 | FUNC
+18   | test_expressions |           |       |    |     |      | void      | 1 | FUNC
+19   | Line             |           |       |    |     |      |           | 0 | COM 
+19   | 1:               |           |       |    |     |      |           | 0 | COM 
+19   | Simple           |           |       |    |     |      |           | 0 | COM 
+19   | variable         |           |       |    |     |      |           | 0 | COM 
+19   | declaration      |           |       |    |     |      |           | 0 | COM 
+19   | function         |           |       |    |     |      |           | 0 | COM 
+19   | call             |           |       |    |     |      |           | 0 | COM 
+20   | ret              |           |       |    |     |      | int       | 1 | VAR 
+20   | add              |           |       |    |     |      |           | 0 | CALL
+22   | Line             |           |       |    |     |      |           | 0 | COM 
+22   | 2:               |           |       |    |     |      |           | 0 | COM 
+22   | Field            |           |       |    |     |      |           | 0 | COM 
+22   | access           |           |       |    |     |      |           | 0 | COM 
+22   | chain            |           |       |    |     |      |           | 0 | COM 
+23   | container        |           |       |    |     |      | Container | 1 | VAR 
+24   | location         | container |       |    |     |      |           | 0 | PROP
+24   | container        |           |       |    |     |      |           | 0 | VAR 
+26   | Line             |           |       |    |     |      |           | 0 | COM 
+26   | 3:               |           |       |    |     |      |           | 0 | COM 
+26   | Nested           |           |       |    |     |      |           | 0 | COM 
+26   | function         |           |       |    |     |      |           | 0 | COM 
+26   | calls            |           |       |    |     |      |           | 0 | COM 
+26   | field            |           |       |    |     |      |           | 0 | COM 
+26   | access           |           |       |    |     |      |           | 0 | COM 
+28   | printf           |           |       |    |     |      |           | 0 | CALL
+28   | Value:           |           |       |    |     |      |           | 0 | STR 
+28   | %d               |           |       |    |     |      |           | 0 | STR 
+28   | add              |           |       |    |     |      |           | 0 | CALL
+28   | count            | container |       |    |     |      |           | 0 | PROP
+28   | container        |           |       |    |     |      |           | 0 | VAR 
+30   | Line             |           |       |    |     |      |           | 0 | COM 
+30   | 4:               |           |       |    |     |      |           | 0 | COM 
+30   | Array            |           |       |    |     |      |           | 0 | COM 
+30   | subscript        |           |       |    |     |      |           | 0 | COM 
+30   | field            |           |       |    |     |      |           | 0 | COM 
+30   | access           |           |       |    |     |      |           | 0 | COM 
+31   | items            |           |       |    |     |      | Container | 1 | VAR 
+32   | location         | items     |       |    |     |      |           | 0 | PROP
+32   | items            |           |       |    |     |      |           | 0 | VAR 
+32   | location         | items     |       |    |     |      |           | 0 | PROP
+32   | items            |           |       |    |     |      |           | 0 | VAR 
+32   | count            | container |       |    |     |      |           | 0 | PROP
+32   | container        |           |       |    |     |      |           | 0 | VAR 

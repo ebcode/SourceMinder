@@ -1,0 +1,121 @@
+LINE | SYM             | PAR     | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/closures.pl:
+1    | closures        |         |       |    |     |      |        | 0 | FILE
+2    | strict          |         |       |    |     |      |        | 0 | IMP 
+3    | warnings        |         |       |    |     |      |        | 0 | IMP 
+5    | Shared          |         |       |    |     |      |        | 0 | COM 
+5    | mutable         |         |       |    |     |      |        | 0 | COM 
+5    | state           |         |       |    |     |      |        | 0 | COM 
+5    | closures        |         |       |    |     |      |        | 0 | COM 
+6    | make_stack      |         |       |    |     |      |        | 1 | FUNC
+7    | stack           |         |       |    | my  |      | array  | 1 | VAR 
+8    | push            |         |       |    | my  |      | scalar | 1 | FUNC
+8    | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+8    | push            |         |       |    |     |      |        | 0 | CALL
+8    | stack           |         |       |    |     |      | array  | 0 | VAR 
+9    | pop             |         |       |    | my  |      | scalar | 1 | FUNC
+9    | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+9    | pop             |         |       |    |     |      |        | 0 | CALL
+9    | stack           |         |       |    |     |      | array  | 0 | VAR 
+10   | size            |         |       |    | my  |      | scalar | 1 | FUNC
+10   | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+10   | scalar          |         |       |    |     |      |        | 0 | CALL
+10   | stack           |         |       |    |     |      | array  | 0 | VAR 
+11   | push            |         |       |    |     |      | scalar | 0 | VAR 
+11   | pop             |         |       |    |     |      | scalar | 0 | VAR 
+11   | size            |         |       |    |     |      | scalar | 0 | VAR 
+14   | push            |         |       |    | my  |      | scalar | 1 | VAR 
+14   | pop             |         |       |    | my  |      | scalar | 1 | VAR 
+14   | size            |         |       |    | my  |      | scalar | 1 | VAR 
+14   | make_stack      |         |       |    |     |      |        | 0 | CALL
+15   | push            |         |       |    |     |      |        | 0 | CALL
+16   | push            |         |       |    |     |      |        | 0 | CALL
+17   | top             |         |       |    | my  |      | scalar | 1 | VAR 
+17   | pop             |         |       |    |     |      |        | 0 | CALL
+19   | Generator-style |         |       |    |     |      |        | 0 | COM 
+19   | closure         |         |       |    |     |      |        | 0 | COM 
+20   | counter_from    |         |       |    |     |      |        | 1 | FUNC
+21   | start           |         |       |    | my  |      | scalar | 1 | ARG 
+21   | step            |         |       |    | my  |      | scalar | 1 | ARG 
+22   | step            |         |       |    |     |      | scalar | 0 | VAR 
+23   | start           |         |       |    |     |      | scalar | 0 | VAR 
+24   | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+24   | val             |         |       |    | my  |      | scalar | 1 | VAR 
+24   | step            |         |       |    |     |      | scalar | 0 | VAR 
+24   | val             |         |       |    |     |      | scalar | 0 | VAR 
+27   | evens           |         |       |    | my  |      | scalar | 1 | VAR 
+27   | counter_from    |         |       |    |     |      |        | 0 | CALL
+28   | evens           |         |       |    |     |      |        | 0 | CALL
+29   | evens           |         |       |    |     |      |        | 0 | CALL
+31   | Memoization     |         |       |    |     |      |        | 0 | COM 
+31   | via             |         |       |    |     |      |        | 0 | COM 
+31   | closure         |         |       |    |     |      |        | 0 | COM 
+32   | memoize         |         |       |    |     |      |        | 1 | FUNC
+33   | func            |         |       |    | my  |      | scalar | 1 | ARG 
+34   | cache           |         |       |    | my  |      | hash   | 1 | VAR 
+35   | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+36   | key             |         |       |    | my  |      | scalar | 1 | VAR 
+36   | join            |         |       |    |     |      |        | 0 | CALL
+37   | cache           |         |       |    |     |      | hash   | 0 | VAR 
+37   | key             |         |       |    |     |      | scalar | 0 | VAR 
+37   | func            |         |       |    |     |      |        | 0 | CALL
+38   | cache           |         |       |    |     |      | hash   | 0 | VAR 
+38   | key             |         |       |    |     |      | scalar | 0 | VAR 
+42   | slow_double     |         |       |    | my  |      | scalar | 1 | FUNC
+42   | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+43   | fast_double     |         |       |    | my  |      | scalar | 1 | VAR 
+43   | memoize         |         |       |    |     |      |        | 0 | CALL
+43   | slow_double     |         |       |    |     |      | scalar | 0 | VAR 
+45   | Closure         |         |       |    |     |      |        | 0 | COM 
+45   | over            |         |       |    |     |      |        | 0 | COM 
+45   | loop            |         |       |    |     |      |        | 0 | COM 
+45   | variable        |         |       |    |     |      |        | 0 | COM 
+45   | capture         |         |       |    |     |      |        | 0 | COM 
+45   | value           |         |       |    |     |      |        | 0 | COM 
+46   | actions         |         |       |    | my  |      | array  | 1 | VAR 
+48   | push            |         |       |    |     |      |        | 0 | CALL
+48   | actions         |         |       |    |     |      | array  | 0 | VAR 
+48   | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+50   | squares         |         |       |    | my  |      | array  | 1 | VAR 
+50   | actions         |         |       |    |     |      | array  | 0 | VAR 
+52   | Named           |         |       |    |     |      |        | 0 | COM 
+52   | inner           |         |       |    |     |      |        | 0 | COM 
+52   | closing         |         |       |    |     |      |        | 0 | COM 
+52   | over            |         |       |    |     |      |        | 0 | COM 
+52   | lexical         |         |       |    |     |      |        | 0 | COM 
+53   | make_validator  |         |       |    |     |      |        | 1 | FUNC
+54   | min             |         |       |    | my  |      | scalar | 1 | ARG 
+54   | max             |         |       |    | my  |      | scalar | 1 | ARG 
+55   | in_range        |         |       |    | my  |      | scalar | 1 | FUNC
+55   | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+55   | min             |         |       |    |     |      | scalar | 0 | VAR 
+55   | max             |         |       |    |     |      | scalar | 0 | VAR 
+56   | validate        |         |       |    |     |      |        | 1 | FUNC
+57   | val             |         |       |    | my  |      | scalar | 1 | ARG 
+58   | in_range        |         |       |    |     |      |        | 0 | CALL
+58   | val             |         |       |    |     |      | scalar | 0 | VAR 
+58   | val             |         |       |    |     |      | scalar | 0 | VAR 
+60   | validate        |         |       |    |     |      |        | 0 | CALL
+63   | Closure         |         |       |    |     |      |        | 0 | COM 
+63   | object          |         |       |    |     |      |        | 0 | COM 
+63   | poor            |         |       |    |     |      |        | 0 | COM 
+63   | mans            |         |       |    |     |      |        | 0 | COM 
+63   | OOP             |         |       |    |     |      |        | 0 | COM 
+64   | make_account    |         |       |    |     |      |        | 1 | FUNC
+65   | balance         |         |       |    | my  |      | scalar | 1 | ARG 
+67   | deposit         |         |       |    |     |      |        | 0 | PROP
+67   | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+67   | balance         |         |       |    |     |      | scalar | 0 | VAR 
+68   | withdraw        |         |       |    |     |      |        | 0 | PROP
+68   | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+68   | balance         |         |       |    |     |      | scalar | 0 | VAR 
+69   | balance         |         |       |    |     |      |        | 0 | PROP
+69   | <lambda>        |         |       |    |     |      |        | 1 | LAM 
+69   | balance         |         |       |    |     |      | scalar | 0 | VAR 
+73   | account         |         |       |    | my  |      | scalar | 1 | VAR 
+73   | make_account    |         |       |    |     |      |        | 0 | CALL
+74   | account         |         |       |    |     |      | hash   | 0 | VAR 
+74   | deposit         | account |       |    |     |      |        | 0 | PROP
+75   | bal             |         |       |    | my  |      | scalar | 1 | VAR 
+75   | account         |         |       |    |     |      | hash   | 0 | VAR 
+75   | balance         | account |       |    |     |      |        | 0 | PROP

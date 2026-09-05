@@ -1,0 +1,567 @@
+LINE | SYM                            | PAR           | SCOPE  | NS           | MOD   | CLUE | TYPE | D | CTX  
+./tools/sources/php/keywords.php:
+1    | keywords                       |               |        |              |       |      |      | 0 | FILE 
+3    | Every                          |               |        |              |       |      |      | 0 | COM  
+3    | word                           |               |        |              |       |      |      | 0 | COM  
+3    | php/config/keywords.txt        |               |        |              |       |      |      | 0 | COM  
+3    | used                           |               |        |              |       |      |      | 0 | COM  
+3    | naming                         |               |        |              |       |      |      | 0 | COM  
+3    | position.                      |               |        |              |       |      |      | 0 | COM  
+3    | PHP                            |               |        |              |       |      |      | 0 | COM  
+3    | allows                         |               |        |              |       |      |      | 0 | COM  
+3    | reserved                       |               |        |              |       |      |      | 0 | COM  
+3    | words                          |               |        |              |       |      |      | 0 | COM  
+3    | variable                       |               |        |              |       |      |      | 0 | COM  
+3    | property                       |               |        |              |       |      |      | 0 | COM  
+3    | method                         |               |        |              |       |      |      | 0 | COM  
+3    | class-constant                 |               |        |              |       |      |      | 0 | COM  
+3    | names                          |               |        |              |       |      |      | 0 | COM  
+3    | class/function/trait/interface |               |        |              |       |      |      | 0 | COM  
+3    | declaration                    |               |        |              |       |      |      | 0 | COM  
+3    | names                          |               |        |              |       |      |      | 0 | COM  
+3    | barred.                        |               |        |              |       |      |      | 0 | COM  
+3    | variants                       |               |        |              |       |      |      | 0 | COM  
+3    | included                       |               |        |              |       |      |      | 0 | COM  
+3    | symbol                         |               |        |              |       |      |      | 0 | COM  
+3    | filter                         |               |        |              |       |      |      | 0 | COM  
+3    | lowercases                     |               |        |              |       |      |      | 0 | COM  
+3    | compares                       |               |        |              |       |      |      | 0 | COM  
+3    | $For                           |               |        |              |       |      |      | 0 | COM  
+3    | collides                       |               |        |              |       |      |      | 0 | COM  
+3    | even                           |               |        |              |       |      |      | 0 | COM  
+3    | though                         |               |        |              |       |      |      | 0 | COM  
+3    | PHP                            |               |        |              |       |      |      | 0 | COM  
+3    | keeps                          |               |        |              |       |      |      | 0 | COM  
+3    | apart.                         |               |        |              |       |      |      | 0 | COM  
+3    | identifiers                    |               |        |              |       |      |      | 0 | COM  
+3    | two                            |               |        |              |       |      |      | 0 | COM  
+3    | characters                     |               |        |              |       |      |      | 0 | COM  
+3    | longer                         |               |        |              |       |      |      | 0 | COM  
+3    | nothing                        |               |        |              |       |      |      | 0 | COM  
+3    | dropped                        |               |        |              |       |      |      | 0 | COM  
+3    | minimum                        |               |        |              |       |      |      | 0 | COM  
+3    | length                         |               |        |              |       |      |      | 0 | COM  
+3    | rather                         |               |        |              |       |      |      | 0 | COM  
+3    | keyword-ness.                  |               |        |              |       |      |      | 0 | COM  
+3    | Position                       |               |        |              |       |      |      | 0 | COM  
+3    | coverage                       |               |        |              |       |      |      | 0 | COM  
+3    | verified                       |               |        |              |       |      |      | 0 | COM  
+3    | php                            |               |        |              |       |      |      | 0 | COM  
+3    | -l                             |               |        |              |       |      |      | 0 | COM  
+3    | word                           |               |        |              |       |      |      | 0 | COM  
+3    | PHP                            |               |        |              |       |      |      | 0 | COM  
+3    | rejects                        |               |        |              |       |      |      | 0 | COM  
+3    | constant                       |               |        |              |       |      |      | 0 | COM  
+3    | reserved                       |               |        |              |       |      |      | 0 | COM  
+3    | ::class                        |               |        |              |       |      |      | 0 | COM  
+3    | fetching.                      |               |        |              |       |      |      | 0 | COM  
+18   | App\Keywords                   |               |        |              |       |      |      | 1 | NS   
+20   | Keywords                       |               |        | App\Keywords |       |      |      | 0 | COM  
+20   | local                          |               |        | App\Keywords |       |      |      | 0 | COM  
+20   | variables.                     |               |        | App\Keywords |       |      |      | 0 | COM  
+21   | $abstract                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+22   | $and                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+23   | $array                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+24   | $as                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+25   | $break                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+26   | $callable                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+27   | $case                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+28   | $catch                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+29   | $class                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+30   | $clone                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+31   | $const                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+32   | $continue                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+33   | $declare                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+34   | $default                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+35   | $die                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+36   | $do                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+37   | $echo                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+38   | $else                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+39   | $elseif                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+40   | $empty                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+41   | $enddeclare                    |               |        | App\Keywords |       |      |      | 0 | VAR  
+42   | $endfor                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+43   | $endforeach                    |               |        | App\Keywords |       |      |      | 0 | VAR  
+44   | $endif                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+45   | $endswitch                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+46   | $endwhile                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+47   | $eval                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+48   | $exit                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+49   | $extends                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+50   | $final                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+51   | $finally                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+52   | $fn                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+53   | $for                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+54   | $foreach                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+55   | $function                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+56   | $global                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+57   | $goto                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+58   | $if                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+59   | $implements                    |               |        | App\Keywords |       |      |      | 0 | VAR  
+60   | $include                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+61   | $include_once                  |               |        | App\Keywords |       |      |      | 0 | VAR  
+62   | $instanceof                    |               |        | App\Keywords |       |      |      | 0 | VAR  
+63   | $insteadof                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+64   | $interface                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+65   | $isset                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+66   | $list                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+67   | $match                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+68   | $namespace                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+69   | $new                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+70   | $or                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+71   | $print                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+72   | $private                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+73   | $protected                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+74   | $public                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+75   | $readonly                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+76   | $require                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+77   | $require_once                  |               |        | App\Keywords |       |      |      | 0 | VAR  
+78   | $return                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+79   | $static                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+80   | $switch                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+81   | $throw                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+82   | $trait                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+83   | $try                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+84   | $unset                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+85   | $use                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+86   | $var                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+87   | $while                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+88   | $xor                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+89   | $yield                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+91   | variants:                      |               |        | App\Keywords |       |      |      | 0 | COM  
+91   | legal                          |               |        | App\Keywords |       |      |      | 0 | COM  
+91   | PHP                            |               |        | App\Keywords |       |      |      | 0 | COM  
+91   | identifiers                    |               |        | App\Keywords |       |      |      | 0 | COM  
+91   | filter                         |               |        | App\Keywords |       |      |      | 0 | COM  
+91   | folds                          |               |        | App\Keywords |       |      |      | 0 | COM  
+91   | onto                           |               |        | App\Keywords |       |      |      | 0 | COM  
+91   | keywords.                      |               |        | App\Keywords |       |      |      | 0 | COM  
+92   | $Abstract                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+93   | $And                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+94   | $Array                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+95   | $As                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+96   | $Break                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+97   | $Callable                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+98   | $Case                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+99   | $Catch                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+100  | $Class                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+101  | $Clone                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+102  | $Const                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+103  | $Continue                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+104  | $Declare                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+105  | $Default                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+106  | $Die                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+107  | $Do                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+108  | $Echo                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+109  | $Else                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+110  | $Elseif                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+111  | $Empty                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+112  | $Enddeclare                    |               |        | App\Keywords |       |      |      | 0 | VAR  
+113  | $Endfor                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+114  | $Endforeach                    |               |        | App\Keywords |       |      |      | 0 | VAR  
+115  | $Endif                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+116  | $Endswitch                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+117  | $Endwhile                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+118  | $Eval                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+119  | $Exit                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+120  | $Extends                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+121  | $Final                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+122  | $Finally                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+123  | $Fn                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+124  | $For                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+125  | $Foreach                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+126  | $Function                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+127  | $Global                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+128  | $Goto                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+129  | $If                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+130  | $Implements                    |               |        | App\Keywords |       |      |      | 0 | VAR  
+131  | $Include                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+132  | $Include_once                  |               |        | App\Keywords |       |      |      | 0 | VAR  
+133  | $Instanceof                    |               |        | App\Keywords |       |      |      | 0 | VAR  
+134  | $Insteadof                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+135  | $Interface                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+136  | $Isset                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+137  | $List                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+138  | $Match                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+139  | $Namespace                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+140  | $New                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+141  | $Or                            |               |        | App\Keywords |       |      |      | 0 | VAR  
+142  | $Print                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+143  | $Private                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+144  | $Protected                     |               |        | App\Keywords |       |      |      | 0 | VAR  
+145  | $Public                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+146  | $Readonly                      |               |        | App\Keywords |       |      |      | 0 | VAR  
+147  | $Require                       |               |        | App\Keywords |       |      |      | 0 | VAR  
+148  | $Require_once                  |               |        | App\Keywords |       |      |      | 0 | VAR  
+149  | $Return                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+150  | $Static                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+151  | $Switch                        |               |        | App\Keywords |       |      |      | 0 | VAR  
+152  | $Throw                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+153  | $Trait                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+154  | $Try                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+155  | $Unset                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+156  | $Use                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+157  | $Var                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+158  | $While                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+159  | $Xor                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+160  | $Yield                         |               |        | App\Keywords |       |      |      | 0 | VAR  
+162  | KeywordHolder                  |               |        | App\Keywords |       |      |      | 1 | CLASS
+164  | Keywords                       |               |        | App\Keywords |       |      |      | 0 | COM  
+164  | constants                      |               |        | App\Keywords |       |      |      | 0 | COM  
+164  | UPPER                          |               |        | App\Keywords |       |      |      | 0 | COM  
+164  | variants.                      |               |        | App\Keywords |       |      |      | 0 | COM  
+165  | ABSTRACT                       | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+166  | AND                            | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+167  | ARRAY                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+168  | AS                             | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+169  | BREAK                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+170  | CASE                           | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+172  | CATCH                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+173  | CLONE                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+174  | CONST                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+175  | CONTINUE                       | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+176  | DECLARE                        | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+177  | DEFAULT                        | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+178  | DIE                            | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+179  | DO                             | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+180  | ECHO                           | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+181  | ELSE                           | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+182  | ELSEIF                         | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+183  | EMPTY                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+184  | ENDDECLARE                     | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+185  | ENDFOR                         | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+186  | ENDFOREACH                     | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+187  | ENDIF                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+188  | ENDSWITCH                      | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+189  | ENDWHILE                       | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+190  | EVAL                           | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+191  | EXIT                           | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+192  | EXTENDS                        | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+193  | FINAL                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+194  | FINALLY                        | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+195  | FN                             | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+196  | FOR                            | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+197  | FOREACH                        | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+198  | FUNCTION                       | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+199  | GLOBAL                         | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+200  | GOTO                           | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+201  | IF                             | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+202  | IMPLEMENTS                     | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+203  | INCLUDE                        | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+204  | INCLUDE_ONCE                   | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+205  | INSTANCEOF                     | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+206  | INSTEADOF                      | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+207  | INTERFACE                      | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+208  | ISSET                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+209  | LIST                           | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+210  | MATCH                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+211  | NEW                            | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+213  | OR                             | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+214  | PRINT                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+215  | PRIVATE                        | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+216  | PROTECTED                      | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+217  | PUBLIC                         | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+218  | READONLY                       | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+219  | REQUIRE                        | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+220  | REQUIRE_ONCE                   | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+221  | RETURN                         | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+222  | STATIC                         | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+223  | SWITCH                         | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+224  | THROW                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+225  | TRAIT                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+226  | TRY                            | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+227  | UNSET                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+228  | USE                            | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+229  | VAR                            | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+230  | WHILE                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+231  | XOR                            | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+232  | YIELD                          | KeywordHolder | public | App\Keywords | const |      |      | 1 | VAR  
+234  | Keywords                       |               |        | App\Keywords |       |      |      | 0 | COM  
+234  | properties.                    |               |        | App\Keywords |       |      |      | 0 | COM  
+235  | $abstract                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+236  | $and                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+237  | $array                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+238  | $as                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+239  | $break                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+240  | $callable                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+241  | $case                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+242  | $catch                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+243  | $class                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+244  | $clone                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+245  | $const                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+246  | $continue                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+247  | $declare                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+248  | $default                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+249  | $die                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+250  | $do                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+251  | $echo                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+252  | $else                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+253  | $elseif                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+254  | $empty                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+255  | $enddeclare                    | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+256  | $endfor                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+257  | $endforeach                    | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+258  | $endif                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+259  | $endswitch                     | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+260  | $endwhile                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+261  | $eval                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+262  | $exit                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+263  | $extends                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+264  | $final                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+265  | $finally                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+266  | $fn                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+267  | $for                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+268  | $foreach                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+269  | $function                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+270  | $global                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+271  | $goto                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+272  | $if                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+273  | $implements                    | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+274  | $include                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+275  | $include_once                  | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+276  | $instanceof                    | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+277  | $insteadof                     | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+278  | $interface                     | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+279  | $isset                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+280  | $list                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+281  | $match                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+282  | $namespace                     | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+283  | $new                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+284  | $or                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+285  | $print                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+286  | $private                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+287  | $protected                     | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+288  | $public                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+289  | $readonly                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+290  | $require                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+291  | $require_once                  | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+292  | $return                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+293  | $static                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+294  | $switch                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+295  | $throw                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+296  | $trait                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+297  | $try                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+298  | $unset                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+299  | $use                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+300  | $var                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+301  | $while                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+302  | $xor                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+303  | $yield                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | PROP 
+305  | Keywords                       |               |        | App\Keywords |       |      |      | 0 | COM  
+305  | method                         |               |        | App\Keywords |       |      |      | 0 | COM  
+305  | names.                         |               |        | App\Keywords |       |      |      | 0 | COM  
+306  | abstract                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+306  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+306  | abstract                       | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+307  | and                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+307  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+307  | and                            | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+308  | array                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+308  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+308  | array                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+309  | as                             | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+309  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+309  | as                             | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+310  | break                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+310  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+310  | break                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+311  | callable                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+311  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+311  | callable                       | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+312  | case                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+312  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+312  | case                           | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+313  | catch                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+313  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+313  | catch                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+314  | class                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+314  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+314  | class                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+315  | clone                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+315  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+315  | clone                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+316  | const                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+316  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+316  | const                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+317  | continue                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+317  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+317  | continue                       | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+318  | declare                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+318  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+318  | declare                        | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+319  | default                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+319  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+319  | default                        | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+320  | die                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+320  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+320  | die                            | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+321  | do                             | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+321  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+321  | do                             | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+322  | echo                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+322  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+322  | echo                           | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+323  | else                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+323  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+323  | else                           | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+324  | elseif                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+324  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+324  | elseif                         | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+325  | empty                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+325  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+325  | empty                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+326  | enddeclare                     | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+326  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+326  | enddeclare                     | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+327  | endfor                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+327  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+327  | endfor                         | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+328  | endforeach                     | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+328  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+328  | endforeach                     | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+329  | endif                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+329  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+329  | endif                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+330  | endswitch                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+330  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+330  | endswitch                      | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+331  | endwhile                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+331  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+331  | endwhile                       | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+332  | eval                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+332  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+332  | eval                           | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+333  | exit                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+333  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+333  | exit                           | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+334  | extends                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+334  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+334  | extends                        | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+335  | final                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+335  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+335  | final                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+336  | finally                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+336  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+336  | finally                        | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+337  | fn                             | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+337  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+337  | fn                             | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+338  | for                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+338  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+338  | for                            | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+339  | foreach                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+339  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+339  | foreach                        | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+340  | function                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+340  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+340  | function                       | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+341  | global                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+341  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+341  | global                         | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+342  | goto                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+342  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+342  | goto                           | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+343  | if                             | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+343  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+343  | if                             | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+344  | implements                     | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+344  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+344  | implements                     | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+345  | include                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+345  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+345  | include                        | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+346  | include_once                   | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+346  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+346  | include_once                   | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+347  | instanceof                     | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+347  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+347  | instanceof                     | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+348  | insteadof                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+348  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+348  | insteadof                      | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+349  | interface                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+349  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+349  | interface                      | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+350  | isset                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+350  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+350  | isset                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+351  | list                           | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+351  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+351  | list                           | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+352  | match                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+352  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+352  | match                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+353  | namespace                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+353  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+353  | namespace                      | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+354  | new                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+354  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+354  | new                            | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+355  | or                             | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+355  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+355  | or                             | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+356  | print                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+356  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+356  | print                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+357  | private                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+357  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+357  | private                        | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+358  | protected                      | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+358  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+358  | protected                      | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+359  | public                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+359  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+359  | public                         | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+360  | readonly                       | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+360  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+360  | readonly                       | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+361  | require                        | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+361  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+361  | require                        | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+362  | require_once                   | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+362  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+362  | require_once                   | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+363  | return                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+363  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+363  | return                         | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+364  | static                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+364  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+364  | static                         | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+365  | switch                         | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+365  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+365  | switch                         | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+366  | throw                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+366  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+366  | throw                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+367  | trait                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+367  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+367  | trait                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+368  | try                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+368  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+368  | try                            | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+369  | unset                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+369  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+369  | unset                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+370  | use                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+370  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+370  | use                            | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+371  | var                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+371  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+371  | var                            | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+372  | while                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+372  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+372  | while                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+373  | xor                            | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+373  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+373  | xor                            | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+374  | yield                          | KeywordHolder | public | App\Keywords |       |      |      | 1 | FUNC 
+374  | $this                          |               |        | App\Keywords |       |      |      | 0 | VAR  
+374  | yield                          | $this         |        | App\Keywords |       |      |      | 0 | PROP 
+377  | Keywords                       |               |        | App\Keywords |       |      |      | 0 | COM  
+377  | arguments                      |               |        | App\Keywords |       |      |      | 0 | COM  
+377  | named-argument                 |               |        | App\Keywords |       |      |      | 0 | COM  
+377  | labels.                        |               |        | App\Keywords |       |      |      | 0 | COM  
+378  | describe                       |               |        | App\Keywords |       |      |      | 1 | FUNC 
+380  | $class_name                    |               |        | App\Keywords |       |      |      | 0 | VAR  
+380  | $for                           |               |        | App\Keywords |       |      |      | 0 | VAR  
+380  | $match                         |               |        | App\Keywords |       |      |      | 0 | VAR  

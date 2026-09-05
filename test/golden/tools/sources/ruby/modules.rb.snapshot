@@ -1,0 +1,85 @@
+LINE | SYM              | PAR        | SCOPE | NS                     | MOD  | CLUE        | TYPE | D | CTX  
+./tools/sources/ruby/modules.rb:
+1    | modules          |            |       |                        |      |             |      | 0 | FILE 
+1    | Modules          |            |       |                        |      |             |      | 0 | COM  
+1    | used             |            |       |                        |      |             |      | 0 | COM  
+1    | namespaces       |            |       |                        |      |             |      | 0 | COM  
+1    | mixins.          |            |       |                        |      |             |      | 0 | COM  
+2    | Greetable        |            |       |                        |      |             |      | 1 | NS   
+3    | DEFAULT          | Greetable  |       | Greetable              |      |             |      | 1 | VAR  
+3    | hello            |            |       |                        |      |             |      | 0 | STR  
+5    | greet            | Greetable  |       | Greetable              |      |             |      | 1 | FUNC 
+6    | DEFAULT          |            |       |                        |      |             |      | 0 | VAR  
+6    | name             |            |       |                        |      |             |      | 0 | VAR  
+10   | Walkable         |            |       |                        |      |             |      | 1 | NS   
+11   | walk             | Walkable   |       | Walkable               |      |             |      | 1 | FUNC 
+12   | walking          |            |       |                        |      |             |      | 0 | STR  
+16   | Namespaced       |            |       |                        |      |             |      | 0 | COM  
+16   | nested           |            |       |                        |      |             |      | 0 | COM  
+16   | module_function. |            |       |                        |      |             |      | 0 | COM  
+17   | Zoo              |            |       |                        |      |             |      | 1 | NS   
+18   | Enclosure        | Zoo        |       | Zoo                    |      |             |      | 1 | CLASS
+19   | initialize       | Enclosure  |       | Zoo                    |      |             |      | 1 | FUNC 
+19   | species          | initialize |       |                        |      |             |      | 0 | ARG  
+20   | @species         | Enclosure  |       |                        |      |             |      | 0 | PROP 
+20   | species          |            |       |                        |      |             |      | 0 | VAR  
+24   | Utils            | Zoo        |       | Zoo                    |      |             |      | 1 | NS   
+25   | module_function  |            |       |                        |      |             |      | 0 | VAR  
+27   | sanitize         | Utils      |       | Zoo::Utils             |      |             |      | 1 | FUNC 
+27   | str              | sanitize   |       |                        |      |             |      | 0 | ARG  
+28   | downcase         | strip      |       |                        |      |             |      | 0 | CALL 
+28   | strip            | str        |       |                        |      |             |      | 0 | CALL 
+28   | str              |            |       |                        |      |             |      | 0 | VAR  
+33   | mixes            |            |       |                        |      |             |      | 0 | COM  
+33   | modules.         |            |       |                        |      |             |      | 0 | COM  
+34   | Person           |            |       |                        |      |             |      | 1 | CLASS
+35   | Greetable        |            |       |                        |      | include     |      | 0 | TYPE 
+35   | include          |            |       |                        |      |             |      | 0 | CALL 
+36   | Walkable         |            |       |                        |      | include     |      | 0 | TYPE 
+36   | include          |            |       |                        |      |             |      | 0 | CALL 
+37   | Greetable        |            |       |                        |      | extend      |      | 0 | TYPE 
+37   | extend           |            |       |                        |      |             |      | 0 | CALL 
+39   | name             | Person     |       |                        |      | attr_reader |      | 1 | PROP 
+41   | initialize       | Person     |       |                        |      |             |      | 1 | FUNC 
+41   | name             | initialize |       |                        |      |             |      | 0 | ARG  
+42   | @name            | Person     |       |                        |      |             |      | 0 | PROP 
+42   | name             |            |       |                        |      |             |      | 0 | VAR  
+46   | Compact          |            |       |                        |      |             |      | 0 | COM  
+46   | qualified        |            |       |                        |      |             |      | 0 | COM  
+46   | definitions:     |            |       |                        |      |             |      | 0 | COM  
+46   | written          |            |       |                        |      |             |      | 0 | COM  
+46   | scope            |            |       |                        |      |             |      | 0 | COM  
+46   | owner            |            |       |                        |      |             |      | 0 | COM  
+46   | namespace.       |            |       |                        |      |             |      | 0 | COM  
+47   | Zoo              |            |       |                        |      |             |      | 0 | NS   
+47   | Feeding          | Zoo        |       | Zoo                    |      |             |      | 1 | NS   
+48   | SCHEDULE         | Feeding    |       | Zoo::Feeding           |      |             |      | 1 | VAR  
+50   | next_meal        | Feeding    |       | Zoo::Feeding           | self |             |      | 1 | FUNC 
+51   | first            | SCHEDULE   |       |                        |      |             |      | 0 | CALL 
+51   | SCHEDULE         |            |       |                        |      |             |      | 0 | VAR  
+55   | Zoo              |            |       |                        |      |             |      | 0 | NS   
+55   | Cage             | Zoo        |       | Zoo                    |      |             |      | 1 | CLASS
+56   | initialize       | Cage       |       | Zoo                    |      |             |      | 1 | FUNC 
+56   | size             | initialize |       |                        |      |             |      | 0 | ARG  
+57   | @size            | Cage       |       |                        |      |             |      | 0 | PROP 
+57   | size             |            |       |                        |      |             |      | 0 | VAR  
+61   | Qualified        |            |       |                        |      |             |      | 0 | COM  
+61   | reads            |            |       |                        |      |             |      | 0 | COM  
+61   | calls:           |            |       |                        |      |             |      | 0 | COM  
+61   | terminal         |            |       |                        |      |             |      | 0 | COM  
+61   | symbol           |            |       |                        |      |             |      | 0 | COM  
+61   | qualifier        |            |       |                        |      |             |      | 0 | COM  
+61   | namespace.       |            |       |                        |      |             |      | 0 | COM  
+62   | first_meal       |            |       |                        |      |             |      | 1 | VAR  
+62   | first            | SCHEDULE   |       | Zoo::Feeding::SCHEDULE |      |             |      | 0 | CALL 
+62   | SCHEDULE         | Feeding    |       | Zoo::Feeding           |      |             |      | 0 | VAR  
+62   | Feeding          | Zoo        |       | Zoo                    |      |             |      | 0 | NS   
+62   | Zoo              |            |       |                        |      |             |      | 0 | NS   
+63   | pen              |            |       |                        |      |             |      | 1 | VAR  
+63   | new              | Enclosure  |       | Zoo::Enclosure         |      |             |      | 0 | CALL 
+63   | Enclosure        | Zoo        |       | Zoo                    |      |             |      | 0 | VAR  
+63   | Zoo              |            |       |                        |      |             |      | 0 | NS   
+63   | otter            |            |       |                        |      |             |      | 0 | STR  
+64   | next_meal        | Feeding    |       | Zoo::Feeding           |      |             |      | 0 | CALL 
+64   | Feeding          | Zoo        |       | Zoo                    |      |             |      | 0 | VAR  
+64   | Zoo              |            |       |                        |      |             |      | 0 | NS   

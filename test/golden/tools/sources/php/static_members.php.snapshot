@@ -1,0 +1,26 @@
+LINE | SYM             | PAR      | SCOPE     | NS         | MOD    | CLUE | TYPE | D | CTX  
+./tools/sources/php/static_members.php:
+1    | static_members  |          |           |            |        |      |      | 0 | FILE 
+3    | App\Models      |          |           |            |        |      |      | 1 | NS   
+5    | members         |          |           | App\Models |        |      |      | 0 | COM  
+8    | Database        |          |           | App\Models |        |      |      | 1 | CLASS
+9    | $instance       | Database | private   | App\Models | static |      |      | 1 | PROP 
+10   | $queryCount     | Database | public    | App\Models | static |      |      | 1 | PROP 
+12   | HOST            | Database | private   | App\Models | const  |      |      | 1 | VAR  
+13   | PORT            | Database | public    | App\Models | const  |      |      | 1 | VAR  
+14   | TIMEOUT         | Database | protected | App\Models | const  |      |      | 1 | VAR  
+16   | __construct     | Database | private   | App\Models |        |      |      | 1 | FUNC 
+17   | constructor     |          |           | App\Models |        |      |      | 0 | COM  
+17   | singleton       |          |           | App\Models |        |      |      | 0 | COM  
+20   | getInstance     | Database | public    | App\Models | static |      |      | 1 | FUNC 
+22   | $instance       | self     |           | App\Models | static |      |      | 0 | PROP 
+24   | $queryCount     | self     |           | App\Models | static |      |      | 0 | PROP 
+25   | $instance       | self     |           | App\Models | static |      |      | 0 | PROP 
+28   | resetQueryCount | Database | public    | App\Models | static |      |      | 1 | FUNC 
+29   | $queryCount     | self     |           | App\Models | static |      |      | 0 | PROP 
+33   | Usage           |          |           | App\Models |        |      |      | 0 | COM  
+33   | examples        |          |           | App\Models |        |      |      | 0 | COM  
+34   | $db             |          |           | App\Models |        |      |      | 0 | VAR  
+34   | getInstance     | Database |           | App\Models | static |      |      | 0 | CALL 
+35   | resetQueryCount | Database |           | App\Models | static |      |      | 0 | CALL 
+36   | $queryCount     | Database |           | App\Models | static |      |      | 0 | PROP 

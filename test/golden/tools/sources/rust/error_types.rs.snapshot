@@ -1,0 +1,62 @@
+LINE | SYM             | PAR      | SCOPE   | NS       | MOD | CLUE         | TYPE                | D | CTX  
+./tools/sources/rust/error_types.rs:
+1    | error_types     |          |         |          |     |              |                     | 0 | FILE 
+1    | Common          |          |         |          |     |              |                     | 0 | COM  
+1    | Rust            |          |         |          |     |              |                     | 0 | COM  
+1    | error           |          |         |          |     |              |                     | 0 | COM  
+1    | patterns:       |          |         |          |     |              |                     | 0 | COM  
+1    | thiserror-style |          |         |          |     |              |                     | 0 | COM  
+1    | enums           |          |         |          |     |              |                     | 0 | COM  
+1    | impls           |          |         |          |     |              |                     | 0 | COM  
+1    | Result          |          |         |          |     |              |                     | 0 | COM  
+1    | chains          |          |         |          |     |              |                     | 0 | COM  
+3    | fmt             |          |         | std      |     |              |                     | 0 | IMP  
+5    | Debug           |          |         |          |     | derive       |                     | 0 | TRAIT
+6    | AppError        |          | pub     |          |     | #[derive]    |                     | 1 | ENUM 
+7    | NotFound        | AppError |         |          |     |              |                     | 1 | CASE 
+8    | InvalidInput    | AppError |         |          |     |              |                     | 1 | CASE 
+9    | Io              | AppError |         |          |     |              |                     | 1 | CASE 
+10   | Parse           | AppError |         |          |     |              |                     | 1 | CASE 
+10   | field           | Parse    | private |          |     |              | String              | 1 | PROP 
+10   | reason          | Parse    | private |          |     |              | String              | 1 | PROP 
+13   | AppError        |          |         |          |     | impl Display |                     | 1 | CLASS
+14   | fmt             | AppError | private |          |     |              | fmt::Result         | 1 | FUNC 
+16   | NotFound        |          |         | AppError |     |              |                     | 0 | CASE 
+16   | write           |          |         |          |     |              | macro               | 0 | CALL 
+16   | found           |          |         |          |     |              |                     | 0 | STR  
+17   | InvalidInput    |          |         | AppError |     |              |                     | 0 | CASE 
+17   | msg             |          |         |          |     |              |                     | 1 | VAR  
+17   | write           |          |         |          |     |              | macro               | 0 | CALL 
+17   | invalid:        |          |         |          |     |              |                     | 0 | STR  
+17   | msg             |          |         |          |     | write        |                     | 0 | ARG  
+18   | Io              |          |         | AppError |     |              |                     | 0 | CASE 
+18   | err             |          |         |          |     |              |                     | 1 | VAR  
+18   | write           |          |         |          |     |              | macro               | 0 | CALL 
+18   | io              |          |         |          |     |              |                     | 0 | STR  
+18   | error:          |          |         |          |     |              |                     | 0 | STR  
+18   | err             |          |         |          |     | write        |                     | 0 | ARG  
+19   | Parse           |          |         | AppError |     |              |                     | 0 | CASE 
+19   | field           |          |         |          |     |              |                     | 1 | VAR  
+19   | reason          |          |         |          |     |              |                     | 1 | VAR  
+20   | write           |          |         |          |     |              | macro               | 0 | CALL 
+20   | parse           |          |         |          |     |              |                     | 0 | STR  
+20   | error           |          |         |          |     |              |                     | 0 | STR  
+20   | field           |          |         |          |     | write        |                     | 0 | ARG  
+20   | reason          |          |         |          |     | write        |                     | 0 | ARG  
+26   | AppError        |          |         |          |     | impl Error   |                     | 1 | CLASS
+28   | AppError        |          |         |          |     | impl From    |                     | 1 | CLASS
+29   | from            | AppError | private |          |     |              | Self                | 1 | FUNC 
+29   | err             |          |         |          |     |              | std::io::Error      | 0 | ARG  
+30   | Io              |          |         | AppError |     |              |                     | 0 | CALL 
+34   | AppResult       |          | pub     |          |     |              | Result<T, AppError> | 1 | TYPE 
+36   | load_config     |          | pub     |          |     |              | AppResult<String>   | 1 | FUNC 
+36   | path            |          |         |          |     |              | &str                | 0 | ARG  
+37   | content         |          |         |          |     |              |                     | 1 | VAR  
+37   | read_to_string  |          |         | std::fs  |     |              |                     | 0 | CALL 
+38   | is_empty        | content  |         |          |     |              |                     | 0 | CALL 
+39   | Err             |          |         |          |     |              |                     | 0 | CALL 
+39   | InvalidInput    |          |         | AppError |     |              |                     | 0 | CALL 
+39   | from            |          |         | String   |     |              |                     | 0 | CALL 
+39   | empty           |          |         |          |     |              |                     | 0 | STR  
+39   | file            |          |         |          |     |              |                     | 0 | STR  
+41   | Ok              |          |         |          |     |              |                     | 0 | CALL 

@@ -1,0 +1,176 @@
+LINE | SYM                                 | PAR              | SCOPE | NS | MOD | CLUE        | TYPE | D | CTX  
+./tools/sources/python/magic-methods.py:
+1    | magic-methods                       |                  |       |    |     |             |      | 0 | FILE 
+1    | Python                              |                  |       |    |     |             |      | 0 | STR  
+1    | magic/dunder                        |                  |       |    |     |             |      | 0 | STR  
+1    | methods.                            |                  |       |    |     |             |      | 0 | STR  
+4    | Vector                              |                  |       |    |     |             |      | 1 | CLASS
+5    | arithmetic                          |                  |       |    |     |             |      | 0 | STR  
+5    | magic                               |                  |       |    |     |             |      | 0 | STR  
+5    | methods.                            |                  |       |    |     |             |      | 0 | STR  
+7    | __init__                            | Vector           |       |    |     |             |      | 1 | FUNC 
+7    | self                                | __init__         |       |    |     |             |      | 0 | ARG  
+7    | xx                                  | __init__         |       |    |     |             |      | 0 | ARG  
+7    | yy                                  | __init__         |       |    |     |             |      | 0 | ARG  
+8    | xx                                  | self             |       |    |     |             |      | 1 | PROP 
+8    | xx                                  |                  |       |    |     |             |      | 0 | VAR  
+9    | yy                                  | self             |       |    |     |             |      | 1 | PROP 
+9    | yy                                  |                  |       |    |     |             |      | 0 | VAR  
+11   | __add__                             | Vector           |       |    |     |             |      | 1 | FUNC 
+11   | self                                | __add__          |       |    |     |             |      | 0 | ARG  
+11   | other                               | __add__          |       |    |     |             |      | 0 | ARG  
+12   | Vector                              |                  |       |    |     |             |      | 0 | CALL 
+12   | xx                                  | self             |       |    |     |             |      | 0 | PROP 
+12   | self                                |                  |       |    |     |             |      | 0 | VAR  
+12   | xx                                  | other            |       |    |     |             |      | 0 | PROP 
+12   | other                               |                  |       |    |     |             |      | 0 | VAR  
+12   | yy                                  | self             |       |    |     |             |      | 0 | PROP 
+12   | self                                |                  |       |    |     |             |      | 0 | VAR  
+12   | yy                                  | other            |       |    |     |             |      | 0 | PROP 
+12   | other                               |                  |       |    |     |             |      | 0 | VAR  
+14   | __sub__                             | Vector           |       |    |     |             |      | 1 | FUNC 
+14   | self                                | __sub__          |       |    |     |             |      | 0 | ARG  
+14   | other                               | __sub__          |       |    |     |             |      | 0 | ARG  
+15   | Vector                              |                  |       |    |     |             |      | 0 | CALL 
+15   | xx                                  | self             |       |    |     |             |      | 0 | PROP 
+15   | self                                |                  |       |    |     |             |      | 0 | VAR  
+15   | xx                                  | other            |       |    |     |             |      | 0 | PROP 
+15   | other                               |                  |       |    |     |             |      | 0 | VAR  
+15   | yy                                  | self             |       |    |     |             |      | 0 | PROP 
+15   | self                                |                  |       |    |     |             |      | 0 | VAR  
+15   | yy                                  | other            |       |    |     |             |      | 0 | PROP 
+15   | other                               |                  |       |    |     |             |      | 0 | VAR  
+17   | __mul__                             | Vector           |       |    |     |             |      | 1 | FUNC 
+17   | self                                | __mul__          |       |    |     |             |      | 0 | ARG  
+17   | scalar                              | __mul__          |       |    |     |             |      | 0 | ARG  
+18   | Vector                              |                  |       |    |     |             |      | 0 | CALL 
+18   | xx                                  | self             |       |    |     |             |      | 0 | PROP 
+18   | self                                |                  |       |    |     |             |      | 0 | VAR  
+18   | scalar                              |                  |       |    |     |             |      | 0 | VAR  
+18   | yy                                  | self             |       |    |     |             |      | 0 | PROP 
+18   | self                                |                  |       |    |     |             |      | 0 | VAR  
+18   | scalar                              |                  |       |    |     |             |      | 0 | VAR  
+20   | __str__                             | Vector           |       |    |     |             |      | 1 | FUNC 
+20   | self                                | __str__          |       |    |     |             |      | 0 | ARG  
+21   | f"Vector({self.xx}, {self.yy})"     |                  |       |    |     |             |      | 0 | STR  
+21   | Vector                              |                  |       |    |     |             |      | 0 | STR  
+21   | xx                                  | self             |       |    |     |             |      | 0 | PROP 
+21   | self                                |                  |       |    |     |             |      | 0 | VAR  
+21   | yy                                  | self             |       |    |     |             |      | 0 | PROP 
+21   | self                                |                  |       |    |     |             |      | 0 | VAR  
+23   | __repr__                            | Vector           |       |    |     |             |      | 1 | FUNC 
+23   | self                                | __repr__         |       |    |     |             |      | 0 | ARG  
+24   | f"Vector(x={self.xx}, y={self.yy})" |                  |       |    |     |             |      | 0 | STR  
+24   | Vectorx=                            |                  |       |    |     |             |      | 0 | STR  
+24   | y=                                  |                  |       |    |     |             |      | 0 | STR  
+24   | xx                                  | self             |       |    |     |             |      | 0 | PROP 
+24   | self                                |                  |       |    |     |             |      | 0 | VAR  
+24   | yy                                  | self             |       |    |     |             |      | 0 | PROP 
+24   | self                                |                  |       |    |     |             |      | 0 | VAR  
+26   | __eq__                              | Vector           |       |    |     |             |      | 1 | FUNC 
+26   | self                                | __eq__           |       |    |     |             |      | 0 | ARG  
+26   | other                               | __eq__           |       |    |     |             |      | 0 | ARG  
+27   | xx                                  | self             |       |    |     |             |      | 0 | PROP 
+27   | self                                |                  |       |    |     |             |      | 0 | VAR  
+27   | xx                                  | other            |       |    |     |             |      | 0 | PROP 
+27   | other                               |                  |       |    |     |             |      | 0 | VAR  
+27   | yy                                  | self             |       |    |     |             |      | 0 | PROP 
+27   | self                                |                  |       |    |     |             |      | 0 | VAR  
+27   | yy                                  | other            |       |    |     |             |      | 0 | PROP 
+27   | other                               |                  |       |    |     |             |      | 0 | VAR  
+29   | __len__                             | Vector           |       |    |     |             |      | 1 | FUNC 
+29   | self                                | __len__          |       |    |     |             |      | 0 | ARG  
+30   | int                                 |                  |       |    |     |             |      | 0 | CALL 
+30   | xx                                  | self             |       |    |     |             |      | 0 | PROP 
+30   | self                                |                  |       |    |     |             |      | 0 | VAR  
+30   | yy                                  | self             |       |    |     |             |      | 0 | PROP 
+30   | self                                |                  |       |    |     |             |      | 0 | VAR  
+33   | Container                           |                  |       |    |     |             |      | 1 | CLASS
+34   | container                           |                  |       |    |     |             |      | 0 | STR  
+34   | magic                               |                  |       |    |     |             |      | 0 | STR  
+34   | methods.                            |                  |       |    |     |             |      | 0 | STR  
+36   | __init__                            | Container        |       |    |     |             |      | 1 | FUNC 
+36   | self                                | __init__         |       |    |     |             |      | 0 | ARG  
+37   | items                               | self             |       |    |     |             |      | 1 | PROP 
+39   | __getitem__                         | Container        |       |    |     |             |      | 1 | FUNC 
+39   | self                                | __getitem__      |       |    |     |             |      | 0 | ARG  
+39   | index                               | __getitem__      |       |    |     |             |      | 0 | ARG  
+40   | items                               | self             |       |    |     |             |      | 0 | PROP 
+40   | self                                |                  |       |    |     |             |      | 0 | VAR  
+40   | index                               |                  |       |    |     |             |      | 0 | VAR  
+42   | __setitem__                         | Container        |       |    |     |             |      | 1 | FUNC 
+42   | self                                | __setitem__      |       |    |     |             |      | 0 | ARG  
+42   | index                               | __setitem__      |       |    |     |             |      | 0 | ARG  
+42   | value                               | __setitem__      |       |    |     |             |      | 0 | ARG  
+43   | value                               |                  |       |    |     |             |      | 0 | VAR  
+45   | __delitem__                         | Container        |       |    |     |             |      | 1 | FUNC 
+45   | self                                | __delitem__      |       |    |     |             |      | 0 | ARG  
+45   | index                               | __delitem__      |       |    |     |             |      | 0 | ARG  
+46   | items                               | self             |       |    |     |             |      | 0 | PROP 
+46   | self                                |                  |       |    |     |             |      | 0 | VAR  
+48   | __len__                             | Container        |       |    |     |             |      | 1 | FUNC 
+48   | self                                | __len__          |       |    |     |             |      | 0 | ARG  
+49   | len                                 |                  |       |    |     |             |      | 0 | CALL 
+49   | items                               | self             |       |    |     |             |      | 0 | PROP 
+49   | self                                |                  |       |    |     |             |      | 0 | VAR  
+51   | __contains__                        | Container        |       |    |     |             |      | 1 | FUNC 
+51   | self                                | __contains__     |       |    |     |             |      | 0 | ARG  
+51   | item                                | __contains__     |       |    |     |             |      | 0 | ARG  
+52   | item                                |                  |       |    |     |             |      | 0 | VAR  
+52   | items                               | self             |       |    |     |             |      | 0 | PROP 
+52   | self                                |                  |       |    |     |             |      | 0 | VAR  
+54   | __iter__                            | Container        |       |    |     |             |      | 1 | FUNC 
+54   | self                                | __iter__         |       |    |     |             |      | 0 | ARG  
+55   | iter                                |                  |       |    |     |             |      | 0 | CALL 
+55   | items                               | self             |       |    |     |             |      | 0 | PROP 
+55   | self                                |                  |       |    |     |             |      | 0 | VAR  
+58   | CallableClass                       |                  |       |    |     |             |      | 1 | CLASS
+59   | __call__                            |                  |       |    |     |             |      | 0 | STR  
+59   | method.                             |                  |       |    |     |             |      | 0 | STR  
+61   | __init__                            | CallableClass    |       |    |     |             |      | 1 | FUNC 
+61   | self                                | __init__         |       |    |     |             |      | 0 | ARG  
+61   | multiplier                          | __init__         |       |    |     |             |      | 0 | ARG  
+62   | multiplier                          | self             |       |    |     |             |      | 1 | PROP 
+62   | multiplier                          |                  |       |    |     |             |      | 0 | VAR  
+64   | __call__                            | CallableClass    |       |    |     |             |      | 1 | FUNC 
+64   | self                                | __call__         |       |    |     |             |      | 0 | ARG  
+64   | value                               | __call__         |       |    |     |             |      | 0 | ARG  
+65   | value                               |                  |       |    |     |             |      | 0 | VAR  
+65   | multiplier                          | self             |       |    |     |             |      | 0 | PROP 
+65   | self                                |                  |       |    |     |             |      | 0 | VAR  
+68   | ManagedAttribute                    |                  |       |    |     |             |      | 1 | CLASS
+69   | attribute                           |                  |       |    |     |             |      | 0 | STR  
+69   | access                              |                  |       |    |     |             |      | 0 | STR  
+69   | methods.                            |                  |       |    |     |             |      | 0 | STR  
+71   | __getattr__                         | ManagedAttribute |       |    |     |             |      | 1 | FUNC 
+71   | self                                | __getattr__      |       |    |     |             |      | 0 | ARG  
+71   | name                                | __getattr__      |       |    |     |             |      | 0 | ARG  
+72   | f"Getting {name}"                   |                  |       |    |     |             |      | 0 | STR  
+72   | Getting                             |                  |       |    |     |             |      | 0 | STR  
+72   | name                                |                  |       |    |     |             |      | 0 | VAR  
+74   | __setattr__                         | ManagedAttribute |       |    |     |             |      | 1 | FUNC 
+74   | self                                | __setattr__      |       |    |     |             |      | 0 | ARG  
+74   | name                                | __setattr__      |       |    |     |             |      | 0 | ARG  
+74   | value                               | __setattr__      |       |    |     |             |      | 0 | ARG  
+75   | __setattr__                         |                  |       |    |     |             |      | 0 | CALL 
+75   | super                               |                  |       |    |     |             |      | 0 | CALL 
+75   | name                                |                  |       |    |     | __setattr__ |      | 0 | ARG  
+75   | value                               |                  |       |    |     | __setattr__ |      | 0 | ARG  
+77   | __delattr__                         | ManagedAttribute |       |    |     |             |      | 1 | FUNC 
+77   | self                                | __delattr__      |       |    |     |             |      | 0 | ARG  
+77   | name                                | __delattr__      |       |    |     |             |      | 0 | ARG  
+78   | __delattr__                         |                  |       |    |     |             |      | 0 | CALL 
+78   | super                               |                  |       |    |     |             |      | 0 | CALL 
+78   | name                                |                  |       |    |     | __delattr__ |      | 0 | ARG  
+81   | ContextManager                      |                  |       |    |     |             |      | 1 | CLASS
+82   | context                             |                  |       |    |     |             |      | 0 | STR  
+82   | manager                             |                  |       |    |     |             |      | 0 | STR  
+82   | methods.                            |                  |       |    |     |             |      | 0 | STR  
+84   | __enter__                           | ContextManager   |       |    |     |             |      | 1 | FUNC 
+84   | self                                | __enter__        |       |    |     |             |      | 0 | ARG  
+85   | self                                |                  |       |    |     |             |      | 0 | VAR  
+87   | __exit__                            | ContextManager   |       |    |     |             |      | 1 | FUNC 
+87   | self                                | __exit__         |       |    |     |             |      | 0 | ARG  
+87   | exc_type                            | __exit__         |       |    |     |             |      | 0 | ARG  
+87   | exc_val                             | __exit__         |       |    |     |             |      | 0 | ARG  
+87   | exc_tb                              | __exit__         |       |    |     |             |      | 0 | ARG  

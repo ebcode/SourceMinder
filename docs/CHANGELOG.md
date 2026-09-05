@@ -10,6 +10,7 @@
 - PHP Indexer: now indexes use trait statements
 - Python Indexer: now index "self" and "cls" params
 - Ruby Indexer: initial implementation
+- apply --exclude-dir/--exclude-file to named files in file mode
 
 ## Version 0.4.0-beta (2026-08-24)
 

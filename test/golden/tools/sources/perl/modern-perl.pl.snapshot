@@ -1,0 +1,69 @@
+LINE | SYM                  | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/modern-perl.pl:
+1    | modern-perl          |     |       |    |     |      |        | 0 | FILE
+3    | strict               |     |       |    |     |      |        | 0 | IMP 
+4    | warnings             |     |       |    |     |      |        | 0 | IMP 
+5    | feature              |     |       |    |     |      |        | 0 | IMP 
+5    | say                  |     |       |    |     |      |        | 0 | IMP 
+5    | state                |     |       |    |     |      |        | 0 | IMP 
+5    | unicode_strings      |     |       |    |     |      |        | 0 | IMP 
+7    | instead              |     |       |    |     |      |        | 0 | COM 
+8    | greet_modern         |     |       |    |     |      |        | 1 | FUNC
+9    | name                 |     |       |    | my  |      | scalar | 1 | ARG 
+10   | say                  |     |       |    |     |      |        | 0 | CALL
+10   | Hello                |     |       |    |     |      |        | 0 | STR 
+10   | $name!               |     |       |    |     |      |        | 0 | STR 
+10   | name                 |     |       |    |     |      | scalar | 0 | VAR 
+13   | state                |     |       |    |     |      |        | 0 | COM 
+13   | variables            |     |       |    |     |      |        | 0 | COM 
+13   | like                 |     |       |    |     |      |        | 0 | COM 
+13   | static               |     |       |    |     |      |        | 0 | COM 
+13   | locals               |     |       |    |     |      |        | 0 | COM 
+14   | call_count           |     |       |    |     |      |        | 1 | FUNC
+15   | count                |     |       |    |     |      | scalar | 1 | VAR 
+16   | count                |     |       |    |     |      | scalar | 0 | VAR 
+19   | fibonacci            |     |       |    |     |      |        | 1 | FUNC
+21   | cache                |     |       |    |     |      | hash   | 1 | VAR 
+23   | cache                |     |       |    |     |      | hash   | 0 | VAR 
+23   | fibonacci            |     |       |    |     |      |        | 0 | CALL
+23   | fibonacci            |     |       |    |     |      |        | 0 | CALL
+26   | Given/when           |     |       |    |     |      |        | 0 | COM 
+26   | switch-like          |     |       |    |     |      |        | 0 | COM 
+27   | feature              |     |       |    |     |      |        | 0 | IMP 
+28   | warnings             |     |       |    |     |      |        | 0 | IMP 
+30   | classify_number      |     |       |    |     |      |        | 1 | FUNC
+32   | result               |     |       |    | my  |      | scalar | 1 | VAR 
+33   | result               |     |       |    |     |      | scalar | 0 | VAR 
+33   | negative             |     |       |    |     |      |        | 0 | STR 
+34   | result               |     |       |    |     |      | scalar | 0 | VAR 
+34   | zero                 |     |       |    |     |      |        | 0 | STR 
+35   | result               |     |       |    |     |      | scalar | 0 | VAR 
+35   | small                |     |       |    |     |      |        | 0 | STR 
+36   | result               |     |       |    |     |      | scalar | 0 | VAR 
+36   | large                |     |       |    |     |      |        | 0 | STR 
+37   | result               |     |       |    |     |      | scalar | 0 | VAR 
+40   | Postfix              |     |       |    |     |      |        | 0 | COM 
+40   | conditionals         |     |       |    |     |      |        | 0 | COM 
+40   | loops                |     |       |    |     |      |        | 0 | COM 
+41   | filter_positives     |     |       |    |     |      |        | 1 | FUNC
+42   | nums                 |     |       |    | my  |      | array  | 1 | ARG 
+43   | pos                  |     |       |    | my  |      | array  | 1 | VAR 
+43   | nums                 |     |       |    |     |      | array  | 0 | VAR 
+44   | pos                  |     |       |    |     |      | array  | 0 | VAR 
+47   | String               |     |       |    |     |      |        | 0 | COM 
+47   | operations           |     |       |    |     |      |        | 0 | COM 
+48   | normalize_whitespace |     |       |    |     |      |        | 1 | FUNC
+49   | str                  |     |       |    | my  |      | scalar | 1 | ARG 
+50   | str                  |     |       |    |     |      | scalar | 0 | VAR 
+51   | str                  |     |       |    |     |      | scalar | 0 | VAR 
+52   | str                  |     |       |    |     |      | scalar | 0 | VAR 
+55   | Error                |     |       |    |     |      |        | 0 | COM 
+55   | handling             |     |       |    |     |      |        | 0 | COM 
+55   | eval/die             |     |       |    |     |      |        | 0 | COM 
+56   | safe_divide          |     |       |    |     |      |        | 1 | FUNC
+58   | result               |     |       |    | my  |      | scalar | 1 | VAR 
+60   | warn                 |     |       |    |     |      |        | 0 | CALL
+60   | Division             |     |       |    |     |      |        | 0 | STR 
+60   | failed:              |     |       |    |     |      |        | 0 | STR 
+60   | $@                   |     |       |    |     |      |        | 0 | STR 
+63   | result               |     |       |    |     |      | scalar | 0 | VAR 

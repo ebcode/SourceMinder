@@ -1,0 +1,28 @@
+LINE | SYM           | PAR   | SCOPE | NS         | MOD             | CLUE         | TYPE    | D | CTX 
+./tools/sources/rust/extern_ffi.rs:
+1    | extern_ffi    |       |       |            |                 |              |         | 0 | FILE
+1    | blocks        |       |       |            |                 |              |         | 0 | COM 
+1    | FFI           |       |       |            |                 |              |         | 0 | COM 
+3    | alloc         |       |       |            |                 |              |         | 0 | IMP 
+4    | pm            |       |       | proc_macro |                 | as           |         | 0 | IMP 
+6    | FFI:          |       |       |            |                 |              |         | 0 | COM 
+6    | foreign       |       |       |            |                 |              |         | 0 | COM 
+6    | functions     |       |       |            |                 |              |         | 0 | COM 
+6    | declared      |       |       |            |                 |              |         | 0 | COM 
+6    | block         |       |       |            |                 |              |         | 0 | COM 
+8    | malloc        |       | pub   |            | extern "C"      |              | *mut u8 | 1 | FUNC
+8    | size          |       |       |            |                 |              | usize   | 0 | ARG 
+9    | free          |       | pub   |            | extern "C"      |              |         | 1 | FUNC
+9    | ptr           |       |       |            |                 |              | *mut u8 | 0 | ARG 
+10   | strlen        |       | pub   |            | extern "C"      |              | usize   | 1 | FUNC
+11   | errno         |       | pub   |            | extern "C"      |              | i32     | 1 | VAR 
+15   | GetLastError  |       | pub   |            | extern "system" |              | u32     | 1 | FUNC
+18   | Function      |       |       |            |                 |              |         | 0 | COM 
+18   | exported      |       |       |            |                 |              |         | 0 | COM 
+18   | ABI           |       |       |            |                 |              |         | 0 | COM 
+20   | rust_callback |       | pub   |            | extern "C"      | #[no_mangle] | i32     | 1 | FUNC
+20   | value         |       |       |            |                 |              | i32     | 0 | ARG 
+21   | wrapping_mul  | value |       |            |                 |              |         | 0 | CALL
+24   | rare          |       |       |            |                 |              |         | 0 | COM 
+24   | combo         |       |       |            |                 |              |         | 0 | COM 
+25   | const_helper  |       | pub   |            | const           |              | u32     | 1 | FUNC

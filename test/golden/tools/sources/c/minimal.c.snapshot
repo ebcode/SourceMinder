@@ -1,0 +1,4 @@
+LINE | SYM     | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/c/minimal.c:
+1    | minimal |     |       |    |     |      |      | 0 | FILE
+1    | main    |     |       |    |     |      | int  | 1 | FUNC

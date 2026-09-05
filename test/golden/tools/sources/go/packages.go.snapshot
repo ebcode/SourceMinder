@@ -1,0 +1,48 @@
+LINE | SYM                | PAR    | SCOPE   | NS   | MOD | CLUE  | TYPE      | D | CTX 
+./tools/sources/go/packages.go:
+1    | packages           |        |         |      |     |       |           | 0 | FILE
+1    | main               |        |         |      |     |       |           | 0 | NS  
+4    | fmt                |        |         | main |     |       |           | 0 | IMP 
+5    | io                 |        |         | main |     |       |           | 0 | IMP 
+6    | net/http           |        |         | main |     |       |           | 0 | IMP 
+7    | os                 |        |         | main |     |       |           | 0 | IMP 
+10   | alias              |        |         |      |     |       |           | 0 | COM 
+12   | stdlog             |        |         | main |     | alias | log       | 0 | IMP 
+13   | mrand              |        |         | main |     | alias | math/rand | 0 | IMP 
+16   | Blank              |        |         |      |     |       |           | 0 | COM 
+16   | side               |        |         |      |     |       |           | 0 | COM 
+16   | effects            |        |         |      |     |       |           | 0 | COM 
+17   | database/sql       |        |         | main |     | blank |           | 0 | IMP 
+19   | Dot                |        |         |      |     |       |           | 0 | COM 
+19   | imports            |        |         |      |     |       |           | 0 | COM 
+19   | current            |        |         |      |     |       |           | 0 | COM 
+19   | namespace          |        |         |      |     |       |           | 0 | COM 
+20   | math               |        |         | main |     | dot   |           | 0 | IMP 
+22   | useImports         |        | private | main |     |       |           | 1 | FUNC
+23   | Standard           |        |         |      |     |       |           | 0 | COM 
+23   | library            |        |         |      |     |       |           | 0 | COM 
+23   | usage              |        |         |      |     |       |           | 0 | COM 
+24   | Println            | fmt    |         |      |     |       |           | 0 | CALL
+24   | Hello              |        |         |      |     |       |           | 0 | STR 
+26   | Aliased            |        |         |      |     |       |           | 0 | COM 
+27   | Println            | stdlog |         |      |     |       |           | 0 | CALL
+27   | Logging            |        |         |      |     |       |           | 0 | STR 
+28   | Intn               | mrand  |         |      |     |       |           | 0 | CALL
+30   | Multiple           |        |         |      |     |       |           | 0 | COM 
+30   | imports            |        |         |      |     |       |           | 0 | COM 
+31   | file               |        | private | main |     |       |           | 1 | VAR 
+31   | err                |        | private | main |     |       |           | 1 | VAR 
+31   | Open               | os     |         |      |     |       |           | 0 | CALL
+31   | file.txt           |        |         |      |     |       |           | 0 | STR 
+32   | err                |        |         | main |     |       |           | 0 | VAR 
+35   | Close              | file   |         | main |     | defer |           | 0 | CALL
+35   | file               |        |         | main |     |       |           | 0 | VAR 
+35   | Close              | file   |         | main |     |       |           | 0 | PROP
+38   | file               |        |         | main |     |       |           | 0 | VAR 
+40   | HTTP               |        |         |      |     |       |           | 0 | COM 
+40   | client             |        |         |      |     |       |           | 0 | COM 
+41   | resp               |        | private | main |     |       |           | 1 | VAR 
+41   | err                |        | private | main |     |       |           | 1 | VAR 
+41   | Get                | http   |         |      |     |       |           | 0 | CALL
+41   | http://example.com |        |         |      |     |       |           | 0 | STR 
+42   | resp               |        |         | main |     |       |           | 0 | VAR 

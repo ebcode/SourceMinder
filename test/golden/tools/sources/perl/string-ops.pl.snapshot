@@ -1,0 +1,130 @@
+LINE | SYM               | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/string-ops.pl:
+1    | string-ops        |     |       |    |     |      |        | 0 | FILE
+1    | strict            |     |       |    |     |      |        | 0 | IMP 
+2    | warnings          |     |       |    |     |      |        | 0 | IMP 
+4    | Basic             |     |       |    |     |      |        | 0 | COM 
+4    | case              |     |       |    |     |      |        | 0 | COM 
+4    | conversion        |     |       |    |     |      |        | 0 | COM 
+5    | normalize_name    |     |       |    |     |      |        | 1 | FUNC
+6    | name              |     |       |    | my  |      | scalar | 1 | ARG 
+7    | ucfirst           |     |       |    |     |      |        | 0 | CALL
+7    | lc                |     |       |    |     |      |        | 0 | CALL
+7    | name              |     |       |    |     |      | scalar | 0 | VAR 
+10   | Title             |     |       |    |     |      |        | 0 | COM 
+10   | case              |     |       |    |     |      |        | 0 | COM 
+11   | title_case        |     |       |    |     |      |        | 1 | FUNC
+12   | str               |     |       |    | my  |      | scalar | 1 | ARG 
+13   | str               |     |       |    |     |      | scalar | 0 | VAR 
+14   | str               |     |       |    |     |      | scalar | 0 | VAR 
+17   | Index             |     |       |    |     |      |        | 0 | COM 
+17   | rindex            |     |       |    |     |      |        | 0 | COM 
+18   | find_extension    |     |       |    |     |      |        | 1 | FUNC
+19   | filename          |     |       |    | my  |      | scalar | 1 | ARG 
+20   | dot               |     |       |    | my  |      | scalar | 1 | VAR 
+20   | rindex            |     |       |    |     |      |        | 0 | CALL
+20   | filename          |     |       |    |     |      | scalar | 0 | VAR 
+21   | dot               |     |       |    |     |      | scalar | 0 | VAR 
+21   | substr            |     |       |    |     |      |        | 0 | CALL
+21   | filename          |     |       |    |     |      | scalar | 0 | VAR 
+21   | dot               |     |       |    |     |      | scalar | 0 | VAR 
+24   | String            |     |       |    |     |      |        | 0 | COM 
+24   | repetition        |     |       |    |     |      |        | 0 | COM 
+24   | padding           |     |       |    |     |      |        | 0 | COM 
+25   | pad_left          |     |       |    |     |      |        | 1 | FUNC
+26   | str               |     |       |    | my  |      | scalar | 1 | ARG 
+26   | width             |     |       |    | my  |      | scalar | 1 | ARG 
+26   | char              |     |       |    | my  |      | scalar | 1 | ARG 
+27   | char              |     |       |    |     |      | scalar | 0 | VAR 
+28   | padding           |     |       |    | my  |      | scalar | 1 | VAR 
+28   | char              |     |       |    |     |      | scalar | 0 | VAR 
+28   | width             |     |       |    |     |      | scalar | 0 | VAR 
+28   | length            |     |       |    |     |      |        | 0 | CALL
+28   | str               |     |       |    |     |      | scalar | 0 | VAR 
+29   | padding           |     |       |    |     |      | scalar | 0 | VAR 
+29   | str               |     |       |    |     |      | scalar | 0 | VAR 
+32   | Heredoc           |     |       |    |     |      |        | 0 | COM 
+32   | forms             |     |       |    |     |      |        | 0 | COM 
+33   | build_report      |     |       |    |     |      |        | 1 | FUNC
+34   | title             |     |       |    | my  |      | scalar | 1 | ARG 
+34   | body              |     |       |    | my  |      | scalar | 1 | ARG 
+35   | header            |     |       |    | my  |      | scalar | 1 | VAR 
+36   | title             |     |       |    |     |      | scalar | 0 | VAR 
+38   | footer            |     |       |    | my  |      | scalar | 1 | VAR 
+41   | header            |     |       |    |     |      | scalar | 0 | VAR 
+41   | body              |     |       |    |     |      | scalar | 0 | VAR 
+41   | footer            |     |       |    |     |      | scalar | 0 | VAR 
+44   | tr///             |     |       |    |     |      |        | 0 | COM 
+44   | transliteration   |     |       |    |     |      |        | 0 | COM 
+45   | count_vowels      |     |       |    |     |      |        | 1 | FUNC
+46   | str               |     |       |    | my  |      | scalar | 1 | ARG 
+47   | copy              |     |       |    | my  |      | scalar | 1 | VAR 
+47   | str               |     |       |    |     |      | scalar | 0 | VAR 
+48   | copy              |     |       |    |     |      | scalar | 0 | VAR 
+51   | rot13             |     |       |    |     |      |        | 1 | FUNC
+52   | str               |     |       |    | my  |      | scalar | 1 | ARG 
+53   | str               |     |       |    |     |      | scalar | 0 | VAR 
+54   | str               |     |       |    |     |      | scalar | 0 | VAR 
+57   | pos               |     |       |    |     |      |        | 0 | COM 
+58   | extract_words     |     |       |    |     |      |        | 1 | FUNC
+59   | text              |     |       |    | my  |      | scalar | 1 | ARG 
+60   | words             |     |       |    | my  |      | array  | 1 | VAR 
+61   | text              |     |       |    |     |      | scalar | 0 | VAR 
+62   | push              |     |       |    |     |      |        | 0 | CALL
+62   | words             |     |       |    |     |      | array  | 0 | VAR 
+64   | words             |     |       |    |     |      | array  | 0 | VAR 
+67   | quotemeta         |     |       |    |     |      |        | 0 | COM 
+67   | Q...E             |     |       |    |     |      |        | 0 | COM 
+68   | literal_search    |     |       |    |     |      |        | 1 | FUNC
+69   | text              |     |       |    | my  |      | scalar | 1 | ARG 
+69   | pattern           |     |       |    | my  |      | scalar | 1 | ARG 
+70   | quoted            |     |       |    | my  |      | scalar | 1 | VAR 
+70   | quotemeta         |     |       |    |     |      |        | 0 | CALL
+70   | pattern           |     |       |    |     |      | scalar | 0 | VAR 
+71   | text              |     |       |    |     |      | scalar | 0 | VAR 
+71   | quoted            |     |       |    |     |      | scalar | 0 | VAR 
+74   | String            |     |       |    |     |      |        | 0 | COM 
+74   | multiplication    |     |       |    |     |      |        | 0 | COM 
+74   | formatting        |     |       |    |     |      |        | 0 | COM 
+75   | make_ruler        |     |       |    |     |      |        | 1 | FUNC
+76   | width             |     |       |    | my  |      | scalar | 1 | ARG 
+77   | width             |     |       |    |     |      | scalar | 0 | VAR 
+80   | index             |     |       |    |     |      |        | 0 | COM 
+80   | finding           |     |       |    |     |      |        | 0 | COM 
+80   | substrings        |     |       |    |     |      |        | 0 | COM 
+81   | count_occurrences |     |       |    |     |      |        | 1 | FUNC
+82   | haystack          |     |       |    | my  |      | scalar | 1 | ARG 
+82   | needle            |     |       |    | my  |      | scalar | 1 | ARG 
+83   | count             |     |       |    | my  |      | scalar | 1 | VAR 
+84   | pos               |     |       |    | my  |      | scalar | 1 | VAR 
+85   | pos               |     |       |    |     |      | scalar | 0 | VAR 
+85   | index             |     |       |    |     |      |        | 0 | CALL
+85   | haystack          |     |       |    |     |      | scalar | 0 | VAR 
+85   | needle            |     |       |    |     |      | scalar | 0 | VAR 
+85   | pos               |     |       |    |     |      | scalar | 0 | VAR 
+86   | count             |     |       |    |     |      | scalar | 0 | VAR 
+87   | pos               |     |       |    |     |      | scalar | 0 | VAR 
+87   | length            |     |       |    |     |      |        | 0 | CALL
+87   | needle            |     |       |    |     |      | scalar | 0 | VAR 
+89   | count             |     |       |    |     |      | scalar | 0 | VAR 
+92   | formatting        |     |       |    |     |      |        | 0 | COM 
+92   | keyword           |     |       |    |     |      |        | 0 | COM 
+92   | variables         |     |       |    |     |      |        | 0 | COM 
+92   | around            |     |       |    |     |      |        | 0 | COM 
+92   | interesting       |     |       |    |     |      |        | 0 | COM 
+93   | format_currency   |     |       |    |     |      |        | 1 | FUNC
+94   | amount            |     |       |    | my  |      | scalar | 1 | ARG 
+94   | symbol            |     |       |    | my  |      | scalar | 1 | ARG 
+95   | symbol            |     |       |    |     |      | scalar | 0 | VAR 
+96   | sprintf           |     |       |    |     |      |        | 0 | CALL
+96   | %s%.2f            |     |       |    |     |      |        | 0 | STR 
+96   | symbol            |     |       |    |     |      | scalar | 0 | VAR 
+96   | amount            |     |       |    |     |      | scalar | 0 | VAR 
+99   | lc                |     |       |    |     |      |        | 0 | COM 
+99   | uc                |     |       |    |     |      |        | 0 | COM 
+99   | normalization     |     |       |    |     |      |        | 0 | COM 
+100  | canonicalize_key  |     |       |    |     |      |        | 1 | FUNC
+101  | key               |     |       |    | my  |      | scalar | 1 | ARG 
+102  | key               |     |       |    |     |      | scalar | 0 | VAR 
+103  | lc                |     |       |    |     |      |        | 0 | CALL
+103  | key               |     |       |    |     |      | scalar | 0 | VAR 

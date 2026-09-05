@@ -1,0 +1,19 @@
+LINE | SYM            | PAR            | SCOPE  | NS         | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/attributes.php:
+1    | attributes     |                |        |            |     |      |      | 0 | FILE 
+3    | App\Models     |                |        |            |     |      |      | 1 | NS   
+5    | Custom         |                |        | App\Models |     |      |      | 0 | COM  
+5    | attribute      |                |        | App\Models |     |      |      | 0 | COM  
+5    | definitions    |                |        | App\Models |     |      |      | 0 | COM  
+8    | Route          |                |        | App\Models |     |      |      | 1 | CLASS
+10   | __construct    | Route          | public | App\Models |     |      |      | 1 | FUNC 
+16   | Deprecated     |                |        | App\Models |     |      |      | 1 | CLASS
+18   | __construct    | Deprecated     | public | App\Models |     |      |      | 1 | FUNC 
+21   | using          |                |        | App\Models |     |      |      | 0 | COM  
+21   | attributes     |                |        | App\Models |     |      |      | 0 | COM  
+24   | UserController |                |        | App\Models |     |      |      | 1 | CLASS
+26   | show           | UserController | public | App\Models |     |      |      | 1 | FUNC 
+28   | id             |                |        | App\Models |     |      |      | 0 | STR  
+31   | oldMethod      | UserController | public | App\Models |     |      |      | 1 | FUNC 
+34   | Deprecated     |                |        | App\Models |     |      |      | 0 | COM  
+34   | method         |                |        | App\Models |     |      |      | 0 | COM  

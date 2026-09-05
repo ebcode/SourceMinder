@@ -1,0 +1,139 @@
+LINE | SYM                      | PAR             | SCOPE | NS | MOD | CLUE | TYPE              | D | CTX  
+./tools/sources/python/exceptions.py:
+1    | exceptions               |                 |       |    |     |      |                   | 0 | FILE 
+1    | Python                   |                 |       |    |     |      |                   | 0 | STR  
+1    | exception                |                 |       |    |     |      |                   | 0 | STR  
+1    | handling.                |                 |       |    |     |      |                   | 0 | STR  
+4    | basic_exception_handling |                 |       |    |     |      |                   | 1 | FUNC 
+5    | Basic                    |                 |       |    |     |      |                   | 0 | STR  
+5    | try/except.              |                 |       |    |     |      |                   | 0 | STR  
+7    | result                   |                 |       |    |     |      |                   | 1 | VAR  
+8    | ZeroDivisionError        |                 |       |    |     |      | ZeroDivisionError | 0 | EXC  
+9    | print                    |                 |       |    |     |      |                   | 0 | CALL 
+9    | Cannot                   |                 |       |    |     |      |                   | 0 | STR  
+9    | divide                   |                 |       |    |     |      |                   | 0 | STR  
+9    | zero                     |                 |       |    |     |      |                   | 0 | STR  
+12   | multiple_exceptions      |                 |       |    |     |      |                   | 1 | FUNC 
+13   | Handling                 |                 |       |    |     |      |                   | 0 | STR  
+13   | multiple                 |                 |       |    |     |      |                   | 0 | STR  
+13   | exception                |                 |       |    |     |      |                   | 0 | STR  
+13   | types.                   |                 |       |    |     |      |                   | 0 | STR  
+15   | value                    |                 |       |    |     |      |                   | 1 | VAR  
+15   | int                      |                 |       |    |     |      |                   | 0 | CALL 
+15   | number                   |                 |       |    |     |      |                   | 0 | STR  
+16   | ValueError               |                 |       |    |     |      | ValueError        | 0 | EXC  
+17   | print                    |                 |       |    |     |      |                   | 0 | CALL 
+17   | Invalid                  |                 |       |    |     |      |                   | 0 | STR  
+17   | value                    |                 |       |    |     |      |                   | 0 | STR  
+18   | TypeError                |                 |       |    |     |      | TypeError         | 0 | EXC  
+19   | print                    |                 |       |    |     |      |                   | 0 | CALL 
+19   | Invalid                  |                 |       |    |     |      |                   | 0 | STR  
+19   | type                     |                 |       |    |     |      |                   | 0 | STR  
+22   | exception_with_else      |                 |       |    |     |      |                   | 1 | FUNC 
+23   | Try/except               |                 |       |    |     |      |                   | 0 | STR  
+23   | clause.                  |                 |       |    |     |      |                   | 0 | STR  
+25   | result                   |                 |       |    |     |      |                   | 1 | VAR  
+26   | ZeroDivisionError        |                 |       |    |     |      | ZeroDivisionError | 0 | EXC  
+27   | print                    |                 |       |    |     |      |                   | 0 | CALL 
+27   | Error                    |                 |       |    |     |      |                   | 0 | STR  
+29   | print                    |                 |       |    |     |      |                   | 0 | CALL 
+29   | f"Result: {result}"      |                 |       |    |     |      |                   | 0 | STR  
+29   | Result:                  |                 |       |    |     |      |                   | 0 | STR  
+29   | result                   |                 |       |    |     |      |                   | 0 | VAR  
+32   | exception_with_finally   |                 |       |    |     |      |                   | 1 | FUNC 
+33   | Try/except               |                 |       |    |     |      |                   | 0 | STR  
+35   | file                     |                 |       |    |     |      |                   | 1 | VAR  
+35   | open                     |                 |       |    |     |      |                   | 0 | CALL 
+35   | test.txt                 |                 |       |    |     |      |                   | 0 | STR  
+36   | data                     |                 |       |    |     |      |                   | 1 | VAR  
+36   | read                     | file            |       |    |     |      |                   | 0 | CALL 
+36   | file                     |                 |       |    |     |      |                   | 0 | VAR  
+37   | FileNotFoundError        |                 |       |    |     |      | FileNotFoundError | 0 | EXC  
+38   | print                    |                 |       |    |     |      |                   | 0 | CALL 
+38   | File                     |                 |       |    |     |      |                   | 0 | STR  
+38   | found                    |                 |       |    |     |      |                   | 0 | STR  
+40   | print                    |                 |       |    |     |      |                   | 0 | CALL 
+40   | Cleanup                  |                 |       |    |     |      |                   | 0 | STR  
+43   | catch_all_exceptions     |                 |       |    |     |      |                   | 1 | FUNC 
+44   | Catching                 |                 |       |    |     |      |                   | 0 | STR  
+44   | exceptions.              |                 |       |    |     |      |                   | 0 | STR  
+46   | risky_operation          |                 |       |    |     |      |                   | 0 | CALL 
+47   | ee                       |                 |       |    |     |      | Exception         | 0 | EXC  
+47   | Exception                |                 |       |    |     |      | Exception         | 0 | EXC  
+48   | print                    |                 |       |    |     |      |                   | 0 | CALL 
+48   | f"Error: {ee}"           |                 |       |    |     |      |                   | 0 | STR  
+48   | Error:                   |                 |       |    |     |      |                   | 0 | STR  
+48   | ee                       |                 |       |    |     |      |                   | 0 | VAR  
+51   | risky_operation          |                 |       |    |     |      |                   | 1 | FUNC 
+52   | ValueError               |                 |       |    |     |      |                   | 0 | CALL 
+52   | Something                |                 |       |    |     |      |                   | 0 | STR  
+52   | went                     |                 |       |    |     |      |                   | 0 | STR  
+52   | wrong                    |                 |       |    |     |      |                   | 0 | STR  
+55   | ValidationError          | Exception       |       |    |     |      |                   | 1 | CLASS
+56   | Custom                   |                 |       |    |     |      |                   | 0 | STR  
+56   | exception                |                 |       |    |     |      |                   | 0 | STR  
+58   | __init__                 | ValidationError |       |    |     |      |                   | 1 | FUNC 
+58   | self                     | __init__        |       |    |     |      |                   | 0 | ARG  
+58   | field                    | __init__        |       |    |     |      |                   | 0 | ARG  
+58   | message                  | __init__        |       |    |     |      |                   | 0 | ARG  
+59   | field                    | self            |       |    |     |      |                   | 1 | PROP 
+59   | field                    |                 |       |    |     |      |                   | 0 | VAR  
+60   | message                  | self            |       |    |     |      |                   | 1 | PROP 
+60   | message                  |                 |       |    |     |      |                   | 0 | VAR  
+61   | __init__                 |                 |       |    |     |      |                   | 0 | CALL 
+61   | super                    |                 |       |    |     |      |                   | 0 | CALL 
+61   | f"{field}: {message}"    |                 |       |    |     |      |                   | 0 | STR  
+61   | field                    |                 |       |    |     |      |                   | 0 | VAR  
+61   | message                  |                 |       |    |     |      |                   | 0 | VAR  
+64   | DatabaseError            | Exception       |       |    |     |      |                   | 1 | CLASS
+65   | Custom                   |                 |       |    |     |      |                   | 0 | STR  
+65   | exception                |                 |       |    |     |      |                   | 0 | STR  
+65   | additional               |                 |       |    |     |      |                   | 0 | STR  
+65   | attributes.              |                 |       |    |     |      |                   | 0 | STR  
+67   | __init__                 | DatabaseError   |       |    |     |      |                   | 1 | FUNC 
+67   | self                     | __init__        |       |    |     |      |                   | 0 | ARG  
+67   | query                    | __init__        |       |    |     |      |                   | 0 | ARG  
+67   | error_code               | __init__        |       |    |     |      |                   | 0 | ARG  
+68   | query                    | self            |       |    |     |      |                   | 1 | PROP 
+68   | query                    |                 |       |    |     |      |                   | 0 | VAR  
+69   | error_code               | self            |       |    |     |      |                   | 1 | PROP 
+69   | error_code               |                 |       |    |     |      |                   | 0 | VAR  
+70   | __init__                 |                 |       |    |     |      |                   | 0 | CALL 
+70   | super                    |                 |       |    |     |      |                   | 0 | CALL 
+70   | f"Query failed: {query}" |                 |       |    |     |      |                   | 0 | STR  
+70   | Query                    |                 |       |    |     |      |                   | 0 | STR  
+70   | failed:                  |                 |       |    |     |      |                   | 0 | STR  
+70   | query                    |                 |       |    |     |      |                   | 0 | VAR  
+73   | raise_custom_exception   |                 |       |    |     |      |                   | 1 | FUNC 
+74   | Raising                  |                 |       |    |     |      |                   | 0 | STR  
+74   | custom                   |                 |       |    |     |      |                   | 0 | STR  
+74   | exceptions.              |                 |       |    |     |      |                   | 0 | STR  
+75   | ValidationError          |                 |       |    |     |      |                   | 0 | CALL 
+75   | email                    |                 |       |    |     |      |                   | 0 | STR  
+75   | Invalid                  |                 |       |    |     |      |                   | 0 | STR  
+75   | format                   |                 |       |    |     |      |                   | 0 | STR  
+78   | reraise_exception        |                 |       |    |     |      |                   | 1 | FUNC 
+79   | Re-raising               |                 |       |    |     |      |                   | 0 | STR  
+79   | exceptions.              |                 |       |    |     |      |                   | 0 | STR  
+81   | ValueError               |                 |       |    |     |      |                   | 0 | CALL 
+81   | Original                 |                 |       |    |     |      |                   | 0 | STR  
+81   | error                    |                 |       |    |     |      |                   | 0 | STR  
+82   | ValueError               |                 |       |    |     |      | ValueError        | 0 | EXC  
+83   | print                    |                 |       |    |     |      |                   | 0 | CALL 
+83   | Logging                  |                 |       |    |     |      |                   | 0 | STR  
+83   | error                    |                 |       |    |     |      |                   | 0 | STR  
+87   | exception_chaining       |                 |       |    |     |      |                   | 1 | FUNC 
+88   | Exception                |                 |       |    |     |      |                   | 0 | STR  
+88   | chaining                 |                 |       |    |     |      |                   | 0 | STR  
+90   | int                      |                 |       |    |     |      |                   | 0 | CALL 
+90   | invalid                  |                 |       |    |     |      |                   | 0 | STR  
+91   | ValueError               |                 |       |    |     |      | ValueError        | 0 | EXC  
+92   | RuntimeError             |                 |       |    |     |      |                   | 0 | CALL 
+92   | Processing               |                 |       |    |     |      |                   | 0 | STR  
+92   | failed                   |                 |       |    |     |      |                   | 0 | STR  
+95   | suppress_exception       |                 |       |    |     |      |                   | 1 | FUNC 
+96   | Suppressing              |                 |       |    |     |      |                   | 0 | STR  
+96   | exceptions.              |                 |       |    |     |      |                   | 0 | STR  
+98   | ValueError               |                 |       |    |     |      |                   | 0 | CALL 
+98   | Error                    |                 |       |    |     |      |                   | 0 | STR  
+99   | ValueError               |                 |       |    |     |      | ValueError        | 0 | EXC  

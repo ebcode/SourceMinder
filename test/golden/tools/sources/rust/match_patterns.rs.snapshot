@@ -1,0 +1,68 @@
+LINE | SYM               | PAR   | SCOPE   | NS    | MOD | CLUE    | TYPE                        | D | CTX  
+./tools/sources/rust/match_patterns.rs:
+1    | match_patterns    |       |         |       |     |         |                             | 0 | FILE 
+1    | expressions       |       |         |       |     |         |                             | 0 | COM  
+1    | if-let            |       |         |       |     |         |                             | 0 | COM  
+1    | while-let         |       |         |       |     |         |                             | 0 | COM  
+1    | loops             |       |         |       |     |         |                             | 0 | COM  
+1    | destructuring     |       |         |       |     |         |                             | 0 | COM  
+1    | patterns          |       |         |       |     |         |                             | 0 | COM  
+3    | Shape             |       | pub     |       |     |         |                             | 1 | ENUM 
+4    | Circle            | Shape |         |       |     |         |                             | 1 | CASE 
+5    | Square            | Shape |         |       |     |         |                             | 1 | CASE 
+6    | Rect              | Shape |         |       |     |         |                             | 1 | CASE 
+6    | width             | Rect  | private |       |     |         | f64                         | 1 | PROP 
+6    | height            | Rect  | private |       |     |         | f64                         | 1 | PROP 
+9    | area              |       | pub     |       |     |         | f64                         | 1 | FUNC 
+9    | shape             |       |         |       |     |         | &Shape                      | 0 | ARG  
+11   | Circle            |       |         | Shape |     |         |                             | 0 | CASE 
+11   | radius            |       |         |       |     |         |                             | 1 | VAR  
+12   | Square            |       |         | Shape |     |         |                             | 0 | CASE 
+12   | side              |       |         |       |     |         |                             | 1 | VAR  
+13   | Rect              |       |         | Shape |     |         |                             | 0 | CASE 
+13   | width             |       |         |       |     |         |                             | 1 | VAR  
+13   | height            |       |         |       |     |         |                             | 1 | VAR  
+17   | classify          |       | pub     |       |     |         | &'static str                | 1 | FUNC 
+19   | zero              |       |         |       |     |         |                             | 0 | STR  
+20   | negative          |       |         |       |     |         |                             | 0 | STR  
+21   | single            |       |         |       |     |         |                             | 0 | STR  
+21   | digit             |       |         |       |     |         |                             | 0 | STR  
+22   | round             |       |         |       |     |         |                             | 0 | STR  
+27   | destructure_tuple |       | pub     |       |     |         | i32                         | 1 | FUNC 
+27   | pair              |       |         |       |     |         | (i32, i32, i32)             | 0 | ARG  
+28   | first             |       |         |       |     |         |                             | 1 | VAR  
+28   | third             |       |         |       |     |         |                             | 1 | VAR  
+32   | if_let_demo       |       | pub     |       |     |         |                             | 1 | FUNC 
+32   | maybe             |       |         |       |     |         | Option<i32>                 | 0 | ARG  
+33   | Some              |       |         |       |     |         |                             | 0 | CLASS
+33   | value             |       |         |       |     |         |                             | 1 | VAR  
+34   | println           |       |         |       |     |         | macro                       | 0 | CALL 
+34   | got               |       |         |       |     |         |                             | 0 | STR  
+34   | value             |       |         |       |     | println |                             | 0 | ARG  
+36   | println           |       |         |       |     |         | macro                       | 0 | CALL 
+36   | nothing           |       |         |       |     |         |                             | 0 | STR  
+40   | while_let_demo    |       | pub     |       |     |         |                             | 1 | FUNC 
+41   | queue             |       |         |       | mut |         |                             | 1 | VAR  
+41   | vec               |       |         |       |     |         | macro                       | 0 | CALL 
+42   | Some              |       |         |       |     |         |                             | 0 | CLASS
+42   | item              |       |         |       |     |         |                             | 1 | VAR  
+42   | pop               | queue |         |       |     |         |                             | 0 | CALL 
+43   | println           |       |         |       |     |         | macro                       | 0 | CALL 
+43   | item              |       |         |       |     | println |                             | 0 | ARG  
+47   | for_loop_demo     |       | pub     |       |     |         |                             | 1 | FUNC 
+47   | items             |       |         |       |     |         | &[(String, u32)]            | 0 | ARG  
+48   | name              |       |         |       |     |         |                             | 1 | VAR  
+48   | count             |       |         |       |     |         |                             | 1 | VAR  
+49   | println           |       |         |       |     |         | macro                       | 0 | CALL 
+49   | name              |       |         |       |     | println |                             | 0 | ARG  
+49   | count             |       |         |       |     | println |                             | 0 | ARG  
+52   | idx               |       |         |       |     |         |                             | 1 | VAR  
+53   | println           |       |         |       |     |         | macro                       | 0 | CALL 
+53   | idx               |       |         |       |     | println |                             | 0 | ARG  
+57   | nested_pattern    |       | pub     |       |     |         | i32                         | 1 | FUNC 
+57   | opt               |       |         |       |     |         | Option<Result<i32, String>> | 0 | ARG  
+59   | Some              |       |         |       |     |         |                             | 0 | CLASS
+59   | Ok                |       |         |       |     |         |                             | 0 | CLASS
+60   | Some              |       |         |       |     |         |                             | 0 | CLASS
+60   | Err               |       |         |       |     |         |                             | 0 | CLASS
+60   | _msg              |       |         |       |     |         |                             | 1 | VAR  

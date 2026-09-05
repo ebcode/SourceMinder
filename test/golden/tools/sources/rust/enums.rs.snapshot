@@ -1,0 +1,36 @@
+LINE | SYM           | PAR       | SCOPE | NS      | MOD | CLUE    | TYPE         | D | CTX  
+./tools/sources/rust/enums.rs:
+1    | enums         |           |       |         |     |         |              | 0 | FILE 
+1    | Simple        |           |       |         |     |         |              | 0 | COM  
+1    | C-like        |           |       |         |     |         |              | 0 | COM  
+2    | Direction     |           | pub   |         |     |         |              | 1 | ENUM 
+3    | North         | Direction |       |         |     |         |              | 1 | CASE 
+4    | South         | Direction |       |         |     |         |              | 1 | CASE 
+5    | East          | Direction |       |         |     |         |              | 1 | CASE 
+6    | West          | Direction |       |         |     |         |              | 1 | CASE 
+9    | data          |           |       |         |     |         |              | 0 | COM  
+9    | variants      |           |       |         |     |         |              | 0 | COM  
+10   | Message       |           | pub   |         |     |         |              | 1 | ENUM 
+11   | Quit          | Message   |       |         |     |         |              | 1 | CASE 
+12   | Move          | Message   |       |         |     |         |              | 1 | CASE 
+13   | Write         | Message   |       |         |     |         |              | 1 | CASE 
+14   | ChangeColor   | Message   |       |         |     |         |              | 1 | CASE 
+17   | explicit      |           |       |         |     |         |              | 0 | COM  
+17   | discriminants |           |       |         |     |         |              | 0 | COM  
+19   | Status        |           | pub   |         |     | #[repr] |              | 1 | ENUM 
+20   | Pending       | Status    |       |         |     |         |              | 1 | CASE 
+21   | Active        | Status    |       |         |     |         |              | 1 | CASE 
+22   | Closed        | Status    |       |         |     |         |              | 1 | CASE 
+25   | Generic       |           |       |         |     |         |              | 0 | COM  
+26   | MyResult      |           | pub   |         |     |         |              | 1 | ENUM 
+27   | Ok            | MyResult  |       |         |     |         |              | 1 | CASE 
+28   | Err           | MyResult  |       |         |     |         |              | 1 | CASE 
+31   | Message       |           |       |         |     | impl    |              | 1 | CLASS
+32   | describe      | Message   | pub   |         |     |         | &'static str | 1 | FUNC 
+34   | Quit          |           |       | Message |     |         |              | 0 | CASE 
+34   | quit          |           |       |         |     |         |              | 0 | STR  
+35   | Move          |           |       | Message |     |         |              | 0 | CASE 
+36   | Write         |           |       | Message |     |         |              | 0 | CASE 
+36   | write         |           |       |         |     |         |              | 0 | STR  
+37   | ChangeColor   |           |       | Message |     |         |              | 0 | CASE 
+37   | color         |           |       |         |     |         |              | 0 | STR  

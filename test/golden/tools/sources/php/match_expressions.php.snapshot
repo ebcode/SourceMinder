@@ -1,0 +1,29 @@
+LINE | SYM               | PAR           | SCOPE  | NS         | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/match_expressions.php:
+1    | match_expressions |               |        |            |     |      |      | 0 | FILE 
+3    | App\Models        |               |        |            |     |      |      | 1 | NS   
+5    | expression        |               |        | App\Models |     |      |      | 0 | COM  
+5    | examples          |               |        | App\Models |     |      |      | 0 | COM  
+5    | PHP               |               |        | App\Models |     |      |      | 0 | COM  
+5    | 8.0+              |               |        | App\Models |     |      |      | 0 | COM  
+8    | StatusHandler     |               |        | App\Models |     |      |      | 1 | CLASS
+9    | getStatusMessage  | StatusHandler | public | App\Models |     |      |      | 1 | FUNC 
+11   | active            |               |        | App\Models |     |      |      | 0 | STR  
+11   | User              |               |        | App\Models |     |      |      | 0 | STR  
+11   | active            |               |        | App\Models |     |      |      | 0 | STR  
+12   | inactive          |               |        | App\Models |     |      |      | 0 | STR  
+12   | User              |               |        | App\Models |     |      |      | 0 | STR  
+12   | inactive          |               |        | App\Models |     |      |      | 0 | STR  
+13   | pending           |               |        | App\Models |     |      |      | 0 | STR  
+13   | Awaiting          |               |        | App\Models |     |      |      | 0 | STR  
+13   | approval          |               |        | App\Models |     |      |      | 0 | STR  
+14   | Unknown           |               |        | App\Models |     |      |      | 0 | STR  
+14   | status            |               |        | App\Models |     |      |      | 0 | STR  
+18   | getStatusCode     | StatusHandler | public | App\Models |     |      |      | 1 | FUNC 
+20   | active            |               |        | App\Models |     |      |      | 0 | STR  
+20   | verified          |               |        | App\Models |     |      |      | 0 | STR  
+21   | pending           |               |        | App\Models |     |      |      | 0 | STR  
+21   | reviewing         |               |        | App\Models |     |      |      | 0 | STR  
+22   | inactive          |               |        | App\Models |     |      |      | 0 | STR  
+23   | banned            |               |        | App\Models |     |      |      | 0 | STR  
+23   | suspended         |               |        | App\Models |     |      |      | 0 | STR  

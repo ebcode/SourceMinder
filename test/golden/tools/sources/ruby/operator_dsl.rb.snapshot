@@ -1,0 +1,285 @@
+LINE | SYM                              | PAR          | SCOPE | NS | MOD  | CLUE        | TYPE | D | CTX  
+./tools/sources/ruby/operator_dsl.rb:
+1    | operator_dsl                     |              |       |    |      |             |      | 0 | FILE 
+1    | Operator                         |              |       |    |      |             |      | 0 | COM  
+1    | overloading:                     |              |       |    |      |             |      | 0 | COM  
+1    | Money                            |              |       |    |      |             |      | 0 | COM  
+1    | value                            |              |       |    |      |             |      | 0 | COM  
+1    | type                             |              |       |    |      |             |      | 0 | COM  
+1    | behaves                          |              |       |    |      |             |      | 0 | COM  
+1    | like                             |              |       |    |      |             |      | 0 | COM  
+1    | number.                          |              |       |    |      |             |      | 0 | COM  
+2    | Almost                           |              |       |    |      |             |      | 0 | COM  
+2    | every                            |              |       |    |      |             |      | 0 | COM  
+2    | method                           |              |       |    |      |             |      | 0 | COM  
+2    | named                            |              |       |    |      |             |      | 0 | COM  
+2    | punctuation                      |              |       |    |      |             |      | 0 | COM  
+2    | letters.                         |              |       |    |      |             |      | 0 | COM  
+4    | Money                            |              |       |    |      |             |      | 1 | CLASS
+5    | Comparable                       |              |       |    |      | include     |      | 0 | TYPE 
+5    | include                          |              |       |    |      |             |      | 0 | CALL 
+7    | cents                            | Money        |       |    |      | attr_reader |      | 1 | PROP 
+7    | currency                         | Money        |       |    |      | attr_reader |      | 1 | PROP 
+9    | initialize                       | Money        |       |    |      |             |      | 1 | FUNC 
+9    | cents                            | initialize   |       |    |      |             |      | 0 | ARG  
+9    | currency                         | initialize   |       |    |      |             |      | 0 | ARG  
+9    | usd                              |              |       |    |      |             |      | 0 | VAR  
+10   | @cents                           | Money        |       |    |      |             |      | 0 | PROP 
+10   | cents                            |              |       |    |      |             |      | 0 | VAR  
+11   | @currency                        | Money        |       |    |      |             |      | 0 | PROP 
+11   | currency                         |              |       |    |      |             |      | 0 | VAR  
+14   | Arithmetic                       |              |       |    |      |             |      | 0 | COM  
+14   | operators.                       |              |       |    |      |             |      | 0 | COM  
+15   | other                            | +            |       |    |      |             |      | 0 | ARG  
+15   | new                              | Money        |       |    |      |             |      | 0 | CALL 
+15   | Money                            |              |       |    |      |             |      | 0 | VAR  
+15   | @cents                           | Money        |       |    |      |             |      | 0 | PROP 
+15   | cents                            | other        |       |    |      |             |      | 0 | CALL 
+15   | other                            |              |       |    |      |             |      | 0 | VAR  
+15   | @currency                        | Money        |       |    |      |             |      | 0 | PROP 
+16   | other                            | -            |       |    |      |             |      | 0 | ARG  
+16   | new                              | Money        |       |    |      |             |      | 0 | CALL 
+16   | Money                            |              |       |    |      |             |      | 0 | VAR  
+16   | @cents                           | Money        |       |    |      |             |      | 0 | PROP 
+16   | cents                            | other        |       |    |      |             |      | 0 | CALL 
+16   | other                            |              |       |    |      |             |      | 0 | VAR  
+16   | @currency                        | Money        |       |    |      |             |      | 0 | PROP 
+17   | factor                           | *            |       |    |      |             |      | 0 | ARG  
+17   | new                              | Money        |       |    |      |             |      | 0 | CALL 
+17   | Money                            |              |       |    |      |             |      | 0 | VAR  
+17   | round                            |              |       |    |      |             |      | 0 | CALL 
+17   | @cents                           | Money        |       |    |      |             |      | 0 | PROP 
+17   | factor                           |              |       |    |      |             |      | 0 | VAR  
+17   | @currency                        | Money        |       |    |      |             |      | 0 | PROP 
+18   | divisor                          | /            |       |    |      |             |      | 0 | ARG  
+18   | new                              | Money        |       |    |      |             |      | 0 | CALL 
+18   | Money                            |              |       |    |      |             |      | 0 | VAR  
+18   | round                            |              |       |    |      |             |      | 0 | CALL 
+18   | @cents                           | Money        |       |    |      |             |      | 0 | PROP 
+18   | divisor                          |              |       |    |      |             |      | 0 | VAR  
+18   | @currency                        | Money        |       |    |      |             |      | 0 | PROP 
+20   | Unary                            |              |       |    |      |             |      | 0 | COM  
+20   | minus                            |              |       |    |      |             |      | 0 | COM  
+20   | plus.                            |              |       |    |      |             |      | 0 | COM  
+21   | -@                               | Money        |       |    |      |             |      | 1 | FUNC 
+21   | new                              | Money        |       |    |      |             |      | 0 | CALL 
+21   | Money                            |              |       |    |      |             |      | 0 | VAR  
+21   | @cents                           | Money        |       |    |      |             |      | 0 | PROP 
+21   | @currency                        | Money        |       |    |      |             |      | 0 | PROP 
+22   | +@                               | Money        |       |    |      |             |      | 1 | FUNC 
+24   | Comparable                       |              |       |    |      |             |      | 0 | COM  
+24   | drives                           |              |       |    |      |             |      | 0 | COM  
+24   | <=                               |              |       |    |      |             |      | 0 | COM  
+24   | ==                               |              |       |    |      |             |      | 0 | COM  
+24   | >=                               |              |       |    |      |             |      | 0 | COM  
+24   | one                              |              |       |    |      |             |      | 0 | COM  
+24   | method.                          |              |       |    |      |             |      | 0 | COM  
+25   | <=>                              | Money        |       |    |      |             |      | 1 | FUNC 
+25   | other                            | <=>          |       |    |      |             |      | 0 | ARG  
+26   | currency                         |              |       |    |      |             |      | 0 | VAR  
+26   | currency                         | other        |       |    |      |             |      | 0 | CALL 
+26   | other                            |              |       |    |      |             |      | 0 | VAR  
+27   | cents                            |              |       |    |      |             |      | 0 | VAR  
+27   | cents                            | other        |       |    |      |             |      | 0 | CALL 
+27   | other                            |              |       |    |      |             |      | 0 | VAR  
+30   | Case-equality                    |              |       |    |      |             |      | 0 | COM  
+30   | Money                            |              |       |    |      |             |      | 0 | COM  
+30   | works                            |              |       |    |      |             |      | 0 | COM  
+30   | case/in                          |              |       |    |      |             |      | 0 | COM  
+30   | guard.                           |              |       |    |      |             |      | 0 | COM  
+31   | ===                              | Money        |       |    |      |             |      | 1 | FUNC 
+31   | other                            | ===          |       |    |      |             |      | 0 | ARG  
+32   | is_a?                            | other        |       |    |      |             |      | 0 | CALL 
+32   | other                            |              |       |    |      |             |      | 0 | VAR  
+32   | Money                            |              |       |    |      |             |      | 0 | VAR  
+32   | currency                         | other        |       |    |      |             |      | 0 | CALL 
+32   | other                            |              |       |    |      |             |      | 0 | VAR  
+32   | currency                         |              |       |    |      |             |      | 0 | VAR  
+35   | Index                            |              |       |    |      |             |      | 0 | COM  
+35   | read                             |              |       |    |      |             |      | 0 | COM  
+35   | write                            |              |       |    |      |             |      | 0 | COM  
+35   | virtual                          |              |       |    |      |             |      | 0 | COM  
+35   | field.                           |              |       |    |      |             |      | 0 | COM  
+36   | []                               | Money        |       |    |      |             |      | 1 | FUNC 
+36   | field                            | []           |       |    |      |             |      | 0 | ARG  
+36   | to_h                             |              |       |    |      |             |      | 0 | VAR  
+36   | field                            |              |       |    |      |             |      | 0 | VAR  
+38   | []=                              | Money        |       |    |      |             |      | 1 | FUNC 
+38   | field                            | []=          |       |    |      |             |      | 0 | ARG  
+38   | value                            | []=          |       |    |      |             |      | 0 | ARG  
+39   | to_h                             |              |       |    |      |             |      | 0 | VAR  
+39   | field                            |              |       |    |      |             |      | 0 | VAR  
+39   | value                            |              |       |    |      |             |      | 0 | VAR  
+42   | coerce                           |              |       |    |      |             |      | 0 | COM  
+42   | lets                             |              |       |    |      |             |      | 0 | COM  
+42   | money                            |              |       |    |      |             |      | 0 | COM  
+42   | work                             |              |       |    |      |             |      | 0 | COM  
+42   | money                            |              |       |    |      |             |      | 0 | COM  
+42   | 5.                               |              |       |    |      |             |      | 0 | COM  
+43   | coerce                           | Money        |       |    |      |             |      | 1 | FUNC 
+43   | numeric                          | coerce       |       |    |      |             |      | 0 | ARG  
+44   | new                              | Money        |       |    |      |             |      | 0 | CALL 
+44   | Money                            |              |       |    |      |             |      | 0 | VAR  
+44   | numeric                          |              |       |    |      |             |      | 0 | VAR  
+44   | @currency                        | Money        |       |    |      |             |      | 0 | PROP 
+47   | Bitwise-shift                    |              |       |    |      |             |      | 0 | COM  
+47   | repurposed                       |              |       |    |      |             |      | 0 | COM  
+47   | append                           |              |       |    |      |             |      | 0 | COM  
+47   | DSL                              |              |       |    |      |             |      | 0 | COM  
+47   | like                             |              |       |    |      |             |      | 0 | COM  
+47   | <<                               |              |       |    |      |             |      | 0 | COM  
+47   | arrays/strings.                  |              |       |    |      |             |      | 0 | COM  
+48   | <<                               | Money        |       |    |      |             |      | 1 | FUNC 
+48   | other                            | <<           |       |    |      |             |      | 0 | ARG  
+49   | other                            |              |       |    |      |             |      | 0 | VAR  
+52   | to_proc                          |              |       |    |      |             |      | 0 | COM  
+52   | [a                               |              |       |    |      |             |      | 0 | COM  
+52   | b].map&Money.method:from_dollars |              |       |    |      |             |      | 0 | COM  
+52   | reads                            |              |       |    |      |             |      | 0 | COM  
+52   | cleanly.                         |              |       |    |      |             |      | 0 | COM  
+53   | to_proc                          | Money        |       |    |      |             |      | 1 | FUNC 
+57   | to_h                             | Money        |       |    |      |             |      | 1 | FUNC 
+57   | cents                            |              |       |    |      |             |      | 0 | PROP 
+57   | @cents                           | Money        |       |    |      |             |      | 0 | PROP 
+57   | currency                         |              |       |    |      |             |      | 0 | PROP 
+57   | @currency                        | Money        |       |    |      |             |      | 0 | PROP 
+59   | from_dollars                     | Money        |       |    | self |             |      | 1 | FUNC 
+59   | dollars                          | from_dollars |       |    |      |             |      | 0 | ARG  
+59   | new                              |              |       |    |      |             |      | 0 | CALL 
+59   | round                            |              |       |    |      |             |      | 0 | CALL 
+59   | dollars                          |              |       |    |      |             |      | 0 | VAR  
+62   | tiny                             |              |       |    |      |             |      | 0 | COM  
+62   | query                            |              |       |    |      |             |      | 0 | COM  
+62   | DSL                              |              |       |    |      |             |      | 0 | COM  
+62   | built                            |              |       |    |      |             |      | 0 | COM  
+62   | entirely                         |              |       |    |      |             |      | 0 | COM  
+62   | operator                         |              |       |    |      |             |      | 0 | COM  
+62   | methods.                         |              |       |    |      |             |      | 0 | COM  
+63   | Predicate                        |              |       |    |      |             |      | 1 | CLASS
+64   | initialize                       | Predicate    |       |    |      |             |      | 1 | FUNC 
+64   | test                             | initialize   |       |    |      |             |      | 0 | ARG  
+64   | @test                            | Predicate    |       |    |      |             |      | 0 | PROP 
+64   | test                             |              |       |    |      |             |      | 0 | VAR  
+66   | other                            | &            |       |    |      |             |      | 0 | ARG  
+66   | new                              | Predicate    |       |    |      |             |      | 0 | CALL 
+66   | Predicate                        |              |       |    |      |             |      | 0 | VAR  
+66   | call                             | @test        |       |    |      |             |      | 0 | CALL 
+66   | @test                            | Predicate    |       |    |      |             |      | 0 | PROP 
+66   | match?                           | other        |       |    |      |             |      | 0 | CALL 
+66   | other                            |              |       |    |      |             |      | 0 | VAR  
+67   | other                            | |            |       |    |      |             |      | 0 | ARG  
+67   | new                              | Predicate    |       |    |      |             |      | 0 | CALL 
+67   | Predicate                        |              |       |    |      |             |      | 0 | VAR  
+67   | call                             | @test        |       |    |      |             |      | 0 | CALL 
+67   | @test                            | Predicate    |       |    |      |             |      | 0 | PROP 
+67   | match?                           | other        |       |    |      |             |      | 0 | CALL 
+67   | other                            |              |       |    |      |             |      | 0 | VAR  
+68   | new                              | Predicate    |       |    |      |             |      | 0 | CALL 
+68   | Predicate                        |              |       |    |      |             |      | 0 | VAR  
+68   | call                             | @test        |       |    |      |             |      | 0 | CALL 
+68   | @test                            | Predicate    |       |    |      |             |      | 0 | PROP 
+69   | match?                           | Predicate    |       |    |      |             |      | 1 | FUNC 
+69   | call                             | @test        |       |    |      |             |      | 0 | CALL 
+69   | @test                            | Predicate    |       |    |      |             |      | 0 | PROP 
+72   | positive                         |              |       |    |      |             |      | 1 | VAR  
+72   | new                              | Predicate    |       |    |      |             |      | 0 | CALL 
+72   | Predicate                        |              |       |    |      |             |      | 0 | VAR  
+73   | even                             |              |       |    |      |             |      | 1 | VAR  
+73   | new                              | Predicate    |       |    |      |             |      | 0 | CALL 
+73   | Predicate                        |              |       |    |      |             |      | 0 | VAR  
+73   | even?                            | n            |       |    |      |             |      | 0 | CALL 
+74   | wanted                           |              |       |    |      |             |      | 1 | VAR  
+74   | positive                         |              |       |    |      |             |      | 0 | VAR  
+74   | even                             |              |       |    |      |             |      | 0 | VAR  
+76   | ---                              |              |       |    |      |             |      | 0 | COM  
+76   | Exercise:                        |              |       |    |      |             |      | 0 | COM  
+76   | put                              |              |       |    |      |             |      | 0 | COM  
+76   | operators                        |              |       |    |      |             |      | 0 | COM  
+76   | paces.                           |              |       |    |      |             |      | 0 | COM  
+76   | ---                              |              |       |    |      |             |      | 0 | COM  
+77   | price                            |              |       |    |      |             |      | 1 | VAR  
+77   | from_dollars                     | Money        |       |    |      |             |      | 0 | CALL 
+77   | Money                            |              |       |    |      |             |      | 0 | VAR  
+78   | tax                              |              |       |    |      |             |      | 1 | VAR  
+78   | new                              | Money        |       |    |      |             |      | 0 | CALL 
+78   | Money                            |              |       |    |      |             |      | 0 | VAR  
+79   | total                            |              |       |    |      |             |      | 1 | VAR  
+79   | price                            |              |       |    |      |             |      | 0 | VAR  
+79   | tax                              |              |       |    |      |             |      | 0 | VAR  
+80   | diff                             |              |       |    |      |             |      | 1 | VAR  
+80   | tax                              |              |       |    |      |             |      | 0 | VAR  
+80   | price                            |              |       |    |      |             |      | 0 | VAR  
+81   | tripled                          |              |       |    |      |             |      | 1 | VAR  
+81   | price                            |              |       |    |      |             |      | 0 | VAR  
+82   | halved                           |              |       |    |      |             |      | 1 | VAR  
+82   | price                            |              |       |    |      |             |      | 0 | VAR  
+83   | negated                          |              |       |    |      |             |      | 1 | VAR  
+83   | price                            |              |       |    |      |             |      | 0 | VAR  
+84   | same                             |              |       |    |      |             |      | 1 | VAR  
+84   | price                            |              |       |    |      |             |      | 0 | VAR  
+85   | cheaper                          |              |       |    |      |             |      | 1 | VAR  
+85   | tax                              |              |       |    |      |             |      | 0 | VAR  
+85   | price                            |              |       |    |      |             |      | 0 | VAR  
+85   | Comparable                       |              |       |    |      |             |      | 0 | COM  
+85   | via                              |              |       |    |      |             |      | 0 | COM  
+85   | <=>                              |              |       |    |      |             |      | 0 | COM  
+86   | combined                         |              |       |    |      |             |      | 1 | VAR  
+86   | price                            |              |       |    |      |             |      | 0 | VAR  
+86   | tax                              |              |       |    |      |             |      | 0 | VAR  
+86   | <<                               |              |       |    |      |             |      | 0 | COM  
+86   | append                           |              |       |    |      |             |      | 0 | COM  
+86   | DSL                              |              |       |    |      |             |      | 0 | COM  
+87   | cents                            |              |       |    |      |             |      | 1 | VAR  
+87   | total                            |              |       |    |      |             |      | 0 | VAR  
+87   | cents                            |              |       |    |      |             |      | 0 | VAR  
+87   | []                               |              |       |    |      |             |      | 0 | COM  
+88   | total                            |              |       |    |      |             |      | 0 | VAR  
+88   | cents                            |              |       |    |      |             |      | 0 | VAR  
+88   | []=                              |              |       |    |      |             |      | 0 | COM  
+89   | coerced                          |              |       |    |      |             |      | 1 | VAR  
+89   | coerce                           | price        |       |    |      |             |      | 0 | CALL 
+89   | price                            |              |       |    |      |             |      | 0 | VAR  
+89   | coerce                           |              |       |    |      |             |      | 0 | COM  
+90   | doubled                          |              |       |    |      |             |      | 1 | VAR  
+90   | call                             | to_proc      |       |    |      |             |      | 0 | CALL 
+90   | to_proc                          | price        |       |    |      |             |      | 0 | CALL 
+90   | price                            |              |       |    |      |             |      | 0 | VAR  
+90   | to_proc                          |              |       |    |      |             |      | 0 | COM  
+91   | either                           |              |       |    |      |             |      | 1 | VAR  
+91   | match?                           |              |       |    |      |             |      | 0 | CALL 
+91   | positive                         |              |       |    |      |             |      | 0 | VAR  
+91   | even                             |              |       |    |      |             |      | 0 | VAR  
+91   | match?                           |              |       |    |      |             |      | 0 | COM  
+92   | neither                          |              |       |    |      |             |      | 1 | VAR  
+92   | match?                           |              |       |    |      |             |      | 0 | CALL 
+92   | positive                         |              |       |    |      |             |      | 0 | VAR  
+92   | !@                               |              |       |    |      |             |      | 0 | COM  
+92   | unary                            |              |       |    |      |             |      | 0 | COM  
+92   | match?                           |              |       |    |      |             |      | 0 | COM  
+93   | matches                          |              |       |    |      |             |      | 1 | VAR  
+93   | match?                           | wanted       |       |    |      |             |      | 0 | CALL 
+93   | wanted                           |              |       |    |      |             |      | 0 | VAR  
+93   | chain                            |              |       |    |      |             |      | 0 | COM  
+93   | built                            |              |       |    |      |             |      | 0 | COM  
+94   | cents                            | total        |       |    |      |             |      | 0 | CALL 
+94   | total                            |              |       |    |      |             |      | 0 | VAR  
+94   | cents                            | diff         |       |    |      |             |      | 0 | CALL 
+94   | diff                             |              |       |    |      |             |      | 0 | VAR  
+94   | cents                            | tripled      |       |    |      |             |      | 0 | CALL 
+94   | tripled                          |              |       |    |      |             |      | 0 | VAR  
+94   | cents                            | halved       |       |    |      |             |      | 0 | CALL 
+94   | halved                           |              |       |    |      |             |      | 0 | VAR  
+94   | cents                            | negated      |       |    |      |             |      | 0 | CALL 
+94   | negated                          |              |       |    |      |             |      | 0 | VAR  
+95   | cents                            | same         |       |    |      |             |      | 0 | CALL 
+95   | same                             |              |       |    |      |             |      | 0 | VAR  
+95   | cheaper                          |              |       |    |      |             |      | 0 | VAR  
+95   | cents                            | combined     |       |    |      |             |      | 0 | CALL 
+95   | combined                         |              |       |    |      |             |      | 0 | VAR  
+95   | cents                            |              |       |    |      |             |      | 0 | VAR  
+95   | coerced                          |              |       |    |      |             |      | 0 | VAR  
+95   | cents                            | doubled      |       |    |      |             |      | 0 | CALL 
+95   | doubled                          |              |       |    |      |             |      | 0 | VAR  
+96   | either                           |              |       |    |      |             |      | 0 | VAR  
+96   | neither                          |              |       |    |      |             |      | 0 | VAR  
+96   | matches                          |              |       |    |      |             |      | 0 | VAR  

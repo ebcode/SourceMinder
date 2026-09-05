@@ -1,0 +1,79 @@
+LINE | SYM             | PAR              | SCOPE   | NS   | MOD | CLUE     | TYPE             | D | CTX  
+./tools/sources/go/errors.go:
+1    | errors          |                  |         |      |     |          |                  | 0 | FILE 
+1    | main            |                  |         |      |     |          |                  | 0 | NS   
+4    | errors          |                  |         | main |     |          |                  | 0 | IMP  
+5    | fmt             |                  |         | main |     |          |                  | 0 | IMP  
+8    | Custom          |                  |         |      |     |          |                  | 0 | COM  
+8    | error           |                  |         |      |     |          |                  | 0 | COM  
+9    | ValidationError |                  | public  | main |     |          |                  | 1 | CLASS
+10   | Field           |                  | public  | main |     |          | string           | 1 | PROP 
+11   | Message         |                  | public  | main |     |          | string           | 1 | PROP 
+14   | Error           | *ValidationError | public  | main |     |          | string           | 1 | FUNC 
+15   | Sprintf         | fmt              |         |      |     |          |                  | 0 | CALL 
+15   | %s:             |                  |         |      |     |          |                  | 0 | STR  
+15   | %s              |                  |         |      |     |          |                  | 0 | STR  
+15   | Field           | e                |         | main |     | Sprintf  |                  | 0 | ARG  
+15   | Message         | e                |         | main |     | Sprintf  |                  | 0 | ARG  
+18   | Function        |                  |         |      |     |          |                  | 0 | COM  
+18   | returning       |                  |         |      |     |          |                  | 0 | COM  
+18   | error           |                  |         |      |     |          |                  | 0 | COM  
+19   | divide          |                  | private | main |     |          | (float64, error) | 1 | FUNC 
+21   | New             | errors           |         |      |     |          |                  | 0 | CALL 
+21   | division        |                  |         |      |     |          |                  | 0 | STR  
+21   | zero            |                  |         |      |     |          |                  | 0 | STR  
+26   | Custom          |                  |         |      |     |          |                  | 0 | COM  
+26   | error           |                  |         |      |     |          |                  | 0 | COM  
+26   | wrapping        |                  |         |      |     |          |                  | 0 | COM  
+27   | processFile     |                  | private | main |     |          | error            | 1 | FUNC 
+27   | filename        |                  |         |      |     |          | string           | 1 | ARG  
+28   | err             |                  | private | main |     |          |                  | 1 | VAR  
+28   | openFile        |                  |         |      |     |          |                  | 0 | CALL 
+28   | filename        |                  |         | main |     | openFile |                  | 0 | ARG  
+29   | err             |                  |         | main |     |          |                  | 0 | VAR  
+30   | Errorf          | fmt              |         |      |     |          |                  | 0 | CALL 
+30   | failed          |                  |         |      |     |          |                  | 0 | STR  
+30   | process         |                  |         |      |     |          |                  | 0 | STR  
+30   | file:           |                  |         |      |     |          |                  | 0 | STR  
+30   | %w              |                  |         |      |     |          |                  | 0 | STR  
+30   | err             |                  |         | main |     | Errorf   |                  | 0 | ARG  
+35   | openFile        |                  | private | main |     |          | error            | 1 | FUNC 
+35   | name            |                  |         |      |     |          | string           | 1 | ARG  
+36   | New             | errors           |         |      |     |          |                  | 0 | CALL 
+36   | file            |                  |         |      |     |          |                  | 0 | STR  
+36   | found           |                  |         |      |     |          |                  | 0 | STR  
+39   | Error           |                  |         |      |     |          |                  | 0 | COM  
+39   | checking        |                  |         |      |     |          |                  | 0 | COM  
+39   | patterns        |                  |         |      |     |          |                  | 0 | COM  
+40   | handleErrors    |                  | private | main |     |          |                  | 1 | FUNC 
+41   | Basic           |                  |         |      |     |          |                  | 0 | COM  
+41   | error           |                  |         |      |     |          |                  | 0 | COM  
+41   | check           |                  |         |      |     |          |                  | 0 | COM  
+42   | result          |                  | private | main |     |          |                  | 1 | VAR  
+42   | err             |                  | private | main |     |          |                  | 1 | VAR  
+42   | divide          |                  |         |      |     |          |                  | 0 | CALL 
+43   | err             |                  |         | main |     |          |                  | 0 | VAR  
+44   | Println         | fmt              |         |      |     |          |                  | 0 | CALL 
+44   | Error:          |                  |         |      |     |          |                  | 0 | STR  
+44   | err             |                  |         | main |     | Println  |                  | 0 | ARG  
+48   | Error           |                  |         |      |     |          |                  | 0 | COM  
+48   | custom          |                  |         |      |     |          |                  | 0 | COM  
+49   | err             |                  |         | main |     |          |                  | 0 | VAR  
+50   | Field           |                  |         | main |     |          |                  | 0 | PROP 
+50   | email           |                  |         |      |     |          |                  | 0 | STR  
+51   | Message         |                  |         | main |     |          |                  | 0 | PROP 
+51   | invalid         |                  |         |      |     |          |                  | 0 | STR  
+51   | format          |                  |         |      |     |          |                  | 0 | STR  
+54   | assertion       |                  |         |      |     |          |                  | 0 | COM  
+54   | custom          |                  |         |      |     |          |                  | 0 | COM  
+54   | error           |                  |         |      |     |          |                  | 0 | COM  
+55   | ve              |                  | private | main |     |          |                  | 1 | VAR  
+55   | ok              |                  | private | main |     |          |                  | 1 | VAR  
+55   | err             |                  |         | main |     |          |                  | 0 | VAR  
+55   | ok              |                  |         | main |     |          |                  | 0 | VAR  
+56   | Println         | fmt              |         |      |     |          |                  | 0 | CALL 
+56   | ve              |                  |         | main |     | Println  |                  | 0 | ARG  
+56   | Field           | ve               |         | main |     | Println  |                  | 0 | ARG  
+56   | ve              |                  |         | main |     | Println  |                  | 0 | ARG  
+56   | Message         | ve               |         | main |     | Println  |                  | 0 | ARG  
+59   | result          |                  |         | main |     |          |                  | 0 | VAR  

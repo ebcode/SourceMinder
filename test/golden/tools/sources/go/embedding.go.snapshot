@@ -1,0 +1,54 @@
+LINE | SYM        | PAR    | SCOPE  | NS   | MOD | CLUE      | TYPE   | D | CTX  
+./tools/sources/go/embedding.go:
+1    | embedding  |        |        |      |     |           |        | 0 | FILE 
+1    | main       |        |        |      |     |           |        | 0 | NS   
+3    | fmt        |        |        | main |     |           |        | 0 | IMP  
+5    | Base       |        |        |      |     |           |        | 0 | COM  
+6    | Engine     |        | public | main |     |           |        | 1 | CLASS
+7    | Horsepower |        | public | main |     |           | int    | 1 | PROP 
+8    | Type       |        | public | main |     |           | string | 1 | PROP 
+11   | Start      | Engine | public | main |     |           |        | 1 | FUNC 
+12   | Println    | fmt    |        |      |     |           |        | 0 | CALL 
+12   | Engine     |        |        |      |     |           |        | 0 | STR  
+12   | started    |        |        |      |     |           |        | 0 | STR  
+15   | Embedding  |        |        |      |     |           |        | 0 | COM  
+15   | Engine     |        |        |      |     |           |        | 0 | COM  
+15   | Car        |        |        |      |     |           |        | 0 | COM  
+16   | Car        |        | public | main |     |           |        | 1 | CLASS
+17   | Engine     |        | public | main |     | embedded  | Engine | 1 | PROP 
+17   | Embedded   |        |        |      |     |           |        | 0 | COM  
+17   | field      |        |        |      |     |           |        | 0 | COM  
+18   | Brand      |        | public | main |     |           | string | 1 | PROP 
+19   | Model      |        | public | main |     |           | string | 1 | PROP 
+22   | Multiple   |        |        |      |     |           |        | 0 | COM  
+22   | embedding  |        |        |      |     |           |        | 0 | COM  
+23   | Logger     |        | public | main |     |           |        | 1 | CLASS
+24   | Prefix     |        | public | main |     |           | string | 1 | PROP 
+27   | Log        | Logger | public | main |     |           |        | 1 | FUNC 
+27   | msg        |        |        |      |     |           | string | 1 | ARG  
+28   | Println    | fmt    |        |      |     |           |        | 0 | CALL 
+28   | Prefix     | l      |        | main |     | Println   |        | 0 | ARG  
+28   | msg        |        |        | main |     | Println   |        | 0 | ARG  
+31   | Database   |        | public | main |     |           |        | 1 | CLASS
+32   | Logger     |        | public | main |     | embedded  | Logger | 1 | PROP 
+32   | Embedded   |        |        |      |     |           |        | 0 | COM  
+32   | Logger     |        |        |      |     |           |        | 0 | COM  
+33   | Name       |        | public | main |     |           | string | 1 | PROP 
+36   | embedding  |        |        |      |     |           |        | 0 | COM  
+37   | Reader     |        | public | main |     |           |        | 1 | IFACE
+38   | Read       | Reader | public | main |     | interface | string | 1 | FUNC 
+41   | Writer     |        | public | main |     |           |        | 1 | IFACE
+42   | Write      | Writer | public | main |     | interface |        | 1 | FUNC 
+45   | ReadWriter |        | public | main |     |           |        | 1 | IFACE
+46   | Embedded   |        |        |      |     |           |        | 0 | COM  
+47   | Embedded   |        |        |      |     |           |        | 0 | COM  
+50   | Anonymous  |        |        |      |     |           |        | 0 | COM  
+50   | field      |        |        |      |     |           |        | 0 | COM  
+50   | embedding  |        |        |      |     |           |        | 0 | COM  
+51   | Point      |        | public | main |     |           |        | 1 | CLASS
+55   | Circle     |        | public | main |     |           |        | 1 | CLASS
+56   | Point      |        | public | main |     | embedded  | Point  | 1 | PROP 
+56   | Anonymous  |        |        |      |     |           |        | 0 | COM  
+56   | embedded   |        |        |      |     |           |        | 0 | COM  
+56   | field      |        |        |      |     |           |        | 0 | COM  
+57   | Radius     |        | public | main |     |           | int    | 1 | PROP 

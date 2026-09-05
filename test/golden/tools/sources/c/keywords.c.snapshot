@@ -1,0 +1,465 @@
+LINE | SYM                           | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/c/keywords.c:
+1    | keywords                      |     |       |    |     |      |      | 0 | FILE
+1    | Every                         |     |       |    |     |      |      | 0 | COM 
+1    | word                          |     |       |    |     |      |      | 0 | COM 
+1    | c/config/keywords.txt         |     |       |    |     |      |      | 0 | COM 
+1    | used                          |     |       |    |     |      |      | 0 | COM 
+1    | naming                        |     |       |    |     |      |      | 0 | COM 
+1    | position.                     |     |       |    |     |      |      | 0 | COM 
+1    | reserves                      |     |       |    |     |      |      | 0 | COM 
+1    | none                          |     |       |    |     |      |      | 0 | COM 
+1    | appear                        |     |       |    |     |      |      | 0 | COM 
+1    | bare.                         |     |       |    |     |      |      | 0 | COM 
+1    | Every                         |     |       |    |     |      |      | 0 | COM 
+1    | one                           |     |       |    |     |      |      | 0 | COM 
+1    | exercised                     |     |       |    |     |      |      | 0 | COM 
+1    | capitalized                   |     |       |    |     |      |      | 0 | COM 
+1    | upper-case                    |     |       |    |     |      |      | 0 | COM 
+1    | variant                       |     |       |    |     |      |      | 0 | COM 
+1    | instead:                      |     |       |    |     |      |      | 0 | COM 
+1    | legal                         |     |       |    |     |      |      | 0 | COM 
+1    | identifiers                   |     |       |    |     |      |      | 0 | COM 
+1    | symbol                        |     |       |    |     |      |      | 0 | COM 
+1    | filter                        |     |       |    |     |      |      | 0 | COM 
+1    | folds                         |     |       |    |     |      |      | 0 | COM 
+1    | onto                          |     |       |    |     |      |      | 0 | COM 
+1    | keyword                       |     |       |    |     |      |      | 0 | COM 
+1    | lowercases                    |     |       |    |     |      |      | 0 | COM 
+1    | comparing.                    |     |       |    |     |      |      | 0 | COM 
+1    | Note:                         |     |       |    |     |      |      | 0 | COM 
+1    | ten                           |     |       |    |     |      |      | 0 | COM 
+1    | _Alignas/_Bool/_Static_assert |     |       |    |     |      |      | 0 | COM 
+1    | style                         |     |       |    |     |      |      | 0 | COM 
+1    | entries                       |     |       |    |     |      |      | 0 | COM 
+1    | carry                         |     |       |    |     |      |      | 0 | COM 
+1    | capitals                      |     |       |    |     |      |      | 0 | COM 
+1    | list                          |     |       |    |     |      |      | 0 | COM 
+1    | list                          |     |       |    |     |      |      | 0 | COM 
+1    | compared                      |     |       |    |     |      |      | 0 | COM 
+1    | strcmp                        |     |       |    |     |      |      | 0 | COM 
+1    | already                       |     |       |    |     |      |      | 0 | COM 
+1    | lowercased                    |     |       |    |     |      |      | 0 | COM 
+1    | symbol                        |     |       |    |     |      |      | 0 | COM 
+1    | never                         |     |       |    |     |      |      | 0 | COM 
+1    | match                         |     |       |    |     |      |      | 0 | COM 
+1    | anything.                     |     |       |    |     |      |      | 0 | COM 
+1    | identifiers                   |     |       |    |     |      |      | 0 | COM 
+1    | two                           |     |       |    |     |      |      | 0 | COM 
+1    | characters                    |     |       |    |     |      |      | 0 | COM 
+1    | longer                        |     |       |    |     |      |      | 0 | COM 
+1    | nothing                       |     |       |    |     |      |      | 0 | COM 
+1    | dropped                       |     |       |    |     |      |      | 0 | COM 
+1    | minimum                       |     |       |    |     |      |      | 0 | COM 
+1    | length                        |     |       |    |     |      |      | 0 | COM 
+1    | rather                        |     |       |    |     |      |      | 0 | COM 
+1    | keyword-ness.                 |     |       |    |     |      |      | 0 | COM 
+16   | Capitalized                   |     |       |    |     |      |      | 0 | COM 
+16   | variants                      |     |       |    |     |      |      | 0 | COM 
+16   | file-scope                    |     |       |    |     |      |      | 0 | COM 
+16   | variables.                    |     |       |    |     |      |      | 0 | COM 
+17   | Auto                          |     |       |    |     |      | int  | 1 | VAR 
+18   | Break                         |     |       |    |     |      | int  | 1 | VAR 
+19   | Case                          |     |       |    |     |      | int  | 1 | VAR 
+20   | Char                          |     |       |    |     |      | int  | 1 | VAR 
+21   | Const                         |     |       |    |     |      | int  | 1 | VAR 
+22   | Continue                      |     |       |    |     |      | int  | 1 | VAR 
+23   | Default                       |     |       |    |     |      | int  | 1 | VAR 
+24   | Do                            |     |       |    |     |      | int  | 1 | VAR 
+25   | Double                        |     |       |    |     |      | int  | 1 | VAR 
+26   | Else                          |     |       |    |     |      | int  | 1 | VAR 
+27   | Enum                          |     |       |    |     |      | int  | 1 | VAR 
+28   | Extern                        |     |       |    |     |      | int  | 1 | VAR 
+29   | Float                         |     |       |    |     |      | int  | 1 | VAR 
+30   | For                           |     |       |    |     |      | int  | 1 | VAR 
+31   | Goto                          |     |       |    |     |      | int  | 1 | VAR 
+32   | If                            |     |       |    |     |      | int  | 1 | VAR 
+33   | Inline                        |     |       |    |     |      | int  | 1 | VAR 
+34   | Int                           |     |       |    |     |      | int  | 1 | VAR 
+35   | Long                          |     |       |    |     |      | int  | 1 | VAR 
+36   | Register                      |     |       |    |     |      | int  | 1 | VAR 
+37   | Restrict                      |     |       |    |     |      | int  | 1 | VAR 
+38   | Return                        |     |       |    |     |      | int  | 1 | VAR 
+39   | Short                         |     |       |    |     |      | int  | 1 | VAR 
+40   | Signed                        |     |       |    |     |      | int  | 1 | VAR 
+41   | Static                        |     |       |    |     |      | int  | 1 | VAR 
+42   | Struct                        |     |       |    |     |      | int  | 1 | VAR 
+43   | Switch                        |     |       |    |     |      | int  | 1 | VAR 
+44   | Typedef                       |     |       |    |     |      | int  | 1 | VAR 
+45   | Union                         |     |       |    |     |      | int  | 1 | VAR 
+46   | Unsigned                      |     |       |    |     |      | int  | 1 | VAR 
+47   | Void                          |     |       |    |     |      | int  | 1 | VAR 
+48   | Volatile                      |     |       |    |     |      | int  | 1 | VAR 
+49   | While                         |     |       |    |     |      | int  | 1 | VAR 
+50   | _alignas                      |     |       |    |     |      | int  | 1 | VAR 
+51   | _alignof                      |     |       |    |     |      | int  | 1 | VAR 
+52   | _atomic                       |     |       |    |     |      | int  | 1 | VAR 
+53   | _bool                         |     |       |    |     |      | int  | 1 | VAR 
+54   | _complex                      |     |       |    |     |      | int  | 1 | VAR 
+55   | _generic                      |     |       |    |     |      | int  | 1 | VAR 
+56   | _imaginary                    |     |       |    |     |      | int  | 1 | VAR 
+57   | _noreturn                     |     |       |    |     |      | int  | 1 | VAR 
+58   | _static_assert                |     |       |    |     |      | int  | 1 | VAR 
+59   | _thread_local                 |     |       |    |     |      | int  | 1 | VAR 
+61   | Upper-case                    |     |       |    |     |      |      | 0 | COM 
+61   | variants                      |     |       |    |     |      |      | 0 | COM 
+61   | constants.                    |     |       |    |     |      |      | 0 | COM 
+62   | KeywordCodes                  |     |       |    |     |      |      | 1 | ENUM
+63   | AUTO                          |     |       |    |     |      |      | 1 | CASE
+64   | BREAK                         |     |       |    |     |      |      | 1 | CASE
+65   | CASE                          |     |       |    |     |      |      | 1 | CASE
+66   | CHAR                          |     |       |    |     |      |      | 1 | CASE
+67   | CONST                         |     |       |    |     |      |      | 1 | CASE
+68   | CONTINUE                      |     |       |    |     |      |      | 1 | CASE
+69   | DEFAULT                       |     |       |    |     |      |      | 1 | CASE
+70   | DO                            |     |       |    |     |      |      | 1 | CASE
+71   | DOUBLE                        |     |       |    |     |      |      | 1 | CASE
+72   | ELSE                          |     |       |    |     |      |      | 1 | CASE
+73   | ENUM                          |     |       |    |     |      |      | 1 | CASE
+74   | EXTERN                        |     |       |    |     |      |      | 1 | CASE
+75   | FLOAT                         |     |       |    |     |      |      | 1 | CASE
+76   | FOR                           |     |       |    |     |      |      | 1 | CASE
+77   | GOTO                          |     |       |    |     |      |      | 1 | CASE
+78   | IF                            |     |       |    |     |      |      | 1 | CASE
+79   | INLINE                        |     |       |    |     |      |      | 1 | CASE
+80   | INT                           |     |       |    |     |      |      | 1 | CASE
+81   | LONG                          |     |       |    |     |      |      | 1 | CASE
+82   | REGISTER                      |     |       |    |     |      |      | 1 | CASE
+83   | RESTRICT                      |     |       |    |     |      |      | 1 | CASE
+84   | RETURN                        |     |       |    |     |      |      | 1 | CASE
+85   | SHORT                         |     |       |    |     |      |      | 1 | CASE
+86   | SIGNED                        |     |       |    |     |      |      | 1 | CASE
+87   | STATIC                        |     |       |    |     |      |      | 1 | CASE
+88   | STRUCT                        |     |       |    |     |      |      | 1 | CASE
+89   | SWITCH                        |     |       |    |     |      |      | 1 | CASE
+90   | TYPEDEF                       |     |       |    |     |      |      | 1 | CASE
+91   | UNION                         |     |       |    |     |      |      | 1 | CASE
+92   | UNSIGNED                      |     |       |    |     |      |      | 1 | CASE
+93   | VOID                          |     |       |    |     |      |      | 1 | CASE
+94   | VOLATILE                      |     |       |    |     |      |      | 1 | CASE
+95   | WHILE                         |     |       |    |     |      |      | 1 | CASE
+96   | _ALIGNAS                      |     |       |    |     |      |      | 1 | CASE
+97   | _ALIGNOF                      |     |       |    |     |      |      | 1 | CASE
+98   | _ATOMIC                       |     |       |    |     |      |      | 1 | CASE
+99   | _BOOL                         |     |       |    |     |      |      | 1 | CASE
+100  | _COMPLEX                      |     |       |    |     |      |      | 1 | CASE
+101  | _GENERIC                      |     |       |    |     |      |      | 1 | CASE
+102  | _IMAGINARY                    |     |       |    |     |      |      | 1 | CASE
+103  | _NORETURN                     |     |       |    |     |      |      | 1 | CASE
+104  | _STATIC_ASSERT                |     |       |    |     |      |      | 1 | CASE
+105  | _THREAD_LOCAL                 |     |       |    |     |      |      | 1 | CASE
+108  | Capitalized                   |     |       |    |     |      |      | 0 | COM 
+108  | variants                      |     |       |    |     |      |      | 0 | COM 
+108  | tags.                         |     |       |    |     |      |      | 0 | COM 
+109  | Auto                          |     |       |    |     |      |      | 1 | TYPE
+109  | int                           |     |       |    |     |      |      | 0 | TYPE
+109  | mem                           |     |       |    |     |      | int  | 1 | PROP
+110  | Break                         |     |       |    |     |      |      | 1 | TYPE
+110  | int                           |     |       |    |     |      |      | 0 | TYPE
+110  | mem                           |     |       |    |     |      | int  | 1 | PROP
+111  | Case                          |     |       |    |     |      |      | 1 | TYPE
+111  | int                           |     |       |    |     |      |      | 0 | TYPE
+111  | mem                           |     |       |    |     |      | int  | 1 | PROP
+112  | Char                          |     |       |    |     |      |      | 1 | TYPE
+112  | int                           |     |       |    |     |      |      | 0 | TYPE
+112  | mem                           |     |       |    |     |      | int  | 1 | PROP
+113  | Const                         |     |       |    |     |      |      | 1 | TYPE
+113  | int                           |     |       |    |     |      |      | 0 | TYPE
+113  | mem                           |     |       |    |     |      | int  | 1 | PROP
+114  | Continue                      |     |       |    |     |      |      | 1 | TYPE
+114  | int                           |     |       |    |     |      |      | 0 | TYPE
+114  | mem                           |     |       |    |     |      | int  | 1 | PROP
+115  | Default                       |     |       |    |     |      |      | 1 | TYPE
+115  | int                           |     |       |    |     |      |      | 0 | TYPE
+115  | mem                           |     |       |    |     |      | int  | 1 | PROP
+116  | Do                            |     |       |    |     |      |      | 1 | TYPE
+116  | int                           |     |       |    |     |      |      | 0 | TYPE
+116  | mem                           |     |       |    |     |      | int  | 1 | PROP
+117  | Double                        |     |       |    |     |      |      | 1 | TYPE
+117  | int                           |     |       |    |     |      |      | 0 | TYPE
+117  | mem                           |     |       |    |     |      | int  | 1 | PROP
+118  | Else                          |     |       |    |     |      |      | 1 | TYPE
+118  | int                           |     |       |    |     |      |      | 0 | TYPE
+118  | mem                           |     |       |    |     |      | int  | 1 | PROP
+119  | Enum                          |     |       |    |     |      |      | 1 | TYPE
+119  | int                           |     |       |    |     |      |      | 0 | TYPE
+119  | mem                           |     |       |    |     |      | int  | 1 | PROP
+120  | Extern                        |     |       |    |     |      |      | 1 | TYPE
+120  | int                           |     |       |    |     |      |      | 0 | TYPE
+120  | mem                           |     |       |    |     |      | int  | 1 | PROP
+121  | Float                         |     |       |    |     |      |      | 1 | TYPE
+121  | int                           |     |       |    |     |      |      | 0 | TYPE
+121  | mem                           |     |       |    |     |      | int  | 1 | PROP
+122  | For                           |     |       |    |     |      |      | 1 | TYPE
+122  | int                           |     |       |    |     |      |      | 0 | TYPE
+122  | mem                           |     |       |    |     |      | int  | 1 | PROP
+123  | Goto                          |     |       |    |     |      |      | 1 | TYPE
+123  | int                           |     |       |    |     |      |      | 0 | TYPE
+123  | mem                           |     |       |    |     |      | int  | 1 | PROP
+124  | If                            |     |       |    |     |      |      | 1 | TYPE
+124  | int                           |     |       |    |     |      |      | 0 | TYPE
+124  | mem                           |     |       |    |     |      | int  | 1 | PROP
+125  | Inline                        |     |       |    |     |      |      | 1 | TYPE
+125  | int                           |     |       |    |     |      |      | 0 | TYPE
+125  | mem                           |     |       |    |     |      | int  | 1 | PROP
+126  | Int                           |     |       |    |     |      |      | 1 | TYPE
+126  | int                           |     |       |    |     |      |      | 0 | TYPE
+126  | mem                           |     |       |    |     |      | int  | 1 | PROP
+127  | Long                          |     |       |    |     |      |      | 1 | TYPE
+127  | int                           |     |       |    |     |      |      | 0 | TYPE
+127  | mem                           |     |       |    |     |      | int  | 1 | PROP
+128  | Register                      |     |       |    |     |      |      | 1 | TYPE
+128  | int                           |     |       |    |     |      |      | 0 | TYPE
+128  | mem                           |     |       |    |     |      | int  | 1 | PROP
+129  | Restrict                      |     |       |    |     |      |      | 1 | TYPE
+129  | int                           |     |       |    |     |      |      | 0 | TYPE
+129  | mem                           |     |       |    |     |      | int  | 1 | PROP
+130  | Return                        |     |       |    |     |      |      | 1 | TYPE
+130  | int                           |     |       |    |     |      |      | 0 | TYPE
+130  | mem                           |     |       |    |     |      | int  | 1 | PROP
+131  | Short                         |     |       |    |     |      |      | 1 | TYPE
+131  | int                           |     |       |    |     |      |      | 0 | TYPE
+131  | mem                           |     |       |    |     |      | int  | 1 | PROP
+132  | Signed                        |     |       |    |     |      |      | 1 | TYPE
+132  | int                           |     |       |    |     |      |      | 0 | TYPE
+132  | mem                           |     |       |    |     |      | int  | 1 | PROP
+133  | Static                        |     |       |    |     |      |      | 1 | TYPE
+133  | int                           |     |       |    |     |      |      | 0 | TYPE
+133  | mem                           |     |       |    |     |      | int  | 1 | PROP
+134  | Struct                        |     |       |    |     |      |      | 1 | TYPE
+134  | int                           |     |       |    |     |      |      | 0 | TYPE
+134  | mem                           |     |       |    |     |      | int  | 1 | PROP
+135  | Switch                        |     |       |    |     |      |      | 1 | TYPE
+135  | int                           |     |       |    |     |      |      | 0 | TYPE
+135  | mem                           |     |       |    |     |      | int  | 1 | PROP
+136  | Typedef                       |     |       |    |     |      |      | 1 | TYPE
+136  | int                           |     |       |    |     |      |      | 0 | TYPE
+136  | mem                           |     |       |    |     |      | int  | 1 | PROP
+137  | Union                         |     |       |    |     |      |      | 1 | TYPE
+137  | int                           |     |       |    |     |      |      | 0 | TYPE
+137  | mem                           |     |       |    |     |      | int  | 1 | PROP
+138  | Unsigned                      |     |       |    |     |      |      | 1 | TYPE
+138  | int                           |     |       |    |     |      |      | 0 | TYPE
+138  | mem                           |     |       |    |     |      | int  | 1 | PROP
+139  | Void                          |     |       |    |     |      |      | 1 | TYPE
+139  | int                           |     |       |    |     |      |      | 0 | TYPE
+139  | mem                           |     |       |    |     |      | int  | 1 | PROP
+140  | Volatile                      |     |       |    |     |      |      | 1 | TYPE
+140  | int                           |     |       |    |     |      |      | 0 | TYPE
+140  | mem                           |     |       |    |     |      | int  | 1 | PROP
+141  | While                         |     |       |    |     |      |      | 1 | TYPE
+141  | int                           |     |       |    |     |      |      | 0 | TYPE
+141  | mem                           |     |       |    |     |      | int  | 1 | PROP
+142  | _alignas                      |     |       |    |     |      |      | 1 | TYPE
+142  | int                           |     |       |    |     |      |      | 0 | TYPE
+142  | mem                           |     |       |    |     |      | int  | 1 | PROP
+143  | _alignof                      |     |       |    |     |      |      | 1 | TYPE
+143  | int                           |     |       |    |     |      |      | 0 | TYPE
+143  | mem                           |     |       |    |     |      | int  | 1 | PROP
+144  | _atomic                       |     |       |    |     |      |      | 1 | TYPE
+144  | int                           |     |       |    |     |      |      | 0 | TYPE
+144  | mem                           |     |       |    |     |      | int  | 1 | PROP
+145  | _bool                         |     |       |    |     |      |      | 1 | TYPE
+145  | int                           |     |       |    |     |      |      | 0 | TYPE
+145  | mem                           |     |       |    |     |      | int  | 1 | PROP
+146  | _complex                      |     |       |    |     |      |      | 1 | TYPE
+146  | int                           |     |       |    |     |      |      | 0 | TYPE
+146  | mem                           |     |       |    |     |      | int  | 1 | PROP
+147  | _generic                      |     |       |    |     |      |      | 1 | TYPE
+147  | int                           |     |       |    |     |      |      | 0 | TYPE
+147  | mem                           |     |       |    |     |      | int  | 1 | PROP
+148  | _imaginary                    |     |       |    |     |      |      | 1 | TYPE
+148  | int                           |     |       |    |     |      |      | 0 | TYPE
+148  | mem                           |     |       |    |     |      | int  | 1 | PROP
+149  | _noreturn                     |     |       |    |     |      |      | 1 | TYPE
+149  | int                           |     |       |    |     |      |      | 0 | TYPE
+149  | mem                           |     |       |    |     |      | int  | 1 | PROP
+150  | _static_assert                |     |       |    |     |      |      | 1 | TYPE
+150  | int                           |     |       |    |     |      |      | 0 | TYPE
+150  | mem                           |     |       |    |     |      | int  | 1 | PROP
+151  | _thread_local                 |     |       |    |     |      |      | 1 | TYPE
+151  | int                           |     |       |    |     |      |      | 0 | TYPE
+151  | mem                           |     |       |    |     |      | int  | 1 | PROP
+153  | Capitalized                   |     |       |    |     |      |      | 0 | COM 
+153  | variants                      |     |       |    |     |      |      | 0 | COM 
+153  | members.                      |     |       |    |     |      |      | 0 | COM 
+154  | KeywordHolder                 |     |       |    |     |      |      | 1 | TYPE
+155  | int                           |     |       |    |     |      |      | 0 | TYPE
+155  | Auto                          |     |       |    |     |      | int  | 1 | PROP
+156  | int                           |     |       |    |     |      |      | 0 | TYPE
+156  | Break                         |     |       |    |     |      | int  | 1 | PROP
+157  | int                           |     |       |    |     |      |      | 0 | TYPE
+157  | Case                          |     |       |    |     |      | int  | 1 | PROP
+158  | int                           |     |       |    |     |      |      | 0 | TYPE
+158  | Char                          |     |       |    |     |      | int  | 1 | PROP
+159  | int                           |     |       |    |     |      |      | 0 | TYPE
+159  | Const                         |     |       |    |     |      | int  | 1 | PROP
+160  | int                           |     |       |    |     |      |      | 0 | TYPE
+160  | Continue                      |     |       |    |     |      | int  | 1 | PROP
+161  | int                           |     |       |    |     |      |      | 0 | TYPE
+161  | Default                       |     |       |    |     |      | int  | 1 | PROP
+162  | int                           |     |       |    |     |      |      | 0 | TYPE
+162  | Do                            |     |       |    |     |      | int  | 1 | PROP
+163  | int                           |     |       |    |     |      |      | 0 | TYPE
+163  | Double                        |     |       |    |     |      | int  | 1 | PROP
+164  | int                           |     |       |    |     |      |      | 0 | TYPE
+164  | Else                          |     |       |    |     |      | int  | 1 | PROP
+165  | int                           |     |       |    |     |      |      | 0 | TYPE
+165  | Enum                          |     |       |    |     |      | int  | 1 | PROP
+166  | int                           |     |       |    |     |      |      | 0 | TYPE
+166  | Extern                        |     |       |    |     |      | int  | 1 | PROP
+167  | int                           |     |       |    |     |      |      | 0 | TYPE
+167  | Float                         |     |       |    |     |      | int  | 1 | PROP
+168  | int                           |     |       |    |     |      |      | 0 | TYPE
+168  | For                           |     |       |    |     |      | int  | 1 | PROP
+169  | int                           |     |       |    |     |      |      | 0 | TYPE
+169  | Goto                          |     |       |    |     |      | int  | 1 | PROP
+170  | int                           |     |       |    |     |      |      | 0 | TYPE
+170  | If                            |     |       |    |     |      | int  | 1 | PROP
+171  | int                           |     |       |    |     |      |      | 0 | TYPE
+171  | Inline                        |     |       |    |     |      | int  | 1 | PROP
+172  | int                           |     |       |    |     |      |      | 0 | TYPE
+172  | Int                           |     |       |    |     |      | int  | 1 | PROP
+173  | int                           |     |       |    |     |      |      | 0 | TYPE
+173  | Long                          |     |       |    |     |      | int  | 1 | PROP
+174  | int                           |     |       |    |     |      |      | 0 | TYPE
+174  | Register                      |     |       |    |     |      | int  | 1 | PROP
+175  | int                           |     |       |    |     |      |      | 0 | TYPE
+175  | Restrict                      |     |       |    |     |      | int  | 1 | PROP
+176  | int                           |     |       |    |     |      |      | 0 | TYPE
+176  | Return                        |     |       |    |     |      | int  | 1 | PROP
+177  | int                           |     |       |    |     |      |      | 0 | TYPE
+177  | Short                         |     |       |    |     |      | int  | 1 | PROP
+178  | int                           |     |       |    |     |      |      | 0 | TYPE
+178  | Signed                        |     |       |    |     |      | int  | 1 | PROP
+179  | int                           |     |       |    |     |      |      | 0 | TYPE
+179  | Static                        |     |       |    |     |      | int  | 1 | PROP
+180  | int                           |     |       |    |     |      |      | 0 | TYPE
+180  | Struct                        |     |       |    |     |      | int  | 1 | PROP
+181  | int                           |     |       |    |     |      |      | 0 | TYPE
+181  | Switch                        |     |       |    |     |      | int  | 1 | PROP
+182  | int                           |     |       |    |     |      |      | 0 | TYPE
+182  | Typedef                       |     |       |    |     |      | int  | 1 | PROP
+183  | int                           |     |       |    |     |      |      | 0 | TYPE
+183  | Union                         |     |       |    |     |      | int  | 1 | PROP
+184  | int                           |     |       |    |     |      |      | 0 | TYPE
+184  | Unsigned                      |     |       |    |     |      | int  | 1 | PROP
+185  | int                           |     |       |    |     |      |      | 0 | TYPE
+185  | Void                          |     |       |    |     |      | int  | 1 | PROP
+186  | int                           |     |       |    |     |      |      | 0 | TYPE
+186  | Volatile                      |     |       |    |     |      | int  | 1 | PROP
+187  | int                           |     |       |    |     |      |      | 0 | TYPE
+187  | While                         |     |       |    |     |      | int  | 1 | PROP
+188  | int                           |     |       |    |     |      |      | 0 | TYPE
+188  | _alignas                      |     |       |    |     |      | int  | 1 | PROP
+189  | int                           |     |       |    |     |      |      | 0 | TYPE
+189  | _alignof                      |     |       |    |     |      | int  | 1 | PROP
+190  | int                           |     |       |    |     |      |      | 0 | TYPE
+190  | _atomic                       |     |       |    |     |      | int  | 1 | PROP
+191  | int                           |     |       |    |     |      |      | 0 | TYPE
+191  | _bool                         |     |       |    |     |      | int  | 1 | PROP
+192  | int                           |     |       |    |     |      |      | 0 | TYPE
+192  | _complex                      |     |       |    |     |      | int  | 1 | PROP
+193  | int                           |     |       |    |     |      |      | 0 | TYPE
+193  | _generic                      |     |       |    |     |      | int  | 1 | PROP
+194  | int                           |     |       |    |     |      |      | 0 | TYPE
+194  | _imaginary                    |     |       |    |     |      | int  | 1 | PROP
+195  | int                           |     |       |    |     |      |      | 0 | TYPE
+195  | _noreturn                     |     |       |    |     |      | int  | 1 | PROP
+196  | int                           |     |       |    |     |      |      | 0 | TYPE
+196  | _static_assert                |     |       |    |     |      | int  | 1 | PROP
+197  | int                           |     |       |    |     |      |      | 0 | TYPE
+197  | _thread_local                 |     |       |    |     |      | int  | 1 | PROP
+200  | Capitalized                   |     |       |    |     |      |      | 0 | COM 
+200  | variants                      |     |       |    |     |      |      | 0 | COM 
+200  | names.                        |     |       |    |     |      |      | 0 | COM 
+201  | AutoAlias                     |     |       |    |     |      |      | 1 | TYPE
+202  | BreakAlias                    |     |       |    |     |      |      | 1 | TYPE
+203  | CaseAlias                     |     |       |    |     |      |      | 1 | TYPE
+204  | CharAlias                     |     |       |    |     |      |      | 1 | TYPE
+205  | ConstAlias                    |     |       |    |     |      |      | 1 | TYPE
+206  | ContinueAlias                 |     |       |    |     |      |      | 1 | TYPE
+207  | DefaultAlias                  |     |       |    |     |      |      | 1 | TYPE
+208  | DoAlias                       |     |       |    |     |      |      | 1 | TYPE
+209  | DoubleAlias                   |     |       |    |     |      |      | 1 | TYPE
+210  | ElseAlias                     |     |       |    |     |      |      | 1 | TYPE
+211  | EnumAlias                     |     |       |    |     |      |      | 1 | TYPE
+212  | ExternAlias                   |     |       |    |     |      |      | 1 | TYPE
+213  | FloatAlias                    |     |       |    |     |      |      | 1 | TYPE
+214  | ForAlias                      |     |       |    |     |      |      | 1 | TYPE
+215  | GotoAlias                     |     |       |    |     |      |      | 1 | TYPE
+216  | IfAlias                       |     |       |    |     |      |      | 1 | TYPE
+217  | InlineAlias                   |     |       |    |     |      |      | 1 | TYPE
+218  | IntAlias                      |     |       |    |     |      |      | 1 | TYPE
+219  | LongAlias                     |     |       |    |     |      |      | 1 | TYPE
+220  | RegisterAlias                 |     |       |    |     |      |      | 1 | TYPE
+221  | RestrictAlias                 |     |       |    |     |      |      | 1 | TYPE
+222  | ReturnAlias                   |     |       |    |     |      |      | 1 | TYPE
+223  | ShortAlias                    |     |       |    |     |      |      | 1 | TYPE
+224  | SignedAlias                   |     |       |    |     |      |      | 1 | TYPE
+225  | StaticAlias                   |     |       |    |     |      |      | 1 | TYPE
+226  | StructAlias                   |     |       |    |     |      |      | 1 | TYPE
+227  | SwitchAlias                   |     |       |    |     |      |      | 1 | TYPE
+228  | TypedefAlias                  |     |       |    |     |      |      | 1 | TYPE
+229  | UnionAlias                    |     |       |    |     |      |      | 1 | TYPE
+230  | UnsignedAlias                 |     |       |    |     |      |      | 1 | TYPE
+231  | VoidAlias                     |     |       |    |     |      |      | 1 | TYPE
+232  | VolatileAlias                 |     |       |    |     |      |      | 1 | TYPE
+233  | WhileAlias                    |     |       |    |     |      |      | 1 | TYPE
+234  | _alignasAlias                 |     |       |    |     |      |      | 1 | TYPE
+235  | _alignofAlias                 |     |       |    |     |      |      | 1 | TYPE
+236  | _atomicAlias                  |     |       |    |     |      |      | 1 | TYPE
+237  | _boolAlias                    |     |       |    |     |      |      | 1 | TYPE
+238  | _complexAlias                 |     |       |    |     |      |      | 1 | TYPE
+239  | _genericAlias                 |     |       |    |     |      |      | 1 | TYPE
+240  | _imaginaryAlias               |     |       |    |     |      |      | 1 | TYPE
+241  | _noreturnAlias                |     |       |    |     |      |      | 1 | TYPE
+242  | _static_assertAlias           |     |       |    |     |      |      | 1 | TYPE
+243  | _thread_localAlias            |     |       |    |     |      |      | 1 | TYPE
+245  | Capitalized                   |     |       |    |     |      |      | 0 | COM 
+245  | variants                      |     |       |    |     |      |      | 0 | COM 
+245  | function                      |     |       |    |     |      |      | 0 | COM 
+245  | names.                        |     |       |    |     |      |      | 0 | COM 
+246  | AutoFn                        |     |       |    |     |      | int  | 1 | FUNC
+247  | BreakFn                       |     |       |    |     |      | int  | 1 | FUNC
+248  | CaseFn                        |     |       |    |     |      | int  | 1 | FUNC
+249  | CharFn                        |     |       |    |     |      | int  | 1 | FUNC
+250  | ConstFn                       |     |       |    |     |      | int  | 1 | FUNC
+251  | ContinueFn                    |     |       |    |     |      | int  | 1 | FUNC
+252  | DefaultFn                     |     |       |    |     |      | int  | 1 | FUNC
+253  | DoFn                          |     |       |    |     |      | int  | 1 | FUNC
+254  | DoubleFn                      |     |       |    |     |      | int  | 1 | FUNC
+255  | ElseFn                        |     |       |    |     |      | int  | 1 | FUNC
+256  | EnumFn                        |     |       |    |     |      | int  | 1 | FUNC
+257  | ExternFn                      |     |       |    |     |      | int  | 1 | FUNC
+258  | FloatFn                       |     |       |    |     |      | int  | 1 | FUNC
+259  | ForFn                         |     |       |    |     |      | int  | 1 | FUNC
+260  | GotoFn                        |     |       |    |     |      | int  | 1 | FUNC
+261  | IfFn                          |     |       |    |     |      | int  | 1 | FUNC
+262  | InlineFn                      |     |       |    |     |      | int  | 1 | FUNC
+263  | IntFn                         |     |       |    |     |      | int  | 1 | FUNC
+264  | LongFn                        |     |       |    |     |      | int  | 1 | FUNC
+265  | RegisterFn                    |     |       |    |     |      | int  | 1 | FUNC
+266  | RestrictFn                    |     |       |    |     |      | int  | 1 | FUNC
+267  | ReturnFn                      |     |       |    |     |      | int  | 1 | FUNC
+268  | ShortFn                       |     |       |    |     |      | int  | 1 | FUNC
+269  | SignedFn                      |     |       |    |     |      | int  | 1 | FUNC
+270  | StaticFn                      |     |       |    |     |      | int  | 1 | FUNC
+271  | StructFn                      |     |       |    |     |      | int  | 1 | FUNC
+272  | SwitchFn                      |     |       |    |     |      | int  | 1 | FUNC
+273  | TypedefFn                     |     |       |    |     |      | int  | 1 | FUNC
+274  | UnionFn                       |     |       |    |     |      | int  | 1 | FUNC
+275  | UnsignedFn                    |     |       |    |     |      | int  | 1 | FUNC
+276  | VoidFn                        |     |       |    |     |      | int  | 1 | FUNC
+277  | VolatileFn                    |     |       |    |     |      | int  | 1 | FUNC
+278  | WhileFn                       |     |       |    |     |      | int  | 1 | FUNC
+279  | _alignasFn                    |     |       |    |     |      | int  | 1 | FUNC
+280  | _alignofFn                    |     |       |    |     |      | int  | 1 | FUNC
+281  | _atomicFn                     |     |       |    |     |      | int  | 1 | FUNC
+282  | _boolFn                       |     |       |    |     |      | int  | 1 | FUNC
+283  | _complexFn                    |     |       |    |     |      | int  | 1 | FUNC
+284  | _genericFn                    |     |       |    |     |      | int  | 1 | FUNC
+285  | _imaginaryFn                  |     |       |    |     |      | int  | 1 | FUNC
+286  | _noreturnFn                   |     |       |    |     |      | int  | 1 | FUNC
+287  | _static_assertFn              |     |       |    |     |      | int  | 1 | FUNC
+288  | _thread_localFn               |     |       |    |     |      | int  | 1 | FUNC

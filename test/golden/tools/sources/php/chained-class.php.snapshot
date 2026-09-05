@@ -1,0 +1,10 @@
+LINE | SYM           | PAR   | SCOPE  | NS | MOD    | CLUE | TYPE | D | CTX  
+./tools/sources/php/chained-class.php:
+1    | chained-class |       |        |    |        |      |      | 0 | FILE 
+3    | Hello         |       |        |    |        |      |      | 1 | CLASS
+5    | hey           | Hello | public |    | static |      |      | 1 | FUNC 
+6    | hey           |       |        |    |        |      |      | 0 | STR  
+9    | ho            | Hello | public |    | static |      |      | 1 | FUNC 
+10   | ho            |       |        |    |        |      |      | 0 | STR  
+15   | $h            |       |        |    |        |      |      | 0 | VAR  
+17   | ho            | hey   |        |    | static |      |      | 0 | CALL 

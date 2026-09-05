@@ -1,0 +1,47 @@
+LINE | SYM               | PAR | SCOPE  | NS   | MOD   | CLUE | TYPE    | D | CTX 
+./tools/sources/go/constants.go:
+1    | constants         |     |        |      |       |      |         | 0 | FILE
+1    | main              |     |        |      |       |      |         | 0 | NS  
+3    | Simple            |     |        |      |       |      |         | 0 | COM 
+3    | constants         |     |        |      |       |      |         | 0 | COM 
+4    | Pi                |     | public | main | const |      |         | 1 | VAR 
+5    | AppName           |     | public | main | const |      |         | 1 | VAR 
+5    | MyApp             |     |        |      |       |      |         | 0 | STR 
+7    | Grouped           |     |        |      |       |      |         | 0 | COM 
+7    | constants         |     |        |      |       |      |         | 0 | COM 
+9    | StatusOK          |     | public | main | const |      |         | 1 | VAR 
+10   | StatusNotFound    |     | public | main | const |      |         | 1 | VAR 
+11   | StatusError       |     | public | main | const |      |         | 1 | VAR 
+14   | Typed             |     |        |      |       |      |         | 0 | COM 
+14   | constants         |     |        |      |       |      |         | 0 | COM 
+16   | MaxUsers          |     | public | main | const |      | int     | 1 | VAR 
+17   | Timeout           |     | public | main | const |      | float64 | 1 | VAR 
+18   | DefaultName       |     | public | main | const |      | string  | 1 | VAR 
+18   | Guest             |     |        |      |       |      |         | 0 | STR 
+21   | iota              |     |        |      |       |      |         | 0 | COM 
+21   | enumeration       |     |        |      |       |      |         | 0 | COM 
+23   | Sunday            |     | public | main | const | iota |         | 1 | VAR 
+24   | Monday            |     | public | main | const |      |         | 1 | VAR 
+25   | Tuesday           |     | public | main | const |      |         | 1 | VAR 
+26   | Wednesday         |     | public | main | const |      |         | 1 | VAR 
+27   | Thursday          |     | public | main | const |      |         | 1 | VAR 
+28   | Friday            |     | public | main | const |      |         | 1 | VAR 
+29   | Saturday          |     | public | main | const |      |         | 1 | VAR 
+32   | iota              |     |        |      |       |      |         | 0 | COM 
+32   | expressions       |     |        |      |       |      |         | 0 | COM 
+35   | KB                |     | public | main | const | iota |         | 1 | VAR 
+36   | MB                |     | public | main | const |      |         | 1 | VAR 
+37   | GB                |     | public | main | const |      |         | 1 | VAR 
+38   | TB                |     | public | main | const |      |         | 1 | VAR 
+41   | iota              |     |        |      |       |      |         | 0 | COM 
+41   | custom            |     |        |      |       |      |         | 0 | COM 
+41   | values            |     |        |      |       |      |         | 0 | COM 
+43   | ReadPermission    |     | public | main | const | iota |         | 1 | VAR 
+44   | WritePermission   |     | public | main | const |      |         | 1 | VAR 
+45   | ExecutePermission |     | public | main | const |      |         | 1 | VAR 
+48   | Multiple          |     |        |      |       |      |         | 0 | COM 
+48   | constants         |     |        |      |       |      |         | 0 | COM 
+48   | one               |     |        |      |       |      |         | 0 | COM 
+48   | line              |     |        |      |       |      |         | 0 | COM 
+49   | Width             |     | public | main | const |      |         | 1 | VAR 
+49   | Height            |     |        | main |       |      |         | 0 | VAR 

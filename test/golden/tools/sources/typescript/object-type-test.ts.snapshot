@@ -1,0 +1,26 @@
+LINE | SYM              | PAR     | SCOPE | NS | MOD | CLUE | TYPE             | D | CTX  
+./tools/sources/typescript/object-type-test.ts:
+1    | object-type-test |         |       |    |     |      |                  | 0 | FILE 
+1    | Test             |         |       |    |     |      |                  | 0 | COM  
+1    | file             |         |       |    |     |      |                  | 0 | COM  
+1    | object           |         |       |    |     |      |                  | 0 | COM  
+1    | extraction       |         |       |    |     |      |                  | 0 | COM  
+1    | issue            |         |       |    |     |      |                  | 0 | COM  
+2    | Command          |         |       |    |     |      |                  | 1 | IFACE
+3    | updateStyle      | Command |       |    |     |      | object           | 1 | PROP 
+4    | newStyles        | Command |       |    |     |      | Partial<any>     | 1 | PROP 
+4    | delta            |         |       |    |     |      |                  | 0 | COM  
+4    | apply            |         |       |    |     |      |                  | 0 | COM  
+4    | changed          |         |       |    |     |      |                  | 0 | COM  
+4    | properties       |         |       |    |     |      |                  | 0 | COM  
+5    | Stored           |         |       |    |     |      |                  | 0 | COM  
+5    | execute          |         |       |    |     |      |                  | 0 | COM  
+5    | undo             |         |       |    |     |      |                  | 0 | COM  
+6    | previousStyles   | Command |       |    |     |      | Map<string, any> | 1 | PROP 
+6    | objectId         |         |       |    |     |      |                  | 0 | COM  
+6    | old              |         |       |    |     |      |                  | 0 | COM  
+6    | style            |         |       |    |     |      |                  | 0 | COM  
+9    | simpleType       | Command |       |    |     |      | string           | 1 | PROP 
+11   | nestedObject     | Command |       |    |     |      | object           | 1 | PROP 
+12   | foo              | Command |       |    |     |      | number           | 1 | PROP 
+13   | bar              | Command |       |    |     |      | boolean          | 1 | PROP 

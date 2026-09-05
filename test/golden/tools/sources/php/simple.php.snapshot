@@ -1,0 +1,8 @@
+LINE | SYM     | PAR   | SCOPE  | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/simple.php:
+1    | simple  |       |        |    |     |      |      | 0 | FILE 
+3    | User    |       |        |    |     |      |      | 1 | CLASS
+4    | $name   | User  | public |    |     |      |      | 1 | PROP 
+6    | getName | User  | public |    |     |      |      | 1 | FUNC 
+7    | $this   |       |        |    |     |      |      | 0 | VAR  
+7    | name    | $this |        |    |     |      |      | 0 | PROP 

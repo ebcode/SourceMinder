@@ -1,0 +1,62 @@
+LINE | SYM                | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/variables.pl:
+1    | variables          |     |       |    |     |      |        | 0 | FILE
+2    | strict             |     |       |    |     |      |        | 0 | IMP 
+3    | warnings           |     |       |    |     |      |        | 0 | IMP 
+5    | variables          |     |       |    |     |      |        | 0 | COM 
+6    | name               |     |       |    | my  |      | scalar | 1 | VAR 
+6    | Alice              |     |       |    |     |      |        | 0 | STR 
+7    | age                |     |       |    | my  |      | scalar | 1 | VAR 
+8    | pi                 |     |       |    | my  |      | scalar | 1 | VAR 
+9    | is_valid           |     |       |    | my  |      | scalar | 1 | VAR 
+11   | Array              |     |       |    |     |      |        | 0 | COM 
+11   | variables          |     |       |    |     |      |        | 0 | COM 
+12   | fruits             |     |       |    | my  |      | array  | 1 | VAR 
+12   | apple              |     |       |    |     |      |        | 0 | STR 
+12   | banana             |     |       |    |     |      |        | 0 | STR 
+12   | cherry             |     |       |    |     |      |        | 0 | STR 
+13   | numbers            |     |       |    | my  |      | array  | 1 | VAR 
+14   | empty              |     |       |    | my  |      | array  | 1 | VAR 
+16   | Hash               |     |       |    |     |      |        | 0 | COM 
+16   | variables          |     |       |    |     |      |        | 0 | COM 
+17   | config             |     |       |    | my  |      | hash   | 1 | VAR 
+18   | host               |     |       |    |     |      |        | 0 | PROP
+18   | localhost          |     |       |    |     |      |        | 0 | STR 
+19   | port               |     |       |    |     |      |        | 0 | PROP
+20   | user               |     |       |    |     |      |        | 0 | PROP
+20   | admin              |     |       |    |     |      |        | 0 | STR 
+22   | scores             |     |       |    | my  |      | hash   | 1 | VAR 
+22   | alice              |     |       |    |     |      |        | 0 | PROP
+22   | bob                |     |       |    |     |      |        | 0 | PROP
+22   | carol              |     |       |    |     |      |        | 0 | PROP
+24   | variables          |     |       |    |     |      |        | 0 | COM 
+24   | globals            |     |       |    |     |      |        | 0 | COM 
+25   | VERSION            |     |       |    | our |      | scalar | 1 | VAR 
+25   | 1.0                |     |       |    |     |      |        | 0 | STR 
+26   | greet              |     |       |    |     |      |        | 1 | EXP 
+26   | EXPORT             |     |       |    | our |      | array  | 1 | VAR 
+27   | farewell           |     |       |    |     |      |        | 1 | EXP 
+27   | defaults           |     |       |    | our |      | hash   | 1 | VAR 
+27   | timeout            |     |       |    |     |      |        | 0 | PROP
+27   | retries            |     |       |    |     |      |        | 0 | PROP
+29   | variables          |     |       |    |     |      |        | 0 | COM 
+30   | example_with_local |     |       |    |     |      |        | 1 | FUNC
+31   | slurp              |     |       |    |     |      |        | 0 | COM 
+31   | mode               |     |       |    |     |      |        | 0 | COM 
+33   | data               |     |       |    | my  |      | scalar | 1 | VAR 
+33   | test               |     |       |    |     |      |        | 0 | STR 
+34   | data               |     |       |    |     |      | scalar | 0 | VAR 
+37   | Complex            |     |       |    |     |      |        | 0 | COM 
+37   | data               |     |       |    |     |      |        | 0 | COM 
+37   | structures         |     |       |    |     |      |        | 0 | COM 
+38   | matrix             |     |       |    | my  |      | array  | 1 | VAR 
+39   | registry           |     |       |    | my  |      | hash   | 1 | VAR 
+40   | users              |     |       |    |     |      |        | 0 | PROP
+41   | admins             |     |       |    |     |      |        | 0 | PROP
+42   | settings           |     |       |    |     |      |        | 0 | PROP
+42   | debug              |     |       |    |     |      |        | 0 | PROP
+45   | Multiple           |     |       |    |     |      |        | 0 | COM 
+45   | assignment         |     |       |    |     |      |        | 0 | COM 
+47   | first              |     |       |    | my  |      | scalar | 1 | VAR 
+47   | rest               |     |       |    | my  |      | array  | 1 | VAR 
+47   | fruits             |     |       |    |     |      | array  | 0 | VAR 

@@ -1,0 +1,29 @@
+LINE | SYM        | PAR      | SCOPE  | NS   | MOD | CLUE      | TYPE               | D | CTX  
+./tools/sources/go/interfaces.go:
+1    | interfaces |          |        |      |     |           |                    | 0 | FILE 
+1    | main       |          |        |      |     |           |                    | 0 | NS   
+3    | Reader     |          |        |      |     |           |                    | 0 | COM  
+3    | single     |          |        |      |     |           |                    | 0 | COM  
+3    | method     |          |        |      |     |           |                    | 0 | COM  
+4    | Reader     |          | public | main |     |           |                    | 1 | IFACE
+5    | Read       | Reader   | public | main |     | interface | (n, err)           | 1 | FUNC 
+8    | Writer     |          |        |      |     |           |                    | 0 | COM  
+9    | Writer     |          | public | main |     |           |                    | 1 | IFACE
+10   | Write      | Writer   | public | main |     | interface | (n, err)           | 1 | FUNC 
+13   | ReadWriter |          |        |      |     |           |                    | 0 | COM  
+13   | combines   |          |        |      |     |           |                    | 0 | COM  
+13   | multiple   |          |        |      |     |           |                    | 0 | COM  
+13   | interfaces |          |        |      |     |           |                    | 0 | COM  
+14   | ReadWriter |          | public | main |     |           |                    | 1 | IFACE
+19   | Stringer   |          |        |      |     |           |                    | 0 | COM  
+19   | common     |          |        |      |     |           |                    | 0 | COM  
+19   | pattern    |          |        |      |     |           |                    | 0 | COM  
+20   | Stringer   |          | public | main |     |           |                    | 1 | IFACE
+21   | String     | Stringer | public | main |     | interface | string             | 1 | FUNC 
+24   | Storage    |          |        |      |     |           |                    | 0 | COM  
+24   | multiple   |          |        |      |     |           |                    | 0 | COM  
+24   | methods    |          |        |      |     |           |                    | 0 | COM  
+25   | Storage    |          | public | main |     |           |                    | 1 | IFACE
+26   | Save       | Storage  | public | main |     | interface | error              | 1 | FUNC 
+27   | Load       | Storage  | public | main |     | interface | (interface, error) | 1 | FUNC 
+28   | Delete     | Storage  | public | main |     | interface | error              | 1 | FUNC 

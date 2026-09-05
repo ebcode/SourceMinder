@@ -1,0 +1,3 @@
+LINE | SYM           | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/php/welcome.blade.php:
+1    | welcome.blade |     |       |    |     |      |      | 0 | FILE

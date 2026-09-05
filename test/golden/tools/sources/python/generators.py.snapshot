@@ -1,0 +1,79 @@
+LINE | SYM                  | PAR               | SCOPE | NS | MOD | CLUE  | TYPE | D | CTX 
+./tools/sources/python/generators.py:
+1    | generators           |                   |       |    |     |       |      | 0 | FILE
+1    | Python               |                   |       |    |     |       |      | 0 | STR 
+1    | generator            |                   |       |    |     |       |      | 0 | STR 
+1    | functions.           |                   |       |    |     |       |      | 0 | STR 
+4    | simple_generator     |                   |       |    |     |       |      | 1 | FUNC
+5    | Basic                |                   |       |    |     |       |      | 0 | STR 
+5    | generator            |                   |       |    |     |       |      | 0 | STR 
+11   | countdown            |                   |       |    |     |       |      | 1 | FUNC
+11   | nn                   | countdown         |       |    |     |       |      | 0 | ARG 
+12   | Generator            |                   |       |    |     |       |      | 0 | STR 
+12   | parameter.           |                   |       |    |     |       |      | 0 | STR 
+13   | nn                   |                   |       |    |     |       |      | 0 | VAR 
+14   | nn                   |                   |       |    |     | yield |      | 0 | VAR 
+15   | nn                   |                   |       |    |     |       |      | 1 | VAR 
+18   | fibonacci            |                   |       |    |     |       |      | 1 | FUNC
+18   | limit                | fibonacci         |       |    |     |       |      | 0 | ARG 
+19   | Fibonacci            |                   |       |    |     |       |      | 0 | STR 
+19   | sequence             |                   |       |    |     |       |      | 0 | STR 
+19   | generator.           |                   |       |    |     |       |      | 0 | STR 
+20   | aa                   |                   |       |    |     |       |      | 1 | VAR 
+20   | bb                   |                   |       |    |     |       |      | 1 | VAR 
+21   | limit                |                   |       |    |     |       |      | 0 | VAR 
+22   | aa                   |                   |       |    |     | yield |      | 0 | VAR 
+23   | aa                   |                   |       |    |     |       |      | 1 | VAR 
+23   | bb                   |                   |       |    |     |       |      | 1 | VAR 
+23   | bb                   |                   |       |    |     |       |      | 0 | VAR 
+23   | aa                   |                   |       |    |     |       |      | 0 | VAR 
+23   | bb                   |                   |       |    |     |       |      | 0 | VAR 
+26   | infinite_sequence    |                   |       |    |     |       |      | 1 | FUNC
+27   | Infinite             |                   |       |    |     |       |      | 0 | STR 
+27   | generator.           |                   |       |    |     |       |      | 0 | STR 
+28   | num                  |                   |       |    |     |       |      | 1 | VAR 
+30   | num                  |                   |       |    |     | yield |      | 0 | VAR 
+31   | num                  |                   |       |    |     |       |      | 1 | VAR 
+34   | squares_generator    |                   |       |    |     |       |      | 1 | FUNC
+34   | nn                   | squares_generator |       |    |     |       |      | 0 | ARG 
+35   | Generator            |                   |       |    |     |       |      | 0 | STR 
+35   | expression.          |                   |       |    |     |       |      | 0 | STR 
+36   | ii                   |                   |       |    |     |       |      | 0 | VAR 
+36   | range                |                   |       |    |     |       |      | 0 | CALL
+36   | nn                   |                   |       |    |     | range |      | 0 | ARG 
+40   | read_large_file      |                   |       |    |     |       |      | 1 | FUNC
+40   | filename             | read_large_file   |       |    |     |       |      | 0 | ARG 
+41   | Generator            |                   |       |    |     |       |      | 0 | STR 
+41   | reading              |                   |       |    |     |       |      | 0 | STR 
+41   | file                 |                   |       |    |     |       |      | 0 | STR 
+41   | line                 |                   |       |    |     |       |      | 0 | STR 
+41   | line.                |                   |       |    |     |       |      | 0 | STR 
+42   | open                 |                   |       |    |     |       |      | 0 | CALL
+42   | filename             |                   |       |    |     | open  |      | 0 | ARG 
+43   | line                 |                   |       |    |     |       |      | 0 | VAR 
+43   | ff                   |                   |       |    |     |       |      | 0 | VAR 
+44   | strip                | line              |       |    |     |       |      | 0 | CALL
+44   | line                 |                   |       |    |     |       |      | 0 | VAR 
+47   | delegating_generator |                   |       |    |     |       |      | 1 | FUNC
+48   | Generator            |                   |       |    |     |       |      | 0 | STR 
+48   | using                |                   |       |    |     |       |      | 0 | STR 
+49   | range                |                   |       |    |     |       |      | 0 | CALL
+53   | nested_generator     |                   |       |    |     |       |      | 1 | FUNC
+54   | Generator            |                   |       |    |     |       |      | 0 | STR 
+54   | yielding             |                   |       |    |     |       |      | 0 | STR 
+54   | another              |                   |       |    |     |       |      | 0 | STR 
+54   | generator.           |                   |       |    |     |       |      | 0 | STR 
+55   | inner                |                   |       |    |     |       |      | 1 | FUNC
+59   | inner                |                   |       |    |     |       |      | 0 | CALL
+63   | generator_with_send  |                   |       |    |     |       |      | 1 | FUNC
+64   | Generator            |                   |       |    |     |       |      | 0 | STR 
+64   | receives             |                   |       |    |     |       |      | 0 | STR 
+64   | values               |                   |       |    |     |       |      | 0 | STR 
+64   | via                  |                   |       |    |     |       |      | 0 | STR 
+64   | send.                |                   |       |    |     |       |      | 0 | STR 
+65   | total                |                   |       |    |     |       |      | 1 | VAR 
+67   | value                |                   |       |    |     |       |      | 1 | VAR 
+67   | total                |                   |       |    |     |       |      | 0 | VAR 
+68   | value                |                   |       |    |     |       |      | 0 | VAR 
+69   | total                |                   |       |    |     |       |      | 1 | VAR 
+69   | value                |                   |       |    |     |       |      | 0 | VAR 

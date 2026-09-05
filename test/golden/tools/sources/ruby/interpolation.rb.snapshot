@@ -1,0 +1,82 @@
+LINE | SYM                   | PAR    | SCOPE | NS | MOD | CLUE          | TYPE | D | CTX  
+./tools/sources/ruby/interpolation.rb:
+1    | interpolation         |        |       |    |     |               |      | 0 | FILE 
+1    | String                |        |       |    |     |               |      | 0 | COM  
+1    | interpolation:        |        |       |    |     |               |      | 0 | COM  
+1    | single                |        |       |    |     |               |      | 0 | COM  
+1    | multiple              |        |       |    |     |               |      | 0 | COM  
+1    | inside                |        |       |    |     |               |      | 0 | COM  
+1    | declarative           |        |       |    |     |               |      | 0 | COM  
+1    | calls.                |        |       |    |     |               |      | 0 | COM  
+2    | first                 |        |       |    |     |               |      | 1 | VAR  
+2    | Ada                   |        |       |    |     |               |      | 0 | STR  
+3    | last                  |        |       |    |     |               |      | 1 | VAR  
+3    | Lovelace              |        |       |    |     |               |      | 0 | STR  
+4    | count                 |        |       |    |     |               |      | 1 | VAR  
+6    | Single                |        |       |    |     |               |      | 0 | COM  
+6    | interpolation         |        |       |    |     |               |      | 0 | COM  
+7    | greeting              |        |       |    |     |               |      | 1 | VAR  
+7    | Hello                 |        |       |    |     |               |      | 0 | STR  
+7    | first                 |        |       |    |     |               |      | 0 | VAR  
+9    | Multiple              |        |       |    |     |               |      | 0 | COM  
+9    | interpolations        |        |       |    |     |               |      | 0 | COM  
+9    | one                   |        |       |    |     |               |      | 0 | COM  
+9    | string                |        |       |    |     |               |      | 0 | COM  
+10   | full_name             |        |       |    |     |               |      | 1 | VAR  
+10   | first                 |        |       |    |     |               |      | 0 | VAR  
+10   | last                  |        |       |    |     |               |      | 0 | VAR  
+11   | summary               |        |       |    |     |               |      | 1 | VAR  
+11   | has                   |        |       |    |     |               |      | 0 | STR  
+11   | messages              |        |       |    |     |               |      | 0 | STR  
+11   | first                 |        |       |    |     |               |      | 0 | VAR  
+11   | last                  |        |       |    |     |               |      | 0 | VAR  
+11   | count                 |        |       |    |     |               |      | 0 | VAR  
+13   | Interpolation         |        |       |    |     |               |      | 0 | COM  
+13   | wrapping              |        |       |    |     |               |      | 0 | COM  
+13   | method                |        |       |    |     |               |      | 0 | COM  
+13   | call                  |        |       |    |     |               |      | 0 | COM  
+13   | expression            |        |       |    |     |               |      | 0 | COM  
+14   | loud                  |        |       |    |     |               |      | 1 | VAR  
+14   | NAME:                 |        |       |    |     |               |      | 0 | STR  
+14   | upcase                | first  |       |    |     |               |      | 0 | CALL 
+14   | first                 |        |       |    |     |               |      | 0 | VAR  
+15   | math                  |        |       |    |     |               |      | 1 | VAR  
+15   | total                 |        |       |    |     |               |      | 0 | STR  
+15   | count                 |        |       |    |     |               |      | 0 | VAR  
+17   | Adjacent              |        |       |    |     |               |      | 0 | COM  
+17   | interpolations        |        |       |    |     |               |      | 0 | COM  
+17   | literal               |        |       |    |     |               |      | 0 | COM  
+18   | joined                |        |       |    |     |               |      | 1 | VAR  
+18   | first                 |        |       |    |     |               |      | 0 | VAR  
+18   | last                  |        |       |    |     |               |      | 0 | VAR  
+20   | Interpolation         |        |       |    |     |               |      | 0 | COM  
+20   | inside                |        |       |    |     |               |      | 0 | COM  
+20   | heredoc               |        |       |    |     |               |      | 0 | COM  
+21   | report                |        |       |    |     |               |      | 1 | VAR  
+21   | User                  |        |       |    |     |               |      | 0 | STR  
+22   | Messages:             |        |       |    |     |               |      | 0 | STR  
+22   | first                 |        |       |    |     |               |      | 0 | VAR  
+22   | last                  |        |       |    |     |               |      | 0 | VAR  
+23   | count                 |        |       |    |     |               |      | 0 | VAR  
+26   | Dynamic               |        |       |    |     |               |      | 0 | COM  
+26   | method                |        |       |    |     |               |      | 0 | COM  
+26   | definition            |        |       |    |     |               |      | 0 | COM  
+26   | via                   |        |       |    |     |               |      | 0 | COM  
+26   | interpolated          |        |       |    |     |               |      | 0 | COM  
+26   | names                 |        |       |    |     |               |      | 0 | COM  
+26   | single                |        |       |    |     |               |      | 0 | COM  
+26   | setter                |        |       |    |     |               |      | 0 | COM  
+26   | form                  |        |       |    |     |               |      | 0 | COM  
+27   | Record                |        |       |    |     |               |      | 1 | CLASS
+28   | each                  |        |       |    |     |               |      | 0 | CALL 
+28   | title                 |        |       |    |     |               |      | 0 | VAR  
+28   | author                |        |       |    |     |               |      | 0 | VAR  
+28   | field                 | Record |       |    |     |               |      | 0 | ARG  
+29   | field                 | Record |       |    |     | define_method |      | 0 | VAR  
+30   | instance_variable_get |        |       |    |     |               |      | 0 | CALL 
+30   | field                 |        |       |    |     |               |      | 0 | VAR  
+33   | field                 | Record |       |    |     | define_method |      | 0 | VAR  
+33   | value                 | Record |       |    |     |               |      | 0 | ARG  
+34   | instance_variable_set |        |       |    |     |               |      | 0 | CALL 
+34   | field                 |        |       |    |     |               |      | 0 | VAR  
+34   | value                 |        |       |    |     |               |      | 0 | VAR  

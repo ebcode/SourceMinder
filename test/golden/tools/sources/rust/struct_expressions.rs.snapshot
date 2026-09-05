@@ -1,0 +1,52 @@
+LINE | SYM                | PAR     | SCOPE | NS     | MOD | CLUE      | TYPE    | D | CTX  
+./tools/sources/rust/struct_expressions.rs:
+1    | struct_expressions |         |       |        |     |           |         | 0 | FILE 
+1    | Construction-site  |         |       |        |     |           |         | 0 | COM  
+1    | uses               |         |       |        |     |           |         | 0 | COM  
+1    | structs/enums      |         |       |        |     |           |         | 0 | COM  
+1    | struct_expression  |         |       |        |     |           |         | 0 | COM  
+1    | field              |         |       |        |     |           |         | 0 | COM  
+1    | access             |         |       |        |     |           |         | 0 | COM  
+3    | Debug              |         |       |        |     | derive    |         | 0 | TRAIT
+3    | Clone              |         |       |        |     | derive    |         | 0 | TRAIT
+4    | Address            |         | pub   |        |     | #[derive] |         | 1 | CLASS
+5    | street             | Address | pub   |        |     |           | String  | 1 | PROP 
+6    | city               | Address | pub   |        |     |           | String  | 1 | PROP 
+7    | zip                | Address | pub   |        |     |           | String  | 1 | PROP 
+10   | Debug              |         |       |        |     | derive    |         | 0 | TRAIT
+11   | Person             |         | pub   |        |     | #[derive] |         | 1 | CLASS
+12   | name               | Person  | pub   |        |     |           | String  | 1 | PROP 
+13   | age                | Person  | pub   |        |     |           | u32     | 1 | PROP 
+14   | address            | Person  | pub   |        |     |           | Address | 1 | PROP 
+17   | build_person       |         | pub   |        |     |           | Person  | 1 | FUNC 
+17   | name               |         |       |        |     |           | String  | 0 | ARG  
+18   | addr               |         |       |        |     |           |         | 1 | VAR  
+18   | Address            |         |       |        |     |           |         | 0 | CLASS
+19   | street             | addr    |       |        |     |           |         | 0 | PROP 
+19   | from               |         |       | String |     |           |         | 0 | CALL 
+19   | Main               |         |       |        |     |           |         | 0 | STR  
+20   | city               | addr    |       |        |     |           |         | 0 | PROP 
+20   | from               |         |       | String |     |           |         | 0 | CALL 
+20   | Springfield        |         |       |        |     |           |         | 0 | STR  
+21   | zip                | addr    |       |        |     |           |         | 0 | PROP 
+21   | from               |         |       | String |     |           |         | 0 | CALL 
+24   | Person             |         |       |        |     |           |         | 0 | CLASS
+25   | name               | Person  |       |        |     |           |         | 0 | PROP 
+26   | age                | Person  |       |        |     |           |         | 0 | PROP 
+27   | address            | Person  |       |        |     |           |         | 0 | PROP 
+31   | update_with_spread |         | pub   |        |     |           | Person  | 1 | FUNC 
+31   | base               |         |       |        |     |           | Person  | 0 | ARG  
+31   | new_age            |         |       |        |     |           | u32     | 0 | ARG  
+32   | Person             |         |       |        |     |           |         | 0 | CLASS
+33   | age                | Person  |       |        |     |           |         | 0 | PROP 
+38   | access_fields      |         | pub   |        |     |           | &str    | 1 | FUNC 
+38   | person             |         |       |        |     |           | &Person | 0 | ARG  
+39   | city               |         |       |        |     |           |         | 1 | VAR  
+39   | city               | address |       |        |     |           |         | 0 | PROP 
+39   | address            | person  |       |        |     |           |         | 0 | PROP 
+40   | _name_len          |         |       |        |     |           |         | 1 | VAR  
+40   | len                | name    |       |        |     |           |         | 0 | CALL 
+40   | name               | person  |       |        |     |           |         | 0 | PROP 
+41   | as_str             | city    |       |        |     |           |         | 0 | CALL 
+44   | tuple_struct_use   |         | pub   |        |     |           |         | 1 | FUNC 
+45   | point              |         |       |        |     |           |         | 1 | VAR  

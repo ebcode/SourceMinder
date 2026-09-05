@@ -1,0 +1,14 @@
+LINE | SYM               | PAR  | SCOPE | NS | MOD | CLUE | TYPE                  | D | CTX  
+./tools/sources/typescript/generic-type-test.ts:
+1    | generic-type-test |      |       |    |     |      |                       | 0 | FILE 
+1    | Test              |      |       |    |     |      |                       | 0 | COM  
+1    | generic           |      |       |    |     |      |                       | 0 | COM  
+1    | types             |      |       |    |     |      |                       | 0 | COM  
+1    | complex           |      |       |    |     |      |                       | 0 | COM  
+1    | arguments         |      |       |    |     |      |                       | 0 | COM  
+2    | Test              |      |       |    |     |      |                       | 1 | IFACE
+3    | simpleGeneric     | Test |       |    |     |      | Array<string>         | 1 | PROP 
+5    | genericWithObject | Test |       |    |     |      | ReadonlyArray<object> | 1 | PROP 
+6    | kind              | Test |       |    |     |      | string                | 1 | PROP 
+7    | nested            | Test |       |    |     |      | object                | 1 | PROP 
+7    | foo               | Test |       |    |     |      | number                | 1 | PROP 

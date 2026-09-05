@@ -1,0 +1,102 @@
+LINE | SYM                                        | PAR              | SCOPE | NS | MOD | CLUE              | TYPE | D | CTX  
+./tools/sources/python/decorators.py:
+1    | decorators                                 |                  |       |    |     |                   |      | 0 | FILE 
+1    | Python                                     |                  |       |    |     |                   |      | 0 | STR  
+1    | decorator                                  |                  |       |    |     |                   |      | 0 | STR  
+1    | patterns.                                  |                  |       |    |     |                   |      | 0 | STR  
+3    | time                                       |                  |       |    |     |                   |      | 0 | IMP  
+4    | functools                                  |                  |       |    |     |                   |      | 0 | IMP  
+4    | wraps                                      |                  |       |    |     |                   |      | 0 | IMP  
+7    | timing_decorator                           |                  |       |    |     |                   |      | 1 | FUNC 
+7    | func                                       | timing_decorator |       |    |     |                   |      | 0 | ARG  
+8    | Function                                   |                  |       |    |     |                   |      | 0 | STR  
+8    | decorator.                                 |                  |       |    |     |                   |      | 0 | STR  
+9    | wraps                                      |                  |       |    |     |                   |      | 0 | CALL 
+9    | func                                       |                  |       |    |     | wraps             |      | 0 | ARG  
+9    | wraps                                      |                  |       |    |     |                   |      | 0 | CALL 
+9    | func                                       |                  |       |    |     | wraps             |      | 0 | ARG  
+10   | wrapper                                    |                  |       |    |     | @wraps            |      | 1 | FUNC 
+10   | args                                       | wrapper          |       |    |     | *args             |      | 0 | ARG  
+10   | kwargs                                     | wrapper          |       |    |     | **kwargs          |      | 0 | ARG  
+11   | start                                      |                  |       |    |     |                   |      | 1 | VAR  
+11   | time                                       | time             |       |    |     |                   |      | 0 | CALL 
+11   | time                                       |                  |       |    |     |                   |      | 0 | VAR  
+12   | result                                     |                  |       |    |     |                   |      | 1 | VAR  
+12   | func                                       |                  |       |    |     |                   |      | 0 | CALL 
+12   | args                                       |                  |       |    |     |                   |      | 0 | VAR  
+12   | kwargs                                     |                  |       |    |     |                   |      | 0 | VAR  
+13   | end                                        |                  |       |    |     |                   |      | 1 | VAR  
+13   | time                                       | time             |       |    |     |                   |      | 0 | CALL 
+13   | time                                       |                  |       |    |     |                   |      | 0 | VAR  
+14   | print                                      |                  |       |    |     |                   |      | 0 | CALL 
+14   | f"{func.__name__} took {end - start:.2f}s" |                  |       |    |     |                   |      | 0 | STR  
+14   | took                                       |                  |       |    |     |                   |      | 0 | STR  
+14   | __name__                                   | func             |       |    |     |                   |      | 0 | PROP 
+14   | func                                       |                  |       |    |     |                   |      | 0 | VAR  
+14   | end                                        |                  |       |    |     |                   |      | 0 | VAR  
+14   | start                                      |                  |       |    |     |                   |      | 0 | VAR  
+15   | result                                     |                  |       |    |     |                   |      | 0 | VAR  
+16   | wrapper                                    |                  |       |    |     |                   |      | 0 | VAR  
+20   | slow_function                              |                  |       |    |     | @timing_decorator |      | 1 | FUNC 
+21   | sleep                                      | time             |       |    |     |                   |      | 0 | CALL 
+21   | time                                       |                  |       |    |     |                   |      | 0 | VAR  
+22   | Done                                       |                  |       |    |     |                   |      | 0 | STR  
+25   | repeat                                     |                  |       |    |     |                   |      | 1 | FUNC 
+25   | times                                      | repeat           |       |    |     |                   |      | 0 | ARG  
+26   | Decorator                                  |                  |       |    |     |                   |      | 0 | STR  
+26   | arguments.                                 |                  |       |    |     |                   |      | 0 | STR  
+27   | decorator                                  |                  |       |    |     |                   |      | 1 | FUNC 
+27   | func                                       | decorator        |       |    |     |                   |      | 0 | ARG  
+28   | wraps                                      |                  |       |    |     |                   |      | 0 | CALL 
+28   | func                                       |                  |       |    |     | wraps             |      | 0 | ARG  
+28   | wraps                                      |                  |       |    |     |                   |      | 0 | CALL 
+28   | func                                       |                  |       |    |     | wraps             |      | 0 | ARG  
+29   | wrapper                                    |                  |       |    |     | @wraps            |      | 1 | FUNC 
+29   | args                                       | wrapper          |       |    |     | *args             |      | 0 | ARG  
+29   | kwargs                                     | wrapper          |       |    |     | **kwargs          |      | 0 | ARG  
+30   | range                                      |                  |       |    |     |                   |      | 0 | CALL 
+30   | times                                      |                  |       |    |     | range             |      | 0 | ARG  
+31   | result                                     |                  |       |    |     |                   |      | 1 | VAR  
+31   | func                                       |                  |       |    |     |                   |      | 0 | CALL 
+31   | args                                       |                  |       |    |     |                   |      | 0 | VAR  
+31   | kwargs                                     |                  |       |    |     |                   |      | 0 | VAR  
+32   | result                                     |                  |       |    |     |                   |      | 0 | VAR  
+33   | wrapper                                    |                  |       |    |     |                   |      | 0 | VAR  
+34   | decorator                                  |                  |       |    |     |                   |      | 0 | VAR  
+37   | repeat                                     |                  |       |    |     |                   |      | 0 | CALL 
+37   | repeat                                     |                  |       |    |     |                   |      | 0 | CALL 
+38   | greet                                      |                  |       |    |     | @repeat           |      | 1 | FUNC 
+38   | name                                       | greet            |       |    |     |                   |      | 0 | ARG  
+39   | print                                      |                  |       |    |     |                   |      | 0 | CALL 
+39   | f"Hello, {name}"                           |                  |       |    |     |                   |      | 0 | STR  
+39   | Hello                                      |                  |       |    |     |                   |      | 0 | STR  
+39   | name                                       |                  |       |    |     |                   |      | 0 | VAR  
+42   | MyClass                                    |                  |       |    |     |                   |      | 1 | CLASS
+43   | decorated                                  |                  |       |    |     |                   |      | 0 | STR  
+43   | methods.                                   |                  |       |    |     |                   |      | 0 | STR  
+46   | static_method                              | MyClass          |       |    |     | @staticmethod     |      | 1 | FUNC 
+47   | Static                                     |                  |       |    |     |                   |      | 0 | STR  
+47   | method                                     |                  |       |    |     |                   |      | 0 | STR  
+50   | class_method                               | MyClass          |       |    |     | @classmethod      |      | 1 | FUNC 
+50   | cls                                        | class_method     |       |    |     |                   |      | 0 | ARG  
+51   | f"Class method of {cls.__name__}"          |                  |       |    |     |                   |      | 0 | STR  
+51   | method                                     |                  |       |    |     |                   |      | 0 | STR  
+51   | __name__                                   | cls              |       |    |     |                   |      | 0 | PROP 
+51   | cls                                        |                  |       |    |     |                   |      | 0 | VAR  
+54   | value                                      | MyClass          |       |    |     | @property         |      | 1 | FUNC 
+54   | self                                       | value            |       |    |     |                   |      | 0 | ARG  
+55   | _value                                     | self             |       |    |     |                   |      | 0 | PROP 
+55   | self                                       |                  |       |    |     |                   |      | 0 | VAR  
+57   | setter                                     | value            |       |    |     |                   |      | 0 | PROP 
+57   | value                                      |                  |       |    |     |                   |      | 0 | VAR  
+58   | value                                      | MyClass          |       |    |     | @value.setter     |      | 1 | FUNC 
+58   | self                                       | value            |       |    |     |                   |      | 0 | ARG  
+58   | val                                        | value            |       |    |     |                   |      | 0 | ARG  
+59   | _value                                     | self             |       |    |     |                   |      | 1 | PROP 
+59   | val                                        |                  |       |    |     |                   |      | 0 | VAR  
+62   | class_decorator                            |                  |       |    |     |                   |      | 1 | FUNC 
+62   | cls                                        | class_decorator  |       |    |     |                   |      | 0 | ARG  
+63   | decorator.                                 |                  |       |    |     |                   |      | 0 | STR  
+64   | decorated                                  | cls              |       |    |     |                   |      | 1 | PROP 
+65   | cls                                        |                  |       |    |     |                   |      | 0 | VAR  
+69   | DecoratedClass                             |                  |       |    |     | @class_decorator  |      | 1 | CLASS

@@ -1,0 +1,38 @@
+LINE | SYM                    | PAR         | SCOPE   | NS | MOD | CLUE | TYPE    | D | CTX  
+./tools/sources/typescript/test-private-members.ts:
+1    | test-private-members   |             |         |    |     |      |         | 0 | FILE 
+1    | Test                   |             |         |    |     |      |         | 0 | COM  
+1    | ES2019                 |             |         |    |     |      |         | 0 | COM  
+1    | members                |             |         |    |     |      |         | 0 | COM  
+2    | BankAccount            |             |         |    |     |      |         | 1 | CLASS
+3    | #balance               | BankAccount | private |    |     |      | number  | 1 | PROP 
+4    | #accountNumber         | BankAccount | private |    |     |      | string  | 1 | PROP 
+5    | owner                  | BankAccount |         |    |     |      | string  | 1 | PROP 
+7    | constructor            | BankAccount |         |    |     |      |         | 1 | FUNC 
+7    | string                 |             |         |    |     |      |         | 1 | TYPE 
+7    | owner                  |             |         |    |     |      | string  | 1 | ARG  
+7    | number                 |             |         |    |     |      |         | 1 | TYPE 
+7    | initialBalance         |             |         |    |     |      | number  | 1 | ARG  
+8    | owner                  | this        |         |    |     |      |         | 1 | PROP 
+8    | owner                  |             |         |    |     |      |         | 0 | VAR  
+9    | #balance               | this        |         |    |     |      |         | 1 | PROP 
+9    | initialBalance         |             |         |    |     |      |         | 0 | VAR  
+10   | #accountNumber         | this        |         |    |     |      |         | 1 | PROP 
+10   | #generateAccountNumber | this        |         |    |     |      |         | 0 | CALL 
+13   | #generateAccountNumber | BankAccount | private |    |     |      | string  | 1 | FUNC 
+14   | ACC-                   |             |         |    |     |      |         | 0 | STR  
+14   | toString               |             |         |    |     |      |         | 0 | CALL 
+14   | random                 | Math        |         |    |     |      |         | 0 | CALL 
+17   | deposit                | BankAccount |         |    |     |      | void    | 1 | FUNC 
+17   | number                 |             |         |    |     |      |         | 1 | TYPE 
+17   | amount                 |             |         |    |     |      | number  | 1 | ARG  
+18   | #balance               | this        |         |    |     |      |         | 1 | PROP 
+18   | amount                 |             |         |    |     |      |         | 0 | VAR  
+21   | getBalance             | BankAccount |         |    |     |      | number  | 1 | FUNC 
+22   | #balance               | this        |         |    |     |      |         | 0 | PROP 
+25   | #validateTransaction   | BankAccount | private |    |     |      | boolean | 1 | FUNC 
+25   | number                 |             |         |    |     |      |         | 1 | TYPE 
+25   | amount                 |             |         |    |     |      | number  | 1 | ARG  
+26   | amount                 |             |         |    |     |      |         | 0 | VAR  
+26   | #balance               | this        |         |    |     |      |         | 0 | PROP 
+26   | amount                 |             |         |    |     |      |         | 0 | VAR  

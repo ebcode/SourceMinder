@@ -9,8 +9,8 @@
 //        index-<lang> <file> --db-file <scratch> --once --silent --no-config
 //   2. Reads the rows back through qi, the same query layer a user gets:
 //        ./qi % --no-config -q -v --db-file <scratch>
-//   3. Canonicalizes that display output into a tab-separated table, sorts it,
-//      and compares it to the committed golden -- or writes one with --update.
+//   3. Compares that output to the committed golden, byte for byte -- or
+//      writes one with --update.
 //
 // WHY qi AND NOT SQLITE-DIRECT:
 //   Reading rows the way a user reads them means the harness exercises qi too,
@@ -19,21 +19,20 @@
 //   skips ./.smconfig and ~/.smconfig, so the same command gives the same rows
 //   on any machine.
 //
-// CANONICALIZING qi's OUTPUT:
-//   qi's table is a display format, so it needs three fixes before it is data.
-//   - Column widths follow the widest value in each result set, so two runs
-//     differ in padding on every line. Trim each field.
-//   - Values contain the separator, so the row cannot be split on '|'. Cut at
-//     the byte offsets of the '|' characters in that run's header line instead.
-//     qi pads by byte, not display width, so those offsets hold even for rows
-//     with multibyte characters -- such rows look ragged on screen and cut
-//     correctly here.
-//   - qi prints the filename as a group header line, not a column. It is
-//     dropped: the golden's own path already says which file it came from, so
-//     snapshots stay path-free and moving a sample file churns nothing.
-//   Rows are then sorted here rather than trusting qi's ORDER BY, so a golden
-//   is a function of the row set alone. Duplicate rows are kept: same-line
-//   duplicates are legitimate, and a comparison must notice two becoming one.
+// A GOLDEN IS qi's OUTPUT, UNCHANGED:
+//   Nothing is trimmed, sorted, or dropped. Run the qi command above and you
+//   see the golden. That is the point: when a snapshot fails, you read the file
+//   and the terminal side by side with nothing in between to explain.
+//
+//   The cost is real and was accepted deliberately. qi sizes each column to the
+//   widest value it printed, so one new row repads every line: on a 43-row
+//   sample, adding one method changed 89 lines. Whole-file diffs are the norm
+//   here, which is workable only because tools/sources/ files are kept short.
+//   Two related traps follow from the same fact:
+//   - Goldens carry trailing spaces on most lines. An editor or hook that
+//     strips them rewrites a golden silently. See .gitattributes.
+//   - A golden is display text, not data. Values can contain the '|' separator,
+//     so nothing should try to parse one back into fields.
 //
 // WHAT BELONGS IN test/golden/:
 //   Only files from tools/sources/. Real-world corpora (brew, redmine) are for
@@ -63,7 +62,6 @@
 #define MAX_PATH 4096
 #define MAX_CMD 8192
 #define MAX_FILES 4096
-#define MAX_COLUMNS 64
 /* Scratch paths are built here, not supplied, so they are short and bounded:
  * "tmp/sm-golden-<pid>.raw" is under 30 bytes. Sizing them at MAX_PATH would
  * make the command buffer look overrunnable to the compiler. */
@@ -77,7 +75,12 @@ typedef struct {
 static const Language languages[] = {
     {"c",   "./index-c"},
     {"h",   "./index-c"},
+    /* index-ts owns all five of these; see typescript/config/file_extensions.txt. */
     {"ts",  "./index-ts"},
+    {"tsx", "./index-ts"},
+    {"js",  "./index-ts"},
+    {"jsx", "./index-ts"},
+    {"mjs", "./index-ts"},
     {"php", "./index-php"},
     {"go",  "./index-go"},
     {"py",  "./index-python"},
@@ -182,132 +185,25 @@ static int mkdir_p(const char *path) {
     return 0;
 }
 
-/* Byte offsets of the '|' separators in qi's header line: the field edges every
- * row below it shares. */
-typedef struct {
-    size_t off[MAX_COLUMNS];
-    int count;
-} ColumnEdges;
-
-static void find_edges(const char *header, ColumnEdges *edges) {
-    edges->count = 0;
-    for (size_t i = 0; header[i]; i++) {
-        if (header[i] == '|' && edges->count < MAX_COLUMNS) {
-            edges->off[edges->count++] = i;
-        }
-    }
-}
-
-/* A data row carries a '|' at every offset the header did. Anything else is
- * chrome -- the filename group header, or the "... N matches" notice a limit
- * would print -- and is dropped. */
-static int is_data_row(const char *line, const ColumnEdges *edges) {
-    size_t len = strlen(line);
-    for (int i = 0; i < edges->count; i++) {
-        if (edges->off[i] >= len || line[edges->off[i]] != '|') return 0;
-    }
-    return 1;
-}
-
-/* Cut one line at the header's separator offsets, trim each field of the
- * padding qi added, and join with tabs. Returns a malloc'd string. */
-static char *cut_and_join(const char *line, const ColumnEdges *edges) {
-    size_t len = strlen(line);
-    char *buf = malloc(len + 2);
-    if (!buf) return NULL;
-
-    size_t w = 0;
-    size_t start = 0;
-    for (int i = 0; i <= edges->count; i++) {
-        size_t end = (i < edges->count) ? edges->off[i] : len;
-        if (start > len) start = len;
-        if (end > len) end = len;
-
-        size_t s = start, e = end;
-        while (s < e && line[s] == ' ') s++;
-        while (e > s && line[e - 1] == ' ') e--;
-
-        if (i > 0) buf[w++] = '\t';
-        memcpy(buf + w, line + s, e - s);
-        w += e - s;
-        start = end + 1;   /* step past the separator itself */
-    }
-    buf[w] = '\0';
-    return buf;
-}
-
-typedef struct {
-    long line;
-    char *text;
-} CanonRow;
-
-/* Sort on the line number numerically first: the canonical text starts with
- * that number, so a plain strcmp would put line 10 before line 9. */
-static int row_compare(const void *a, const void *b) {
-    const CanonRow *ra = (const CanonRow *)a;
-    const CanonRow *rb = (const CanonRow *)b;
-    if (ra->line < rb->line) return -1;
-    if (ra->line > rb->line) return 1;
-    return strcmp(ra->text, rb->text);
-}
-
-/* Read qi's display output from raw_path and write the canonical table to out.
- * Returns 0 on success, -1 on a system error, -2 when qi printed no header. */
-static int emit_snapshot(const char *raw_path, FILE *out) {
+/* A golden is qi's output byte for byte, so there is nothing to build -- only
+ * something to check. qi prints its column header first, and that header is the
+ * one line every run must have. Without it qi found nothing, which means the
+ * indexer produced nothing: a finding, not a format to tolerate.
+ *
+ * Returns 0 when a header is present, -1 on a system error, -2 when it is not. */
+static int check_snapshot(const char *raw_path) {
     FILE *in = fopen(raw_path, "r");
     if (!in) return -1;
 
     char *line = NULL;
     size_t cap = 0;
     ssize_t n;
-    int rc = -2;                 /* no header seen yet */
-    ColumnEdges edges;
-    CanonRow *rows = NULL;
-    size_t row_count = 0, row_cap = 0;
+    int rc = -2;
 
     while ((n = getline(&line, &cap, in)) != -1) {
-        while (n > 0 && (line[n - 1] == '\n' || line[n - 1] == '\r')) line[--n] = '\0';
-
-        if (rc == -2) {
-            /* First line is qi's column header, and it names the columns, so
-             * the snapshot header follows whatever -v prints for this build. */
-            find_edges(line, &edges);
-            if (edges.count == 0) continue;   /* not the header; keep looking */
-            char *canon = cut_and_join(line, &edges);
-            if (!canon) { rc = -1; goto done; }
-            fprintf(out, "%s\n", canon);
-            free(canon);
-            rc = 0;
-            continue;
-        }
-
-        if (!is_data_row(line, &edges)) continue;
-
-        char *canon = cut_and_join(line, &edges);
-        if (!canon) { rc = -1; goto done; }
-
-        if (row_count == row_cap) {
-            size_t next = row_cap ? row_cap * 2 : 256;
-            CanonRow *grown = realloc(rows, next * sizeof(*rows));
-            if (!grown) { free(canon); rc = -1; goto done; }
-            rows = grown;
-            row_cap = next;
-        }
-        rows[row_count].line = strtol(canon, NULL, 10);
-        rows[row_count].text = canon;
-        row_count++;
+        if (strchr(line, '|')) { rc = 0; break; }
     }
 
-    if (rc == 0) {
-        qsort(rows, row_count, sizeof(*rows), row_compare);
-        for (size_t i = 0; i < row_count; i++) {
-            fprintf(out, "%s\n", rows[i].text);
-        }
-    }
-
-done:
-    for (size_t i = 0; i < row_count; i++) free(rows[i].text);
-    free(rows);
     free(line);
     fclose(in);
     return rc;
@@ -329,8 +225,7 @@ static void report_first_line(const char *path) {
     fclose(f);
 }
 
-static void cleanup_scratch(const char *db_path, const char *raw_path,
-                            const char *actual_path) {
+static void cleanup_scratch(const char *db_path, const char *raw_path) {
     char sidecar[MAX_PATH + 8];
     unlink(db_path);
     snprintf(sidecar, sizeof(sidecar), "%s-wal", db_path);
@@ -338,13 +233,11 @@ static void cleanup_scratch(const char *db_path, const char *raw_path,
     snprintf(sidecar, sizeof(sidecar), "%s-shm", db_path);
     unlink(sidecar);
     unlink(raw_path);
-    unlink(actual_path);
 }
 
 static void verify_file(const char *path) {
     char db_path[MAX_SCRATCH_PATH];
     char raw_path[MAX_SCRATCH_PATH];
-    char actual_path[MAX_SCRATCH_PATH];
     char golden_path[MAX_PATH];
     char golden_dir[MAX_PATH];
     char cmd[MAX_CMD];
@@ -369,7 +262,6 @@ static void verify_file(const char *path) {
 
     snprintf(db_path, sizeof(db_path), "tmp/sm-golden-%d.db", getpid());
     snprintf(raw_path, sizeof(raw_path), "tmp/sm-golden-%d.raw", getpid());
-    snprintf(actual_path, sizeof(actual_path), "tmp/sm-golden-%d.out", getpid());
     if (snprintf(golden_path, sizeof(golden_path), "test/golden/%s.snapshot", path)
             >= (int)sizeof(golden_path)) {
         printf("  %s ... FAIL (path too long for a golden)\n", path);
@@ -389,56 +281,49 @@ static void verify_file(const char *path) {
      * for the indexer what it does for qi below: an [index-<lang>] section in
      * somebody's .smconfig would otherwise move rows with nothing in the diff to
      * explain it. */
-    cleanup_scratch(db_path, raw_path, actual_path);
+    cleanup_scratch(db_path, raw_path);
     snprintf(cmd, sizeof(cmd), "%s \"%s\" --db-file %s --once --silent --no-config > /dev/null 2>&1",
              lang->indexer, path, db_path);
     if (run_command(cmd) != 0) {
         printf("FAIL (indexer failed)\n");
         failed++;
-        cleanup_scratch(db_path, raw_path, actual_path);
+        cleanup_scratch(db_path, raw_path);
         return;
     }
 
     /* Step 2: read the rows back through qi. --no-config keeps the run dependent
-     * on argv alone; -q drops the banner and footer; -v prints every column. */
+     * on argv alone; -q drops the banner and footer; -v prints every column.
+     * What lands in raw_path is the golden -- no post-processing. */
     snprintf(cmd, sizeof(cmd), "./qi %% --no-config -q -v --db-file %s > %s 2>&1",
              db_path, raw_path);
     if (run_command(cmd) != 0) {
         printf("FAIL (qi failed)\n");
         report_first_line(raw_path);
         failed++;
-        cleanup_scratch(db_path, raw_path, actual_path);
+        cleanup_scratch(db_path, raw_path);
         return;
     }
 
-    FILE *actual = fopen(actual_path, "w");
-    if (!actual) {
-        printf("FAIL (cannot write scratch output)\n");
-        failed++;
-        cleanup_scratch(db_path, raw_path, actual_path);
-        return;
-    }
-    int emit_rc = emit_snapshot(raw_path, actual);
-    fclose(actual);
-    if (emit_rc == -2) {
+    int check_rc = check_snapshot(raw_path);
+    if (check_rc == -2) {
         /* Every indexed file yields at least a FILE row, so a missing header
          * means the indexer produced nothing. That is a finding, not a format. */
         printf("FAIL (qi returned no rows)\n");
         report_first_line(raw_path);
         failed++;
-        cleanup_scratch(db_path, raw_path, actual_path);
+        cleanup_scratch(db_path, raw_path);
         return;
     }
-    if (emit_rc != 0) {
-        printf("FAIL (could not canonicalize qi output)\n");
+    if (check_rc != 0) {
+        printf("FAIL (cannot read qi output)\n");
         failed++;
-        cleanup_scratch(db_path, raw_path, actual_path);
+        cleanup_scratch(db_path, raw_path);
         return;
     }
 
     /* Step 3: compare or update */
     if (update_mode) {
-        if (mkdir_p(golden_dir) != 0 || copy_file(actual_path, golden_path) != 0) {
+        if (mkdir_p(golden_dir) != 0 || copy_file(raw_path, golden_path) != 0) {
             printf("FAIL (could not write golden)\n");
             failed++;
         } else {
@@ -448,24 +333,25 @@ static void verify_file(const char *path) {
     } else if (!file_exists(golden_path)) {
         printf("FAIL (no golden: %s; run with --update)\n", golden_path);
         failed++;
-    } else if (files_differ(golden_path, actual_path)) {
+    } else if (files_differ(golden_path, raw_path)) {
         printf("FAIL (snapshot differs)\n");
-        show_diff(golden_path, actual_path);
+        show_diff(golden_path, raw_path);
         failed++;
     } else {
         printf("PASS\n");
         passed++;
     }
 
-    cleanup_scratch(db_path, raw_path, actual_path);
+    cleanup_scratch(db_path, raw_path);
 }
 
 static void print_usage(const char *prog) {
     printf("Usage: %s [--update] <file>...\n", prog);
     printf("\n");
-    printf("Index each file, read its rows back through qi, and compare the\n");
-    printf("canonicalized table against the golden at test/golden/<file>.snapshot.\n");
-    printf("Columns are whatever qi -v prints for this build.\n");
+    printf("Index each file, read its rows back through qi, and compare that\n");
+    printf("output to the golden at test/golden/<file>.snapshot, byte for byte.\n");
+    printf("A golden is exactly what this prints, so you can compare by eye:\n");
+    printf("  ./qi %% --no-config -q -v --db-file <db>\n");
     printf("\n");
     printf("Bless only files from tools/sources/, never a real-world corpus.\n");
     printf("\n");

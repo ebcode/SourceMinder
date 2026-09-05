@@ -1,0 +1,132 @@
+LINE | SYM               | PAR | SCOPE | NS | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/map-grep-sort.pl:
+1    | map-grep-sort     |     |       |    |     |      |        | 0 | FILE
+2    | strict            |     |       |    |     |      |        | 0 | IMP 
+3    | warnings          |     |       |    |     |      |        | 0 | IMP 
+5    | nums              |     |       |    | my  |      | array  | 1 | VAR 
+6    | words             |     |       |    | my  |      | array  | 1 | VAR 
+8    | ---               |     |       |    |     |      |        | 0 | COM 
+8    | ---               |     |       |    |     |      |        | 0 | COM 
+9    | doubled           |     |       |    | my  |      | array  | 1 | VAR 
+9    | nums              |     |       |    |     |      | array  | 0 | VAR 
+10   | strings           |     |       |    | my  |      | array  | 1 | VAR 
+10   | item              |     |       |    |     |      |        | 0 | STR 
+10   | $_                |     |       |    |     |      |        | 0 | STR 
+10   | nums              |     |       |    |     |      | array  | 0 | VAR 
+11   | lengths           |     |       |    | my  |      | array  | 1 | VAR 
+11   | length            |     |       |    |     |      |        | 0 | CALL
+11   | words             |     |       |    |     |      | array  | 0 | VAR 
+13   | returning         |     |       |    |     |      |        | 0 | COM 
+13   | multiple          |     |       |    |     |      |        | 0 | COM 
+13   | values            |     |       |    |     |      |        | 0 | COM 
+13   | flattening        |     |       |    |     |      |        | 0 | COM 
+14   | pairs             |     |       |    | my  |      | array  | 1 | VAR 
+16   | build             |     |       |    |     |      |        | 0 | COM 
+16   | hash              |     |       |    |     |      |        | 0 | COM 
+17   | len_of            |     |       |    | my  |      | hash   | 1 | VAR 
+17   | length            |     |       |    |     |      |        | 0 | CALL
+17   | words             |     |       |    |     |      | array  | 0 | VAR 
+18   | squared           |     |       |    | my  |      | hash   | 1 | VAR 
+20   | Chained           |     |       |    |     |      |        | 0 | COM 
+21   | result            |     |       |    | my  |      | array  | 1 | VAR 
+21   | uc                |     |       |    |     |      |        | 0 | CALL
+21   | words             |     |       |    |     |      | array  | 0 | VAR 
+23   | ---               |     |       |    |     |      |        | 0 | COM 
+23   | ---               |     |       |    |     |      |        | 0 | COM 
+24   | evens             |     |       |    | my  |      | array  | 1 | VAR 
+24   | nums              |     |       |    |     |      | array  | 0 | VAR 
+25   | long              |     |       |    | my  |      | array  | 1 | VAR 
+25   | length            |     |       |    |     |      |        | 0 | CALL
+25   | words             |     |       |    |     |      | array  | 0 | VAR 
+26   | defined           |     |       |    | my  |      | array  | 1 | VAR 
+26   | defined           |     |       |    |     |      |        | 0 | CALL
+28   | regex             |     |       |    |     |      |        | 0 | COM 
+29   | has_a             |     |       |    | my  |      | array  | 1 | VAR 
+29   | words             |     |       |    |     |      | array  | 0 | VAR 
+30   | no_e              |     |       |    | my  |      | array  | 1 | VAR 
+30   | words             |     |       |    |     |      | array  | 0 | VAR 
+32   | count             |     |       |    |     |      |        | 0 | COM 
+32   | matches           |     |       |    |     |      |        | 0 | COM 
+33   | even_count        |     |       |    | my  |      | scalar | 1 | VAR 
+33   | nums              |     |       |    |     |      | array  | 0 | VAR 
+35   | ---               |     |       |    |     |      |        | 0 | COM 
+35   | ---               |     |       |    |     |      |        | 0 | COM 
+36   | alpha             |     |       |    | my  |      | array  | 1 | VAR 
+36   | words             |     |       |    |     |      | array  | 0 | VAR 
+37   | rev               |     |       |    | my  |      | array  | 1 | VAR 
+37   | words             |     |       |    |     |      | array  | 0 | VAR 
+38   | by_len            |     |       |    | my  |      | array  | 1 | VAR 
+38   | length            |     |       |    |     |      |        | 0 | CALL
+38   | length            |     |       |    |     |      |        | 0 | CALL
+38   | words             |     |       |    |     |      | array  | 0 | VAR 
+39   | numeric           |     |       |    | my  |      | array  | 1 | VAR 
+40   | rev_num           |     |       |    | my  |      | array  | 1 | VAR 
+40   | nums              |     |       |    |     |      | array  | 0 | VAR 
+42   | Schwartzian       |     |       |    |     |      |        | 0 | COM 
+42   | transform         |     |       |    |     |      |        | 0 | COM 
+42   | computed          |     |       |    |     |      |        | 0 | COM 
+42   | key               |     |       |    |     |      |        | 0 | COM 
+42   | efficiently       |     |       |    |     |      |        | 0 | COM 
+43   | by_len_st         |     |       |    | my  |      | array  | 1 | VAR 
+45   | length            |     |       |    |     |      |        | 0 | CALL
+46   | words             |     |       |    |     |      | array  | 0 | VAR 
+48   | objects/hashes    |     |       |    |     |      |        | 0 | COM 
+48   | field             |     |       |    |     |      |        | 0 | COM 
+49   | people            |     |       |    | my  |      | array  | 1 | VAR 
+50   | name              |     |       |    |     |      |        | 0 | PROP
+50   | Charlie           |     |       |    |     |      |        | 0 | STR 
+50   | age               |     |       |    |     |      |        | 0 | PROP
+51   | name              |     |       |    |     |      |        | 0 | PROP
+51   | Alice             |     |       |    |     |      |        | 0 | STR 
+51   | age               |     |       |    |     |      |        | 0 | PROP
+52   | name              |     |       |    |     |      |        | 0 | PROP
+52   | Bob               |     |       |    |     |      |        | 0 | STR 
+52   | age               |     |       |    |     |      |        | 0 | PROP
+54   | by_age            |     |       |    | my  |      | array  | 1 | VAR 
+54   | age               |     |       |    |     |      |        | 0 | PROP
+54   | age               |     |       |    |     |      |        | 0 | PROP
+54   | people            |     |       |    |     |      | array  | 0 | VAR 
+55   | by_name           |     |       |    | my  |      | array  | 1 | VAR 
+55   | name              |     |       |    |     |      |        | 0 | PROP
+55   | name              |     |       |    |     |      |        | 0 | PROP
+55   | people            |     |       |    |     |      | array  | 0 | VAR 
+57   | ---               |     |       |    |     |      |        | 0 | COM 
+57   | combinations      |     |       |    |     |      |        | 0 | COM 
+57   | ---               |     |       |    |     |      |        | 0 | COM 
+58   | top3_even_squares |     |       |    | my  |      | array  | 1 | VAR 
+62   | nums              |     |       |    |     |      | array  | 0 | VAR 
+64   | reduce            |     |       |    |     |      |        | 0 | COM 
+64   | List::Util        |     |       |    |     |      |        | 0 | COM 
+65   | List::Util        |     |       |    |     |      |        | 0 | IMP 
+65   | reduce            |     |       |    |     |      |        | 0 | IMP 
+65   | sum               |     |       |    |     |      |        | 0 | IMP 
+65   | min               |     |       |    |     |      |        | 0 | IMP 
+65   | max               |     |       |    |     |      |        | 0 | IMP 
+65   | first             |     |       |    |     |      |        | 0 | IMP 
+65   | any               |     |       |    |     |      |        | 0 | IMP 
+65   | all               |     |       |    |     |      |        | 0 | IMP 
+65   | none              |     |       |    |     |      |        | 0 | IMP 
+67   | product           |     |       |    | my  |      | scalar | 1 | VAR 
+67   | reduce            |     |       |    |     |      |        | 0 | CALL
+67   | nums              |     |       |    |     |      | array  | 0 | VAR 
+68   | total             |     |       |    | my  |      | scalar | 1 | VAR 
+68   | sum               |     |       |    |     |      |        | 0 | CALL
+68   | nums              |     |       |    |     |      | array  | 0 | VAR 
+69   | minimum           |     |       |    | my  |      | scalar | 1 | VAR 
+69   | min               |     |       |    |     |      |        | 0 | CALL
+69   | nums              |     |       |    |     |      | array  | 0 | VAR 
+70   | maximum           |     |       |    | my  |      | scalar | 1 | VAR 
+70   | max               |     |       |    |     |      |        | 0 | CALL
+70   | nums              |     |       |    |     |      | array  | 0 | VAR 
+71   | first_e           |     |       |    | my  |      | scalar | 1 | VAR 
+71   | first             |     |       |    |     |      |        | 0 | CALL
+71   | words             |     |       |    |     |      | array  | 0 | VAR 
+73   | has_even          |     |       |    | my  |      | scalar | 1 | VAR 
+73   | any               |     |       |    |     |      |        | 0 | CALL
+73   | nums              |     |       |    |     |      | array  | 0 | VAR 
+74   | all_pos           |     |       |    | my  |      | scalar | 1 | VAR 
+74   | all               |     |       |    |     |      |        | 0 | CALL
+74   | nums              |     |       |    |     |      | array  | 0 | VAR 
+75   | none_neg          |     |       |    | my  |      | scalar | 1 | VAR 
+75   | none              |     |       |    |     |      |        | 0 | CALL
+75   | nums              |     |       |    |     |      | array  | 0 | VAR 

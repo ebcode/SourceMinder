@@ -1,0 +1,179 @@
+LINE | SYM               | PAR             | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/ruby/perl_heritage.rb:
+1    | perl_heritage     |                 |       |    |     |      |      | 0 | FILE
+1    | Perl              |                 |       |    |     |      |      | 0 | COM 
+1    | heritage:         |                 |       |    |     |      |      | 0 | COM 
+1    | special           |                 |       |    |     |      |      | 0 | COM 
+1    | globals           |                 |       |    |     |      |      | 0 | COM 
+1    | regex             |                 |       |    |     |      |      | 0 | COM 
+1    | captures          |                 |       |    |     |      |      | 0 | COM 
+1    | flip-flop         |                 |       |    |     |      |      | 0 | COM 
+1    | DATA.             |                 |       |    |     |      |      | 0 | COM 
+2    | Ruby              |                 |       |    |     |      |      | 0 | COM 
+2    | inherited         |                 |       |    |     |      |      | 0 | COM 
+2    | Perls             |                 |       |    |     |      |      | 0 | COM 
+2    | line-noise        |                 |       |    |     |      |      | 0 | COM 
+2    | globals           |                 |       |    |     |      |      | 0 | COM 
+2    | implicit-variable |                 |       |    |     |      |      | 0 | COM 
+2    | style.            |                 |       |    |     |      |      | 0 | COM 
+4    | BEGIN/END         |                 |       |    |     |      |      | 0 | COM 
+4    | blocks            |                 |       |    |     |      |      | 0 | COM 
+4    | run               |                 |       |    |     |      |      | 0 | COM 
+4    | load              |                 |       |    |     |      |      | 0 | COM 
+4    | exit              |                 |       |    |     |      |      | 0 | COM 
+4    | time              |                 |       |    |     |      |      | 0 | COM 
+4    | straight          |                 |       |    |     |      |      | 0 | COM 
+4    | Perl/awk.         |                 |       |    |     |      |      | 0 | COM 
+5    | $processed        |                 |       |    |     |      |      | 1 | VAR 
+6    | warn              |                 |       |    |     |      |      | 0 | CALL
+6    | processed         |                 |       |    |     |      |      | 0 | STR 
+6    | lines             |                 |       |    |     |      |      | 0 | STR 
+6    | $processed        |                 |       |    |     |      |      | 0 | VAR 
+8    | Output/record     |                 |       |    |     |      |      | 0 | COM 
+8    | separators        |                 |       |    |     |      |      | 0 | COM 
+8    | like              |                 |       |    |     |      |      | 0 | COM 
+8    | Perls             |                 |       |    |     |      |      | 0 | COM 
+8    | $/.               |                 |       |    |     |      |      | 0 | COM 
+9    | $\                |                 |       |    |     |      |      | 1 | VAR 
+10   | $,                |                 |       |    |     |      |      | 1 | VAR 
+11   | $;                |                 |       |    |     |      |      | 1 | VAR 
+13   | LOG_LINE          |                 |       |    |     |      |      | 1 | VAR 
+23   | Parse             |                 |       |    |     |      |      | 0 | COM 
+23   | using             |                 |       |    |     |      |      | 0 | COM 
+23   | named             |                 |       |    |     |      |      | 0 | COM 
+23   | captures          |                 |       |    |     |      |      | 0 | COM 
+23   | leak              |                 |       |    |     |      |      | 0 | COM 
+23   | local             |                 |       |    |     |      |      | 0 | COM 
+23   | variables         |                 |       |    |     |      |      | 0 | COM 
+23   | via               |                 |       |    |     |      |      | 0 | COM 
+23   | =~.               |                 |       |    |     |      |      | 0 | COM 
+24   | parse             |                 |       |    |     |      |      | 1 | FUNC
+24   | line              | parse           |       |    |     |      |      | 0 | ARG 
+25   | line              |                 |       |    |     |      |      | 0 | VAR 
+25   | LOG_LINE          |                 |       |    |     |      |      | 0 | VAR 
+26   | $~                |                 |       |    |     |      |      | 0 | COM 
+26   | MatchData         |                 |       |    |     |      |      | 0 | COM 
+26   | $1/$2             |                 |       |    |     |      |      | 0 | COM 
+26   | named             |                 |       |    |     |      |      | 0 | COM 
+26   | locals            |                 |       |    |     |      |      | 0 | COM 
+26   | work.             |                 |       |    |     |      |      | 0 | COM 
+27   | level             | parse           |       |    |     |      |      | 1 | VAR 
+27   | $~                |                 |       |    |     |      |      | 0 | VAR 
+27   | level             |                 |       |    |     |      |      | 0 | VAR 
+28   | stamp             | parse           |       |    |     |      |      | 1 | VAR 
+28   | $1                |                 |       |    |     |      |      | 0 | VAR 
+29   | at                |                 |       |    |     |      |      | 0 | PROP
+29   | stamp             |                 |       |    |     |      |      | 0 | VAR 
+29   | level             |                 |       |    |     |      |      | 0 | PROP
+29   | level             |                 |       |    |     |      |      | 0 | VAR 
+29   | text              |                 |       |    |     |      |      | 0 | PROP
+29   | $~                |                 |       |    |     |      |      | 0 | VAR 
+29   | msg               |                 |       |    |     |      |      | 0 | VAR 
+31   | raw               |                 |       |    |     |      |      | 0 | PROP
+31   | $_                |                 |       |    |     |      |      | 0 | VAR 
+31   | $_                |                 |       |    |     |      |      | 0 | COM 
+31   | last              |                 |       |    |     |      |      | 0 | COM 
+31   | line              |                 |       |    |     |      |      | 0 | COM 
+31   | read              |                 |       |    |     |      |      | 0 | COM 
+31   | gets              |                 |       |    |     |      |      | 0 | COM 
+35   | gsub              |                 |       |    |     |      |      | 0 | COM 
+35   | block             |                 |       |    |     |      |      | 0 | COM 
+35   | sees              |                 |       |    |     |      |      | 0 | COM 
+35   | $~                |                 |       |    |     |      |      | 0 | COM 
+35   | $1...             |                 |       |    |     |      |      | 0 | COM 
+35   | each              |                 |       |    |     |      |      | 0 | COM 
+35   | match             |                 |       |    |     |      |      | 0 | COM 
+35   | Perlish.          |                 |       |    |     |      |      | 0 | COM 
+36   | redact            |                 |       |    |     |      |      | 1 | FUNC
+36   | text              | redact          |       |    |     |      |      | 0 | ARG 
+37   | gsub              | text            |       |    |     |      |      | 0 | CALL
+37   | text              |                 |       |    |     |      |      | 0 | VAR 
+38   | @[redacted]       |                 |       |    |     |      |      | 0 | STR 
+38   | $~                |                 |       |    |     |      |      | 0 | VAR 
+38   | user              |                 |       |    |     |      |      | 0 | VAR 
+42   | Flip-flop         |                 |       |    |     |      |      | 0 | COM 
+42   | operator:         |                 |       |    |     |      |      | 0 | COM 
+42   | start             |                 |       |    |     |      |      | 0 | COM 
+42   | line              |                 |       |    |     |      |      | 0 | COM 
+42   | line.             |                 |       |    |     |      |      | 0 | COM 
+43   | extract_section   |                 |       |    |     |      |      | 1 | FUNC
+43   | lines             | extract_section |       |    |     |      |      | 0 | ARG 
+44   | each              | lines           |       |    |     |      |      | 0 | CALL
+44   | lines             |                 |       |    |     |      |      | 0 | VAR 
+44   | line              | extract_section |       |    |     |      |      | 0 | ARG 
+45   | $processed        |                 |       |    |     |      |      | 0 | VAR 
+46   | puts              |                 |       |    |     |      |      | 0 | CALL
+46   | line              |                 |       |    |     |      |      | 0 | VAR 
+46   | line              |                 |       |    |     |      |      | 0 | VAR 
+46   | line              |                 |       |    |     |      |      | 0 | VAR 
+50   | classic           |                 |       |    |     |      |      | 0 | COM 
+50   | Perl              |                 |       |    |     |      |      | 0 | COM 
+50   | one-liner         |                 |       |    |     |      |      | 0 | COM 
+50   | style:            |                 |       |    |     |      |      | 0 | COM 
+50   | chained           |                 |       |    |     |      |      | 0 | COM 
+50   | implicit          |                 |       |    |     |      |      | 0 | COM 
+50   | operations.       |                 |       |    |     |      |      | 0 | COM 
+51   | word_freq         |                 |       |    |     |      |      | 1 | FUNC
+52   | freq              | word_freq       |       |    |     |      |      | 1 | VAR 
+52   | new               | Hash            |       |    |     |      |      | 0 | CALL
+52   | Hash              |                 |       |    |     |      |      | 0 | VAR 
+53   | each_line         | DATA            |       |    |     |      |      | 0 | CALL
+53   | DATA              |                 |       |    |     |      |      | 0 | VAR 
+53   | line              | word_freq       |       |    |     |      |      | 0 | ARG 
+54   | scan              | line            |       |    |     |      |      | 0 | CALL
+54   | line              |                 |       |    |     |      |      | 0 | VAR 
+54   | freq              |                 |       |    |     |      |      | 0 | VAR 
+54   | downcase          | w               |       |    |     |      |      | 0 | CALL
+56   | max_by            | freq            |       |    |     |      |      | 0 | CALL
+56   | freq              |                 |       |    |     |      |      | 0 | VAR 
+56   | _word             | word_freq       |       |    |     |      |      | 0 | ARG 
+59   | Backtick          |                 |       |    |     |      |      | 0 | COM 
+59   | subshell          |                 |       |    |     |      |      | 0 | COM 
+59   | %x                |                 |       |    |     |      |      | 0 | COM 
+59   | Ruby              |                 |       |    |     |      |      | 0 | COM 
+59   | kept              |                 |       |    |     |      |      | 0 | COM 
+59   | Perls             |                 |       |    |     |      |      | 0 | COM 
+59   | shell-out         |                 |       |    |     |      |      | 0 | COM 
+59   | syntax.           |                 |       |    |     |      |      | 0 | COM 
+60   | host_uptime       |                 |       |    |     |      |      | 1 | FUNC
+61   | strip             |                 |       |    |     |      |      | 0 | CALL
+64   | ---               |                 |       |    |     |      |      | 0 | COM 
+64   | Exercise:         |                 |       |    |     |      |      | 0 | COM 
+64   | drive             |                 |       |    |     |      |      | 0 | COM 
+64   | every             |                 |       |    |     |      |      | 0 | COM 
+64   | definition        |                 |       |    |     |      |      | 0 | COM 
+64   | parser            |                 |       |    |     |      |      | 0 | COM 
+64   | sees              |                 |       |    |     |      |      | 0 | COM 
+64   | real              |                 |       |    |     |      |      | 0 | COM 
+64   | usages.           |                 |       |    |     |      |      | 0 | COM 
+64   | ---               |                 |       |    |     |      |      | 0 | COM 
+65   | records           |                 |       |    |     |      |      | 1 | VAR 
+65   | map               |                 |       |    |     |      |      | 0 | CALL
+65   | 2026-08-31        |                 |       |    |     |      |      | 0 | STR 
+65   | INFO              |                 |       |    |     |      |      | 0 | STR 
+65   | service           |                 |       |    |     |      |      | 0 | STR 
+65   | started           |                 |       |    |     |      |      | 0 | STR 
+65   | garbled           |                 |       |    |     |      |      | 0 | STR 
+65   | line              |                 |       |    |     |      |      | 0 | STR 
+65   | line              |                 |       |    |     |      |      | 0 | ARG 
+65   | parse             |                 |       |    |     |      |      | 0 | CALL
+65   | line              |                 |       |    |     |      |      | 0 | VAR 
+66   | cleaned           |                 |       |    |     |      |      | 1 | VAR 
+66   | redact            |                 |       |    |     |      |      | 0 | CALL
+66   | ping              |                 |       |    |     |      |      | 0 | STR 
+66   | ada@example.com   |                 |       |    |     |      |      | 0 | STR 
+66   | grace@dev.local   |                 |       |    |     |      |      | 0 | STR 
+67   | extract_section   |                 |       |    |     |      |      | 0 | CALL
+67   | intro             |                 |       |    |     |      |      | 0 | STR 
+67   | captured          |                 |       |    |     |      |      | 0 | STR 
+67   | outro             |                 |       |    |     |      |      | 0 | STR 
+68   | top_words         |                 |       |    |     |      |      | 1 | VAR 
+68   | word_freq         |                 |       |    |     |      |      | 0 | VAR 
+69   | uptime_line       |                 |       |    |     |      |      | 1 | VAR 
+69   | host_uptime       |                 |       |    |     |      |      | 0 | VAR 
+70   | puts              |                 |       |    |     |      |      | 0 | CALL
+70   | inspect           |                 |       |    |     |      |      | 0 | CALL
+70   | records           |                 |       |    |     |      |      | 0 | VAR 
+70   | cleaned           |                 |       |    |     |      |      | 0 | VAR 
+70   | top_words         |                 |       |    |     |      |      | 0 | VAR 
+70   | uptime_line       |                 |       |    |     |      |      | 0 | VAR 

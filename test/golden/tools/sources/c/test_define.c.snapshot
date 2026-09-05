@@ -1,0 +1,21 @@
+LINE | SYM           | PAR | SCOPE | NS | MOD | CLUE | TYPE          | D | CTX  
+./tools/sources/c/test_define.c:
+1    | test_define   |     |       |    |     |      |               | 0 | FILE 
+1    | Test          |     |       |    |     |      |               | 0 | COM  
+1    | file          |     |       |    |     |      |               | 0 | COM  
+1    | #define       |     |       |    |     |      |               | 0 | COM  
+1    | directives    |     |       |    |     |      |               | 0 | COM  
+2    | MAX_SIZE      |     |       |    |     |      | object-like   | 1 | MACRO
+3    | MIN_SIZE      |     |       |    |     |      | object-like   | 1 | MACRO
+4    | PI            |     |       |    |     |      | object-like   | 1 | MACRO
+6    | Function-like |     |       |    |     |      |               | 0 | COM  
+6    | macros        |     |       |    |     |      |               | 0 | COM  
+7    | MIN           |     |       |    |     |      | function-like | 1 | MACRO
+8    | MAX           |     |       |    |     |      | function-like | 1 | MACRO
+9    | SQUARE        |     |       |    |     |      | function-like | 1 | MACRO
+11   | Multi-line    |     |       |    |     |      |               | 0 | COM  
+11   | define        |     |       |    |     |      |               | 0 | COM  
+12   | COMPLEX_MACRO |     |       |    |     |      | function-like | 1 | MACRO
+19   | main          |     |       |    |     |      | int           | 1 | FUNC 
+20   | size          |     |       |    |     |      | int           | 1 | VAR  
+20   | MAX_SIZE      |     |       |    |     |      |               | 0 | VAR  

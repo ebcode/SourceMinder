@@ -1,0 +1,50 @@
+LINE | SYM                 | PAR | SCOPE | NS              | MOD | CLUE | TYPE   | D | CTX 
+./tools/sources/perl/packages.pl:
+1    | packages            |     |       |                 |     |      |        | 0 | FILE
+2    | MyApp::Config       |     |       |                 |     |      |        | 1 | NS  
+4    | strict              |     |       |                 |     |      |        | 0 | IMP 
+5    | warnings            |     |       |                 |     |      |        | 0 | IMP 
+6    | Exporter            |     |       |                 |     |      |        | 0 | IMP 
+8    | get_config          |     |       |                 |     |      |        | 1 | EXP 
+8    | EXPORT_OK           |     |       |                 | our |      | array  | 1 | VAR 
+9    | load_config         |     |       |                 |     |      |        | 1 | EXP 
+9    | EXPORT_TAGS         |     |       |                 | our |      | hash   | 1 | VAR 
+9    | all                 |     |       |                 |     |      |        | 0 | PROP
+9    | EXPORT_OK           |     |       |                 |     |      | array  | 0 | VAR 
+10   | VERSION             |     |       |                 | our |      | scalar | 1 | VAR 
+10   | 2.1.0               |     |       |                 |     |      |        | 0 | STR 
+12   | get_config          |     |       | MyApp::Config   |     |      |        | 1 | FUNC
+13   | key                 |     |       |                 | my  |      | scalar | 1 | ARG 
+14   | defaults            |     |       |                 |     |      | hash   | 0 | VAR 
+14   | key                 |     |       |                 |     |      | scalar | 0 | VAR 
+17   | load_config         |     |       | MyApp::Config   |     |      |        | 1 | FUNC
+18   | file                |     |       |                 | my  |      | scalar | 1 | ARG 
+19   | load                |     |       |                 |     |      |        | 0 | COM 
+19   | file                |     |       |                 |     |      |        | 0 | COM 
+22   | MyApp::Database     |     |       |                 |     |      |        | 1 | NS  
+24   | strict              |     |       |                 |     |      |        | 0 | IMP 
+25   | warnings            |     |       |                 |     |      |        | 0 | IMP 
+27   | DSN                 |     |       |                 | our |      | scalar | 1 | VAR 
+27   | dbi:Pg:dbname=myapp |     |       |                 |     |      |        | 0 | STR 
+28   | USERNAME            |     |       |                 | our |      | scalar | 1 | VAR 
+28   | myapp_user          |     |       |                 |     |      |        | 0 | STR 
+30   | connect             |     |       | MyApp::Database |     |      |        | 1 | FUNC
+31   | class               |     |       |                 | my  |      | scalar | 1 | ARG 
+32   | connection          |     |       |                 |     |      |        | 0 | COM 
+32   | logic               |     |       |                 |     |      |        | 0 | COM 
+35   | disconnect          |     |       | MyApp::Database |     |      |        | 1 | FUNC
+36   | self                |     |       |                 | my  |      | scalar | 1 | ARG 
+37   | cleanup             |     |       |                 |     |      |        | 0 | COM 
+40   | MyApp::Utils        |     |       |                 |     |      |        | 1 | NS  
+42   | trim                |     |       | MyApp::Utils    |     |      |        | 1 | FUNC
+43   | str                 |     |       |                 | my  |      | scalar | 1 | ARG 
+44   | str                 |     |       |                 |     |      | scalar | 0 | VAR 
+45   | str                 |     |       |                 |     |      | scalar | 0 | VAR 
+48   | slugify             |     |       | MyApp::Utils    |     |      |        | 1 | FUNC
+49   | str                 |     |       |                 | my  |      | scalar | 1 | ARG 
+50   | str                 |     |       |                 |     |      | scalar | 0 | VAR 
+50   | lc                  |     |       |                 |     |      |        | 0 | CALL
+50   | str                 |     |       |                 |     |      | scalar | 0 | VAR 
+51   | str                 |     |       |                 |     |      | scalar | 0 | VAR 
+52   | str                 |     |       |                 |     |      | scalar | 0 | VAR 
+53   | str                 |     |       |                 |     |      | scalar | 0 | VAR 

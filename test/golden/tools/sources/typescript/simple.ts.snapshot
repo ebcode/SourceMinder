@@ -1,0 +1,4 @@
+LINE | SYM    | PAR | SCOPE | NS | MOD | CLUE | TYPE | D | CTX 
+./tools/sources/typescript/simple.ts:
+1    | simple |     |       |    |     |      |      | 0 | FILE
+1    | foo    |     |       |    |     |      |      | 1 | VAR 

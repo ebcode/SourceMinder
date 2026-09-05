@@ -1,0 +1,79 @@
+LINE | SYM               | PAR         | SCOPE   | NS | MOD      | CLUE | TYPE                 | D | CTX  
+./tools/sources/typescript/test-types.ts:
+1    | test-types        |             |         |    |          |      |                      | 0 | FILE 
+1    | Test              |             |         |    |          |      |                      | 0 | COM  
+1    | file              |             |         |    |          |      |                      | 0 | COM  
+1    | TypeScript        |             |         |    |          |      |                      | 0 | COM  
+1    | extraction        |             |         |    |          |      |                      | 0 | COM  
+2    | Testing:          |             |         |    |          |      |                      | 0 | COM  
+2    | variable          |             |         |    |          |      |                      | 0 | COM  
+2    | types             |             |         |    |          |      |                      | 0 | COM  
+2    | types             |             |         |    |          |      |                      | 0 | COM  
+2    | property          |             |         |    |          |      |                      | 0 | COM  
+2    | types             |             |         |    |          |      |                      | 0 | COM  
+4    | Variables         |             |         |    |          |      |                      | 0 | COM  
+4    | explicit          |             |         |    |          |      |                      | 0 | COM  
+4    | annotations       |             |         |    |          |      |                      | 0 | COM  
+5    | userName          |             |         |    |          |      | string               | 1 | VAR  
+6    | count             |             |         |    |          |      | number               | 1 | VAR  
+7    | isActive          |             |         |    |          |      | boolean              | 1 | VAR  
+8    | data              |             |         |    |          |      | Data                 | 1 | VAR  
+8    | fetchData         |             |         |    |          |      |                      | 0 | CALL 
+9    | items             |             |         |    |          |      | array                | 1 | VAR  
+10   | callback          |             |         |    |          |      |                      | 1 | FUNC 
+12   | Variables         |             |         |    |          |      |                      | 0 | COM  
+12   | without           |             |         |    |          |      |                      | 0 | COM  
+12   | annotations       |             |         |    |          |      |                      | 0 | COM  
+12   | implicit/inferred |             |         |    |          |      |                      | 0 | COM  
+13   | inferredString    |             |         |    |          |      |                      | 1 | VAR  
+14   | inferredNumber    |             |         |    |          |      |                      | 1 | VAR  
+16   | declarations      |             |         |    |          |      |                      | 0 | COM  
+16   | types             |             |         |    |          |      |                      | 0 | COM  
+17   | getUserById       |             |         |    |          |      | User                 | 1 | FUNC 
+17   | number            |             |         |    |          |      |                      | 1 | TYPE 
+17   | id                |             |         |    |          |      | number               | 1 | ARG  
+21   | processData       |             |         |    |          |      | void                 | 1 | FUNC 
+22   | log               | console     |         |    |          |      |                      | 0 | CALL 
+22   | processing        |             |         |    |          |      |                      | 0 | STR  
+25   | fetchUser         |             |         |    | async    |      | Promise<User>        | 1 | FUNC 
+29   | Arrow             |             |         |    |          |      |                      | 0 | COM  
+29   | functions         |             |         |    |          |      |                      | 0 | COM  
+29   | types             |             |         |    |          |      |                      | 0 | COM  
+30   | getCount          |             |         |    |          |      |                      | 1 | FUNC 
+31   | transform         |             |         |    |          |      |                      | 1 | FUNC 
+31   | string            |             |         |    |          |      |                      | 1 | TYPE 
+31   | value             |             |         |    |          |      |                      | 0 | PROP 
+33   | property          |             |         |    |          |      |                      | 0 | COM  
+33   | types             |             |         |    |          |      |                      | 0 | COM  
+34   | UserManager       |             |         |    |          |      |                      | 1 | CLASS
+35   | Properties        |             |         |    |          |      |                      | 0 | COM  
+35   | types             |             |         |    |          |      |                      | 0 | COM  
+36   | name              | UserManager |         |    |          |      | string               | 1 | PROP 
+37   | age               | UserManager |         |    |          |      | number               | 1 | PROP 
+38   | userId            | UserManager | private |    |          |      | number               | 1 | PROP 
+39   | maxUsers          | UserManager | public  |    | readonly |      | number               | 1 | PROP 
+40   | instanceCount     | UserManager |         |    | static   |      | number               | 1 | PROP 
+42   | Methods           |             |         |    |          |      |                      | 0 | COM  
+42   | types             |             |         |    |          |      |                      | 0 | COM  
+43   | getUser           | UserManager |         |    |          |      | User                 | 1 | FUNC 
+44   | name              | this        |         |    |          |      |                      | 0 | PROP 
+47   | fetchData         | UserManager |         |    | async    |      | Promise<Data>        | 1 | FUNC 
+51   | processItems      | UserManager |         |    |          |      | void                 | 1 | FUNC 
+51   | items             |             |         |    |          |      | array                | 1 | ARG  
+52   | log               | console     |         |    |          |      |                      | 0 | CALL 
+52   | items             |             |         |    |          | log  |                      | 0 | ARG  
+56   | property          |             |         |    |          |      |                      | 0 | COM  
+56   | types             |             |         |    |          |      |                      | 0 | COM  
+57   | Config            |             |         |    |          |      |                      | 1 | IFACE
+58   | host              | Config      |         |    |          |      | string               | 1 | PROP 
+59   | port              | Config      |         |    |          |      | number               | 1 | PROP 
+60   | timeout           | Config      |         |    |          |      | number               | 1 | PROP 
+61   | callback          | Config      |         |    |          |      | (err: Error) => void | 1 | PROP 
+64   | alias             |             |         |    |          |      |                      | 0 | COM  
+65   | Point             |             |         |    |          |      |                      | 1 | TYPE 
+70   | Generic           |             |         |    |          |      |                      | 0 | COM  
+70   | types             |             |         |    |          |      |                      | 0 | COM  
+71   | map               |             |         |    |          |      | Map<string, number>  | 1 | VAR  
+71   | Map               |             |         |    |          |      |                      | 0 | CALL 
+72   | users             |             |         |    |          |      | Array<User>          | 1 | VAR  
+73   | getItems          |             |         |    |          |      | array                | 1 | FUNC 

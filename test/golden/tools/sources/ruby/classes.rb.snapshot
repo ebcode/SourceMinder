@@ -1,0 +1,80 @@
+LINE | SYM         | PAR        | SCOPE | NS      | MOD  | CLUE             | TYPE          | D | CTX  
+./tools/sources/ruby/classes.rb:
+1    | classes     |            |       |         |      |                  |               | 0 | FILE 
+1    | Basic       |            |       |         |      |                  |               | 0 | COM  
+1    | definitions |            |       |         |      |                  |               | 0 | COM  
+1    | inheritance |            |       |         |      |                  |               | 0 | COM  
+1    | methods.    |            |       |         |      |                  |               | 0 | COM  
+2    | set         |            |       |         |      | require          |               | 0 | IMP  
+3    | modules     |            |       |         |      | require_relative |               | 0 | IMP  
+5    | plain       |            |       |         |      |                  |               | 0 | COM  
+5    | initializer |            |       |         |      |                  |               | 0 | COM  
+5    | instance    |            |       |         |      |                  |               | 0 | COM  
+5    | methods.    |            |       |         |      |                  |               | 0 | COM  
+6    | Animal      |            |       |         |      |                  |               | 1 | CLASS
+7    | LEGS        | Animal     |       |         |      |                  |               | 1 | VAR  
+7    | class-level |            |       |         |      |                  |               | 0 | COM  
+7    | constant    |            |       |         |      |                  |               | 0 | COM  
+8    | @@count     | Animal     |       |         |      |                  |               | 0 | PROP 
+8    | variable    |            |       |         |      |                  |               | 0 | COM  
+10   | name        | Animal     |       |         |      | attr_reader      |               | 1 | PROP 
+11   | age         | Animal     |       |         |      | attr_accessor    |               | 1 | PROP 
+12   | owner       | Animal     |       |         |      | attr_writer      |               | 1 | PROP 
+14   | initialize  | Animal     |       |         |      |                  |               | 1 | FUNC 
+14   | name        | initialize |       |         |      |                  |               | 0 | ARG  
+14   | age         | initialize |       |         |      |                  |               | 0 | ARG  
+15   | @name       | Animal     |       |         |      |                  |               | 0 | PROP 
+15   | name        |            |       |         |      |                  |               | 0 | VAR  
+15   | instance    |            |       |         |      |                  |               | 0 | COM  
+15   | variable    |            |       |         |      |                  |               | 0 | COM  
+16   | @age        | Animal     |       |         |      |                  |               | 0 | PROP 
+16   | age         |            |       |         |      |                  |               | 0 | VAR  
+17   | @@count     | Animal     |       |         |      |                  |               | 0 | PROP 
+20   | speak       | Animal     |       |         |      |                  |               | 1 | FUNC 
+24   | method      |            |       |         |      |                  |               | 0 | COM  
+24   | via         |            |       |         |      |                  |               | 0 | COM  
+25   | count       | Animal     |       |         | self |                  |               | 1 | FUNC 
+26   | @@count     | Animal     |       |         |      |                  |               | 0 | PROP 
+29   | Predicate   |            |       |         |      |                  |               | 0 | COM  
+29   | bang        |            |       |         |      |                  |               | 0 | COM  
+29   | method      |            |       |         |      |                  |               | 0 | COM  
+29   | names.      |            |       |         |      |                  |               | 0 | COM  
+30   | adult?      | Animal     |       |         |      |                  |               | 1 | FUNC 
+31   | @age        | Animal     |       |         |      |                  |               | 0 | PROP 
+34   | rename!     | Animal     |       |         |      |                  |               | 1 | FUNC 
+34   | new_name    | rename!    |       |         |      |                  |               | 0 | ARG  
+35   | @name       | Animal     |       |         |      |                  |               | 0 | PROP 
+35   | new_name    |            |       |         |      |                  |               | 0 | VAR  
+39   | Inheritance |            |       |         |      |                  |               | 0 | COM  
+40   | Animal      |            |       |         |      |                  |               | 0 | CLASS
+40   | Dog         |            |       |         |      |                  | Animal        | 1 | CLASS
+41   | initialize  | Dog        |       |         |      |                  |               | 1 | FUNC 
+41   | name        | initialize |       |         |      |                  |               | 0 | ARG  
+41   | breed       | initialize |       |         |      |                  |               | 0 | ARG  
+42   | super       |            |       |         |      |                  |               | 0 | CALL 
+42   | name        |            |       |         |      |                  |               | 0 | VAR  
+43   | @breed      | Dog        |       |         |      |                  |               | 0 | PROP 
+43   | breed       |            |       |         |      |                  |               | 0 | VAR  
+46   | speak       | Dog        |       |         |      |                  |               | 1 | FUNC 
+47   | Woof        |            |       |         |      |                  |               | 0 | STR  
+51   | Qualified   |            |       |         |      |                  |               | 0 | COM  
+51   | superclass  |            |       |         |      |                  |               | 0 | COM  
+51   | namespaced  |            |       |         |      |                  |               | 0 | COM  
+51   | base        |            |       |         |      |                  |               | 0 | COM  
+52   | Animals     |            |       |         |      |                  |               | 0 | NS   
+52   | Base        | Animals    |       | Animals |      |                  |               | 0 | CLASS
+52   | Puppy       |            |       |         |      |                  | Animals::Base | 1 | CLASS
+53   | speak       | Puppy      |       |         |      |                  |               | 1 | FUNC 
+54   | Yip         |            |       |         |      |                  |               | 0 | STR  
+58   | Singleton   |            |       |         |      |                  |               | 0 | COM  
+58   | method      |            |       |         |      |                  |               | 0 | COM  
+58   | specific    |            |       |         |      |                  |               | 0 | COM  
+58   | object.     |            |       |         |      |                  |               | 0 | COM  
+59   | rex         |            |       |         |      |                  |               | 1 | VAR  
+59   | new         | Dog        |       |         |      |                  |               | 0 | CALL 
+59   | Dog         |            |       |         |      |                  |               | 0 | VAR  
+59   | Rex         |            |       |         |      |                  |               | 0 | STR  
+59   | Lab         |            |       |         |      |                  |               | 0 | STR  
+60   | trick       |            |       |         | rex  |                  |               | 1 | FUNC 
+61   | rolls       |            |       |         |      |                  |               | 0 | STR  
+61   | over        |            |       |         |      |                  |               | 0 | STR  

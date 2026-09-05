@@ -1,0 +1,13 @@
+LINE | SYM               | PAR          | SCOPE   | NS           | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/namespace_imports.php:
+1    | namespace_imports |              |         |              |     |      |      | 0 | FILE 
+3    | App\Services      |              |         |              |     |      |      | 1 | NS   
+12   | Service           |              |         | App\Services |     |      |      | 0 | COM  
+12   | demonstrating     |              |         | App\Services |     |      |      | 0 | COM  
+12   | imports           |              |         | App\Services |     |      |      | 0 | COM  
+15   | OrderService      |              |         | App\Services |     |      |      | 1 | CLASS
+16   | $users            | OrderService | private | App\Services |     |      |      | 1 | PROP 
+18   | createOrder       | OrderService | public  | App\Services |     |      |      | 1 | FUNC 
+19   | $date             |              |         | App\Services |     |      |      | 0 | VAR  
+19   | formatDate        |              |         | App\Services |     |      |      | 0 | CALL 
+19   | Y-m-d             |              |         | App\Services |     |      |      | 0 | STR  

@@ -1,0 +1,59 @@
+LINE | SYM               | PAR    | SCOPE   | NS   | MOD | CLUE | TYPE    | D | CTX  
+./tools/sources/go/pointers.go:
+1    | pointers          |        |         |      |     |      |         | 0 | FILE 
+1    | main              |        |         |      |     |      |         | 0 | NS   
+3    | Person            |        | public  | main |     |      |         | 1 | CLASS
+4    | Name              |        | public  | main |     |      | string  | 1 | PROP 
+5    | Age               |        | public  | main |     |      | int     | 1 | PROP 
+8    | pointerOperations |        | private | main |     |      |         | 1 | FUNC 
+9    | Pointer           |        |         |      |     |      |         | 0 | COM  
+9    | declaration       |        |         |      |     |      |         | 0 | COM  
+10   | ptr               |        | private | main | var |      | *int    | 1 | VAR  
+12   | Address-of        |        |         |      |     |      |         | 0 | COM  
+12   | operator          |        |         |      |     |      |         | 0 | COM  
+13   | value             |        | private | main |     |      |         | 1 | VAR  
+14   | ptr               |        |         | main |     |      |         | 0 | VAR  
+14   | value             |        |         | main |     |      |         | 0 | VAR  
+16   | Dereference       |        |         |      |     |      |         | 0 | COM  
+16   | operator          |        |         |      |     |      |         | 0 | COM  
+17   | dereferenced      |        | private | main |     |      |         | 1 | VAR  
+17   | ptr               |        |         | main |     |      |         | 0 | VAR  
+19   | Pointer           |        |         |      |     |      |         | 0 | COM  
+20   | person            |        | private | main |     |      | Person  | 1 | VAR  
+20   | Name              |        |         | main |     |      |         | 0 | PROP 
+20   | Alice             |        |         |      |     |      |         | 0 | STR  
+20   | Age               |        |         | main |     |      |         | 0 | PROP 
+22   | Access            |        |         |      |     |      |         | 0 | COM  
+22   | fields            |        |         |      |     |      |         | 0 | COM  
+22   | pointer           |        |         |      |     |      |         | 0 | COM  
+22   | automatic         |        |         |      |     |      |         | 0 | COM  
+22   | dereferencing     |        |         |      |     |      |         | 0 | COM  
+23   | name              |        | private | main |     |      |         | 1 | VAR  
+23   | person            |        |         | main |     |      |         | 0 | VAR  
+23   | Name              | person |         | main |     |      |         | 0 | PROP 
+24   | age               |        | private | main |     |      |         | 1 | VAR  
+24   | person            |        |         | main |     |      |         | 0 | VAR  
+24   | Age               | person |         | main |     |      |         | 0 | PROP 
+26   | dereferenced      |        |         | main |     |      |         | 0 | VAR  
+27   | name              |        |         | main |     |      |         | 0 | VAR  
+28   | age               |        |         | main |     |      |         | 0 | VAR  
+31   | Function          |        |         |      |     |      |         | 0 | COM  
+31   | pointer           |        |         |      |     |      |         | 0 | COM  
+31   | parameter         |        |         |      |     |      |         | 0 | COM  
+32   | updatePerson      |        | private | main |     |      |         | 1 | FUNC 
+33   | Name              | p      |         | main |     |      |         | 0 | PROP 
+33   | Bob               |        |         |      |     |      |         | 0 | STR  
+34   | Age               | p      |         | main |     |      |         | 0 | PROP 
+37   | Function          |        |         |      |     |      |         | 0 | COM  
+37   | returning         |        |         |      |     |      |         | 0 | COM  
+37   | pointer           |        |         |      |     |      |         | 0 | COM  
+38   | createPerson      |        | private | main |     |      | *Person | 1 | FUNC 
+38   | name              |        |         |      |     |      | string  | 1 | ARG  
+39   | Name              |        |         | main |     |      |         | 0 | PROP 
+39   | name              |        |         | main |     |      |         | 0 | VAR  
+39   | Age               |        |         | main |     |      |         | 0 | PROP 
+42   | Nil               |        |         |      |     |      |         | 0 | COM  
+42   | pointer           |        |         |      |     |      |         | 0 | COM  
+42   | check             |        |         |      |     |      |         | 0 | COM  
+43   | safeDereference   |        | private | main |     |      | string  | 1 | FUNC 
+45   | Name              | p      |         | main |     |      |         | 0 | PROP 

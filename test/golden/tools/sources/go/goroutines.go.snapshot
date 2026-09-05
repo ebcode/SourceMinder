@@ -1,0 +1,47 @@
+LINE | SYM               | PAR | SCOPE   | NS   | MOD | CLUE              | TYPE       | D | CTX 
+./tools/sources/go/goroutines.go:
+1    | goroutines        |     |         |      |     |                   |            | 0 | FILE
+1    | main              |     |         |      |     |                   |            | 0 | NS  
+3    | fmt               |     |         | main |     |                   |            | 0 | IMP 
+5    | worker            |     | private | main |     |                   |            | 1 | FUNC
+5    | id                |     |         |      |     |                   | int        | 1 | ARG 
+5    | jobs              |     |         |      |     |                   | <-chan int | 1 | ARG 
+5    | results           |     |         |      |     |                   | chan<- int | 1 | ARG 
+6    | job               |     | private | main |     | range             |            | 0 | VAR 
+7    | results           |     | private | main |     | send              |            | 0 | VAR 
+7    | job               |     |         | main |     |                   |            | 0 | VAR 
+11   | processData       |     | private | main |     |                   |            | 1 | FUNC
+11   | data              |     |         |      |     |                   | []int      | 1 | ARG 
+12   | Launch            |     |         |      |     |                   |            | 0 | COM 
+12   | goroutine         |     |         |      |     |                   |            | 0 | COM 
+12   | anonymous         |     |         |      |     |                   |            | 0 | COM 
+12   | function          |     |         |      |     |                   |            | 0 | COM 
+13   | func              |     |         | main |     | go                |            | 0 | CALL
+13   | <lambda>          |     |         | main |     |                   |            | 1 | LAM 
+15   | Println           | fmt |         |      |     |                   |            | 0 | CALL
+20   | fetchUser         |     | private | main |     |                   |            | 1 | FUNC
+20   | id                |     |         |      |     |                   | int        | 1 | ARG 
+21   | Simple            |     |         |      |     |                   |            | 0 | COM 
+21   | goroutine         |     |         |      |     |                   |            | 0 | COM 
+21   | launch            |     |         |      |     |                   |            | 0 | COM 
+22   | fetchFromDatabase |     |         | main |     | go                |            | 0 | CALL
+22   | fetchFromDatabase |     |         | main |     |                   |            | 0 | VAR 
+22   | id                |     |         | main |     | fetchFromDatabase |            | 0 | ARG 
+25   | fetchFromDatabase |     | private | main |     |                   |            | 1 | FUNC
+25   | id                |     |         |      |     |                   | int        | 1 | ARG 
+26   | Simulated         |     |         |      |     |                   |            | 0 | COM 
+26   | async             |     |         |      |     |                   |            | 0 | COM 
+26   | operation         |     |         |      |     |                   |            | 0 | COM 
+29   | main              |     | private | main |     |                   |            | 1 | FUNC
+30   | Goroutine         |     |         |      |     |                   |            | 0 | COM 
+30   | named             |     |         |      |     |                   |            | 0 | COM 
+30   | function          |     |         |      |     |                   |            | 0 | COM 
+31   | worker            |     |         | main |     | go                |            | 0 | CALL
+31   | worker            |     |         | main |     |                   |            | 0 | VAR 
+33   | Goroutine         |     |         |      |     |                   |            | 0 | COM 
+33   | closure           |     |         |      |     |                   |            | 0 | COM 
+34   | done              |     | private | main |     |                   |            | 1 | VAR 
+34   | make              |     |         |      |     | built-in          |            | 0 | CALL
+35   | func              |     |         | main |     | go                |            | 0 | CALL
+35   | <lambda>          |     |         | main |     |                   |            | 1 | LAM 
+36   | done              |     | private | main |     | send              |            | 0 | VAR 

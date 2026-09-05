@@ -1,0 +1,16 @@
+LINE | SYM         | PAR    | SCOPE | NS | MOD | CLUE      | TYPE | D | CTX 
+./tools/sources/javascript/commonjs.js:
+1    | commonjs    |        |       |    |     |           |      | 0 | FILE
+1    | CommonJS    |        |       |    |     |           |      | 0 | COM 
+1    | exports     |        |       |    |     |           |      | 0 | COM 
+1    | test        |        |       |    |     |           |      | 0 | COM 
+2    | helpers     |        |       |    |     | ./helpers |      | 0 | IMP 
+2    | ./helpers   |        |       |    |     |           |      | 0 | STR 
+4    | getUserById |        |       |    |     |           |      | 1 | FUNC
+4    | id          |        |       |    |     |           |      | 1 | ARG 
+8    | createUser  |        |       |    |     |           |      | 1 | FUNC
+8    | name        |        |       |    |     |           |      | 1 | ARG 
+8    | email       |        |       |    |     |           |      | 1 | ARG 
+12   | userCache   |        |       |    |     |           |      | 1 | VAR 
+12   | Map         |        |       |    |     |           |      | 0 | CALL
+14   | exports     | module |       |    |     |           |      | 1 | PROP

@@ -1,0 +1,133 @@
+LINE | SYM               | PAR           | SCOPE | NS | MOD | CLUE       | TYPE            | D | CTX  
+./tools/sources/python/dataclasses.py:
+1    | dataclasses       |               |       |    |     |            |                 | 0 | FILE 
+1    | Python            |               |       |    |     |            |                 | 0 | STR  
+1    | 3.7+              |               |       |    |     |            |                 | 0 | STR  
+1    | dataclass         |               |       |    |     |            |                 | 0 | STR  
+1    | decorator.        |               |       |    |     |            |                 | 0 | STR  
+3    | dataclasses       |               |       |    |     |            |                 | 0 | IMP  
+3    | dataclass         |               |       |    |     |            |                 | 0 | IMP  
+3    | field             |               |       |    |     |            |                 | 0 | IMP  
+3    | asdict            |               |       |    |     |            |                 | 0 | IMP  
+3    | astuple           |               |       |    |     |            |                 | 0 | IMP  
+4    | typing            |               |       |    |     |            |                 | 0 | IMP  
+4    | List              |               |       |    |     |            |                 | 0 | IMP  
+4    | ClassVar          |               |       |    |     |            |                 | 0 | IMP  
+8    | Point             |               |       |    |     | @dataclass |                 | 1 | CLASS
+9    | Basic             |               |       |    |     |            |                 | 0 | STR  
+9    | dataclass!.       |               |       |    |     |            |                 | 0 | STR  
+10   | xx                |               |       |    |     |            | float           | 1 | VAR  
+11   | yy                |               |       |    |     |            | float           | 1 | VAR  
+15   | User              |               |       |    |     | @dataclass |                 | 1 | CLASS
+16   | Dataclass         |               |       |    |     |            |                 | 0 | STR  
+16   | default           |               |       |    |     |            |                 | 0 | STR  
+16   | values.           |               |       |    |     |            |                 | 0 | STR  
+17   | name              |               |       |    |     |            | str             | 1 | VAR  
+18   | email             |               |       |    |     |            | str             | 1 | VAR  
+19   | age               |               |       |    |     |            | int             | 1 | VAR  
+20   | active            |               |       |    |     |            | bool            | 1 | VAR  
+24   | Product           |               |       |    |     | @dataclass |                 | 1 | CLASS
+25   | Dataclass         |               |       |    |     |            |                 | 0 | STR  
+25   | field             |               |       |    |     |            |                 | 0 | STR  
+25   | defaults.         |               |       |    |     |            |                 | 0 | STR  
+26   | name              |               |       |    |     |            | str             | 1 | VAR  
+27   | price             |               |       |    |     |            | float           | 1 | VAR  
+28   | tags              |               |       |    |     |            | List[str]       | 1 | VAR  
+28   | field             |               |       |    |     |            |                 | 0 | CALL 
+28   | default_factory   |               |       |    |     |            |                 | 0 | VAR  
+28   | list              |               |       |    |     |            |                 | 0 | VAR  
+29   | quantity          |               |       |    |     |            | int             | 1 | VAR  
+29   | field             |               |       |    |     |            |                 | 0 | CALL 
+29   | default           |               |       |    |     |            |                 | 0 | VAR  
+32   | dataclass         |               |       |    |     |            |                 | 0 | CALL 
+32   | frozen            |               |       |    |     |            |                 | 0 | VAR  
+32   | dataclass         |               |       |    |     |            |                 | 0 | CALL 
+32   | frozen            |               |       |    |     |            |                 | 0 | VAR  
+33   | ImmutablePoint    |               |       |    |     | @dataclass |                 | 1 | CLASS
+34   | Frozen            |               |       |    |     |            |                 | 0 | STR  
+34   | immutable         |               |       |    |     |            |                 | 0 | STR  
+34   | dataclass.        |               |       |    |     |            |                 | 0 | STR  
+35   | xx                |               |       |    |     |            | int             | 1 | VAR  
+36   | yy                |               |       |    |     |            | int             | 1 | VAR  
+39   | dataclass         |               |       |    |     |            |                 | 0 | CALL 
+39   | order             |               |       |    |     |            |                 | 0 | VAR  
+39   | dataclass         |               |       |    |     |            |                 | 0 | CALL 
+39   | order             |               |       |    |     |            |                 | 0 | VAR  
+40   | Person            |               |       |    |     | @dataclass |                 | 1 | CLASS
+41   | Dataclass         |               |       |    |     |            |                 | 0 | STR  
+41   | comparison        |               |       |    |     |            |                 | 0 | STR  
+41   | methods.          |               |       |    |     |            |                 | 0 | STR  
+42   | name              |               |       |    |     |            | str             | 1 | VAR  
+43   | age               |               |       |    |     |            | int             | 1 | VAR  
+47   | Config            |               |       |    |     | @dataclass |                 | 1 | CLASS
+48   | Dataclass         |               |       |    |     |            |                 | 0 | STR  
+48   | variables.        |               |       |    |     |            |                 | 0 | STR  
+49   | host              |               |       |    |     |            | str             | 1 | VAR  
+50   | port              |               |       |    |     |            | int             | 1 | VAR  
+52   | MAX_CONNECTIONS   |               |       |    |     |            | ClassVar[int]   | 1 | VAR  
+53   | DEFAULT_TIMEOUT   |               |       |    |     |            | ClassVar[float] | 1 | VAR  
+57   | Rectangle         |               |       |    |     | @dataclass |                 | 1 | CLASS
+58   | Dataclass         |               |       |    |     |            |                 | 0 | STR  
+58   | post-init.        |               |       |    |     |            |                 | 0 | STR  
+59   | width             |               |       |    |     |            | float           | 1 | VAR  
+60   | height            |               |       |    |     |            | float           | 1 | VAR  
+61   | area              |               |       |    |     |            | float           | 1 | VAR  
+61   | field             |               |       |    |     |            |                 | 0 | CALL 
+61   | init              |               |       |    |     |            |                 | 0 | VAR  
+63   | __post_init__     | Rectangle     |       |    |     |            |                 | 1 | FUNC 
+63   | self              | __post_init__ |       |    |     |            |                 | 0 | ARG  
+64   | area              | self          |       |    |     |            |                 | 1 | PROP 
+64   | width             | self          |       |    |     |            |                 | 0 | PROP 
+64   | self              |               |       |    |     |            |                 | 0 | VAR  
+64   | height            | self          |       |    |     |            |                 | 0 | PROP 
+64   | self              |               |       |    |     |            |                 | 0 | VAR  
+68   | Node              |               |       |    |     | @dataclass |                 | 1 | CLASS
+69   | Dataclass         |               |       |    |     |            |                 | 0 | STR  
+69   | repr              |               |       |    |     |            |                 | 0 | STR  
+69   | configuration.    |               |       |    |     |            |                 | 0 | STR  
+70   | value             |               |       |    |     |            | int             | 1 | VAR  
+71   | children          |               |       |    |     |            | List['Node']    | 1 | VAR  
+71   | field             |               |       |    |     |            |                 | 0 | CALL 
+71   | default_factory   |               |       |    |     |            |                 | 0 | VAR  
+71   | list              |               |       |    |     |            |                 | 0 | VAR  
+71   | repr              |               |       |    |     |            |                 | 0 | VAR  
+75   | Employee          |               |       |    |     | @dataclass |                 | 1 | CLASS
+76   | Dataclass         |               |       |    |     |            |                 | 0 | STR  
+76   | field             |               |       |    |     |            |                 | 0 | STR  
+76   | metadata.         |               |       |    |     |            |                 | 0 | STR  
+77   | name              |               |       |    |     |            | str             | 1 | VAR  
+77   | field             |               |       |    |     |            |                 | 0 | CALL 
+77   | metadata          |               |       |    |     |            |                 | 0 | VAR  
+77   | description       |               |       |    |     |            |                 | 0 | STR  
+77   | Employee          |               |       |    |     |            |                 | 0 | STR  
+77   | name              |               |       |    |     |            |                 | 0 | STR  
+78   | salary            |               |       |    |     |            | float           | 1 | VAR  
+78   | field             |               |       |    |     |            |                 | 0 | CALL 
+78   | metadata          |               |       |    |     |            |                 | 0 | VAR  
+78   | currency          |               |       |    |     |            |                 | 0 | STR  
+78   | USD               |               |       |    |     |            |                 | 0 | STR  
+81   | use_dataclasses   |               |       |    |     |            |                 | 1 | FUNC 
+82   | Using             |               |       |    |     |            |                 | 0 | STR  
+82   | dataclass         |               |       |    |     |            |                 | 0 | STR  
+82   | instances.        |               |       |    |     |            |                 | 0 | STR  
+83   | pp                |               |       |    |     |            |                 | 1 | VAR  
+83   | Point             |               |       |    |     |            |                 | 0 | CALL 
+84   | user              |               |       |    |     |            |                 | 1 | VAR  
+84   | User              |               |       |    |     |            |                 | 0 | CALL 
+84   | name              |               |       |    |     |            |                 | 0 | VAR  
+84   | Alice             |               |       |    |     |            |                 | 0 | STR  
+84   | email             |               |       |    |     |            |                 | 0 | VAR  
+84   | alice@example.com |               |       |    |     |            |                 | 0 | STR  
+86   | Convert           |               |       |    |     |            |                 | 0 | COM  
+86   | dict              |               |       |    |     |            |                 | 0 | COM  
+86   | tuple             |               |       |    |     |            |                 | 0 | COM  
+87   | user_dict         |               |       |    |     |            |                 | 1 | VAR  
+87   | asdict            |               |       |    |     |            |                 | 0 | CALL 
+87   | user              |               |       |    |     | asdict     |                 | 0 | ARG  
+88   | user_tuple        |               |       |    |     |            |                 | 1 | VAR  
+88   | astuple           |               |       |    |     |            |                 | 0 | CALL 
+88   | user              |               |       |    |     | astuple    |                 | 0 | ARG  
+90   | pp                |               |       |    |     |            |                 | 0 | VAR  
+90   | user              |               |       |    |     |            |                 | 0 | VAR  
+90   | user_dict         |               |       |    |     |            |                 | 0 | VAR  
+90   | user_tuple        |               |       |    |     |            |                 | 0 | VAR  

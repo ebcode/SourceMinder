@@ -1,0 +1,35 @@
+LINE | SYM         | PAR      | SCOPE  | NS         | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/php/basic_class.php:
+1    | basic_class |          |        |            |     |      |      | 0 | FILE 
+3    | App\Models  |          |        |            |     |      |      | 1 | NS   
+5    | Basic       |          |        | App\Models |     |      |      | 0 | COM  
+5    | definition  |          |        | App\Models |     |      |      | 0 | COM  
+8    | Product     |          |        | App\Models |     |      |      | 1 | CLASS
+9    | $id         | Product  | public | App\Models |     |      |      | 1 | PROP 
+10   | $name       | Product  | public | App\Models |     |      |      | 1 | PROP 
+11   | $price      | Product  | public | App\Models |     |      |      | 1 | PROP 
+13   | __construct | Product  | public | App\Models |     |      |      | 1 | FUNC 
+14   | $id         |          |        | App\Models |     |      |      | 0 | VAR  
+14   | $this       |          |        | App\Models |     |      |      | 0 | VAR  
+14   | id          | $this    |        | App\Models |     |      |      | 0 | PROP 
+15   | $name       |          |        | App\Models |     |      |      | 0 | VAR  
+15   | $this       |          |        | App\Models |     |      |      | 0 | VAR  
+15   | name        | $this    |        | App\Models |     |      |      | 0 | PROP 
+16   | $price      |          |        | App\Models |     |      |      | 0 | VAR  
+16   | $this       |          |        | App\Models |     |      |      | 0 | VAR  
+16   | price       | $this    |        | App\Models |     |      |      | 0 | PROP 
+19   | getTotal    | Product  | public | App\Models |     |      |      | 1 | FUNC 
+20   | $this       |          |        | App\Models |     |      |      | 0 | VAR  
+20   | $quantity   |          |        | App\Models |     |      |      | 0 | VAR  
+23   | updatePrice | Product  | public | App\Models |     |      |      | 1 | FUNC 
+24   | $newPrice   |          |        | App\Models |     |      |      | 0 | VAR  
+24   | $this       |          |        | App\Models |     |      |      | 0 | VAR  
+24   | price       | $this    |        | App\Models |     |      |      | 0 | PROP 
+28   | Instantiate |          |        | App\Models |     |      |      | 0 | COM  
+29   | $product    |          |        | App\Models |     |      |      | 0 | VAR  
+29   | Widget      |          |        | App\Models |     |      |      | 0 | STR  
+30   | $total      |          |        | App\Models |     |      |      | 0 | VAR  
+30   | $product    |          |        | App\Models |     |      |      | 0 | VAR  
+30   | getTotal    | $product |        | App\Models |     |      |      | 0 | CALL 
+31   | $product    |          |        | App\Models |     |      |      | 0 | VAR  
+31   | updatePrice | $product |        | App\Models |     |      |      | 0 | CALL 

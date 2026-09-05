@@ -1,0 +1,25 @@
+LINE | SYM                  | PAR      | SCOPE   | NS | MOD | CLUE                    | TYPE  | D | CTX  
+./tools/sources/rust/attributes.rs:
+1    | attributes           |          |         |    |     |                         |       | 0 | FILE 
+3    | Debug                |          |         |    |     | derive                  |       | 0 | TRAIT
+3    | Clone                |          |         |    |     | derive                  |       | 0 | TRAIT
+3    | Copy                 |          |         |    |     | derive                  |       | 0 | TRAIT
+3    | PartialEq            |          |         |    |     | derive                  |       | 0 | TRAIT
+3    | Eq                   |          |         |    |     | derive                  |       | 0 | TRAIT
+3    | Hash                 |          |         |    |     | derive                  |       | 0 | TRAIT
+4    | Vector2              |          | pub     |    |     | #[derive]               |       | 1 | CLASS
+9    | Default              |          |         |    |     | derive                  |       | 0 | TRAIT
+10   | Settings             |          | pub     |    |     | #[derive]               |       | 1 | CLASS
+11   | verbose              | Settings | pub     |    |     |                         | bool  | 1 | PROP 
+12   | workers              | Settings | pub     |    |     |                         | usize | 1 | PROP 
+16   | tests                |          | private |    |     | #[cfg]                  |       | 1 | NS   
+20   | test_vector_equality |          | private |    |     | #[test]                 |       | 1 | FUNC 
+21   | Vector2              |          |         |    |     |                         |       | 0 | CLASS
+22   | Vector2              |          |         |    |     |                         |       | 0 | CLASS
+23   | assert_eq            |          |         |    |     |                         | macro | 0 | CALL 
+28   | test_panics          |          | private |    |     | #[should_panic],#[test] |       | 1 | FUNC 
+29   | panic                |          |         |    |     |                         | macro | 0 | CALL 
+29   | boom                 |          |         |    |     |                         |       | 0 | STR  
+34   | fast_path            |          | pub     |    |     | #[inline]               | u32   | 1 | FUNC 
+35   | wrapping_mul         | n        |         |    |     |                         |       | 0 | CALL 
+39   | old_api              |          | pub     |    |     | #[deprecated]           |       | 1 | FUNC 

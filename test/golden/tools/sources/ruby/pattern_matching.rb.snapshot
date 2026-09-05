@@ -1,0 +1,210 @@
+LINE | SYM              | PAR              | SCOPE | NS | MOD | CLUE | TYPE | D | CTX  
+./tools/sources/ruby/pattern_matching.rb:
+1    | pattern_matching |                  |       |    |     |      |      | 0 | FILE 
+1    | Ruby             |                  |       |    |     |      |      | 0 | COM  
+1    | pattern          |                  |       |    |     |      |      | 0 | COM  
+1    | matching:        |                  |       |    |     |      |      | 0 | COM  
+1    | case/in          |                  |       |    |     |      |      | 0 | COM  
+1    | binds            |                  |       |    |     |      |      | 0 | COM  
+1    | new              |                  |       |    |     |      |      | 0 | COM  
+1    | local            |                  |       |    |     |      |      | 0 | COM  
+1    | variables        |                  |       |    |     |      |      | 0 | COM  
+1    | implicitly.      |                  |       |    |     |      |      | 0 | COM  
+2    | bound            |                  |       |    |     |      |      | 0 | COM  
+2    | names            |                  |       |    |     |      |      | 0 | COM  
+2    | status           |                  |       |    |     |      |      | 0 | COM  
+2    | rest             |                  |       |    |     |      |      | 0 | COM  
+2    | lat              |                  |       |    |     |      |      | 0 | COM  
+2    | lng...           |                  |       |    |     |      |      | 0 | COM  
+2    | appear           |                  |       |    |     |      |      | 0 | COM  
+2    | side.            |                  |       |    |     |      |      | 0 | COM  
+4    | route            |                  |       |    |     |      |      | 1 | FUNC 
+4    | request          | route            |       |    |     |      |      | 0 | ARG  
+5    | request          |                  |       |    |     |      |      | 0 | VAR  
+6    | method           |                  |       |    |     |      |      | 0 | PROP 
+6    | GET              |                  |       |    |     |      |      | 0 | STR  
+6    | path             |                  |       |    |     |      |      | 0 | PROP 
+6    | users            |                  |       |    |     |      |      | 0 | STR  
+6    | id               | route            |       |    |     |      |      | 1 | VAR  
+7    | show             |                  |       |    |     |      |      | 0 | STR  
+7    | user             |                  |       |    |     |      |      | 0 | STR  
+7    | id               |                  |       |    |     |      |      | 0 | VAR  
+8    | method           |                  |       |    |     |      |      | 0 | PROP 
+8    | POST             |                  |       |    |     |      |      | 0 | STR  
+8    | path             |                  |       |    |     |      |      | 0 | PROP 
+8    | users            |                  |       |    |     |      |      | 0 | STR  
+8    | body             |                  |       |    |     |      |      | 0 | PROP 
+8    | name             |                  |       |    |     |      |      | 0 | PROP 
+8    | name             | route            |       |    |     |      |      | 1 | VAR  
+8    | String           |                  |       |    |     |      |      | 0 | VAR  
+9    | create           |                  |       |    |     |      |      | 0 | STR  
+9    | user             |                  |       |    |     |      |      | 0 | STR  
+9    | name             |                  |       |    |     |      |      | 0 | VAR  
+10   | method           |                  |       |    |     |      |      | 0 | PROP 
+10   | DELETE           |                  |       |    |     |      |      | 0 | STR  
+10   | path             |                  |       |    |     |      |      | 0 | PROP 
+10   | users            |                  |       |    |     |      |      | 0 | STR  
+10   | id               | route            |       |    |     |      |      | 1 | VAR  
+10   | rest             | route            |       |    |     |      |      | 1 | VAR  
+11   | delete           |                  |       |    |     |      |      | 0 | STR  
+11   | opts:            |                  |       |    |     |      |      | 0 | STR  
+11   | id               |                  |       |    |     |      |      | 0 | VAR  
+11   | rest             |                  |       |    |     |      |      | 0 | VAR  
+13   | found            |                  |       |    |     |      |      | 0 | STR  
+17   | Array            |                  |       |    |     |      |      | 0 | COM  
+17   | patterns         |                  |       |    |     |      |      | 0 | COM  
+17   | splats           |                  |       |    |     |      |      | 0 | COM  
+17   | find             |                  |       |    |     |      |      | 0 | COM  
+17   | pattern          |                  |       |    |     |      |      | 0 | COM  
+18   | analyze          |                  |       |    |     |      |      | 1 | FUNC 
+18   | list             | analyze          |       |    |     |      |      | 0 | ARG  
+19   | list             |                  |       |    |     |      |      | 0 | VAR  
+21   | empty            |                  |       |    |     |      |      | 0 | STR  
+22   | single           | analyze          |       |    |     |      |      | 1 | VAR  
+23   | one:             |                  |       |    |     |      |      | 0 | STR  
+23   | single           |                  |       |    |     |      |      | 0 | VAR  
+24   | first            | analyze          |       |    |     |      |      | 1 | VAR  
+24   | middle           | analyze          |       |    |     |      |      | 1 | VAR  
+24   | last             | analyze          |       |    |     |      |      | 1 | VAR  
+25   | ends             |                  |       |    |     |      |      | 0 | STR  
+25   | first            |                  |       |    |     |      |      | 0 | VAR  
+25   | last             |                  |       |    |     |      |      | 0 | VAR  
+25   | size             | middle           |       |    |     |      |      | 0 | CALL 
+25   | middle           |                  |       |    |     |      |      | 0 | VAR  
+26   | pivot            | analyze          |       |    |     |      |      | 1 | VAR  
+26   | Integer          |                  |       |    |     |      |      | 0 | VAR  
+26   | pivot            |                  |       |    |     |      |      | 0 | VAR  
+27   | has              |                  |       |    |     |      |      | 0 | STR  
+27   | big              |                  |       |    |     |      |      | 0 | STR  
+27   | number:          |                  |       |    |     |      |      | 0 | STR  
+27   | pivot            |                  |       |    |     |      |      | 0 | VAR  
+31   | deconstruct      |                  |       |    |     |      |      | 0 | COM  
+31   | deconstruct_keys |                  |       |    |     |      |      | 0 | COM  
+31   | make             |                  |       |    |     |      |      | 0 | COM  
+31   | object           |                  |       |    |     |      |      | 0 | COM  
+31   | matchable.       |                  |       |    |     |      |      | 0 | COM  
+32   | Point            |                  |       |    |     |      |      | 1 | CLASS
+35   | initialize       | Point            |       |    |     |      |      | 1 | FUNC 
+36   | @x               | Point            |       |    |     |      |      | 0 | PROP 
+37   | @y               | Point            |       |    |     |      |      | 0 | PROP 
+40   | deconstruct      | Point            |       |    |     |      |      | 1 | FUNC 
+41   | deconstruct_keys | Point            |       |    |     |      |      | 1 | FUNC 
+41   | keys             | deconstruct_keys |       |    |     |      |      | 0 | ARG  
+44   | quadrant         |                  |       |    |     |      |      | 1 | FUNC 
+44   | point            | quadrant         |       |    |     |      |      | 0 | ARG  
+45   | point            |                  |       |    |     |      |      | 0 | VAR  
+46   | Point            |                  |       |    |     |      |      | 0 | VAR  
+47   | origin           |                  |       |    |     |      |      | 0 | VAR  
+48   | Point            |                  |       |    |     |      |      | 0 | VAR  
+49   | first            |                  |       |    |     |      |      | 0 | VAR  
+51   | third            |                  |       |    |     |      |      | 0 | VAR  
+52   | Point            |                  |       |    |     |      |      | 0 | VAR  
+53   | somewhere:       |                  |       |    |     |      |      | 0 | STR  
+57   | One-line         |                  |       |    |     |      |      | 0 | COM  
+57   | pattern          |                  |       |    |     |      |      | 0 | COM  
+57   | match            |                  |       |    |     |      |      | 0 | COM  
+57   | =>               |                  |       |    |     |      |      | 0 | COM  
+57   | rightward        |                  |       |    |     |      |      | 0 | COM  
+57   | assignment       |                  |       |    |     |      |      | 0 | COM  
+57   | destructuring.   |                  |       |    |     |      |      | 0 | COM  
+58   | unpack           |                  |       |    |     |      |      | 1 | FUNC 
+58   | config           | unpack           |       |    |     |      |      | 0 | ARG  
+59   | config           |                  |       |    |     |      |      | 0 | VAR  
+59   | host             |                  |       |    |     |      |      | 0 | PROP 
+59   | host             | unpack           |       |    |     |      |      | 1 | VAR  
+59   | port             |                  |       |    |     |      |      | 0 | PROP 
+59   | port             | unpack           |       |    |     |      |      | 1 | VAR  
+59   | Integer          |                  |       |    |     |      |      | 0 | VAR  
+60   | host             |                  |       |    |     |      |      | 0 | VAR  
+60   | port             |                  |       |    |     |      |      | 0 | VAR  
+63   | boolean          |                  |       |    |     |      |      | 0 | COM  
+63   | form:            |                  |       |    |     |      |      | 0 | COM  
+63   | match            |                  |       |    |     |      |      | 0 | COM  
+63   | test             |                  |       |    |     |      |      | 0 | COM  
+63   | returns          |                  |       |    |     |      |      | 0 | COM  
+63   | true/false.      |                  |       |    |     |      |      | 0 | COM  
+64   | valid_pair?      |                  |       |    |     |      |      | 1 | FUNC 
+64   | data             | valid_pair?      |       |    |     |      |      | 0 | ARG  
+65   | data             |                  |       |    |     |      |      | 0 | VAR  
+65   | Symbol           |                  |       |    |     |      |      | 0 | VAR  
+65   | Numeric          |                  |       |    |     |      |      | 0 | VAR  
+68   | Alternative      |                  |       |    |     |      |      | 0 | COM  
+68   | patterns         |                  |       |    |     |      |      | 0 | COM  
+68   | pinning          |                  |       |    |     |      |      | 0 | COM  
+68   | match            |                  |       |    |     |      |      | 0 | COM  
+68   | known            |                  |       |    |     |      |      | 0 | COM  
+68   | value.           |                  |       |    |     |      |      | 0 | COM  
+69   | classify_token   |                  |       |    |     |      |      | 1 | FUNC 
+69   | token            | classify_token   |       |    |     |      |      | 0 | ARG  
+69   | expected         | classify_token   |       |    |     |      |      | 0 | ARG  
+70   | token            |                  |       |    |     |      |      | 0 | VAR  
+71   | plus             |                  |       |    |     |      |      | 0 | VAR  
+71   | minus            |                  |       |    |     |      |      | 0 | VAR  
+71   | times            |                  |       |    |     |      |      | 0 | VAR  
+72   | operator         |                  |       |    |     |      |      | 0 | VAR  
+73   | expected         |                  |       |    |     |      |      | 0 | VAR  
+74   | matched_expected |                  |       |    |     |      |      | 0 | VAR  
+75   | Integer          |                  |       |    |     |      |      | 0 | VAR  
+75   | Float            |                  |       |    |     |      |      | 0 | VAR  
+76   | number           |                  |       |    |     |      |      | 0 | VAR  
+77   | String           |                  |       |    |     |      |      | 0 | VAR  
+77   | empty?           | token            |       |    |     |      |      | 0 | CALL 
+77   | token            |                  |       |    |     |      |      | 0 | VAR  
+78   | blank            |                  |       |    |     |      |      | 0 | VAR  
+82   | ---              |                  |       |    |     |      |      | 0 | COM  
+82   | Exercise:        |                  |       |    |     |      |      | 0 | COM  
+82   | feed             |                  |       |    |     |      |      | 0 | COM  
+82   | inputs           |                  |       |    |     |      |      | 0 | COM  
+82   | each             |                  |       |    |     |      |      | 0 | COM  
+82   | matcher.         |                  |       |    |     |      |      | 0 | COM  
+82   | ---              |                  |       |    |     |      |      | 0 | COM  
+83   | routes           |                  |       |    |     |      |      | 1 | VAR  
+84   | route            |                  |       |    |     |      |      | 0 | CALL 
+84   | method           |                  |       |    |     |      |      | 0 | PROP 
+84   | GET              |                  |       |    |     |      |      | 0 | STR  
+84   | path             |                  |       |    |     |      |      | 0 | PROP 
+84   | users            |                  |       |    |     |      |      | 0 | STR  
+85   | route            |                  |       |    |     |      |      | 0 | CALL 
+85   | method           |                  |       |    |     |      |      | 0 | PROP 
+85   | POST             |                  |       |    |     |      |      | 0 | STR  
+85   | path             |                  |       |    |     |      |      | 0 | PROP 
+85   | users            |                  |       |    |     |      |      | 0 | STR  
+85   | body             |                  |       |    |     |      |      | 0 | PROP 
+85   | name             | body             |       |    |     |      |      | 0 | PROP 
+85   | Ada              |                  |       |    |     |      |      | 0 | STR  
+86   | route            |                  |       |    |     |      |      | 0 | CALL 
+86   | method           |                  |       |    |     |      |      | 0 | PROP 
+86   | PATCH            |                  |       |    |     |      |      | 0 | STR  
+86   | path             |                  |       |    |     |      |      | 0 | PROP 
+86   | users            |                  |       |    |     |      |      | 0 | STR  
+88   | shapes           |                  |       |    |     |      |      | 1 | VAR  
+88   | analyze          |                  |       |    |     |      |      | 0 | CALL 
+88   | analyze          |                  |       |    |     |      |      | 0 | CALL 
+88   | analyze          |                  |       |    |     |      |      | 0 | CALL 
+88   | analyze          |                  |       |    |     |      |      | 0 | CALL 
+89   | region           |                  |       |    |     |      |      | 1 | VAR  
+89   | quadrant         |                  |       |    |     |      |      | 0 | CALL 
+89   | new              | Point            |       |    |     |      |      | 0 | CALL 
+89   | Point            |                  |       |    |     |      |      | 0 | VAR  
+90   | addr             |                  |       |    |     |      |      | 1 | VAR  
+90   | unpack           |                  |       |    |     |      |      | 0 | CALL 
+90   | host             |                  |       |    |     |      |      | 0 | PROP 
+90   | localhost        |                  |       |    |     |      |      | 0 | STR  
+90   | port             |                  |       |    |     |      |      | 0 | PROP 
+91   | pair_ok          |                  |       |    |     |      |      | 1 | VAR  
+91   | valid_pair?      |                  |       |    |     |      |      | 0 | CALL 
+91   | age              |                  |       |    |     |      |      | 0 | VAR  
+92   | tokens           |                  |       |    |     |      |      | 1 | VAR  
+92   | classify_token   |                  |       |    |     |      |      | 0 | CALL 
+92   | plus             |                  |       |    |     |      |      | 0 | VAR  
+92   | eq               |                  |       |    |     |      |      | 0 | VAR  
+92   | classify_token   |                  |       |    |     |      |      | 0 | CALL 
+92   | eq               |                  |       |    |     |      |      | 0 | VAR  
+93   | classify_token   |                  |       |    |     |      |      | 0 | CALL 
+93   | eq               |                  |       |    |     |      |      | 0 | VAR  
+94   | routes           |                  |       |    |     |      |      | 0 | VAR  
+94   | shapes           |                  |       |    |     |      |      | 0 | VAR  
+94   | region           |                  |       |    |     |      |      | 0 | VAR  
+94   | addr             |                  |       |    |     |      |      | 0 | VAR  
+94   | pair_ok          |                  |       |    |     |      |      | 0 | VAR  
+94   | tokens           |                  |       |    |     |      |      | 0 | VAR  

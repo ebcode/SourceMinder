@@ -1,0 +1,211 @@
+LINE | SYM                                      | PAR                   | SCOPE | NS | MOD | CLUE                  | TYPE       | D | CTX 
+./tools/sources/python/walrus.py:
+1    | walrus                                   |                       |       |    |     |                       |            | 0 | FILE
+1    | Python                                   |                       |       |    |     |                       |            | 0 | STR 
+1    | 3.8+                                     |                       |       |    |     |                       |            | 0 | STR 
+1    | walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+1    | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+1    | :=                                       |                       |       |    |     |                       |            | 0 | STR 
+1    | examples.                                |                       |       |    |     |                       |            | 0 | STR 
+4    | walrus_in_if                             |                       |       |    |     |                       |            | 1 | FUNC
+5    | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+5    | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+5    | statement.                               |                       |       |    |     |                       |            | 0 | STR 
+6    | data                                     |                       |       |    |     |                       |            | 1 | VAR 
+8    | nn                                       |                       |       |    |     | :=                    |            | 0 | VAR 
+8    | len                                      |                       |       |    |     |                       |            | 0 | CALL
+8    | data                                     |                       |       |    |     | len                   |            | 0 | ARG 
+9    | print                                    |                       |       |    |     |                       |            | 0 | CALL
+9    | f"List has {n} items"                    |                       |       |    |     |                       |            | 0 | STR 
+9    | List                                     |                       |       |    |     |                       |            | 0 | STR 
+9    | has                                      |                       |       |    |     |                       |            | 0 | STR 
+9    | items                                    |                       |       |    |     |                       |            | 0 | STR 
+12   | walrus_in_while                          |                       |       |    |     |                       |            | 1 | FUNC
+13   | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+13   | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+13   | loop.                                    |                       |       |    |     |                       |            | 0 | STR 
+14   | data                                     |                       |       |    |     |                       |            | 1 | VAR 
+16   | line                                     |                       |       |    |     | :=                    |            | 0 | VAR 
+16   | input                                    |                       |       |    |     |                       |            | 0 | CALL
+16   | Enter:                                   |                       |       |    |     |                       |            | 0 | STR 
+16   | quit                                     |                       |       |    |     |                       |            | 0 | STR 
+17   | append                                   | data                  |       |    |     |                       |            | 0 | CALL
+17   | data                                     |                       |       |    |     |                       |            | 0 | VAR 
+17   | line                                     |                       |       |    |     | append                |            | 0 | ARG 
+20   | walrus_in_comprehension                  |                       |       |    |     |                       |            | 1 | FUNC
+21   | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+21   | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+21   | list                                     |                       |       |    |     |                       |            | 0 | STR 
+21   | comprehension.                           |                       |       |    |     |                       |            | 0 | STR 
+22   | data                                     |                       |       |    |     |                       |            | 1 | VAR 
+24   | Compute                                  |                       |       |    |     |                       |            | 0 | COM 
+24   | use                                      |                       |       |    |     |                       |            | 0 | COM 
+24   | twice                                    |                       |       |    |     |                       |            | 0 | COM 
+25   | filtered                                 |                       |       |    |     |                       |            | 1 | VAR 
+25   | yy                                       |                       |       |    |     |                       |            | 0 | VAR 
+25   | xx                                       |                       |       |    |     |                       |            | 0 | VAR 
+25   | data                                     |                       |       |    |     |                       |            | 0 | VAR 
+25   | yy                                       |                       |       |    |     | :=                    |            | 0 | VAR 
+27   | filtered                                 |                       |       |    |     |                       |            | 0 | VAR 
+30   | walrus_with_function_call                |                       |       |    |     |                       |            | 1 | FUNC
+31   | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+31   | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+31   | avoid                                    |                       |       |    |     |                       |            | 0 | STR 
+31   | repeated                                 |                       |       |    |     |                       |            | 0 | STR 
+31   | function                                 |                       |       |    |     |                       |            | 0 | STR 
+31   | calls.                                   |                       |       |    |     |                       |            | 0 | STR 
+32   | expensive_computation                    |                       |       |    |     |                       |            | 1 | FUNC
+32   | xx                                       | expensive_computation |       |    |     |                       |            | 0 | ARG 
+33   | xx                                       |                       |       |    |     |                       |            | 0 | VAR 
+35   | values                                   |                       |       |    |     |                       |            | 1 | VAR 
+37   | Compute                                  |                       |       |    |     |                       |            | 0 | COM 
+37   | use                                      |                       |       |    |     |                       |            | 0 | COM 
+37   | condition                                |                       |       |    |     |                       |            | 0 | COM 
+38   | results                                  |                       |       |    |     |                       |            | 1 | VAR 
+38   | yy                                       |                       |       |    |     |                       |            | 0 | VAR 
+38   | xx                                       |                       |       |    |     |                       |            | 0 | VAR 
+38   | values                                   |                       |       |    |     |                       |            | 0 | VAR 
+38   | yy                                       |                       |       |    |     | :=                    |            | 0 | VAR 
+38   | expensive_computation                    |                       |       |    |     |                       |            | 0 | CALL
+38   | xx                                       |                       |       |    |     | expensive_computation |            | 0 | ARG 
+40   | results                                  |                       |       |    |     |                       |            | 0 | VAR 
+43   | walrus_in_nested_scope                   |                       |       |    |     |                       |            | 1 | FUNC
+44   | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+44   | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+44   | nested                                   |                       |       |    |     |                       |            | 0 | STR 
+44   | conditions.                              |                       |       |    |     |                       |            | 0 | STR 
+45   | data                                     |                       |       |    |     |                       |            | 1 | VAR 
+45   | user                                     |                       |       |    |     |                       |            | 0 | STR 
+45   | name                                     |                       |       |    |     |                       |            | 0 | STR 
+45   | Alice                                    |                       |       |    |     |                       |            | 0 | STR 
+45   | age                                      |                       |       |    |     |                       |            | 0 | STR 
+47   | user                                     |                       |       |    |     | :=                    |            | 0 | VAR 
+47   | get                                      | data                  |       |    |     |                       |            | 0 | CALL
+47   | data                                     |                       |       |    |     |                       |            | 0 | VAR 
+47   | user                                     |                       |       |    |     |                       |            | 0 | STR 
+47   | age                                      |                       |       |    |     | :=                    |            | 0 | VAR 
+47   | get                                      | user                  |       |    |     |                       |            | 0 | CALL
+47   | user                                     |                       |       |    |     |                       |            | 0 | VAR 
+47   | age                                      |                       |       |    |     |                       |            | 0 | STR 
+48   | print                                    |                       |       |    |     |                       |            | 0 | CALL
+48   | f"Adult user: {user['name']}, age {age}" |                       |       |    |     |                       |            | 0 | STR 
+48   | Adult                                    |                       |       |    |     |                       |            | 0 | STR 
+48   | user:                                    |                       |       |    |     |                       |            | 0 | STR 
+48   | age                                      |                       |       |    |     |                       |            | 0 | STR 
+48   | user                                     |                       |       |    |     |                       |            | 0 | VAR 
+48   | name                                     |                       |       |    |     |                       |            | 0 | STR 
+48   | age                                      |                       |       |    |     |                       |            | 0 | VAR 
+51   | walrus_with_regex                        |                       |       |    |     |                       |            | 1 | FUNC
+52   | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+52   | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+52   | regex                                    |                       |       |    |     |                       |            | 0 | STR 
+52   | matching.                                |                       |       |    |     |                       |            | 0 | STR 
+53   | re                                       |                       |       |    |     |                       |            | 0 | IMP 
+55   | text                                     |                       |       |    |     |                       |            | 1 | VAR 
+55   | Email:                                   |                       |       |    |     |                       |            | 0 | STR 
+55   | alice@example.com                        |                       |       |    |     |                       |            | 0 | STR 
+57   | match                                    |                       |       |    |     | :=                    |            | 0 | VAR 
+57   | search                                   | re                    |       |    |     |                       |            | 0 | CALL
+57   | re                                       |                       |       |    |     |                       |            | 0 | VAR 
+57   | r'(\w+)@(\w+\.\w+)'                      |                       |       |    |     |                       |            | 0 | STR 
+57   | w+@w+.w+                                 |                       |       |    |     |                       |            | 0 | STR 
+57   | text                                     |                       |       |    |     | search                |            | 0 | ARG 
+58   | username                                 |                       |       |    |     |                       |            | 1 | VAR 
+58   | group                                    | match                 |       |    |     |                       |            | 0 | CALL
+58   | match                                    |                       |       |    |     |                       |            | 0 | VAR 
+59   | domain                                   |                       |       |    |     |                       |            | 1 | VAR 
+59   | group                                    | match                 |       |    |     |                       |            | 0 | CALL
+59   | match                                    |                       |       |    |     |                       |            | 0 | VAR 
+60   | print                                    |                       |       |    |     |                       |            | 0 | CALL
+60   | f"User: {username}, Domain: {domain}"    |                       |       |    |     |                       |            | 0 | STR 
+60   | User:                                    |                       |       |    |     |                       |            | 0 | STR 
+60   | Domain:                                  |                       |       |    |     |                       |            | 0 | STR 
+60   | username                                 |                       |       |    |     |                       |            | 0 | VAR 
+60   | domain                                   |                       |       |    |     |                       |            | 0 | VAR 
+63   | walrus_in_exception_handling             |                       |       |    |     |                       |            | 1 | FUNC
+64   | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+64   | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+64   | exception                                |                       |       |    |     |                       |            | 0 | STR 
+64   | handling.                                |                       |       |    |     |                       |            | 0 | STR 
+66   | value                                    |                       |       |    |     | :=                    |            | 0 | VAR 
+66   | int                                      |                       |       |    |     |                       |            | 0 | CALL
+67   | print                                    |                       |       |    |     |                       |            | 0 | CALL
+67   | f"Large value: {value}"                  |                       |       |    |     |                       |            | 0 | STR 
+67   | Large                                    |                       |       |    |     |                       |            | 0 | STR 
+67   | value:                                   |                       |       |    |     |                       |            | 0 | STR 
+67   | value                                    |                       |       |    |     |                       |            | 0 | VAR 
+68   | ValueError                               |                       |       |    |     |                       | ValueError | 0 | EXC 
+69   | print                                    |                       |       |    |     |                       |            | 0 | CALL
+69   | Invalid                                  |                       |       |    |     |                       |            | 0 | STR 
+69   | value                                    |                       |       |    |     |                       |            | 0 | STR 
+72   | walrus_with_file_reading                 |                       |       |    |     |                       |            | 1 | FUNC
+73   | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+73   | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+73   | file                                     |                       |       |    |     |                       |            | 0 | STR 
+73   | reading.                                 |                       |       |    |     |                       |            | 0 | STR 
+74   | Read                                     |                       |       |    |     |                       |            | 0 | COM 
+74   | file                                     |                       |       |    |     |                       |            | 0 | COM 
+74   | line                                     |                       |       |    |     |                       |            | 0 | COM 
+74   | line                                     |                       |       |    |     |                       |            | 0 | COM 
+74   | condition                                |                       |       |    |     |                       |            | 0 | COM 
+74   | met                                      |                       |       |    |     |                       |            | 0 | COM 
+75   | open                                     |                       |       |    |     |                       |            | 0 | CALL
+75   | data.txt                                 |                       |       |    |     |                       |            | 0 | STR 
+76   | line                                     |                       |       |    |     | :=                    |            | 0 | VAR 
+76   | readline                                 | f                     |       |    |     |                       |            | 0 | CALL
+76   | strip                                    | line                  |       |    |     |                       |            | 0 | CALL
+76   | line                                     |                       |       |    |     |                       |            | 0 | VAR 
+77   | process                                  |                       |       |    |     |                       |            | 0 | CALL
+77   | line                                     |                       |       |    |     | process               |            | 0 | ARG 
+80   | process                                  |                       |       |    |     |                       |            | 1 | FUNC
+80   | line                                     | process               |       |    |     |                       |            | 0 | ARG 
+81   | Dummy                                    |                       |       |    |     |                       |            | 0 | STR 
+81   | processing                               |                       |       |    |     |                       |            | 0 | STR 
+81   | function.                                |                       |       |    |     |                       |            | 0 | STR 
+82   | print                                    |                       |       |    |     |                       |            | 0 | CALL
+82   | line                                     |                       |       |    |     | print                 |            | 0 | ARG 
+85   | walrus_in_lambda                         |                       |       |    |     |                       |            | 1 | FUNC
+86   | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+86   | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+86   | limited                                  |                       |       |    |     |                       |            | 0 | STR 
+86   | use.                                     |                       |       |    |     |                       |            | 0 | STR 
+87   | Note:                                    |                       |       |    |     |                       |            | 0 | COM 
+87   | walrus                                   |                       |       |    |     |                       |            | 0 | COM 
+87   | requires                                 |                       |       |    |     |                       |            | 0 | COM 
+87   | parentheses                              |                       |       |    |     |                       |            | 0 | COM 
+88   | func                                     |                       |       |    |     |                       |            | 1 | VAR 
+88   | <lambda>                                 |                       |       |    |     |                       |            | 1 | LAM 
+88   | xx                                       | lambda                |       |    |     | lambda                |            | 0 | ARG 
+88   | yy                                       |                       |       |    |     | :=                    |            | 0 | VAR 
+89   | func                                     |                       |       |    |     |                       |            | 0 | CALL
+92   | walrus_multiple_assignments              |                       |       |    |     |                       |            | 1 | FUNC
+93   | Multiple                                 |                       |       |    |     |                       |            | 0 | STR 
+93   | walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+93   | assignments.                             |                       |       |    |     |                       |            | 0 | STR 
+94   | data                                     |                       |       |    |     |                       |            | 1 | VAR 
+96   | length                                   |                       |       |    |     | :=                    |            | 0 | VAR 
+96   | len                                      |                       |       |    |     |                       |            | 0 | CALL
+96   | data                                     |                       |       |    |     | len                   |            | 0 | ARG 
+96   | total                                    |                       |       |    |     | :=                    |            | 0 | VAR 
+96   | sum                                      |                       |       |    |     |                       |            | 0 | CALL
+96   | data                                     |                       |       |    |     | sum                   |            | 0 | ARG 
+97   | avg                                      |                       |       |    |     |                       |            | 1 | VAR 
+97   | total                                    |                       |       |    |     |                       |            | 0 | VAR 
+97   | length                                   |                       |       |    |     |                       |            | 0 | VAR 
+98   | print                                    |                       |       |    |     |                       |            | 0 | CALL
+98   | f"Average: {avg}"                        |                       |       |    |     |                       |            | 0 | STR 
+98   | Average:                                 |                       |       |    |     |                       |            | 0 | STR 
+98   | avg                                      |                       |       |    |     |                       |            | 0 | VAR 
+101  | walrus_in_dict_comprehension             |                       |       |    |     |                       |            | 1 | FUNC
+102  | Walrus                                   |                       |       |    |     |                       |            | 0 | STR 
+102  | operator                                 |                       |       |    |     |                       |            | 0 | STR 
+102  | dict                                     |                       |       |    |     |                       |            | 0 | STR 
+102  | comprehension.                           |                       |       |    |     |                       |            | 0 | STR 
+103  | numbers                                  |                       |       |    |     |                       |            | 1 | VAR 
+104  | squares                                  |                       |       |    |     |                       |            | 1 | VAR 
+104  | xx                                       |                       |       |    |     |                       |            | 0 | VAR 
+104  | square                                   |                       |       |    |     |                       |            | 0 | VAR 
+104  | xx                                       |                       |       |    |     |                       |            | 0 | VAR 
+104  | numbers                                  |                       |       |    |     |                       |            | 0 | VAR 
+104  | square                                   |                       |       |    |     | :=                    |            | 0 | VAR 
+105  | squares                                  |                       |       |    |     |                       |            | 0 | VAR 

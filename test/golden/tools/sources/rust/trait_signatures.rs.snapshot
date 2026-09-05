@@ -1,0 +1,49 @@
+LINE | SYM                     | PAR          | SCOPE   | NS | MOD | CLUE | TYPE            | D | CTX  
+./tools/sources/rust/trait_signatures.rs:
+1    | trait_signatures        |              |         |    |     |      |                 | 0 | FILE 
+1    | Methods                 |              |         |    |     |      |                 | 0 | COM  
+1    | declared                |              |         |    |     |      |                 | 0 | COM  
+1    | traits                  |              |         |    |     |      |                 | 0 | COM  
+1    | without                 |              |         |    |     |      |                 | 0 | COM  
+1    | bodies                  |              |         |    |     |      |                 | 0 | COM  
+1    | function_signature_item |              |         |    |     |      |                 | 0 | COM  
+3    | Storage                 |              | pub     |    |     |      |                 | 1 | TRAIT
+4    | Bodyless                |              |         |    |     |      |                 | 0 | COM  
+4    | signatures              |              |         |    |     |      |                 | 0 | COM  
+5    | read                    | Storage      | private |    |     |      | Option<Vec<u8>> | 1 | FUNC 
+5    | key                     |              |         |    |     |      | &str            | 0 | ARG  
+6    | write                   | Storage      | private |    |     |      | bool            | 1 | FUNC 
+6    | key                     |              |         |    |     |      | &str            | 0 | ARG  
+6    | value                   |              |         |    |     |      | &[u8]           | 0 | ARG  
+7    | delete                  | Storage      | private |    |     |      |                 | 1 | FUNC 
+7    | key                     |              |         |    |     |      | &str            | 0 | ARG  
+9    | Associated              |              |         |    |     |      |                 | 0 | COM  
+10   | Iter                    | Storage      | private |    |     |      |                 | 1 | TYPE 
+10   | Iterator                |              |         |    |     |      |                 | 0 | TRAIT
+12   | Associated              |              |         |    |     |      |                 | 0 | COM  
+13   | VERSION                 | Storage      | private |    |     |      | u32             | 1 | VAR  
+15   | Provided                |              |         |    |     |      |                 | 0 | COM  
+15   | method                  |              |         |    |     |      |                 | 0 | COM  
+15   | has                     |              |         |    |     |      |                 | 0 | COM  
+15   | body                    |              |         |    |     |      |                 | 0 | COM  
+16   | exists                  | Storage      | private |    |     |      | bool            | 1 | FUNC 
+16   | key                     |              |         |    |     |      | &str            | 0 | ARG  
+17   | is_some                 | read         |         |    |     |      |                 | 0 | CALL 
+17   | read                    | self         |         |    |     |      |                 | 0 | CALL 
+21   | Visitor                 |              | pub     |    |     |      |                 | 1 | TRAIT
+22   | visit_node              | Visitor      | private |    |     |      |                 | 1 | FUNC 
+22   | name                    |              |         |    |     |      | &str            | 0 | ARG  
+23   | visit_edge              | Visitor      | private |    |     |      |                 | 1 | FUNC 
+23   | from                    |              |         |    |     |      | &str            | 0 | ARG  
+23   | to                      |              |         |    |     |      | &str            | 0 | ARG  
+24   | finish                  | Visitor      | private |    |     |      | u32             | 1 | FUNC 
+27   | supertrait              |              |         |    |     |      |                 | 0 | COM  
+27   | default                 |              |         |    |     |      |                 | 0 | COM  
+27   | methods                 |              |         |    |     |      |                 | 0 | COM  
+28   | Serializable            |              | pub     |    |     |      |                 | 1 | TRAIT
+28   | Send                    |              |         |    |     |      |                 | 0 | TRAIT
+28   | Sync                    |              |         |    |     |      |                 | 0 | TRAIT
+29   | serialize               | Serializable | private |    |     |      | Vec<u8>         | 1 | FUNC 
+31   | serialize_size          | Serializable | private |    |     |      | usize           | 1 | FUNC 
+32   | len                     | serialize    |         |    |     |      |                 | 0 | CALL 
+32   | serialize               | self         |         |    |     |      |                 | 0 | CALL 

@@ -1,0 +1,16 @@
+LINE | SYM              | PAR | SCOPE   | NS   | MOD | CLUE | TYPE        | D | CTX  
+./tools/sources/go/test-param-types.go:
+1    | test-param-types |     |         |      |     |      |             | 0 | FILE 
+1    | main             |     |         |      |     |      |             | 0 | NS   
+3    | Test             |     |         |      |     |      |             | 0 | COM  
+3    | parameter        |     |         |      |     |      |             | 0 | COM  
+3    | types            |     |         |      |     |      |             | 0 | COM  
+5    | FileFilter       |     | public  | main |     |      |             | 1 | CLASS
+6    | count            |     | private | main |     |      | int         | 1 | PROP 
+9    | simpleType       |     | private | main |     |      |             | 1 | FUNC 
+11   | customType       |     | private | main |     |      |             | 1 | FUNC 
+11   | filter           |     |         |      |     |      | FileFilter  | 1 | ARG  
+13   | pointerType      |     | private | main |     |      |             | 1 | FUNC 
+13   | filter           |     |         |      |     |      | *FileFilter | 1 | ARG  
+15   | sliceType        |     | private | main |     |      |             | 1 | FUNC 
+15   | items            |     |         |      |     |      | []string    | 1 | ARG  

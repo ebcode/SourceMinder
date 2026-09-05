@@ -1,0 +1,19 @@
+LINE | SYM              | PAR        | SCOPE | NS | MOD | CLUE | TYPE       | D | CTX  
+./tools/sources/typescript/test-param-types.ts:
+1    | test-param-types |            |       |    |     |      |            | 0 | FILE 
+1    | Test             |            |       |    |     |      |            | 0 | COM  
+1    | TypeScript       |            |       |    |     |      |            | 0 | COM  
+1    | parameter        |            |       |    |     |      |            | 0 | COM  
+1    | types            |            |       |    |     |      |            | 0 | COM  
+3    | FileFilter       |            |       |    |     |      |            | 1 | IFACE
+4    | count            | FileFilter |       |    |     |      | number     | 1 | PROP 
+7    | simpleType       |            |       |    |     |      | void       | 1 | FUNC 
+7    | number           |            |       |    |     |      |            | 1 | TYPE 
+9    | customType       |            |       |    |     |      | void       | 1 | FUNC 
+9    | FileFilter       |            |       |    |     |      |            | 1 | TYPE 
+9    | filter           |            |       |    |     |      | FileFilter | 1 | ARG  
+11   | arrayType        |            |       |    |     |      | void       | 1 | FUNC 
+11   | items            |            |       |    |     |      | array      | 1 | ARG  
+13   | optionalParam    |            |       |    |     |      | void       | 1 | FUNC 
+13   | number           |            |       |    |     |      |            | 1 | TYPE 
+13   | count            |            |       |    |     |      | number     | 1 | ARG  
