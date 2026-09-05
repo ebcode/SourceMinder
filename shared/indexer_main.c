@@ -637,6 +637,24 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
         }
 
         for (int i = 0; i < target_count; i++) {
+            /* --exclude-dir and --exclude-file apply to named files too. A shell
+             * glob (index-ruby lib/... --exclude-file generated.rb) arrives here
+             * as an explicit list, and the startup banner has already announced
+             * the exclusion. Same two helpers, same argument shape, as the
+             * directory walker and the daemon event loop. */
+            const char *excl_basename = strrchr(targets[i], '/');
+            excl_basename = excl_basename ? excl_basename + 1 : targets[i];
+            const char *matched_excl_dir = exclude_dirs_match(targets[i], excl_basename, &exclude_dirs);
+            const char *matched_excl_file = exclude_files_match(targets[i], excl_basename, &exclude_files);
+            if (matched_excl_dir || matched_excl_file) {
+                if (!quiet_init && !silent) {
+                    printf("Skipped %s: --exclude-%s %s\n", targets[i],
+                           matched_excl_dir ? "dir" : "file",
+                           matched_excl_dir ? matched_excl_dir : matched_excl_file);
+                }
+                continue;
+            }
+
             /* Parse the file to get directory and filename */
             int entry_count = 0;
             if (reindex_single_file(parser, config->parser_parse, &db, result,
