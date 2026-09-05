@@ -289,6 +289,7 @@ static void print_usage(const IndexerConfig *config) {
     printf("      --silent                   suppress all output (initial + re-index messages)\n");
     printf("      --verbose                  show preflight checks and validation\n");    
     printf("      --show-config              show effective config files and their sources, then exit\n");
+    printf("      --no-config                ignore ./.smconfig and ~/.smconfig\n");
     printf("      --exclude-dir DIR...       exclude directories (can specify multiple)\n");
     printf("      --exclude-file FILE...     exclude files (can specify multiple)\n");
     printf("  -f, --db-file PATH             database file location (default: code-index.db)\n");
@@ -321,12 +322,16 @@ static void print_usage(const IndexerConfig *config) {
 }
 
 int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
-    /* Check for --help flag first */
+    /* Check for --help and --no-config first */
     int show_help = 0;
+    int no_config = 0;
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             show_help = 1;
             break;
+        }
+        if (strcmp(argv[i], "--no-config") == 0) {
+            no_config = 1;
         }
     }
 
@@ -334,8 +339,10 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
     char **original_argv = argv;
     int original_argc = argc;
 
-    /* Load config file only if not showing help (CLI flags override config) */
-    if (!show_help) {
+    /* Load config file only if not showing help (CLI flags override config).
+     * --no-config skips the file so a run depends on argv alone, which keeps
+     * scripted runs the same on any machine. */
+    if (!show_help && !no_config) {
         int cli_flags = scan_cli_flags(argc, argv);
         load_config_file(&argc, &argv, cli_flags, config->name);
     }
@@ -373,6 +380,8 @@ int indexer_main(int argc, char *argv[], const IndexerConfig *config) {
             verbose = 1;
         } else if (strcmp(argv[i], "--show-config") == 0) {
             show_config = 1;
+        } else if (strcmp(argv[i], "--no-config") == 0) {
+            /* Handled in the pre-scan above, before the config file is read. */
         } else if (strcmp(argv[i], "--debug") == 0) {
             debug = 1;
         } else if (strcmp(argv[i], "--echo") == 0) {

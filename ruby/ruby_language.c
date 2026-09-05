@@ -76,6 +76,7 @@ static struct {
     TSSymbol instance_variable;
     TSSymbol class_variable;
     TSSymbol global_variable;
+    TSSymbol self_;
     TSSymbol scope_resolution;
     TSSymbol simple_symbol;
     TSSymbol hash_key_symbol;
@@ -946,25 +947,45 @@ static void handle_call(TSNode node, const char *source_code, const char *direct
         snprintf(mname, sizeof(mname), "call");
     }
 
-    /* Receiver becomes the call's parent, e.g. `qi each -p numbers`. A qualified
-     * receiver (`Animals::Dog.new`) is split like any qualified name: the terminal
-     * is the owner, the whole qualifier is the namespace. */
+    /* Receiver becomes the call's parent, e.g. `qi each -p numbers`. Only a
+     * receiver that NAMES something can be a parent: the column exists so a
+     * reader can search it, and the raw text of a literal or an expression names
+     * nothing. Guard on the node type, not the string -- a length check accepts
+     * `42`, `[1, 2, 3]` and a whole embedded SQL string alike.
+     *
+     * A qualified receiver (`Animals::Dog.new`) is split like any qualified name:
+     * the terminal is the owner, the whole qualifier is the namespace. A chained
+     * receiver (`str.strip.downcase`) takes the immediate method name, so each
+     * link owns the next, matching how Python records `a.b.c`. */
     const char *call_parent = NULL;
     const char *call_ns = NULL;
     char recv_buf[SYMBOL_MAX_LENGTH];
     char owner_buf[SYMBOL_MAX_LENGTH];
     TSNode receiver = ts_node_child_by_field_name(node, "receiver", 8);
     if (!ts_node_is_null(receiver)) {
-        node_text(receiver, source_code, filename, recv_buf, sizeof(recv_buf));
-        if (recv_buf[0] && !strchr(recv_buf, '\n')) {
-            call_parent = recv_buf;
-            if (ts_node_symbol(receiver) == ruby_symbols.scope_resolution) {
-                TSNode owner = ts_node_child_by_field_name(receiver, "name", 4);
-                if (!ts_node_is_null(owner)) {
-                    node_text(owner, source_code, filename, owner_buf, sizeof(owner_buf));
+        TSSymbol rsym = ts_node_symbol(receiver);
+        if (rsym == ruby_symbols.identifier || rsym == ruby_symbols.constant ||
+            rsym == ruby_symbols.instance_variable || rsym == ruby_symbols.class_variable ||
+            rsym == ruby_symbols.global_variable || rsym == ruby_symbols.self_) {
+            node_text(receiver, source_code, filename, recv_buf, sizeof(recv_buf));
+            if (recv_buf[0]) call_parent = recv_buf;
+        } else if (rsym == ruby_symbols.scope_resolution) {
+            node_text(receiver, source_code, filename, recv_buf, sizeof(recv_buf));
+            TSNode owner = ts_node_child_by_field_name(receiver, "name", 4);
+            if (!ts_node_is_null(owner)) {
+                node_text(owner, source_code, filename, owner_buf, sizeof(owner_buf));
+                if (owner_buf[0]) {
                     call_parent = owner_buf;
-                    call_ns = recv_buf;
+                    if (recv_buf[0]) call_ns = recv_buf;
                 }
+            }
+        } else if (rsym == ruby_symbols.call) {
+            /* Chain: the receiver's own method name is the immediate owner. It
+             * has no method field only for the `fact.(n)` proc shorthand. */
+            TSNode inner = ts_node_child_by_field_name(receiver, "method", 6);
+            if (!ts_node_is_null(inner)) {
+                node_text(inner, source_code, filename, recv_buf, sizeof(recv_buf));
+                if (recv_buf[0]) call_parent = recv_buf;
             }
         }
     }
@@ -1487,6 +1508,7 @@ static void init_ruby_symbols(const TSLanguage *language) {
     ruby_symbols.instance_variable = ts_language_symbol_for_name(language, "instance_variable", 17, true);
     ruby_symbols.class_variable = ts_language_symbol_for_name(language, "class_variable", 14, true);
     ruby_symbols.global_variable = ts_language_symbol_for_name(language, "global_variable", 15, true);
+    ruby_symbols.self_ = ts_language_symbol_for_name(language, "self", 4, true);
     ruby_symbols.scope_resolution = ts_language_symbol_for_name(language, "scope_resolution", 16, true);
     ruby_symbols.simple_symbol = ts_language_symbol_for_name(language, "simple_symbol", 13, true);
     ruby_symbols.hash_key_symbol = ts_language_symbol_for_name(language, "hash_key_symbol", 15, true);

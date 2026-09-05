@@ -1,69 +1,69 @@
-line	symbol	context	parent	d
-1	blocks	COM		0
-1	blocks	FILE		0
-1	lambdas	COM		0
-1	procs	COM		0
-2	numbers	VAR		1
-4	block	COM		0
-4	do..end	COM		0
-5	each	CALL	numbers	0
-5	num	ARG		0
-5	numbers	VAR		0
-6	num	VAR		0
-6	puts	CALL		0
-9	block	COM		0
-9	braces	COM		0
-10	doubled	VAR		1
-10	map	CALL	numbers	0
-10	num	ARG		0
-10	num	VAR		0
-10	numbers	VAR		0
-12	block	COM		0
-12	index	COM		0
-12	multiple	COM		0
-12	params	COM		0
-13	each_with_index	CALL	numbers	0
-13	idx	ARG		0
-13	numbers	VAR		0
-13	value	ARG		0
-14	idx	VAR		0
-14	puts	CALL		0
-14	value	VAR		0
-17	lambda	COM		0
-17	locals	COM		0
-17	proc	COM		0
-18	adder	VAR		1
-18	lhs	ARG		0
-18	lhs	VAR		0
-18	proc	CALL		0
-18	rhs	ARG		0
-18	rhs	VAR		0
-19	lambda	CALL		0
-19	lhs	ARG		0
-19	lhs	VAR		0
-19	multiplier	VAR		1
-19	rhs	ARG		0
-19	rhs	VAR		0
-20	stabby	VAR		1
-20	val	ARG		0
-20	val	VAR		0
-20	val	VAR		0
-22	block	COM		0
-22	method	COM		0
-22	takes	COM		0
-22	yields	COM		0
-23	repeat	FUNC		1
-23	times	ARG	repeat	0
-24	idx	ARG		0
-24	idx	VAR		0
-24	times	CALL	times	0
-24	times	VAR		0
-27	2.7+	COM		0
-27	block	COM		0
-27	numbered	COM		0
-27	parameters	COM		0
-27	ruby	COM		0
-28	_1	VAR		0
-28	map	CALL	numbers	0
-28	numbers	VAR		0
-28	tripled	VAR		1
+LINE	SYM	PAR	SCOPE	NS	MOD	CLUE	TYPE	D	CTX
+1	Blocks							0	COM
+1	blocks							0	FILE
+1	lambdas.							0	COM
+1	procs							0	COM
+2	numbers							1	VAR
+4	Block							0	COM
+4	do..end							0	COM
+5	each	numbers						0	CALL
+5	num							0	ARG
+5	numbers							0	VAR
+6	num							0	VAR
+6	puts							0	CALL
+9	Block							0	COM
+9	braces							0	COM
+10	doubled							1	VAR
+10	map	numbers						0	CALL
+10	num							0	ARG
+10	num							0	VAR
+10	numbers							0	VAR
+12	Block							0	COM
+12	index							0	COM
+12	multiple							0	COM
+12	params							0	COM
+13	each_with_index	numbers						0	CALL
+13	idx							0	ARG
+13	numbers							0	VAR
+13	value							0	ARG
+14	idx							0	VAR
+14	puts							0	CALL
+14	value							0	VAR
+17	Proc							0	COM
+17	lambda							0	COM
+17	locals							0	COM
+18	adder							1	VAR
+18	lhs							0	ARG
+18	lhs							0	VAR
+18	proc							0	CALL
+18	rhs							0	ARG
+18	rhs							0	VAR
+19	lambda							0	CALL
+19	lhs							0	ARG
+19	lhs							0	VAR
+19	multiplier							1	VAR
+19	rhs							0	ARG
+19	rhs							0	VAR
+20	stabby							1	VAR
+20	val							0	ARG
+20	val							0	VAR
+20	val							0	VAR
+22	Method							0	COM
+22	block							0	COM
+22	takes							0	COM
+22	yields							0	COM
+23	repeat							1	FUNC
+23	times	repeat						0	ARG
+24	idx							0	VAR
+24	idx	repeat						0	ARG
+24	times							0	VAR
+24	times	times						0	CALL
+27	2.7+							0	COM
+27	Numbered							0	COM
+27	Ruby							0	COM
+27	block							0	COM
+27	parameters							0	COM
+28	_1							0	VAR
+28	map	numbers						0	CALL
+28	numbers							0	VAR
+28	tripled							1	VAR
